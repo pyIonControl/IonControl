@@ -43,20 +43,45 @@ class TreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self):
         super().__init__()
         self.path = ''
+        self.isdir = True
 
-def genFileTree(widget, pathobj):
-    """recursively walk directory and construct file tree with available .py files"""
+def genFileTree(widget, pathobj, expandAbovePathName=None):
+    """
+    Construct the file tree
+    :param widget: Initial object is root TreeWidget
+    :param pathobj: Root directory that contains files that show up in the file tree
+    :param expandAbovePathName: Specifies path of a new file so directories can be expanded to reveal the file
+    :return:
+    """
+    childrange = range(widget.childCount())
     for path in pathobj.iterdir():
-        if path.parts[-1].split('.')[-1] == 'py':
-            child = TreeItem()
-            child.setText(0, str(path.parts[-1]))
-            child.path = str(path)
-            widget.addChild(child)
-        elif path.is_dir() and len(list(path.glob('**/*.py'))):
-            child = TreeItem()
-            child.setText(0, str(path.parts[-1]))
-            widget.addChild(child)
-            genFileTree(child, path)
+        if str(path) in [widget.child(p).path for p in childrange]: #check if tree item already exists
+            for childind in childrange:
+                if widget.child(childind).path == str(path):
+                    if path.is_dir():
+                        genFileTree(widget.child(childind), path, expandAbovePathName)
+        else: #otherwise make a new tree item.
+            if path.parts[-1].split('.')[-1] == 'py':
+                child = TreeItem()
+                child.setText(0, str(path.parts[-1]))
+                child.path = str(path)
+                child.isdir = False
+                widget.addChild(child)
+                if not expandAbovePathName is None and path == Path(expandAbovePathName): # expand directories containing a new file
+                    expandAboveChild(widget)
+            elif path.is_dir() and len(list(path.glob('**/*.py'))):
+                child = TreeItem()
+                child.setText(0, str(path.parts[-1]))
+                child.path = str(path)
+                widget.addChild(child)
+                genFileTree(child, path, expandAbovePathName)
+    widget.sortChildren(0, 0)
+
+def expandAboveChild(child):
+    """expands all parent directories, for use with new file creation"""
+    child.setExpanded(True)
+    if not child.parent() is None:
+        expandAboveChild(child.parent())
 
 class EvalTableModel(QtCore.QAbstractTableModel):
     def __init__(self, globalDict):
@@ -180,6 +205,7 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
     def setupUi(self, parent):
         super(UserFunctionsEditor, self).setupUi(parent)
         self.configname = 'UserFunctionsEditor'
+        self.fileTreeWidget.setHeaderLabels(['User Function Files'])
         self.populateTree()
 
         self.tableModel = EvalTableModel(self.globalDict)
@@ -293,14 +319,12 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         if self.script.code != str(self.textEdit.toPlainText()):
             if not self.confirmLoad():
                return False
-        self.loadFile(args[0].path)
+        if not args[0].isdir:
+            self.loadFile(args[0].path)
 
-    def populateTree(self):
+    def populateTree(self, newfilepath=None):
         """constructs the file tree viewer"""
-        self.fileTreeWidget.setHeaderLabels(['User Function Files'])
-        localpath = getProject().configDir+'/UserFunctions/'
-        self.fileTreeWidget.clear()
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(localpath))
+        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
 
     @QtCore.pyqtSlot()
     def onNew(self):
@@ -326,7 +350,7 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
                     logger.error(message)
                     return
             self.loadFile(fullname)
-            self.populateTree()
+            self.populateTree(fullname)
 
     def onFilenameChange(self, shortname ):
         """A name is typed into the filename combo box."""

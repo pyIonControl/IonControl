@@ -263,7 +263,7 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
                     self.onConsoleSignal(message, False)
                     return
             self.loadFile(fullname)
-            self.populateTree()
+            self.populateTree(fullname)
 
     def enableScriptChange(self, enabled):
         """Enable or disable any changes to script editor"""
@@ -363,12 +363,9 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
                return False
         self.loadFile(args[0].path)
 
-    def populateTree(self):
+    def populateTree(self, newfilepath=None):
         """constructs the file tree viewer"""
-        self.fileTreeWidget.setHeaderLabels(['Scripts'])
-        localpath = getProject().configDir+'/Scripts/'
-        self.fileTreeWidget.clear()
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(localpath))
+        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
 
     def onReset(self):
         """Reset action. Reset file state saved on disk."""
