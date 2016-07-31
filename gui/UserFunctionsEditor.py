@@ -223,6 +223,8 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         #setup filename combo box
         self.recentFiles = self.config.get( self.configname+'.recentFiles', dict() )
         self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
+        self.filenameComboBox.setInsertPolicy(1)
+        self.filenameComboBox.setMaxCount(10)
         self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
         self.filenameComboBox.currentIndexChanged[str].connect( self.onFilenameChange )
         self.removeCurrent.clicked.connect( self.onRemoveCurrent )
@@ -363,7 +365,10 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
                 self.filenameComboBox.addItem(self.script.shortname)
                 self.updateValidator()
             with BlockSignals(self.filenameComboBox) as w:
-                w.setCurrentIndex(w.findText(self.script.shortname))
+                ind = w.findText(self.script.shortname)
+                w.removeItem(ind)
+                w.insertItem(0, self.script.shortname)
+                w.setCurrentIndex(0)
             logger.info('{0} loaded'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
 
