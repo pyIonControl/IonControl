@@ -25,9 +25,64 @@ from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
+from collections import OrderedDict
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
+uipathOptions = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsOptions.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
+OptionsWidget, OptionsBase = PyQt5.uic.loadUiType(uipathOptions)
+
+class OptionsWindow(OptionsWidget, OptionsBase):
+    OptionsChangedSignal = QtCore.pyqtSignal()
+    def __init__(self, config):
+        super().__init__()
+        self.config = config
+        self.lineno = 15
+        self.displayPath = False
+        self.defaultExpand = False
+
+    def setupUi(self, parent):
+        super(OptionsWindow, self).setupUi(parent)
+        self.configname = 'UserFunctionsEditorOptions'
+
+        self.loadConfig()
+        self.spinBox.setValue(self.lineno)
+        self.radioButton.setChecked(not self.displayPath)
+        self.checkBox.setChecked(self.defaultExpand)
+        self.applyButton.clicked.connect(self.saveAndClose)
+        self.cancelButton.clicked.connect(self.cancelAndClose)
+        self.radioButton.toggled.connect(lambda: self.btnstate(self.radioButton, True))
+        #self.radioButton_2.toggled.connect(lambda: self.btnstate(self.radioButton_2, False))
+
+    def btnstate(self, b, buttonFlag):
+        self.displayPath = b.isChecked() ^ buttonFlag
+        print(self.displayPath)
+
+    def loadConfig(self):
+        """Save configuration."""
+        self.lineno = self.config.get(self.configname+'.lineno', 15)
+        self.displayPath = self.config.get(self.configname+'.displayPath', False)
+        self.defaultExpand = self.config.get(self.configname+'.defaultExpand', False)
+
+    def saveConfig(self):
+        """Save configuration."""
+        self.config[self.configname+'.lineno'] = self.lineno
+        self.config[self.configname+'.displayPath'] = self.displayPath
+        self.config[self.configname+'.defaultExpand'] = self.defaultExpand
+
+    def saveAndClose(self):
+        self.lineno = self.spinBox.value()
+        self.defaultExpand = self.checkBox.isChecked()
+        self.saveConfig()
+        self.OptionsChangedSignal.emit()
+        self.hide()
+
+    def cancelAndClose(self):
+        self.loadConfig()
+        self.spinBox.setValue(self.lineno)
+        self.radioButton.setChecked(not self.displayPath)
+        self.checkBox.setChecked(self.defaultExpand)
+        self.hide()
 
 def ensurePath(path):
     """check if path exists, if not add the path"""
@@ -179,21 +234,37 @@ class EvalTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
+def fileNameDictEntry(key, splitDir):
+    shortname = os.path.basename(self.fullname)
+    localpathname = key.split(splitDir)
+    return shortname, localpathname
+
 class LastUpdatedOrderedDict(OrderedDict):
     'Store items in the order the keys were last added'
 
     def __setitem__(self, key, value):
         if key in self:
             del self[key]
+            #self.move_to_end(key)
+        #else:
         OrderedDict.__setitem__(self, key, value)
+
 class UserCode:
-    def __init__(self):
+    def __init__(self, dispfull=False, splitDir=''):
         self.code = ''
         self.fullname = ''
+        self.dispfull = dispfull#False
+        self.splitDir = splitDir#''
 
     @QtCore.pyqtProperty(str)
     def shortname(self):
+        if self.dispfull:
+            return self.fullname.split(self.splitDir)[-1]
         return os.path.basename(self.fullname)
+
+    @QtCore.pyqtProperty(str)
+    def localpathname(self):
+        return self.fullname.split(self.splitDir)[-1]
 
 class UserFunctionsEditor(EditorWidget, EditorBase):
     """Ui for the user function interface."""
@@ -203,11 +274,16 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.experimentUi = experimentUi
         self.globalDict = globalDict
         self.recentFiles = dict() #dict of form {shortname: fullname}, where fullname has path and shortname doesn't
-        self.script = UserCode() #carries around code body and filepath info
-        self.defaultDir = getProject().configDir+'/UserFunctions'
+        #self.script = UserCode() #carries around code body and filepath info
+        self.configDirFolder = 'UserFunctions'
+        self.defaultDir = getProject().configDir+'/' + self.configDirFolder
+        self.displayFullPathNames = True#False
+        self.script = UserCode(self.displayFullPathNames, self.configDirFolder) #carries around code body and filepath info
         if not os.path.exists(self.defaultDir):
-            defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/UserFunctions')) #/IonControl/config/UserFunctions directory
+            defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/' + self.configDirFolder)) #/IonControl/config/UserFunctions directory
             shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
+        self.displayFullPathNames = False
+        self.defaultExpandAll = False
 
     def setupUi(self, parent):
         super(UserFunctionsEditor, self).setupUi(parent)
@@ -222,6 +298,15 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.tableView.setItemDelegateForColumn(1, self.delegate)
         self.addEvalRow.clicked.connect(self.onAddRow)
         self.removeEvalRow.clicked.connect(self.onRemoveRow)
+
+        self.optionsWindow = OptionsWindow(self.config)
+        self.optionsWindow.setupUi(self.optionsWindow)
+        self.actionOptions.triggered.connect(self.onOpenOptions)
+        self.optionsWindow.OptionsChangedSignal.connect(self.updateOptions)
+        self.updateOptions()
+
+        if self.optionsWindow.defaultExpand:
+            self.onExpandOrCollapse(True, True)
 
         #hot keys for copy/past and sorting
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
@@ -255,21 +340,30 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
 
         #setup filename combo box
         self.recentFiles = self.config.get( self.configname+'.recentFiles', dict() )
+        #if len(self.recentFiles):
+            #if not all(isinstance(self.recentFiles.items(), dict)):
+                #self.recentFiles =
         if not isinstance(self.recentFiles, LastUpdatedOrderedDict):
+            #tempdict = copy.deepcopy(self.recentFiles)
             tempdict = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)}
             self.recentFiles = LastUpdatedOrderedDict()
             for k, v in tempdict.items():
                 self.recentFiles[k] = v
+            #tempdict = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)}
         else:
             self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
         self.filenameComboBox.setInsertPolicy(1)
-        self.filenameComboBox.setMaxCount(10)
-        self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
+        #self.filenameComboBox.setMaxCount(10)
+        #self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
+        for shortname, fullname in self.recentFiles.items():
+            self.filenameComboBox.addItem(shortname)
+            self.filenameComboBox.setItemData(0, fullname)
         self.filenameComboBox.currentIndexChanged[str].connect( self.onFilenameChange )
         self.removeCurrent.clicked.connect( self.onRemoveCurrent )
         self.filenameComboBox.setValidator( QtGui.QRegExpValidator() ) #verifies that files typed into combo box can be used
         self.updateValidator()
 
+        #self.recentFilesDual = {fullname: {shortname: sname, midname: mname}}
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
         self.actionSave.triggered.connect(self.onSave)
@@ -297,6 +391,40 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.setWindowIcon(QtGui.QIcon( ":/latex/icons/FuncIcon2.png"))
         self.statusLabel.setText("")
         self.tableModel.updateData()
+
+    def onOpenOptions(self):
+        self.optionsWindow.show()
+        self.optionsWindow.setWindowState(QtCore.Qt.WindowActive)
+        self.optionsWindow.raise_()
+
+    def updateOptions(self):
+        self.filenameComboBox.setMaxCount(self.optionsWindow.lineno)
+        self.displayFullPathNames = self.optionsWindow.displayPath
+        self.defaultExpandAll = self.optionsWindow.defaultExpand
+        self.updateFileComboBoxNames(self.displayFullPathNames)
+        #print("updated, ", self.optionsWindow.lineno)
+
+
+    def updateFileComboBoxNames(self, fullnames):
+        #for k, v in self.recentFiles.items(): #infinite loop
+            #del self.recentFiles[k]
+            #if self.displayFullPathNames:
+                #k2 = v.split(self.configDirFolder)[-1]
+            #else:
+                #k2 = os.path.basename(v)
+            #self.recentFiles[k2] = v
+        with BlockSignals(self.filenameComboBox) as w:
+            for ind in range(w.count()):
+                #pass
+                #ind = w.findText(self.script.shortname)
+                if self.displayFullPathNames:
+                    w.setItemText(ind, w.itemData(ind).split(self.configDirFolder)[-1])
+                else:
+                    w.setItemText(ind, os.path.basename(w.itemData(ind)))
+
+                #w.removeItem(ind) #these two lines just push the loaded filename to the top of the combobox
+                #w.insertItem(ind, self.script.shortname)
+                #w.setCurrentIndex(0)
 
     def onExpandOrCollapse(self, expglobal=True, expand=True):
         """For expanding/collapsing file tree, expglobal=True will expand/collapse everything and False will
@@ -398,13 +526,15 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
                 self.script.code = f.read()
             self.textEdit.setPlainText(self.script.code)
             if self.script.shortname not in self.recentFiles:
-                self.recentFiles[self.script.shortname] = fullname
+                #self.recentFiles[self.script.shortname] = fullname
                 self.filenameComboBox.addItem(self.script.shortname)
                 self.updateValidator()
+            self.recentFiles[self.script.shortname] = fullname
             with BlockSignals(self.filenameComboBox) as w:
                 ind = w.findText(self.script.shortname)
-                w.removeItem(ind)
+                w.removeItem(ind) #these two lines just push the loaded filename to the top of the combobox
                 w.insertItem(0, self.script.shortname)
+                w.setItemData(0, self.script.fullname)
                 w.setCurrentIndex(0)
             logger.info('{0} loaded'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
