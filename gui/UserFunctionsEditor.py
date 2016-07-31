@@ -179,6 +179,13 @@ class EvalTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
+class LastUpdatedOrderedDict(OrderedDict):
+    'Store items in the order the keys were last added'
+
+    def __setitem__(self, key, value):
+        if key in self:
+            del self[key]
+        OrderedDict.__setitem__(self, key, value)
 class UserCode:
     def __init__(self):
         self.code = ''
@@ -248,7 +255,13 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
 
         #setup filename combo box
         self.recentFiles = self.config.get( self.configname+'.recentFiles', dict() )
-        self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
+        if not isinstance(self.recentFiles, LastUpdatedOrderedDict):
+            tempdict = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)}
+            self.recentFiles = LastUpdatedOrderedDict()
+            for k, v in tempdict.items():
+                self.recentFiles[k] = v
+        else:
+            self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
         self.filenameComboBox.setInsertPolicy(1)
         self.filenameComboBox.setMaxCount(10)
         self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
