@@ -25,63 +25,10 @@ from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
+from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse#, FileTreeModel#, expandAboveChild
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
-
-def ensurePath(path):
-    """check if path exists, if not add the path"""
-    pathlist = path.replace('\\','/').split('/')
-    newpath = ''
-    for dir in pathlist[:-1]:
-        newpath += dir + '/'
-        if not os.path.exists(newpath):
-            os.mkdir(newpath)
-
-class TreeItem(QtWidgets.QTreeWidgetItem):
-    """a custom TreeWidgetItem that keeps track of full paths for loading files"""
-    def __init__(self):
-        super().__init__()
-        self.path = ''
-        self.isdir = True
-
-def genFileTree(widget, pathobj, expandAbovePathName=None):
-    """
-    Construct the file tree
-    :param widget: Initial object is root TreeWidget
-    :param pathobj: Root directory that contains files that show up in the file tree
-    :param expandAbovePathName: Specifies path of a new file so directories can be expanded to reveal the file
-    :return:
-    """
-    childrange = range(widget.childCount())
-    for path in pathobj.iterdir():
-        if str(path) in [widget.child(p).path for p in childrange]: #check if tree item already exists
-            for childind in childrange:
-                if widget.child(childind).path == str(path):
-                    if path.is_dir():
-                        genFileTree(widget.child(childind), path, expandAbovePathName)
-        else: #otherwise make a new tree item.
-            if path.parts[-1].split('.')[-1] == 'py':
-                child = TreeItem()
-                child.setText(0, str(path.parts[-1]))
-                child.path = str(path)
-                child.isdir = False
-                widget.addChild(child)
-                if not expandAbovePathName is None and path == Path(expandAbovePathName): # expand directories containing a new file
-                    expandAboveChild(widget)
-            elif path.is_dir() and len(list(path.glob('**/*.py'))):
-                child = TreeItem()
-                child.setText(0, str(path.parts[-1]))
-                child.path = str(path)
-                widget.addChild(child)
-                genFileTree(child, path, expandAbovePathName)
-    widget.sortChildren(0, 0)
-
-def expandAboveChild(child):
-    """expands all parent directories, for use with new file creation"""
-    child.setExpanded(True)
-    if not child.parent() is None:
-        expandAboveChild(child.parent())
 
 class EvalTableModel(QtCore.QAbstractTableModel):
     def __init__(self, globalDict):
@@ -282,10 +229,10 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.collapseTree = QtWidgets.QAction("Collapse All", self)
         self.expandChild = QtWidgets.QAction("Expand Selected", self)
         self.collapseChild = QtWidgets.QAction("Collapse Selected", self)
-        self.expandTree.triggered.connect(partial(self.onExpandOrCollapse, True, True))
-        self.collapseTree.triggered.connect(partial(self.onExpandOrCollapse, True, False))
-        self.expandChild.triggered.connect(partial(self.onExpandOrCollapse, False, True))
-        self.collapseChild.triggered.connect(partial(self.onExpandOrCollapse, False, False))
+        self.expandTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, True))
+        self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
+        self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
+        self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
         self.fileTreeWidget.addAction(self.expandTree)
         self.fileTreeWidget.addAction(self.collapseTree)
         self.fileTreeWidget.addAction(self.expandChild)
@@ -298,25 +245,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.statusLabel.setText("")
         self.tableModel.updateData()
 
-    def onExpandOrCollapse(self, expglobal=True, expand=True):
-        """For expanding/collapsing file tree, expglobal=True will expand/collapse everything and False will
-           collapse/expand only selected nodes. expand=True will expand, False will collapse"""
-        if expglobal:
-            root = self.fileTreeWidget.invisibleRootItem()
-            self.recurseExpand(root, expand)
-        else:
-            selected = self.fileTreeWidget.selectedItems()
-            if selected:
-                for child in selected:
-                    child.setExpanded(expand)
-                    self.recurseExpand(child, expand)
-
-    def recurseExpand(self, node, expand=True):
-        """recursively descends into tree structure below node to expand/collapse all subdirectories.
-           expand=True will expand, False will collapse."""
-        for childind in range(node.childCount()):
-            node.child(childind).setExpanded(expand)
-            self.recurseExpand(node.child(childind), expand)
 
     def confirmLoad(self):
         """pop up window to confirm loss of unsaved changes when loading new file"""
