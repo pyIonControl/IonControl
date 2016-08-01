@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.Ad9910 &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.Ad9910</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.Ad9910</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pulser.PulserHardwareClient</span> <span class="k">import</span> <span class="n">check</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+
+<div class="viewcode-block" id="Ad9910Exception"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910Exception">[docs]</a><span class="k">class</span> <span class="nc">Ad9910Exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Ad9910"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910">[docs]</a><span class="k">class</span> <span class="nc">Ad9910</span><span class="p">:</span>
+    <span class="n">channels</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="n">pulser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frequency</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amplitude</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">channels</span>
+
+<div class="viewcode-block" id="Ad9910.rawToMagnitude"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.rawToMagnitude">[docs]</a>    <span class="k">def</span> <span class="nf">rawToMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39; MHz&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">raw</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Ad9910.setFrequency"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setFrequency">[docs]</a>    <span class="k">def</span> <span class="nf">setFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">even</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">intFrequency</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">*</span> <span class="n">frequency</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;GHz&#39;</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">intFrequency</span></div>
+    
+<div class="viewcode-block" id="Ad9910.setFrequencyRaw"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setFrequencyRaw">[docs]</a>    <span class="k">def</span> <span class="nf">setFrequencyRaw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">intFrequency</span>        </div>
+    
+<div class="viewcode-block" id="Ad9910.setPhase"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setPhase">[docs]</a>    <span class="k">def</span> <span class="nf">setPhase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+        <span class="n">intPhase</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">16</span> <span class="o">*</span> <span class="n">phase</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;rad&#39;</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span> <span class="c1"># AD9910 has 16 bit phase.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">intPhase</span> <span class="o">&amp;</span> <span class="mh">0xffff</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Ad9910.setAmplitude"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setAmplitude">[docs]</a>    <span class="k">def</span> <span class="nf">setAmplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">):</span>
+        <span class="n">intAmplitude</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">amplitude</span><span class="o">*</span><span class="mf">16.</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="p">)))</span> <span class="c1"># AD9910 has 14 bit amplitude, uses a &quot;scale factor.&quot; To use it like the AD9912s,I am scaling the typical 0-1023 range by *16.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">intAmplitude</span> <span class="o">&amp;</span> <span class="mh">0x3fff</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.setRampStep"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setRampStep">[docs]</a>    <span class="k">def</span> <span class="nf">setRampStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rampType</span><span class="p">,</span> <span class="n">rampStepUp</span><span class="p">,</span> <span class="n">rampStepDown</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rampType</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span> <span class="c1"># frequency ramp sent in MHz</span>
+            <span class="n">intRampStepUp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">*</span> <span class="n">rampStepUp</span><span class="o">/</span><span class="mf">1000.</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span> <span class="c1"># assuming fsysclk is 1GHz, convert rampStep to GHz see AD9910 datasheet</span>
+            <span class="n">intRampStepDown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">*</span> <span class="n">rampStepDown</span><span class="o">/</span><span class="mf">1000.</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">rampType</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># phase ramp sent in deg</span>
+            <span class="n">intRampStepUp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepUp</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">29</span><span class="p">)</span><span class="o">/</span><span class="mi">45</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span> <span class="c1"># for rad would use stepRad*2^31/pi</span>
+            <span class="n">intRampStepDown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepDown</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">29</span><span class="p">)</span><span class="o">/</span><span class="mi">45</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># amplitude scan sent in 0-1023 arb DDS units</span>
+            <span class="n">intRampStepUp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepUp</span><span class="o">*</span><span class="mi">16</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+            <span class="n">intRampStepDown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepDown</span><span class="o">*</span><span class="mi">16</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="n">intRampStepUp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepUp</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="n">intRampStepDown</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampStepDown</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="n">intRampCombined</span> <span class="o">=</span> <span class="p">((</span><span class="n">intRampStepDown</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">intRampStepUp</span><span class="p">)</span> <span class="c1"># down,up</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">intRampCombined</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.setRampTimeStep"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setRampTimeStep">[docs]</a>    <span class="k">def</span> <span class="nf">setRampTimeStep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">negSlopeRate</span><span class="p">,</span> <span class="n">posSlopeRate</span><span class="p">):</span>
+        <span class="n">intNegSlopeRate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">negSlopeRate</span><span class="o">/</span><span class="mf">4.</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffff</span>
+        <span class="n">intPosSlopeRate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">posSlopeRate</span><span class="o">/</span><span class="mf">4.</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffff</span>
+        <span class="n">intSlopeCombined</span> <span class="o">=</span> <span class="p">((</span><span class="n">intNegSlopeRate</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="n">intPosSlopeRate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">intSlopeCombined</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.setRampLimits"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setRampLimits">[docs]</a>    <span class="k">def</span> <span class="nf">setRampLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rampType</span><span class="p">,</span> <span class="n">rampMin</span><span class="p">,</span> <span class="n">rampMax</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">rampType</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span> <span class="c1"># frequency ramp</span>
+            <span class="n">intRampMin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">*</span> <span class="n">rampMin</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+            <span class="n">intRampMax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span> <span class="o">*</span> <span class="n">rampMax</span><span class="p">))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">rampType</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># phase ramp</span>
+            <span class="n">intRampMin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">16</span> <span class="o">*</span> <span class="n">rampMin</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+            <span class="n">intRampMax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">16</span> <span class="o">*</span> <span class="n">rampMax</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># amplitude scan</span>
+            <span class="n">intRampMin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampMin</span><span class="o">/</span><span class="mf">1023.0</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+            <span class="n">intRampMax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">rampMax</span><span class="o">/</span><span class="mf">1023.0</span><span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+        <span class="n">intLimitsCombined</span> <span class="o">=</span> <span class="p">((</span><span class="n">intRampMax</span> <span class="o">&lt;&lt;</span> <span class="mi">32</span><span class="p">)</span> <span class="o">|</span> <span class="n">intRampMin</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">intLimitsCombined</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.setCFR2register"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.setCFR2register">[docs]</a>    <span class="k">def</span> <span class="nf">setCFR2register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rampEnable</span><span class="p">,</span> <span class="n">rampDestination</span><span class="p">,</span> <span class="n">noDwellHigh</span><span class="p">,</span> <span class="n">noDwellLow</span><span class="p">):</span>
+        <span class="n">intRampEnable</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rampEnable</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span>
+        <span class="n">intRampDestination</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">rampDestination</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x3</span>
+        <span class="n">intNoDwellHigh</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">noDwellHigh</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span>
+        <span class="n">intNoDwellLow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">noDwellLow</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x1</span>
+        <span class="n">intCFR2Combined</span> <span class="o">=</span> <span class="p">(</span><span class="n">intRampDestination</span> <span class="o">&lt;&lt;</span> <span class="mi">3</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">intRampEnable</span> <span class="o">&lt;&lt;</span> <span class="mi">2</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">intNoDwellHigh</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">intNoDwellLow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="o">+</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">intCFR2Combined</span><span class="p">)</span></div>
+        
+        
+<div class="viewcode-block" id="Ad9910.sendCommand"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x03</span><span class="p">,</span> <span class="p">(</span><span class="n">channel</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="mi">4</span> <span class="o">|</span> <span class="p">(</span><span class="n">cmd</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span> <span class="p">),</span> <span class="s2">&quot;Ad9910&quot;</span> <span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x12</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;Ad9910 trigger&quot;</span><span class="p">)</span> <span class="c1"># Currently I am setting 9910s as channels 7&amp;8 (6&amp;7 starting from 0)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.update"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channelmask</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x08</span><span class="p">,</span> <span class="n">channelmask</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">),</span> <span class="s2">&quot;Ad9910 apply&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9910.reset"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9910.Ad9910.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="c1">#if mask &amp; 0x3: check( self.pulser.ActivateTriggerIn(0x42,0), &quot;DDS AD9910 Reset board 0&quot; )</span>
+            <span class="c1">#if mask &amp; 0xc: check( self.pulser.ActivateTriggerIn(0x42,1), &quot;DDS AD9910 Reset board 1&quot; )</span>
+            <span class="c1">#if mask &amp; 0x30: check( self.pulser.ActivateTriggerIn(0x42,2), &quot;DDS AD9910 Reset board 2&quot; )</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x42</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="s2">&quot;DDS AD9910 Reset board&quot;</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div></div>
+
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

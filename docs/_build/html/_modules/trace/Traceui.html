@@ -1,0 +1,688 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>trace.Traceui &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>trace.Traceui</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for trace.Traceui</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">from</span> <span class="nn">modules.AttributeComparisonEquality</span> <span class="k">import</span> <span class="n">AttributeComparisonEquality</span>
+<span class="kn">from</span> <span class="nn">trace.BlockAutoRange</span> <span class="k">import</span> <span class="n">BlockAutoRangeList</span>
+<span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TraceCollection</span>
+<span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">pens</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">ProjectConfig.Project</span> <span class="k">import</span> <span class="n">getProject</span>
+<span class="kn">from</span> <span class="nn">.TraceModel</span> <span class="k">import</span> <span class="n">TraceComboDelegate</span>
+<span class="kn">from</span> <span class="nn">.TraceModel</span> <span class="k">import</span> <span class="n">TraceModel</span>
+<span class="kn">from</span> <span class="nn">uiModules.CategoryTree</span> <span class="k">import</span> <span class="n">nodeTypes</span>
+<span class="kn">from</span> <span class="nn">trace.PlottedTrace</span> <span class="k">import</span> <span class="n">PlottedTrace</span>
+<span class="kn">from</span> <span class="nn">.TraceDescriptionTableModel</span> <span class="k">import</span> <span class="n">TraceDescriptionTableModel</span>
+<span class="kn">from</span> <span class="nn">uiModules.ComboBoxDelegate</span> <span class="k">import</span> <span class="n">ComboBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">uiModules.KeyboardFilter</span> <span class="k">import</span> <span class="n">KeyListFilter</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">dateutil.tz</span> <span class="k">import</span> <span class="n">tzlocal</span>
+<span class="kn">from</span> <span class="nn">modules.doProfile</span> <span class="k">import</span> <span class="n">doprofile</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">reduce</span>
+
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/Traceui.ui&#39;</span><span class="p">)</span>
+<span class="n">TraceuiForm</span><span class="p">,</span> <span class="n">TraceuiBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="n">AttributeComparisonEquality</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class to hold Traceui settings</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        lastDir (str): last directory from which traces were opened</span>
+<span class="sd">        plotStyle (int): style to use for plotting new traces (i.e. lines, points, etc.)</span>
+<span class="sd">        unplotLastTrace (bool): whether last trace should be unplotted when new trace is created</span>
+<span class="sd">        collapseLastTrace (bool): whether last set of traces should be collapsed in tree when new trace set is created</span>
+<span class="sd">        expandNew (bool): whether new trace sets should be expanded when they are created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lastDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">plotstyle</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">lastDir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span><span class="o">.</span><span class="n">projectDir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">lastDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotstyle</span> <span class="o">=</span> <span class="n">plotstyle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unplotLastTrace</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTrace</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandNew</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;unplotLastTrace&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;collapseLastTrace&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;expandNew&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui">[docs]</a><span class="k">class</span> <span class="nc">Traceui</span><span class="p">(</span><span class="n">TraceuiForm</span><span class="p">,</span> <span class="n">TraceuiBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for the trace interface.</span>
+<span class="sd">    Attributes:</span>
+<span class="sd">        penicons (list[QtGui.QIcon]): icons to display available trace pens</span>
+<span class="sd">        config (configshelve): configuration dictionary</span>
+<span class="sd">        experimentName (str): name of experiment with which this Traceui is associated</span>
+<span class="sd">        graphicsViewDict (dict): dict of available plot windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">openMeasurementLog</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span> <span class="c1">#list of strings with trace creation dates</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penicons</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">experimentName</span><span class="p">,</span> <span class="n">graphicsViewDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lastDir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hasMeasurementLog</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">highlightUnsaved</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">TraceuiBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">TraceuiForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penicons</span> <span class="o">=</span> <span class="n">penicons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s2">&quot;Traceui.&quot;</span><span class="o">+</span><span class="n">experimentName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.settings&quot;</span><span class="p">,</span> <span class="n">Settings</span><span class="p">(</span><span class="n">lastDir</span><span class="o">=</span><span class="n">lastDir</span><span class="p">,</span> <span class="n">plotstyle</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span> <span class="o">=</span> <span class="n">graphicsViewDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hasMeasurementLog</span> <span class="o">=</span> <span class="n">hasMeasurementLog</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlightUnsaved</span> <span class="o">=</span> <span class="n">highlightUnsaved</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">preferences</span> <span class="c1">#these are really print preferences used to find gnuplot path</span>
+
+<div class="viewcode-block" id="Traceui.setupUi"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Setup the UI. Create the model and the view. Connect all the buttons.&quot;&quot;&quot;</span>
+        <span class="n">TraceuiForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">TraceModel</span><span class="p">([],</span> <span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="p">,</span> <span class="n">highlightUnsaved</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">highlightUnsaved</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">TraceComboDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDelegate</span> <span class="o">=</span> <span class="n">ComboBoxDelegate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span><span class="p">)</span> <span class="c1">#This is for selecting which pen to use in the plot</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDelegate</span><span class="p">)</span> <span class="c1">#This is for selecting which plot to use</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span> <span class="c1">#allows selecting more than one element in the view</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clearButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onClearOrPlot</span><span class="p">,</span> <span class="s1">&#39;clear&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onClearOrPlot</span><span class="p">,</span> <span class="s1">&#39;plot&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButtonApplyStyle</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onApplyStyle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSave</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onDelete</span><span class="p">)</span> <span class="c1">#  (self.traceView.onDelete)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openFileButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onOpenFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxStyle</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setPlotStyle</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onViewClicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxStyle</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotstyle</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setMenu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span><span class="p">)</span>
+        <span class="n">saveAsTextAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;save as text&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span><span class="p">)</span>
+        <span class="n">saveAsTextAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSave</span><span class="p">,</span> <span class="s1">&#39;text&#39;</span><span class="p">))</span>
+        <span class="n">saveAsHdf5Action</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;save as hdf5&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span><span class="p">)</span>
+        <span class="n">saveAsHdf5Action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSave</span><span class="p">,</span> <span class="s1">&#39;hdf5&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">saveAsTextAction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButtonMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">saveAsHdf5Action</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">showOnlyLastButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onShowOnlyLast</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectAllButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectAll</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseAllButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">collapseAll</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandAllButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">expandAll</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">selectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onActiveTraceChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurementLogButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onMeasurementLog</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ActionsContextMenu</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unplotSettingsAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;Unplot last trace set&quot;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unplotSettingsAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unplotSettingsAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unplotLastTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unplotSettingsAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUnplotSetting</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">unplotSettingsAction</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTraceAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;Collapse last trace set&quot;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTraceAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTraceAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">collapseLastTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTraceAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onCollapseLastTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">collapseLastTraceAction</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandNewAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;Expand new traces&quot;</span><span class="p">,</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandNewAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandNewAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">expandNew</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandNewAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpandNew</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandNewAction</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurementLogButton</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hasMeasurementLog</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotWithMatplotlib</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Plot with matplotlib&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotWithMatplotlib</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPlotWithMatplotlib</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotWithMatplotlib</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotWithGnuplot</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Plot with gnuplot&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotWithGnuplot</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPlotWithGnuplot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotWithGnuplot</span><span class="p">)</span></div>
+
+    <span class="nd">@doprofile</span>
+    <span class="k">def</span> <span class="nf">onDelete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">BlockAutoRangeList</span><span class="p">([</span><span class="n">gv</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">gv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">onDelete</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Traceui.onMeasurementLog"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onMeasurementLog">[docs]</a>    <span class="k">def</span> <span class="nf">onMeasurementLog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when open measurement log is clicked. Emit signal containing list of trace creation keys selected.&quot;&quot;&quot;</span>
+        <span class="n">selectedTopNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedTopNodes</span><span class="p">()</span>
+        <span class="n">traceCreationList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">topNode</span> <span class="ow">in</span> <span class="n">selectedTopNodes</span><span class="p">:</span>
+            <span class="n">dataNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">topNode</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dataNode</span><span class="p">:</span>
+                <span class="n">traceCreation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">)</span>
+                <span class="n">traceCreationList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">traceCreation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openMeasurementLog</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">traceCreationList</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.onClearOrPlot"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onClearOrPlot">[docs]</a>    <span class="k">def</span> <span class="nf">onClearOrPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">changeType</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when clear or plot action buttons are clicked.&quot;&quot;&quot;</span>
+        <span class="n">leftCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">rightCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span>
+        <span class="n">selectedNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">uniqueSelectedNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedNodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectedNodes</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">BlockAutoRangeList</span><span class="p">([</span><span class="n">gv</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">gv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">uniqueSelectedNodes</span><span class="p">:</span>
+                <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+                    <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span>
+                    <span class="n">changed</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">changeType</span><span class="o">==</span><span class="s1">&#39;clear&#39;</span> <span class="ow">and</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">curvePen</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="n">changed</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="k">elif</span> <span class="n">changeType</span><span class="o">==</span><span class="s1">&#39;plot&#39;</span> <span class="ow">and</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">curvePen</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                        <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotstyle</span><span class="p">)</span>
+                        <span class="n">changed</span><span class="o">=</span><span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">changed</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;isPlotted&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                        <span class="n">leftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">leftCol</span><span class="p">)</span>
+                        <span class="n">rightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">rightCol</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftInd</span><span class="p">,</span> <span class="n">rightInd</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">emitParentDataChanged</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.onPlotWithGnuplot"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onPlotWithGnuplot">[docs]</a>    <span class="k">def</span> <span class="nf">onPlotWithGnuplot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">selectedNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">uniqueSelectedNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedNodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectedNodes</span><span class="p">]</span>
+        <span class="n">plotCommands</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">lc</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># custom cycle counter for plot color</span>
+        <span class="n">lt</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># custom cycle counter for line style</span>
+        <span class="n">colorList</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;#0072bd&#39;</span><span class="p">,</span> <span class="s1">&#39;#e2141f&#39;</span><span class="p">,</span> <span class="s1">&#39;#77ac30&#39;</span><span class="p">,</span> <span class="s1">&#39;#d95319&#39;</span><span class="p">,</span> <span class="s1">&#39;#4dbeee&#39;</span><span class="p">,</span> <span class="s1">&#39;#7e2f8e&#39;</span><span class="p">,</span> <span class="s1">&#39;#000000&#39;</span><span class="p">,</span> <span class="s1">&#39;#edb120&#39;</span><span class="p">]</span>
+        <span class="n">clLen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">colorList</span><span class="p">)</span>
+        <span class="n">linesonly</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">uniqueSelectedNodes</span><span class="p">:</span>
+            <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+                <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">xind</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">_xColumn</span><span class="p">)</span>
+                <span class="n">yind</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">_yColumn</span><span class="p">)</span>
+                <span class="n">plotstyle</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">reverse_mapping</span><span class="p">[</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">style</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">plotstyle</span> <span class="o">!=</span> <span class="s1">&#39;lines&#39;</span><span class="p">:</span>
+                    <span class="n">linesonly</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">xAxisLabel</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">xAxisLabel</span>
+                <span class="n">xAxisUnit</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">xAxisUnit</span>
+                <span class="n">yAxisLabel</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">yAxisLabel</span>
+                <span class="n">yAxisUnit</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">yAxisUnit</span>
+                <span class="k">if</span> <span class="n">plotCommands</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                    <span class="n">lt</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">lc</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">lt</span> <span class="o">%</span> <span class="mi">19</span><span class="p">:</span>
+                        <span class="n">lt</span> <span class="o">=</span> <span class="mi">11</span>
+                    <span class="n">plotCommands</span> <span class="o">+=</span> <span class="s1">&#39;, &#39;</span>
+                <span class="n">plotCommands</span> <span class="o">+=</span> <span class="s2">&quot;&#39;</span><span class="si">{0}</span><span class="s2">&#39; using </span><span class="si">{1}</span><span class="s2">:</span><span class="si">{2}</span><span class="s2"> ls </span><span class="si">{3}</span><span class="s2"> lc rgb &#39;</span><span class="si">{4}</span><span class="s2">&#39; w </span><span class="si">{5}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">xind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">yind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">lt</span><span class="p">,</span>
+                                                                                       <span class="n">colorList</span><span class="p">[</span><span class="n">lc</span> <span class="o">%</span> <span class="n">clLen</span><span class="p">],</span> <span class="n">plotstyle</span><span class="p">)</span>
+        <span class="n">gnupath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">gnuplotExecutable</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">gnupath</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Path to gnuplot executable </span><span class="si">{0}</span><span class="s2"> doesn&#39;t exist!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gnupath</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">gnupath</span><span class="p">,</span> <span class="s1">&#39;-persist&#39;</span><span class="p">],</span>
+                                  <span class="n">stdin</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                  <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
+                                  <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span>
+                                  <span class="p">)</span> <span class="k">as</span> <span class="n">proc</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">xAxisLabel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">xlabel</span> <span class="o">=</span> <span class="n">xAxisLabel</span>
+                    <span class="k">if</span> <span class="n">xAxisUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">xAxisUnit</span><span class="p">):</span>
+                        <span class="n">xlabel</span> <span class="o">+=</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">xAxisUnit</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">xlabel</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">if</span> <span class="n">yAxisLabel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ylabel</span> <span class="o">=</span> <span class="n">yAxisLabel</span>
+                    <span class="k">if</span> <span class="n">yAxisUnit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">xAxisUnit</span><span class="p">):</span>
+                        <span class="n">ylabel</span> <span class="o">+=</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">yAxisUnit</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ylabel</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+                <span class="c1"># some custom line types since gnuplot standards annoy me, started at a higher index so</span>
+                <span class="c1"># as not to conflict with lower index line styles if people prefer them</span>
+                <span class="c1"># line styles exceed color list by 1 so point types and colors will go through every combination</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 11 lt 1 pt 5 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># blue</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 12 lt 1 pt 7 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># red</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 13 lt 1 pt 13 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># green</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 14 lt 1 pt 9 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># orange</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 15 lt 1 pt 11 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># light blue</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 16 lt 1 pt 4 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># purple</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 17 lt 1 pt 6 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># black</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 18 lt 1 pt 12 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># yellow</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">b</span><span class="s2">&quot; set style line 19 lt 1 pt 8 lw 2 ps 1.25</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># yellow</span>
+
+                <span class="c1"># autoscale fix prevents gnuplot from autoscaling up to next tick, offset command gives a 2% offset</span>
+                <span class="c1"># from edge of data along x axis, and a 4% offset along y axis</span>
+                <span class="k">if</span> <span class="n">linesonly</span><span class="p">:</span>
+                    <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="n">b</span><span class="s2">&quot;unset key; set autoscale fix; set offset graph 0.0, graph 0.0, graph 0.04, graph 0.04</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="n">b</span><span class="s2">&quot;unset key; set autoscale fix; set offset graph 0.02, graph 0.02, graph 0.04, graph 0.04</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="s2">&quot;set xlabel &#39;</span><span class="si">{0}</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">set ylabel &#39;</span><span class="si">{1}</span><span class="s2">&#39;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xlabel</span><span class="p">,</span> <span class="n">ylabel</span><span class="p">),</span> <span class="s1">&#39;ASCII&#39;</span><span class="p">))</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="s2">&quot;plot &quot;</span> <span class="o">+</span> <span class="n">plotCommands</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s1">&#39;ASCII&#39;</span><span class="p">))</span>
+                <span class="n">proc</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Traceui.onPlotWithMatplotlib"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onPlotWithMatplotlib">[docs]</a>    <span class="k">def</span> <span class="nf">onPlotWithMatplotlib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">selectedNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">uniqueSelectedNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedNodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectedNodes</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">uniqueSelectedNodes</span><span class="p">:</span>
+            <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+                <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span></div>
+ 
+<div class="viewcode-block" id="Traceui.onApplyStyle"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onApplyStyle">[docs]</a>    <span class="k">def</span> <span class="nf">onApplyStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when apply style button is clicked. Changed style of selected traces.&quot;&quot;&quot;</span>
+        <span class="n">selectedNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">uniqueSelectedNodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedNodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectedNodes</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">uniqueSelectedNodes</span><span class="p">:</span>
+            <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotstyle</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.onSave"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onSave">[docs]</a>    <span class="k">def</span> <span class="nf">onSave</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">saveCopy</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save button is clicked. Save selected traces. If a trace has never been saved before, update model.&quot;&quot;&quot;</span>
+        <span class="n">leftCol</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">rightCol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numColumns</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">selectedTopNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedTopNodes</span><span class="p">()</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedTopNodes</span><span class="p">:</span>
+            <span class="n">dataNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dataNode</span><span class="p">:</span>
+                <span class="n">traceCollection</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span>
+                <span class="n">alreadySaved</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">saved</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">fileType</span><span class="p">,</span><span class="n">saveCopy</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">alreadySaved</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">onSaveUnsavedTrace</span><span class="p">(</span><span class="n">dataNode</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dataNode</span> <span class="ow">is</span> <span class="n">node</span><span class="p">:</span>
+                        <span class="n">topLeftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">)</span>
+                        <span class="n">bottomRightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">topLeftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">leftCol</span><span class="p">)</span>
+                        <span class="n">bottomRightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">rightCol</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">topLeftInd</span><span class="p">,</span> <span class="n">bottomRightInd</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">emitParentDataChanged</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">filename</span></div>
+
+<div class="viewcode-block" id="Traceui.onActiveTraceChanged"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onActiveTraceChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onActiveTraceChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Display trace creation/finalized date/time when a trace is selected&quot;&quot;&quot;</span>
+        <span class="n">nodes</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">dataNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">nodes</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">dataNode</span><span class="p">:</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span>
+            <span class="n">traceCreation</span> <span class="o">=</span> <span class="n">description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;traceCreation&quot;</span><span class="p">)</span>
+            <span class="n">traceFinalized</span> <span class="o">=</span> <span class="n">description</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;traceFinalized&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">traceCreation</span><span class="p">:</span>
+                <span class="n">traceCreationLocal</span> <span class="o">=</span> <span class="n">traceCreation</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">tzlocal</span><span class="p">())</span> <span class="c1">#use local time</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">traceCreationLocal</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">traceCreationLocal</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">traceFinalized</span><span class="p">:</span>
+                <span class="n">traceFinalizedLocal</span> <span class="o">=</span> <span class="n">traceFinalized</span><span class="o">.</span><span class="n">astimezone</span><span class="p">(</span><span class="n">tzlocal</span><span class="p">())</span> <span class="c1">#use local time</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">traceFinalizedLocal</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">traceFinalizedLocal</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M:%S&#39;</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">createdTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedDateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">finalizedTimeLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.onUnplotSetting"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onUnplotSetting">[docs]</a>    <span class="k">def</span> <span class="nf">onUnplotSetting</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unplotLastTrace</span> <span class="o">=</span> <span class="n">checked</span></div>
+
+<div class="viewcode-block" id="Traceui.onCollapseLastTrace"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onCollapseLastTrace">[docs]</a>    <span class="k">def</span> <span class="nf">onCollapseLastTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">collapseLastTrace</span> <span class="o">=</span> <span class="n">checked</span></div>
+
+<div class="viewcode-block" id="Traceui.onExpandNew"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onExpandNew">[docs]</a>    <span class="k">def</span> <span class="nf">onExpandNew</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">expandNew</span> <span class="o">=</span> <span class="n">checked</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtProperty</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">unplotLastTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">unplotLastTrace</span>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtProperty</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">collapseLastTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">collapseLastTrace</span>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtProperty</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">expandNew</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">expandNew</span>
+
+<div class="viewcode-block" id="Traceui.collapse"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.collapse">[docs]</a>    <span class="k">def</span> <span class="nf">collapse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;collapse node associated with trace&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodeFromContent</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">collapse</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.expand"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.expand">[docs]</a>    <span class="k">def</span> <span class="nf">expand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;expand node associated with trace&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">nodeFromContent</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.selectedRowIndexes"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.selectedRowIndexes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedRowIndexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return selected row indexes, modified according to the boolean controls&quot;&quot;&quot;</span>
+        <span class="n">inputIndexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">selectedRowIndexes</span><span class="p">()</span>
+        <span class="n">outputIndexes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">inputIndexes</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">contentFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">allowUnplotted</span> <span class="ow">or</span> <span class="n">trace</span><span class="o">.</span><span class="n">isPlotted</span><span class="p">:</span>
+                <span class="n">outputIndexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">outputIndexes</span> <span class="ow">and</span> <span class="n">useLastIfNoSelection</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getLastDataNode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="n">outputIndexes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputIndexes</span></div>
+
+<div class="viewcode-block" id="Traceui.selectedTraces"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.selectedTraces">[docs]</a>    <span class="k">def</span> <span class="nf">selectedTraces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of the selected traces.&quot;&quot;&quot;</span>
+        <span class="n">selectedIndexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRowIndexes</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">contentFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">selectedIndexes</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Traceui.addTrace"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.addTrace">[docs]</a>    <span class="k">def</span> <span class="nf">addTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">pen</span><span class="p">,</span> <span class="n">style</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a trace to the model and plot it.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+            <span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotstyle</span>
+        <span class="n">trace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pen</span><span class="p">,</span> <span class="n">style</span><span class="p">)</span></div>
+                
+<div class="viewcode-block" id="Traceui.resizeColumnsToContents"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.resizeColumnsToContents">[docs]</a>    <span class="k">def</span> <span class="nf">resizeColumnsToContents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">numColumns</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="n">column</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.setPlotStyle"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.setPlotStyle">[docs]</a>    <span class="k">def</span> <span class="nf">setPlotStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the plot style to &#39;value&#39;.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotstyle</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onApplyStyle</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="Traceui.onViewClicked"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onViewClicked">[docs]</a>    <span class="k">def</span> <span class="nf">onViewClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If one of the editable columns is clicked, begin to edit it.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">isDataNode</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">edit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceView</span><span class="o">.</span><span class="n">edit</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.onOpenFile"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onOpenFile">[docs]</a>    <span class="k">def</span> <span class="nf">onOpenFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when the open button is clicked. Open an existing trace file from disk.&quot;&quot;&quot;</span>
+        <span class="n">fnames</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Open files&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">lastDir</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">BlockAutoRangeList</span><span class="p">([</span><span class="n">gv</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">gv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fnames</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">openFile</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.openFile"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.openFile">[docs]</a>    <span class="k">def</span> <span class="nf">openFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">traceCollection</span> <span class="o">=</span> <span class="n">TraceCollection</span><span class="p">()</span>
+        <span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="n">traceCollection</span><span class="o">.</span><span class="n">filepath</span><span class="p">,</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">fileleaf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">filepath</span>
+        <span class="n">traceCollection</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">fileleaf</span>
+        <span class="n">traceCollection</span><span class="o">.</span><span class="n">saved</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">traceCollection</span><span class="o">.</span><span class="n">loadTrace</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">traceCollection</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">traceDict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">dataNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">existingTraceCollection</span><span class="o">=</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span>
+            <span class="k">if</span> <span class="n">existingTraceCollection</span><span class="o">.</span><span class="n">fileleaf</span><span class="o">==</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">fileleaf</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">existingTraceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">)</span><span class="o">==</span><span class="nb">str</span><span class="p">(</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">):</span>
+                <span class="k">return</span> <span class="c1">#If the filename and creation dates are the same, you&#39;re trying to open an existing trace.</span>
+        <span class="n">plottedTraceList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">tracePlottingList</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueCategory</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">plotting</span> <span class="ow">in</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">tracePlottingList</span><span class="p">:</span>
+            <span class="n">windowName</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">windowName</span> <span class="k">if</span> <span class="n">plotting</span><span class="o">.</span><span class="n">windowName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">plotting</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="n">traceCollection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="p">[</span><span class="n">windowName</span><span class="p">][</span><span class="s1">&#39;view&#39;</span><span class="p">],</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tracePlotting</span><span class="o">=</span><span class="n">plotting</span><span class="p">,</span> <span class="n">windowName</span><span class="o">=</span><span class="n">windowName</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">category</span>
+            <span class="n">plottedTraceList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expandNew</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">plottedTraceList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">plottedTraceList</span></div>
+
+<div class="viewcode-block" id="Traceui.saveConfig"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when the UI is closed. Save the settings to the config file.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.settings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span></div>
+        
+<div class="viewcode-block" id="Traceui.onShowOnlyLast"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.onShowOnlyLast">[docs]</a>    <span class="k">def</span> <span class="nf">onShowOnlyLast</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">functionCall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">categoryCheckboxChange</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">checkboxChange</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">)</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">functionCall</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Traceui.getUniqueCategory"><a class="viewcode-back" href="../../code/trace-doc.html#trace.Traceui.Traceui.getUniqueCategory">[docs]</a>    <span class="k">def</span> <span class="nf">getUniqueCategory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">getUniqueCategory</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div></div>
+
+<span class="c1"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c1">#     import sys</span>
+<span class="c1">#     import pyqtgraph as pg</span>
+<span class="c1">#     from uiModules.CoordinatePlotWidget import CoordinatePlotWidget</span>
+<span class="c1">#     import pens</span>
+<span class="c1">#     pg.setConfigOption(&#39;background&#39;, &#39;w&#39;) #set background to white</span>
+<span class="c1">#     pg.setConfigOption(&#39;foreground&#39;, &#39;k&#39;) #set foreground to black</span>
+<span class="c1">#     app = QtWidgets.QApplication(sys.argv)</span>
+<span class="c1">#     penicons = pens.penicons().penicons()</span>
+<span class="c1">#     window = QtWidgets.QWidget()</span>
+<span class="c1">#     layout = QtWidgets.QVBoxLayout()</span>
+<span class="c1">#     window.setLayout(layout)</span>
+<span class="c1">#     addPlotButton = QtWidgets.QPushButton()</span>
+<span class="c1">#     layout.addWidget(addPlotButton)</span>
+<span class="c1">#     ui = Traceui(penicons, {}, &#39;&#39;, {}, lastDir = &#39; &#39;)</span>
+<span class="c1">#     ui.setupUi(ui)</span>
+<span class="c1">#     layout.addWidget(ui)</span>
+<span class="c1">#     plot = CoordinatePlotWidget(ui)</span>
+<span class="c1">#     layout.addWidget(plot)</span>
+<span class="c1">#     traceCollection = TraceCollection.TraceCollection()</span>
+<span class="c1">#     plottedTrace = PlottedTrace(traceCollection, plot, pens.penList)</span>
+<span class="c1">#     addPlotButton.clicked.connect(ui.addTrace(plottedTrace, pens.penList[0]))</span>
+<span class="c1">#     window.show()</span>
+<span class="c1">#     sys.exit(app.exec_())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scan.EvaluationTableModel &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scan.EvaluationTableModel</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scan.EvaluationTableModel</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">scan.EvaluationBase</span> <span class="k">import</span> <span class="n">EvaluationAlgorithms</span>
+<span class="kn">from</span> <span class="nn">scan.AbszisseType</span> <span class="k">import</span> <span class="n">AbszisseType</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">is_Q</span>
+
+<div class="viewcode-block" id="EvaluationTableModel"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel">[docs]</a><span class="k">class</span> <span class="nc">EvaluationTableModel</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractTableModel</span><span class="p">):</span>
+    <span class="n">dataChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">object</span> <span class="p">)</span>
+    <span class="n">headerDataLookup</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Type&#39;</span><span class="p">,</span> <span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="s1">&#39;Channel&#39;</span><span class="p">,</span> <span class="s1">&#39;Evaluation&#39;</span><span class="p">,</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="s1">&#39;Hist&#39;</span><span class="p">,</span> <span class="s1">&#39;Plot&#39;</span><span class="p">,</span> <span class="s1">&#39;Abszisse&#39;</span> <span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updateSaveStatus</span><span class="p">,</span> <span class="n">plotnames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">evalList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">analysisNames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">counterNames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EvaluationTableModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="k">if</span> <span class="n">evalList</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span> <span class="o">=</span> <span class="n">evalList</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotnames</span> <span class="o">=</span> <span class="n">plotnames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateSaveStatus</span> <span class="o">=</span> <span class="n">updateSaveStatus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalAlgorithmList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisNames</span> <span class="o">=</span> <span class="n">analysisNames</span> <span class="k">if</span> <span class="n">analysisNames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counterNamesList</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">counterNames</span><span class="o">.</span><span class="n">items</span><span class="p">())]</span> <span class="k">if</span> <span class="n">counterNames</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counterNames</span> <span class="o">=</span> <span class="n">counterNames</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counterIndex</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">counterNames</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">if</span> <span class="n">counterNames</span> <span class="k">else</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span> <span class="o">=</span>  <span class="p">{</span>  <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setType</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setCounterId</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setCounter</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setAlgorithm</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataName</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setPlotName</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setAbszisse</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setShowHistogram</span><span class="p">,</span>
+                                <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span> <span class="o">=</span> <span class="p">{</span>  <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">counterId</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s1">&#39;Counter&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">counterName</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">evaluation</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">plotname</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">abszisse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">counterId</span><span class="p">),</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>    <span class="bp">self</span><span class="o">.</span><span class="n">counterName</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>    <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">evaluation</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>    <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>    <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">plotname</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>    <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">abszisse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">showHistogram</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">,</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundColorRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s1">&#39;Counter&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundColorRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">),</span>
+                             <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundColorRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+                             <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">abszisseNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">AbszisseType</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">choiceLookup</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;Counter&#39;</span><span class="p">,</span> <span class="s1">&#39;Result&#39;</span><span class="p">],</span>
+                              <span class="mi">2</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">counterNamesList</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;Counter&#39;</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                              <span class="mi">3</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">EvaluationAlgorithms</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+                              <span class="mi">6</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getPlotnames</span><span class="p">()),</span>
+                              <span class="mi">7</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">abszisseNames</span> <span class="p">}</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="EvaluationTableModel.hasChannel"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.hasChannel">[docs]</a>    <span class="k">def</span> <span class="nf">hasChannel</span><span class="p">(</span><span class="n">evaluation</span><span class="p">):</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">EvaluationAlgorithms</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">algo</span> <span class="ow">and</span> <span class="n">algo</span><span class="o">.</span><span class="n">hasChannel</span></div>
+
+<div class="viewcode-block" id="EvaluationTableModel.counterName"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.counterName">[docs]</a>    <span class="k">def</span> <span class="nf">counterName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;Counter&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">counterNames</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">counterNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">counter</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">counter</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e</span><span class="o">.</span><span class="n">counter</span></div>
+
+<div class="viewcode-block" id="EvaluationTableModel.setAnalysisNames"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setAnalysisNames">[docs]</a>    <span class="k">def</span> <span class="nf">setAnalysisNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisNames</span> <span class="o">=</span> <span class="n">names</span></div>
+        
+<div class="viewcode-block" id="EvaluationTableModel.setType"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setType">[docs]</a>    <span class="k">def</span> <span class="nf">setType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">(),</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="EvaluationTableModel.setCounterId"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setCounterId">[docs]</a>    <span class="k">def</span> <span class="nf">setCounterId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">counterId</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>      </div>
+        
+<div class="viewcode-block" id="EvaluationTableModel.setData"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">role</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="k">lambda</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">False</span> <span class="p">)(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvaluationTableModel.getPlotnames"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.getPlotnames">[docs]</a>    <span class="k">def</span> <span class="nf">getPlotnames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;None&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotnames</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.getAnalysisNames"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.getAnalysisNames">[docs]</a>    <span class="k">def</span> <span class="nf">getAnalysisNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNames</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.choice"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.choice">[docs]</a>    <span class="k">def</span> <span class="nf">choice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">choiceLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()](</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()])</span></div>
+            
+<div class="viewcode-block" id="EvaluationTableModel.setEvalList"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setEvalList">[docs]</a>    <span class="k">def</span> <span class="nf">setEvalList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evalList</span><span class="p">,</span> <span class="n">evalAlgorithmList</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginResetModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span> <span class="o">=</span> <span class="n">evalList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalAlgorithmList</span> <span class="o">=</span> <span class="n">evalAlgorithmList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endResetModel</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="EvaluationTableModel.rowCount"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.columnCount"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="mi">8</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.data"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span> 
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">role</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="k">lambda</span> <span class="n">e</span><span class="p">:</span> <span class="kc">None</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()])</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+        
+<div class="viewcode-block" id="EvaluationTableModel.flags"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]:</span>
+            <span class="k">return</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="mi">5</span><span class="p">:</span>
+            <span class="k">return</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="s1">&#39;Counter&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="p">):</span>
+            <span class="k">return</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasChannel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="p">):</span>
+            <span class="k">return</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span>
+        <span class="k">return</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span></div>
+
+<div class="viewcode-block" id="EvaluationTableModel.headerData"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">section</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerDataLookup</span><span class="p">[</span><span class="n">section</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span> </div>
+
+<div class="viewcode-block" id="EvaluationTableModel.setCounter"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setCounter">[docs]</a>    <span class="k">def</span> <span class="nf">setCounter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">counter</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">counterIndex</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>      </div>
+
+<div class="viewcode-block" id="EvaluationTableModel.setShowHistogram"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setShowHistogram">[docs]</a>    <span class="k">def</span> <span class="nf">setShowHistogram</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">showHistogram</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>      </div>
+                
+<div class="viewcode-block" id="EvaluationTableModel.setValue"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">)</span></div>
+                
+<div class="viewcode-block" id="EvaluationTableModel.setDataName"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setDataName">[docs]</a>    <span class="k">def</span> <span class="nf">setDataName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalAlgorithmList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">setSettingsName</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.setPlotName"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setPlotName">[docs]</a>    <span class="k">def</span> <span class="nf">setPlotName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">plotname</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">plotname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">plotname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.setAbszisse"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setAbszisse">[docs]</a>    <span class="k">def</span> <span class="nf">setAbszisse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">abszisse</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span><span class="o">.</span><span class="n">abszisse</span> <span class="o">=</span> <span class="n">AbszisseType</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">abszisse</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span> 
+        <span class="k">return</span> <span class="kc">True</span>        </div>
+    
+<div class="viewcode-block" id="EvaluationTableModel.setAlgorithm"><a class="viewcode-back" href="../../code/scan-doc.html#scan.EvaluationTableModel.EvaluationTableModel.setAlgorithm">[docs]</a>    <span class="k">def</span> <span class="nf">setAlgorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">):</span>
+        <span class="n">algorithm</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="n">evaluation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span>
+        <span class="n">previousEvaluation</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evalList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()])</span>
+        <span class="n">previousAlgorithm</span> <span class="o">=</span> <span class="n">previousEvaluation</span><span class="o">.</span><span class="n">evaluation</span>
+        <span class="k">if</span> <span class="n">algorithm</span><span class="o">!=</span><span class="n">previousAlgorithm</span><span class="p">:</span>
+            <span class="n">evaluation</span><span class="o">.</span><span class="n">settingsCache</span><span class="p">[</span><span class="n">previousAlgorithm</span><span class="p">]</span> <span class="o">=</span> <span class="n">previousEvaluation</span><span class="o">.</span><span class="n">settings</span>
+            <span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="o">=</span> <span class="n">algorithm</span>
+            <span class="n">algo</span> <span class="o">=</span> <span class="n">EvaluationAlgorithms</span><span class="p">[</span><span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span><span class="p">](</span><span class="n">globalDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+            <span class="n">algo</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">updateSaveStatus</span> <span class="p">)</span>   <span class="c1"># track changes of the algorithms settings so the save status is displayed correctly</span>
+            <span class="k">if</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="ow">in</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">settingsCache</span><span class="p">:</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">settingsCache</span><span class="p">[</span><span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">algo</span><span class="o">.</span><span class="n">setSettings</span><span class="p">(</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evalAlgorithmList</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="o">=</span> <span class="n">algo</span>     
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

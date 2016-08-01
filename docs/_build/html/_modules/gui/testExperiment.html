@@ -1,0 +1,377 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gui.testExperiment &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>gui.testExperiment</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gui.testExperiment</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">pens</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">.AverageViewTable</span> <span class="k">import</span> <span class="n">AverageViewTable</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">MainWindowWidget</span>
+<span class="kn">from</span> <span class="nn">scan.ScanControl</span> <span class="k">import</span> <span class="n">ScanControl</span>
+<span class="kn">from</span> <span class="nn">fit.FitUi</span> <span class="k">import</span> <span class="n">FitUi</span>
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">DataDirectory</span>
+<span class="kn">from</span> <span class="nn">trace.PlottedTrace</span> <span class="k">import</span> <span class="n">PlottedTrace</span>
+<span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TraceCollection</span>
+<span class="kn">from</span> <span class="nn">trace.Traceui</span> <span class="k">import</span> <span class="n">Traceui</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/testExperiment.ui&#39;</span><span class="p">)</span>
+<span class="n">testForm</span><span class="p">,</span> <span class="n">testBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="test"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test">[docs]</a><span class="k">class</span> <span class="nc">test</span><span class="p">(</span><span class="n">testForm</span><span class="p">,</span> <span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">MainWindowWidget</span><span class="p">):</span>
+    <span class="n">StatusMessage</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">str</span> <span class="p">)</span>
+    <span class="n">ClearStatusMessage</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="n">experimentName</span> <span class="o">=</span> <span class="s1">&#39;Test Scan&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">globalVariablesUi</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measurementLog</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">testForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span> <span class="o">=</span> <span class="n">globalVariablesUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measurementLog</span> <span class="o">=</span> <span class="n">measurementLog</span> 
+<span class="c1">#        pyqtgraph.setConfigOption(&#39;background&#39;, &#39;w&#39;)</span>
+<span class="c1">#        pyqtgraph.setConfigOption(&#39;foreground&#39;, &#39;k&#39;)</span>
+
+<div class="viewcode-block" id="test.setupUi"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">testForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsLayout</span><span class="o">.</span><span class="n">_graphicsView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penicons</span> <span class="o">=</span> <span class="n">pens</span><span class="o">.</span><span class="n">penicons</span><span class="p">()</span><span class="o">.</span><span class="n">penicons</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span> <span class="o">=</span> <span class="n">Traceui</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;testExperiment&quot;</span><span class="p">,</span> <span class="p">{</span> <span class="s2">&quot;Plot Window&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;view&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="p">}})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span> <span class="o">=</span> <span class="n">FitUi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s2">&quot;testExperiment&quot;</span><span class="p">,</span> <span class="n">globalDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">variables</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetFitUi</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetFitUi</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayUi</span> <span class="o">=</span> <span class="n">AverageViewTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayUi</span><span class="o">.</span><span class="n">setupUi</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayDock</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDockWidget</span><span class="p">(</span><span class="s2">&quot;Average&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayDock</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="s2">&quot;Average&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayDock</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayUi</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightDockWidgetArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayDock</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayDock</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;testWidget.MainWindow.State&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;testWidget.MainWindow.State&#39;</span><span class="p">])</span>
+<span class="c1">#start added</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span> <span class="o">=</span> <span class="n">ScanControl</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanControlUi</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanControlUi</span><span class="p">)</span>
+<span class="c1">#end added</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tabifyDockWidget</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">dockWidgetFitUi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanControlUi</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="test.addPushDestination"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.addPushDestination">[docs]</a>    <span class="k">def</span> <span class="nf">addPushDestination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+<span class="c1">#        self.fitWidget.addPushDestination(name, destination)</span>
+        <span class="k">pass</span></div>
+        
+<div class="viewcode-block" id="test.setPulseProgramUi"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.setPulseProgramUi">[docs]</a>    <span class="k">def</span> <span class="nf">setPulseProgramUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulseProgramUi</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseProgramUi</span> <span class="o">=</span> <span class="n">pulseProgramUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseProgramUi</span><span class="o">.</span><span class="n">addExperiment</span><span class="p">(</span><span class="s1">&#39;Sequence&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="test.onClear"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onClear">[docs]</a>    <span class="k">def</span> <span class="nf">onClear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dockWidget</span><span class="o">.</span><span class="n">setShown</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StatusMessage</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;test Clear not implemented&quot;</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="test.onSave"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onSave">[docs]</a>    <span class="k">def</span> <span class="nf">onSave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StatusMessage</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;test Save not implemented&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="test.onStart"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onStart">[docs]</a>    <span class="k">def</span> <span class="nf">onStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">scanRepeatComboBox</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+<span class="c1">#start added</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">startScan</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">createAverageScan</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">startScan</span><span class="p">()</span>
+<span class="c1">#end added</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">setInterval</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">timeout</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onData</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayUi</span><span class="o">.</span><span class="n">onClear</span><span class="p">()</span></div>
+
+<span class="c1">#start added</span>
+<div class="viewcode-block" id="test.createAverageScan"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.createAverageScan">[docs]</a>    <span class="k">def</span> <span class="nf">createAverageScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="n">TraceCollection</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="p">,</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;test average trace&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;average trace comment&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">filenameCallback</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceFilename</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+<span class="c1">#end added</span>
+
+<div class="viewcode-block" id="test.startScan"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.startScan">[docs]</a>    <span class="k">def</span> <span class="nf">startScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">unplotLastTrace</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="n">TraceCollection</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="p">,</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#random.uniform(0,2*numpy.pi)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span><span class="p">])</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)])</span><span class="c1">#c*(1-c))])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">filenameCallback</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceFilename</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;test trace&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;My Comment&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">#start added</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">parentTrace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;test trace </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">childCount</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;comment&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;My Comment </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">childCount</span><span class="p">())</span></div>
+<span class="c1">#end added</span>
+
+<div class="viewcode-block" id="test.onData"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onData">[docs]</a>    <span class="k">def</span> <span class="nf">onData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="o">+=</span> <span class="mf">0.05</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">gauss</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span><span class="c1">#c*(1-c))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">value</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">top</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">bottom</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayUi</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xvalue</span> <span class="o">&gt;</span> <span class="mi">500</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">onStop</span><span class="p">()</span>
+<span class="c1">#start added</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">averageChildren</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">averagePlottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="c1">#average plot is in black</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">startScan</span><span class="p">()</span></div>
+<span class="c1">#end added</span>
+                
+<div class="viewcode-block" id="test.onStop"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onStop">[docs]</a>    <span class="k">def</span> <span class="nf">onStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;timer&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timer</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="test.onPause"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.onPause">[docs]</a>    <span class="k">def</span> <span class="nf">onPause</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StatusMessage</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;test Pause not implemented&quot;</span><span class="p">)</span></div>
+     
+<div class="viewcode-block" id="test.activate"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.activate">[docs]</a>    <span class="k">def</span> <span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StatusMessage</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;test active&quot;</span><span class="p">)</span>
+        <span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="test.deactivate"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.deactivate">[docs]</a>    <span class="k">def</span> <span class="nf">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">StatusMessage</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s2">&quot;test not active&quot;</span><span class="p">)</span>
+        <span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">MainWindowWidget</span><span class="o">.</span><span class="n">deactivate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="test.saveConfig"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;testWidget.MainWindow.State&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="o">.</span><span class="n">saveState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">saveConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="o">.</span><span class="n">saveConfig</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="test.traceFilename"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.traceFilename">[docs]</a>    <span class="k">def</span> <span class="nf">traceFilename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
+        <span class="n">directory</span> <span class="o">=</span> <span class="n">DataDirectory</span><span class="o">.</span><span class="n">DataDirectory</span><span class="p">()</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Save file&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">.</span><span class="n">path</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="test.setGlobalVariablesUi"><a class="viewcode-back" href="../../code/gui-doc.html#gui.testExperiment.test.setGlobalVariablesUi">[docs]</a>    <span class="k">def</span> <span class="nf">setGlobalVariablesUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalVariablesUi</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariables</span> <span class="o">=</span> <span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesChanged</span> <span class="o">=</span> <span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">valueChanged</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span> <span class="o">=</span> <span class="n">globalVariablesUi</span></div></div>
+        <span class="c1">#self.fitWidget.addPushDestination(&#39;Global&#39;, globalVariablesUi )</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

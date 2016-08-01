@@ -1,0 +1,37 @@
+\hypertarget{namespaceanalog__outputs__to__boyan}{\section{analog\-\_\-outputs\-\_\-to\-\_\-boyan Namespace Reference}
+\label{namespaceanalog__outputs__to__boyan}\index{analog\-\_\-outputs\-\_\-to\-\_\-boyan@{analog\-\_\-outputs\-\_\-to\-\_\-boyan}}
+}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_ab8d65024450941856d62b9e4f12e5619}{tuple {\bfseries slots} range(2, 18)}\label{namespaceanalog__outputs__to__boyan_ab8d65024450941856d62b9e4f12e5619}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_ab0f5239ef211bc487cb8a80b49b58de7}{list {\bfseries devlist} \mbox{[}\char`\"{}P\-X\-I1\-Slot\char`\"{}+str(x)+\char`\"{}/ao0\-:7\char`\"{} for x in slots\mbox{]}}\label{namespaceanalog__outputs__to__boyan_ab0f5239ef211bc487cb8a80b49b58de7}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_a8b46f1203089e47bb79542a6f094320b}{tuple {\bfseries Chassis} \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}()}\label{namespaceanalog__outputs__to__boyan_a8b46f1203089e47bb79542a6f094320b}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_a511775ab0f27086afd61395abd011f6c}{tuple {\bfseries num\-Channels} Chassis.\-get\-Num\-Ao\-Channels()}\label{namespaceanalog__outputs__to__boyan_a511775ab0f27086afd61395abd011f6c}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_a7a8ecec1294a03cd388e133c2b3f5e36}{tuple {\bfseries data} numpy.\-zeros(num\-Channels)}\label{namespaceanalog__outputs__to__boyan_a7a8ecec1294a03cd388e133c2b3f5e36}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__boyan_ab36814bb7186498bb0b55fb990f3762d}{{\bfseries data2} -\/data}\label{namespaceanalog__outputs__to__boyan_ab36814bb7186498bb0b55fb990f3762d}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}This python script will use 12 PXI-6733 cards to create 96-channels of
+analog outputs.
+Things to Note:
+1. The WaveformChassis class represents a 96-channel waveform generator.
+   This minimizes the need for complicated for loops.
+2. The data passed to the writeAoBuffer method is a 1D array.
+3. The PXI-Chasis used in this script was a PXI-1065 with PXI-6733s in
+   slots 2 through 7 and slots 11 through 17.
+\end{DoxyVerb}
+ 

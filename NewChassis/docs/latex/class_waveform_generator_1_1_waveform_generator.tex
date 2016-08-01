@@ -1,0 +1,282 @@
+\hypertarget{class_waveform_generator_1_1_waveform_generator}{\section{Waveform\-Generator.\-Waveform\-Generator Class Reference}
+\label{class_waveform_generator_1_1_waveform_generator}\index{Waveform\-Generator.\-Waveform\-Generator@{Waveform\-Generator.\-Waveform\-Generator}}
+}
+
+
+This class contains an Analog\-Output and Digital\-Output object.  
+
+
+Inheritance diagram for Waveform\-Generator.\-Waveform\-Generator\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_waveform_generator_1_1_waveform_generator}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_ac7bfc889aae76cae59cfa7de873c3d61}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_a089791e1214bb1342396bef13fcc8a03}{init}
+\begin{DoxyCompactList}\small\item\em Initialize the analog and digital outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_a9fb983f2822da6a010133da8cf2995f9}{write\-Ao\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_afeb3e4ca2b30fc3fc4e6e7325ffd9d9f}{write\-Do\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_a9f7e4db3cb5550802a268ce6a8cb2fb5}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_ac3cf6e28382592a1f05be72f96d9785f}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog and digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_a4e22f830e0cded02a876561c6397de0d}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog and digital output generation. \end{DoxyCompactList}\item 
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a30ee8b98f7a31f4ed0c28afd72d89930}{def {\bfseries write\-Start\-Stop}}\label{class_waveform_generator_1_1_waveform_generator_a30ee8b98f7a31f4ed0c28afd72d89930}
+
+\item 
+def \hyperlink{class_waveform_generator_1_1_waveform_generator_a7bd571409abe468987f15349dc0fa681}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the analog and digital ouput device and channels. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_ae7ee12ae23b6cf317da47e2580ea1655}{ao}
+\begin{DoxyCompactList}\small\item\em This is an Analog\-Output object created using the Analog\-Output class. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a923e4c005cdf1bc1cfdb1cbe33803f40}{do}
+\begin{DoxyCompactList}\small\item\em This is a Digital\-Output object created using the Digita\-Output class. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a7f6803ac26eaa8fd4e1880a39c15ca5f}{sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the waveform generator. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a1800e5e372c200f5241f0ee132b10be3}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of channels configured in the waveform generator. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_ae0573744cbc723202afa75c6381e3f71}{clk\-Source}
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a2eb2105f7a99c224ea725a5fff4c4b39}{start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_ab11b448ff5baf7c87021af3cddfa49d0}{mode}
+\begin{DoxyCompactList}\small\item\em There are currently three modes available. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_aa36d19f0d2c8700947394d01b6b4621a}{loops}
+\begin{DoxyCompactList}\small\item\em This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a240878363858425aa6c8d25241479dbf}{trigger\-Type}
+\begin{DoxyCompactList}\small\item\em There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_abd9a10ccc783ec4174a7ee9f8ab170ad}{use\-Ao}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_generator_1_1_waveform_generator_a68e8bdc6d3cf0b402502766186571d6f}{use\-Do}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize digital outputs. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class contains an Analog\-Output and Digital\-Output object. 
+
+It is intended to represent a single P\-X\-I-\/6733 in software. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_ac7bfc889aae76cae59cfa7de873c3d61}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_ac7bfc889aae76cae59cfa7de873c3d61}
+
+
+This function is a constructor for the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a7bd571409abe468987f15349dc0fa681}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!close@{close}}
+\index{close@{close}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_a7bd571409abe468987f15349dc0fa681}
+
+
+This function will close connection to the analog and digital ouput device and channels. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a089791e1214bb1342396bef13fcc8a03}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!init@{init}}
+\index{init@{init}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Channels, }
+\item[{}]{do\-Channels = {\ttfamily ''}}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_a089791e1214bb1342396bef13fcc8a03}
+
+
+Initialize the analog and digital outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em ao\-Channels} & This is a string representing the device and analog output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+{\em do\-Channels} & This is a string representing the device and digital output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/port0/line0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a9f7e4db3cb5550802a268ce6a8cb2fb5}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!start@{start}}
+\index{start@{start}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_a9f7e4db3cb5550802a268ce6a8cb2fb5}
+
+
+This function starts the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a4e22f830e0cded02a876561c6397de0d}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!stop@{stop}}
+\index{stop@{stop}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_a4e22f830e0cded02a876561c6397de0d}
+
+
+This function stops the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_ac3cf6e28382592a1f05be72f96d9785f}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_ac3cf6e28382592a1f05be72f96d9785f}
+
+
+This functions waits for the analog and digital output generation to complete. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a9fb983f2822da6a010133da8cf2995f9}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!write\-Ao\-Buffer@{write\-Ao\-Buffer}}
+\index{write\-Ao\-Buffer@{write\-Ao\-Buffer}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{write\-Ao\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-write\-Ao\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_a9fb983f2822da6a010133da8cf2995f9}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 64-\/bit float numpy array that contians data for each analog output. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_afeb3e4ca2b30fc3fc4e6e7325ffd9d9f}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!write\-Do\-Buffer@{write\-Do\-Buffer}}
+\index{write\-Do\-Buffer@{write\-Do\-Buffer}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{write\-Do\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Generator.\-Waveform\-Generator.\-write\-Do\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_generator_1_1_waveform_generator_afeb3e4ca2b30fc3fc4e6e7325ffd9d9f}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital line. Lines are non-\/interleaved (line1 n-\/samples then line2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_waveform_generator_1_1_waveform_generator_ae7ee12ae23b6cf317da47e2580ea1655}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!ao@{ao}}
+\index{ao@{ao}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{ao}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-ao}}\label{class_waveform_generator_1_1_waveform_generator_ae7ee12ae23b6cf317da47e2580ea1655}
+
+
+This is an Analog\-Output object created using the Analog\-Output class. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_ae0573744cbc723202afa75c6381e3f71}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-clk\-Source}}\label{class_waveform_generator_1_1_waveform_generator_ae0573744cbc723202afa75c6381e3f71}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_waveform_generator_1_1_waveform_generator_a923e4c005cdf1bc1cfdb1cbe33803f40}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!do@{do}}
+\index{do@{do}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{do}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-do}}\label{class_waveform_generator_1_1_waveform_generator_a923e4c005cdf1bc1cfdb1cbe33803f40}
+
+
+This is a Digital\-Output object created using the Digita\-Output class. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_aa36d19f0d2c8700947394d01b6b4621a}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!loops@{loops}}
+\index{loops@{loops}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-loops}}\label{class_waveform_generator_1_1_waveform_generator_aa36d19f0d2c8700947394d01b6b4621a}
+
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. 
+
+It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_waveform_generator_1_1_waveform_generator_ab11b448ff5baf7c87021af3cddfa49d0}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!mode@{mode}}
+\index{mode@{mode}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-mode}}\label{class_waveform_generator_1_1_waveform_generator_ab11b448ff5baf7c87021af3cddfa49d0}
+
+
+There are currently three modes available. 
+
+Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_waveform_generator_1_1_waveform_generator_a4e22f830e0cded02a876561c6397de0d}{stop()} method is called. \hypertarget{class_waveform_generator_1_1_waveform_generator_a7f6803ac26eaa8fd4e1880a39c15ca5f}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-sample\-Rate}}\label{class_waveform_generator_1_1_waveform_generator_a7f6803ac26eaa8fd4e1880a39c15ca5f}
+
+
+This is the sample rate of the waveform generator. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a1800e5e372c200f5241f0ee132b10be3}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-samples\-Per\-Channel}}\label{class_waveform_generator_1_1_waveform_generator_a1800e5e372c200f5241f0ee132b10be3}
+
+
+This is the number of channels configured in the waveform generator. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a2eb2105f7a99c224ea725a5fff4c4b39}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-start\-Trigger\-Source}}\label{class_waveform_generator_1_1_waveform_generator_a2eb2105f7a99c224ea725a5fff4c4b39}
+
+
+This is the start trigger source terminal. 
+
+The software ignores this value when the trigger\-Type is set to \char`\"{}\-Software\char`\"{}. Otherwise when the trigger\-Type is \char`\"{}\-Hardware,\char`\"{} this terminal is used to start analog generation. Example Value\-: \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I0\char`\"{} \hypertarget{class_waveform_generator_1_1_waveform_generator_a240878363858425aa6c8d25241479dbf}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-trigger\-Type}}\label{class_waveform_generator_1_1_waveform_generator_a240878363858425aa6c8d25241479dbf}
+
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. 
+
+While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. \hypertarget{class_waveform_generator_1_1_waveform_generator_abd9a10ccc783ec4174a7ee9f8ab170ad}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!use\-Ao@{use\-Ao}}
+\index{use\-Ao@{use\-Ao}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{use\-Ao}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-use\-Ao}}\label{class_waveform_generator_1_1_waveform_generator_abd9a10ccc783ec4174a7ee9f8ab170ad}
+
+
+This is a boolean value that will be true if the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize analog outputs. 
+
+\hypertarget{class_waveform_generator_1_1_waveform_generator_a68e8bdc6d3cf0b402502766186571d6f}{\index{Waveform\-Generator\-::\-Waveform\-Generator@{Waveform\-Generator\-::\-Waveform\-Generator}!use\-Do@{use\-Do}}
+\index{use\-Do@{use\-Do}!WaveformGenerator::WaveformGenerator@{Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{use\-Do}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Generator.\-Waveform\-Generator.\-use\-Do}}\label{class_waveform_generator_1_1_waveform_generator_a68e8bdc6d3cf0b402502766186571d6f}
+
+
+This is a boolean value that will be true if the \hyperlink{class_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize digital outputs. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Waveform\-Generator.\-py\end{DoxyCompactItemize}

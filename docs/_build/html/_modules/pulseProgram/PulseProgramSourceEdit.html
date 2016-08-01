@@ -1,0 +1,299 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram.PulseProgramSourceEdit &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulseProgram.PulseProgramSourceEdit</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulseProgram.PulseProgramSourceEdit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+
+<span class="kn">from</span> <span class="nn">.PulseProgramEditUi</span> <span class="k">import</span> <span class="n">Ui_Form</span> <span class="k">as</span> <span class="n">Form</span>
+<span class="kn">from</span> <span class="nn">_functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="n">Base</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span>
+
+<div class="viewcode-block" id="PulseProgramSourceEdit"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit">[docs]</a><span class="k">class</span> <span class="nc">PulseProgramSourceEdit</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;pp&#39;</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlighted</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">highlighted</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QBrush</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">cyan</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selections</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWordOnly</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCaseSensitive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findText</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorFormat</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorFormat</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultFormat</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultFormat</span><span class="o">.</span><span class="n">setBackground</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorCursor</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cursorStack</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">mode</span>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.setupUi"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="p">,</span><span class="n">extraKeywords1</span><span class="o">=</span><span class="p">[],</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="n">extraKeywords1</span><span class="p">,</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="n">extraKeywords2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findLineEdit</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFindTextChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFindClose</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findMatchCaseCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFindFlagsChanged</span><span class="p">,</span> <span class="s1">&#39;findCaseSensitive&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWholeWordsCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onFindFlagsChanged</span><span class="p">,</span> <span class="s1">&#39;findWordOnly&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFind</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onFind</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clearHighlightError</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.setReadOnly"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setReadOnly">[docs]</a>    <span class="k">def</span> <span class="nf">setReadOnly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.onFindFlagsChanged"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindFlagsChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onFindFlagsChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.onFindClose"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindClose">[docs]</a>    <span class="k">def</span> <span class="nf">onFindClose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PulseProgramSourceEdit.setPlainText"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setPlainText">[docs]</a>    <span class="k">def</span> <span class="nf">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulseProgramSourceEdit.toPlainText"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.toPlainText">[docs]</a>    <span class="k">def</span> <span class="nf">toPlainText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.onFind"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFind">[docs]</a>    <span class="k">def</span> <span class="nf">onFind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">backward</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inPlace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inPlace</span> <span class="ow">or</span> <span class="n">backward</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">getSelection</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">getSelection</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">line</span><span class="p">,</span> <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">cursorPosition</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">findFirst</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findText</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">findCaseSensitive</span><span class="p">,</span> 
+                                <span class="bp">self</span><span class="o">.</span><span class="n">findWordOnly</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="ow">not</span> <span class="n">backward</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.onFindTextChanged"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindTextChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onFindTextChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findText</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onFind</span><span class="p">(</span><span class="n">inPlace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.keyReleaseEvent"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.keyReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">matches</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">Find</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showFindDialog</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">matches</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">FindNext</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">.</span><span class="n">matches</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span><span class="o">.</span><span class="n">FindPrevious</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="PulseProgramSourceEdit.highlightError"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightError">[docs]</a>    <span class="k">def</span> <span class="nf">highlightError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">message</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">highlightError</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+       
+<div class="viewcode-block" id="PulseProgramSourceEdit.clearHighlightError"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.clearHighlightError">[docs]</a>    <span class="k">def</span> <span class="nf">clearHighlightError</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">clearError</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PulseProgramSourceEdit.highlightTimingViolation"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightTimingViolation">[docs]</a>    <span class="k">def</span> <span class="nf">highlightTimingViolation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linelist</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">highlightTimingViolation</span><span class="p">(</span><span class="n">linelist</span><span class="p">)</span></div></div>
+                            
+         
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">PulseProgramSourceEdit</span><span class="p">()</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,1464 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>pulseProgram</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/pulseProgram-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pulseprogram">
+<h1>pulseProgram<a class="headerlink" href="#pulseprogram" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pulseProgram.CounterDictionary">
+<span id="counterdictionary"></span><h2>CounterDictionary<a class="headerlink" href="#module-pulseProgram.CounterDictionary" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.CounterDictionary.CounterDictionary">
+<em class="property">class </em><code class="descname">CounterDictionary</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterDictionary.html#CounterDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterDictionary.CounterDictionary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.CounterDictionary.CounterDictionary.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>variabledict</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterDictionary.html#CounterDictionary.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterDictionary.CounterDictionary.merge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.CounterTableModel">
+<span id="countertablemodel"></span><h2>CounterTableModel<a class="headerlink" href="#module-pulseProgram.CounterTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel">
+<em class="property">class </em><code class="descname">CounterTableModel</code><span class="sig-paren">(</span><em>counterdict</em>, <em>namedict</em>, <em>size=49</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665FDDD748&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.contentsChanged">
+<code class="descname">contentsChanged</code><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.contentsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.currentId">
+<code class="descname">currentId</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.currentId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.currentId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.currentState">
+<code class="descname">currentState</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.currentState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.currentState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.displayData">
+<code class="descname">displayData</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.displayData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.displayData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.displayDataColor">
+<code class="descname">displayDataColor</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.displayDataColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.displayDataColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.getVariables">
+<code class="descname">getVariables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.getVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.getVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.onClicked">
+<code class="descname">onClicked</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.onClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.onClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665FDDD6D8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.setCounterdict">
+<code class="descname">setCounterdict</code><span class="sig-paren">(</span><em>counterdict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.setCounterdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.setCounterdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.setCurrentId">
+<code class="descname">setCurrentId</code><span class="sig-paren">(</span><em>index</em>, <em>newid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.setCurrentId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.setCurrentId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.setState">
+<code class="descname">setState</code><span class="sig-paren">(</span><em>index</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.setState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.setState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.CounterTableModel.CounterTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/CounterTableModel.html#CounterTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.CounterTableModel.CounterTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.ParameterTableModel">
+<span id="parametertablemodel"></span><h2>ParameterTableModel<a class="headerlink" href="#module-pulseProgram.ParameterTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.ParameterTableModel.Parameter">
+<em class="property">class </em><code class="descname">Parameter</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>strvalue=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#Parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.Parameter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel">
+<em class="property">class </em><code class="descname">ParameterTableModel</code><span class="sig-paren">(</span><em>variabledict</em>, <em>parameterdict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665FDC0048&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665F73C8D0&gt;</em><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.getVariableValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.getVariables">
+<code class="descname">getVariables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.getVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.getVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665FDC0208&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ParameterTableModel.ParameterTableModel.setDataValue">
+<code class="descname">setDataValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ParameterTableModel.html#ParameterTableModel.setDataValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ParameterTableModel.ParameterTableModel.setDataValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="id1">
+<h2>PulseProgram<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-pulseProgram.PulseProgram"></span><dl class="exception">
+<dt id="pulseProgram.PulseProgram.DependencyError">
+<em class="property">exception </em><code class="descname">DependencyError</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#DependencyError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.DependencyError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.PulseProgram.PulseProgram">
+<em class="property">class </em><code class="descname">PulseProgram</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encapsulates a PulseProgrammer Program
+loadSource( filename ) loads the contents of the file
+The code is compiled in the following steps</p>
+<blockquote>
+<div>parse()         generates self.code
+toBytecode()    generates self.bytecode
+toBinary()      generates self.binarycode</div></blockquote>
+<p>the procedure updateVariables( dictionary )  updates variable values in the bytecode</p>
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.addDefine">
+<code class="descname">addDefine</code><span class="sig-paren">(</span><em>m</em>, <em>lineno</em>, <em>sourcename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.addDefine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.addDefine" title="Permalink to this definition">¶</a></dt>
+<dd><p>add the define to the self.defines dictionary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.addLabel">
+<code class="descname">addLabel</code><span class="sig-paren">(</span><em>label</em>, <em>address</em>, <em>sourcename</em>, <em>lineno</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.addLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.addLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.addVariable">
+<code class="descname">addVariable</code><span class="sig-paren">(</span><em>m</em>, <em>lineno</em>, <em>sourcename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.addVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.addVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a variable to the self.variablesdict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.appendVariableCode">
+<code class="descname">appendVariableCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.appendVariableCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.appendVariableCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>append all variables to the instruction part of the code</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.codelinePattern">
+<code class="descname">codelinePattern</code><em class="property"> = re.compile('(\\s*[^#\\s]+)', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.codelinePattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.compileCode">
+<code class="descname">compileCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.compileCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.compileCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.convertParameter">
+<code class="descname">convertParameter</code><span class="sig-paren">(</span><em>mag</em>, <em>encoding=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.convertParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.convertParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a dimensioned parameter to the binary value
+expected by the hardware. The conversion is determined by the variable encoding</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.currentVariablesText">
+<code class="descname">currentVariablesText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.currentVariablesText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.currentVariablesText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.definePattern">
+<code class="descname">definePattern</code><em class="property"> = re.compile('const\\s+(\\w+)\\s+(\\w+)[^#\n\r]*')</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.definePattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.exitcode">
+<code class="descname">exitcode</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.exitcode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.exitcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.flattenList">
+<code class="descname">flattenList</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.flattenList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.flattenList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.insertPattern">
+<code class="descname">insertPattern</code><em class="property"> = re.compile('insert\\s+([\\w.-_]+)', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.insertPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.insertSource">
+<code class="descname">insertSource</code><span class="sig-paren">(</span><em>pp_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.insertSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.insertSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>read a source file pp_file
+calls itself recursively to for #insert
+adds the contents of this file to the dictionary self.source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.insertSourceString">
+<code class="descname">insertSourceString</code><span class="sig-paren">(</span><em>sourcecode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.insertSourceString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.insertSourceString" title="Permalink to this definition">¶</a></dt>
+<dd><p>read a source file pp_file
+calls itself recursively to for #insert
+adds the contents of this file to the dictionary self.source</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.labelPattern">
+<code class="descname">labelPattern</code><em class="property"> = re.compile('(\\w+):\\s+([^#\n\r]*)')</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.labelPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.lineOfInstruction">
+<code class="descname">lineOfInstruction</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.lineOfInstruction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.lineOfInstruction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.loadFromMemory">
+<code class="descname">loadFromMemory</code><span class="sig-paren">(</span><em>docompile=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.loadFromMemory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.loadFromMemory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to loadSource
+only this routine loads from self.source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.loadSource">
+<code class="descname">loadSource</code><span class="sig-paren">(</span><em>pp_file</em>, <em>docompile=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.loadSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.loadSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the source pp_file
+#include files are loaded recursively
+all code lines are added to self.sourcelines
+for each source file the contents are added to the dictionary self.source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.multiVariableUpdateCode">
+<code class="descname">multiVariableUpdateCode</code><span class="sig-paren">(</span><em>variablenames</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.multiVariableUpdateCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.multiVariableUpdateCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.opPattern">
+<code class="descname">opPattern</code><em class="property"> = re.compile('\\s*(\\w+)(?:\\s+([^#\n\r]*)){0,1}', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.opPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse the code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.saveSource">
+<code class="descname">saveSource</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.saveSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.saveSource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.setHardware">
+<code class="descname">setHardware</code><span class="sig-paren">(</span><em>adIndexList</em>, <em>adBoards</em>, <em>timestep</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.setHardware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.setHardware" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.toBinary">
+<code class="descname">toBinary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.toBinary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.toBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert bytecode to binary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.toBytecode">
+<code class="descname">toBytecode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.toBytecode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.toBytecode" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate bytecode from code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.updateVariables">
+<code class="descname">updateVariables</code><span class="sig-paren">(</span><em>variables</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.updateVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.updateVariables" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the variable values in the bytecode</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.PulseProgram.varPattern">
+<code class="descname">varPattern</code><em class="property"> = re.compile('var\\s+(\\w+)\\s+([^#,\n\r]+)(?:,([^#,\n\r]+)){0,1}(?:,([^#,\n\r]+)){0,1}(?:,([^#,\n\r]+)){0,1}(?:#([^\n\r]+)){0,1}')</em><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.varPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.variable">
+<code class="descname">variable</code><span class="sig-paren">(</span><em>variablename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.variableScanCode">
+<code class="descname">variableScanCode</code><span class="sig-paren">(</span><em>variablename</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.variableScanCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.variableScanCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.variableUpdateCode">
+<code class="descname">variableUpdateCode</code><span class="sig-paren">(</span><em>variablename</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.variableUpdateCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.variableUpdateCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the code to update the variable directly on the fpga
+consists of variablelocation and variablevalue</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.variables">
+<code class="descname">variables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.writeBinaryCodeForReference">
+<code class="descname">writeBinaryCodeForReference</code><span class="sig-paren">(</span><em>code</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.writeBinaryCodeForReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.writeBinaryCodeForReference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.writeBinaryCodeForSimulation">
+<code class="descname">writeBinaryCodeForSimulation</code><span class="sig-paren">(</span><em>code</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.writeBinaryCodeForSimulation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.writeBinaryCodeForSimulation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.PulseProgram.writeBinaryDataForReference">
+<code class="descname">writeBinaryDataForReference</code><span class="sig-paren">(</span><em>code</em>, <em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#PulseProgram.writeBinaryDataForReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.PulseProgram.writeBinaryDataForReference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.PulseProgram.Variable">
+<em class="property">class </em><code class="descname">Variable</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#Variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.Variable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.PulseProgram.Variable.exportXml">
+<code class="descname">exportXml</code><span class="sig-paren">(</span><em>element</em>, <em>tagname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#Variable.exportXml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.exportXml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="pulseProgram.PulseProgram.Variable.fromXMLElement">
+<em class="property">static </em><code class="descname">fromXMLElement</code><span class="sig-paren">(</span><em>element</em>, <em>tagname=None</em>, <em>returnTuple=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#Variable.fromXMLElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.fromXMLElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgram.Variable.outValue">
+<code class="descname">outValue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#Variable.outValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.outValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.Variable.parentObject">
+<code class="descname">parentObject</code><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.parentObject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.Variable.strvalue">
+<code class="descname">strvalue</code><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.strvalue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgram.Variable.value">
+<code class="descname">value</code><a class="headerlink" href="#pulseProgram.PulseProgram.Variable.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulseProgram.PulseProgram.ppexception">
+<em class="property">exception </em><code class="descname">ppexception</code><span class="sig-paren">(</span><em>message</em>, <em>filename</em>, <em>line</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#ppexception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.ppexception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulseProgram.PulseProgram.variableValueDict">
+<code class="descname">variableValueDict</code><span class="sig-paren">(</span><em>variabledict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgram.html#variableValueDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgram.variableValueDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.PulseProgramBNF">
+<span id="pulseprogrambnf"></span><h2>PulseProgramBNF<a class="headerlink" href="#module-pulseProgram.PulseProgramBNF" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions">
+<em class="property">class </em><code class="descname">Dimensions</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#Dimensions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions.current">
+<code class="descname">current</code><em class="property"> = (0, 0, 0, 0, 1, 0, 0, 0, 0)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions.current" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions.dimensionless">
+<code class="descname">dimensionless</code><em class="property"> = (0, 0, 0, 0, 0, 0, 0, 0, 0)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions.dimensionless" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions.frequency">
+<code class="descname">frequency</code><em class="property"> = (0, -1, 0, 0, 0, 0, 0, 0, 0)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions.frequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions.time">
+<code class="descname">time</code><em class="property"> = (0, 1, 0, 0, 0, 0, 0, 0, 0)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.Dimensions.voltage">
+<code class="descname">voltage</code><em class="property"> = (2, -3, 0, 1, -1, 0, 0, 0, 0)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Dimensions.voltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram">
+<em class="property">class </em><code class="descname">PulseProgram</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encapsulates a PulseProgrammer Program
+loadSource( filename ) loads the contents of the file
+The code is compiled in the following steps</p>
+<blockquote>
+<div>parse()         generates self.code
+toBytecode()    generates self.bytecode
+toBinary()      generates self.binarycode</div></blockquote>
+<p>the procedure updateVariables( dictionary )  updates variable values in the bytecode</p>
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.addLabel">
+<code class="descname">addLabel</code><span class="sig-paren">(</span><em>label</em>, <em>address</em>, <em>sourcename</em>, <em>lineno</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.addLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.addLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.addVariable">
+<code class="descname">addVariable</code><span class="sig-paren">(</span><em>m</em>, <em>lineno</em>, <em>sourcename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.addVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.addVariable" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a variable to the self.variablesdict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.appendVariableCode">
+<code class="descname">appendVariableCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.appendVariableCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.appendVariableCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>append all variables to the instruction part of the code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.assembleFile">
+<code class="descname">assembleFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.assembleFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.assembleFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.codelinePattern">
+<code class="descname">codelinePattern</code><em class="property"> = re.compile('(#define|\\s*[^#\\s]+)', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.codelinePattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.command_action">
+<code class="descname">command_action</code><span class="sig-paren">(</span><em>text</em>, <em>loc</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.command_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.command_action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.compileCode">
+<code class="descname">compileCode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.compileCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.compileCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.const_action">
+<code class="descname">const_action</code><span class="sig-paren">(</span><em>text</em>, <em>loc</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.const_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.const_action" title="Permalink to this definition">¶</a></dt>
+<dd><p>add the const to the self.constDict dictionary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.convertParameter">
+<code class="descname">convertParameter</code><span class="sig-paren">(</span><em>mag</em>, <em>encoding=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.convertParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.convertParameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert a dimensioned parameter to the binary value
+expected by the hardware. The conversion is determined by the variable encoding</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.currentVariablesText">
+<code class="descname">currentVariablesText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.currentVariablesText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.currentVariablesText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.exitcode">
+<code class="descname">exitcode</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.exitcode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.exitcode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.flattenList">
+<code class="descname">flattenList</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.flattenList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.flattenList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.initBNF">
+<code class="descname">initBNF</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.initBNF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.initBNF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.insertPattern">
+<code class="descname">insertPattern</code><em class="property"> = re.compile('#insert\\s+([\\w.-_]+)', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.insertPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.insertSource">
+<code class="descname">insertSource</code><span class="sig-paren">(</span><em>pp_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.insertSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.insertSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>read a source file pp_file
+calls itself recursively to for #insert
+adds the contents of this file to the dictionary self.source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.insert_action">
+<code class="descname">insert_action</code><span class="sig-paren">(</span><em>text</em>, <em>loc</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.insert_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.insert_action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.labelPattern">
+<code class="descname">labelPattern</code><em class="property"> = re.compile('(\\w+):\\s+([^#\n\r]*)')</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.labelPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.label_command_action">
+<code class="descname">label_command_action</code><span class="sig-paren">(</span><em>text</em>, <em>loc</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.label_command_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.label_command_action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.loadFromMemory">
+<code class="descname">loadFromMemory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.loadFromMemory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.loadFromMemory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Similar to loadSource
+only this routine loads from self.source</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.loadSource">
+<code class="descname">loadSource</code><span class="sig-paren">(</span><em>pp_file</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.loadSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.loadSource" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the source pp_file
+#include files are loaded recursively
+all code lines are added to self.sourcelines
+for each source file the contents are added to the dictionary self.source</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.opPattern">
+<code class="descname">opPattern</code><em class="property"> = re.compile('\\s*(\\w+)(?:\\s+([^#\n\r]*)){0,1}', re.IGNORECASE)</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.opPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse the code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.saveSource">
+<code class="descname">saveSource</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.saveSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.saveSource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.setHardware">
+<code class="descname">setHardware</code><span class="sig-paren">(</span><em>adIndexList</em>, <em>adBoards</em>, <em>timestep</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.setHardware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.setHardware" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.toBinary">
+<code class="descname">toBinary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.toBinary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.toBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert bytecode to binary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.toBytecode">
+<code class="descname">toBytecode</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.toBytecode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.toBytecode" title="Permalink to this definition">¶</a></dt>
+<dd><p>generate bytecode from code</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.updateVariables">
+<code class="descname">updateVariables</code><span class="sig-paren">(</span><em>variables</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.updateVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.updateVariables" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the variable values in the bytecode</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.varPattern">
+<code class="descname">varPattern</code><em class="property"> = re.compile('var\\s+(\\w+)\\s+([^#,\n\r]+)(?:,([^#,\n\r]+)){0,1}(?:,([^#,\n\r]+)){0,1}(?:,([^#,\n\r]+)){0,1}(?:#([^\n\r]+)){0,1}')</em><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.varPattern" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.var_action">
+<code class="descname">var_action</code><span class="sig-paren">(</span><em>text</em>, <em>loc</em>, <em>arg</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.var_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.var_action" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.variable">
+<code class="descname">variable</code><span class="sig-paren">(</span><em>variablename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.variableScanCode">
+<code class="descname">variableScanCode</code><span class="sig-paren">(</span><em>variablename</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.variableScanCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.variableScanCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.variableUpdateCode">
+<code class="descname">variableUpdateCode</code><span class="sig-paren">(</span><em>variablename</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.variableUpdateCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.variableUpdateCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>returns the code to update the variable directly on the fpga
+consists of variablelocation and variablevalue</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramBNF.PulseProgram.variables">
+<code class="descname">variables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#PulseProgram.variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.PulseProgram.variables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.PulseProgramBNF.Variable">
+<em class="property">class </em><code class="descname">Variable</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#Variable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.Variable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="pulseProgram.PulseProgramBNF.ppexception">
+<em class="property">exception </em><code class="descname">ppexception</code><span class="sig-paren">(</span><em>message</em>, <em>filename</em>, <em>line</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#ppexception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.ppexception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulseProgram.PulseProgramBNF.variableValueDict">
+<code class="descname">variableValueDict</code><span class="sig-paren">(</span><em>variabledict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramBNF.html#variableValueDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramBNF.variableValueDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.PulseProgramEditUi">
+<span id="pulseprogrameditui"></span><h2>PulseProgramEditUi<a class="headerlink" href="#module-pulseProgram.PulseProgramEditUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.PulseProgramEditUi.Ui_Form">
+<em class="property">class </em><code class="descname">Ui_Form</code><a class="reference internal" href="../_modules/pulseProgram/PulseProgramEditUi.html#Ui_Form"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramEditUi.Ui_Form" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.PulseProgramEditUi.Ui_Form.retranslateUi">
+<code class="descname">retranslateUi</code><span class="sig-paren">(</span><em>Form</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramEditUi.html#Ui_Form.retranslateUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramEditUi.Ui_Form.retranslateUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramEditUi.Ui_Form.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>Form</em>, <em>extraKeywords1=[]</em>, <em>extraKeywords2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramEditUi.html#Ui_Form.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramEditUi.Ui_Form.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramEditUi.Ui_Form.showFindDialog">
+<code class="descname">showFindDialog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramEditUi.html#Ui_Form.showFindDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramEditUi.Ui_Form.showFindDialog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.PulseProgramSourceEdit">
+<span id="pulseprogramsourceedit"></span><h2>PulseProgramSourceEdit<a class="headerlink" href="#module-pulseProgram.PulseProgramSourceEdit" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit">
+<em class="property">class </em><code class="descname">PulseProgramSourceEdit</code><span class="sig-paren">(</span><em>mode='pp'</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.clearHighlightError">
+<code class="descname">clearHighlightError</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.clearHighlightError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.clearHighlightError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightError">
+<code class="descname">highlightError</code><span class="sig-paren">(</span><em>message</em>, <em>line</em>, <em>text=None</em>, <em>col=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.highlightError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightTimingViolation">
+<code class="descname">highlightTimingViolation</code><span class="sig-paren">(</span><em>linelist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.highlightTimingViolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.highlightTimingViolation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.keyReleaseEvent">
+<code class="descname">keyReleaseEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFind">
+<code class="descname">onFind</code><span class="sig-paren">(</span><em>backward=False</em>, <em>inPlace=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.onFind"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFind" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindClose">
+<code class="descname">onFindClose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.onFindClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindClose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindFlagsChanged">
+<code class="descname">onFindFlagsChanged</code><span class="sig-paren">(</span><em>attr</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.onFindFlagsChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindFlagsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindTextChanged">
+<code class="descname">onFindTextChanged</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.onFindTextChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.onFindTextChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setPlainText">
+<code class="descname">setPlainText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.setPlainText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setPlainText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setReadOnly">
+<code class="descname">setReadOnly</code><span class="sig-paren">(</span><em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.setReadOnly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setReadOnly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em>, <em>extraKeywords1=[]</em>, <em>extraKeywords2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.toPlainText">
+<code class="descname">toPlainText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/PulseProgramSourceEdit.html#PulseProgramSourceEdit.toPlainText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.PulseProgramSourceEdit.PulseProgramSourceEdit.toPlainText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="pulseprogramui">
+<h2>PulseProgramUi<a class="headerlink" href="#pulseprogramui" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pulseProgram.QPPPEditor">
+<span id="qpppeditor"></span><h2>QPPPEditor<a class="headerlink" href="#module-pulseProgram.QPPPEditor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.QPPPEditor.MyPythonLexer">
+<em class="property">class </em><code class="descname">MyPythonLexer</code><span class="sig-paren">(</span><em>parent=None</em>, <em>extraKeywords1=[]</em>, <em>extraKeywords2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#MyPythonLexer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.MyPythonLexer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.QPPPEditor.MyPythonLexer.keywords">
+<code class="descname">keywords</code><span class="sig-paren">(</span><em>keyset</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#MyPythonLexer.keywords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.MyPythonLexer.keywords" title="Permalink to this definition">¶</a></dt>
+<dd><p>return standard keywords and extra keywords.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor">
+<em class="property">class </em><code class="descname">QPPPEditor</code><span class="sig-paren">(</span><em>parent=None</em>, <em>extraKeywords1=[]</em>, <em>extraKeywords2=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.ARROW_MARKER_NUM">
+<code class="descname">ARROW_MARKER_NUM</code><em class="property"> = 8</em><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.ARROW_MARKER_NUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.clearError">
+<code class="descname">clearError</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.clearError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.clearError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.cursorPosition">
+<code class="descname">cursorPosition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.cursorPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.cursorPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.highlightError">
+<code class="descname">highlightError</code><span class="sig-paren">(</span><em>line</em>, <em>col</em>, <em>toline</em>, <em>tocol</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.highlightError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.highlightError" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.highlightTimingViolation">
+<code class="descname">highlightTimingViolation</code><span class="sig-paren">(</span><em>linelist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.highlightTimingViolation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.highlightTimingViolation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.on_margin_clicked">
+<code class="descname">on_margin_clicked</code><span class="sig-paren">(</span><em>nmargin</em>, <em>nline</em>, <em>modifiers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.on_margin_clicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.on_margin_clicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.scrollPosition">
+<code class="descname">scrollPosition</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.scrollPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.scrollPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.setPlainText">
+<code class="descname">setPlainText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.setPlainText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.setPlainText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.setScrollPosition">
+<code class="descname">setScrollPosition</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.setScrollPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.setScrollPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.QPPPEditor.QPPPEditor.toPlainText">
+<code class="descname">toPlainText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/QPPPEditor.html#QPPPEditor.toPlainText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.QPPPEditor.QPPPEditor.toPlainText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.ShutterDictionary">
+<span id="shutterdictionary"></span><h2>ShutterDictionary<a class="headerlink" href="#module-pulseProgram.ShutterDictionary" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.ShutterDictionary.ShutterDictionary">
+<em class="property">class </em><code class="descname">ShutterDictionary</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterDictionary.html#ShutterDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterDictionary.ShutterDictionary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.ShutterDictionary.ShutterDictionary.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>variabledict</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterDictionary.html#ShutterDictionary.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterDictionary.ShutterDictionary.merge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.ShutterTableModel">
+<span id="shuttertablemodel"></span><h2>ShutterTableModel<a class="headerlink" href="#module-pulseProgram.ShutterTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel">
+<em class="property">class </em><code class="descname">ShutterTableModel</code><span class="sig-paren">(</span><em>shutterdict</em>, <em>channelNameData</em>, <em>size=32</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.colorLookup">
+<code class="descname">colorLookup</code><em class="property"> = {0: &lt;PyQt5.QtGui.QColor object at 0x00000266623C7F98&gt;, 1: &lt;PyQt5.QtGui.QColor object at 0x00000266623C7DD8&gt;, -1: &lt;PyQt5.QtGui.QColor object at 0x00000266623C75F8&gt;}</em><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.colorLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x00000266623C7D68&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.contentsChanged">
+<code class="descname">contentsChanged</code><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.contentsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.currentState">
+<code class="descname">currentState</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.currentState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.currentState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.displayData">
+<code class="descname">displayData</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.displayData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.displayData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.displayDataColor">
+<code class="descname">displayDataColor</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.displayDataColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.displayDataColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.displayToolTip">
+<code class="descname">displayToolTip</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.displayToolTip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.displayToolTip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.getVariables">
+<code class="descname">getVariables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.getVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.getVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.onClicked">
+<code class="descname">onClicked</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.onClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.onClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.onHeaderChanged">
+<code class="descname">onHeaderChanged</code><span class="sig-paren">(</span><em>first</em>, <em>last</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.onHeaderChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.onHeaderChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x00000266623C7518&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.setShutterdict">
+<code class="descname">setShutterdict</code><span class="sig-paren">(</span><em>shutterdict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.setShutterdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.setShutterdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.ShutterTableModel.ShutterTableModel.setState">
+<code class="descname">setState</code><span class="sig-paren">(</span><em>index</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/ShutterTableModel.html#ShutterTableModel.setState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.ShutterTableModel.ShutterTableModel.setState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.TriggerDictionary">
+<span id="triggerdictionary"></span><h2>TriggerDictionary<a class="headerlink" href="#module-pulseProgram.TriggerDictionary" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.TriggerDictionary.TriggerDictionary">
+<em class="property">class </em><code class="descname">TriggerDictionary</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerDictionary.html#TriggerDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerDictionary.TriggerDictionary" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.TriggerDictionary.TriggerDictionary.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>variabledict</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerDictionary.html#TriggerDictionary.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerDictionary.TriggerDictionary.merge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.TriggerTableModel">
+<span id="triggertablemodel"></span><h2>TriggerTableModel<a class="headerlink" href="#module-pulseProgram.TriggerTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel">
+<em class="property">class </em><code class="descname">TriggerTableModel</code><span class="sig-paren">(</span><em>triggerdict</em>, <em>channelNameData</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x0000026660F56CF8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.contentsChanged">
+<code class="descname">contentsChanged</code><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.contentsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.currentState">
+<code class="descname">currentState</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.currentState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.currentState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.displayData">
+<code class="descname">displayData</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.displayData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.displayData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.displayDataColor">
+<code class="descname">displayDataColor</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.displayDataColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.displayDataColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.getVariables">
+<code class="descname">getVariables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.getVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.getVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.onClicked">
+<code class="descname">onClicked</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.onClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.onClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.onHeaderChanged">
+<code class="descname">onHeaderChanged</code><span class="sig-paren">(</span><em>first</em>, <em>last</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.onHeaderChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.onHeaderChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x0000026660F56EB8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.setState">
+<code class="descname">setState</code><span class="sig-paren">(</span><em>index</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.setState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.setState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.TriggerTableModel.TriggerTableModel.setTriggerdict">
+<code class="descname">setTriggerdict</code><span class="sig-paren">(</span><em>triggerdict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/TriggerTableModel.html#TriggerTableModel.setTriggerdict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.TriggerTableModel.TriggerTableModel.setTriggerdict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.VariableDictionary">
+<span id="variabledictionary"></span><h2>VariableDictionary<a class="headerlink" href="#module-pulseProgram.VariableDictionary" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="pulseProgram.VariableDictionary.CyclicDependencyException">
+<em class="property">exception </em><code class="descname">CyclicDependencyException</code><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#CyclicDependencyException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.CyclicDependencyException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary">
+<em class="property">class </em><code class="descname">VariableDictionary</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ordered Dictionary to hold variable values. It maintains a dependency graph
+to check for cycles and to recalculate the necessary values when one of the fields is updated</p>
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.addDependencies">
+<code class="descname">addDependencies</code><span class="sig-paren">(</span><em>graph</em>, <em>dependencies</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.addDependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.addDependencies" title="Permalink to this definition">¶</a></dt>
+<dd><p>add all the dependencies to name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.addEdgeNoCycle">
+<code class="descname">addEdgeNoCycle</code><span class="sig-paren">(</span><em>graph</em>, <em>first</em>, <em>second</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.addEdgeNoCycle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.addEdgeNoCycle" title="Permalink to this definition">¶</a></dt>
+<dd><p>add the dependency to the graph, raise CyclicDependencyException in case of cyclic dependencies</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.bareDictionaryCopy">
+<code class="descname">bareDictionaryCopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.bareDictionaryCopy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.bareDictionaryCopy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.calculateDependencies">
+<code class="descname">calculateDependencies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.calculateDependencies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.calculateDependencies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C7E2630&gt;</em><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.merge">
+<code class="descname">merge</code><span class="sig-paren">(</span><em>variabledict</em>, <em>globaldict=None</em>, <em>overwrite=False</em>, <em>linkNewToParent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.merge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.merge" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.recalculateAll">
+<code class="descname">recalculateAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.recalculateAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.recalculateAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.recalculateDependent">
+<code class="descname">recalculateDependent</code><span class="sig-paren">(</span><em>node</em>, <em>returnResult=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.recalculateDependent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.recalculateDependent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.recalculateNode">
+<code class="descname">recalculateNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.recalculateNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.recalculateNode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setEnabledIndex">
+<code class="descname">setEnabledIndex</code><span class="sig-paren">(</span><em>index</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setEnabledIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setEnabledIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setEncodingIndex">
+<code class="descname">setEncodingIndex</code><span class="sig-paren">(</span><em>index</em>, <em>encoding</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setEncodingIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setEncodingIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setGlobaldict">
+<code class="descname">setGlobaldict</code><span class="sig-paren">(</span><em>globaldict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setGlobaldict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setGlobaldict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setParentStrValue">
+<code class="descname">setParentStrValue</code><span class="sig-paren">(</span><em>name</em>, <em>strvalue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setParentStrValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setParentStrValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setParentValue">
+<code class="descname">setParentValue</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setParentValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setParentValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the variable value with value and recalculate as necessary.
+This is done using existing dependencies.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setStrValue">
+<code class="descname">setStrValue</code><span class="sig-paren">(</span><em>name</em>, <em>strvalue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setStrValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setStrValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the variable value with strvalue and recalculate as necessary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setStrValueIndex">
+<code class="descname">setStrValueIndex</code><span class="sig-paren">(</span><em>index</em>, <em>strvalue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setStrValueIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setStrValueIndex" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionary.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionary.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionary.setValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the variable value with value and recalculate as necessary.
+This is done using existing dependencies.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulseProgram.VariableDictionary.VariableDictionaryView">
+<em class="property">class </em><code class="descname">VariableDictionaryView</code><span class="sig-paren">(</span><em>variableDictionary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionaryView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionaryView" title="Permalink to this definition">¶</a></dt>
+<dd><p>View on VariableDictionary that combines the local dictionary with the global dictionary
+the returnvalue is the evaluated value for both dictionaries</p>
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionaryView.__getitem__">
+<code class="descname">__getitem__</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionaryView.__getitem__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionaryView.__getitem__" title="Permalink to this definition">¶</a></dt>
+<dd><p>if the key is in the local dictionary return the value,
+if it is in the global dictionary return that value,
+otherwise raise KeyError</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableDictionary.VariableDictionaryView.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableDictionary.html#VariableDictionaryView.items"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableDictionary.VariableDictionaryView.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulseProgram.VariableTableModel">
+<span id="variabletablemodel"></span><h2>VariableTableModel<a class="headerlink" href="#module-pulseProgram.VariableTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel">
+<em class="property">class </em><code class="descname">VariableTableModel</code><span class="sig-paren">(</span><em>variabledict=None</em>, <em>config={}</em>, <em>contextName=None</em>, <em>parent=None</em>, <em>contextHasParent=False</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C7D26D8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.contentsChanged">
+<code class="descname">contentsChanged</code><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.contentsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.flagsLookup">
+<code class="descname">flagsLookup</code><em class="property"> = [&lt;PyQt5.QtCore.ItemFlags object at 0x000002665C7D2518&gt;, &lt;PyQt5.QtCore.ItemFlags object at 0x000002665C7D23C8&gt;, &lt;PyQt5.QtCore.ItemFlags object at 0x000002665C7D25F8&gt;, &lt;PyQt5.QtCore.ItemFlags object at 0x000002665C7D2588&gt;]</em><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.flagsLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.getBackgroundColor">
+<code class="descname">getBackgroundColor</code><span class="sig-paren">(</span><em>var</em>, <em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.getBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.getBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['use', 'variable', 'value', 'evaluated']</em><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.onClicked">
+<code class="descname">onClicked</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.onClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.onClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.recalculateDependent">
+<code class="descname">recalculateDependent</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.recalculateDependent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.recalculateDependent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.removeBackgroundColor">
+<code class="descname">removeBackgroundColor</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.removeBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.removeBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C7D2668&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setBackgroundColor">
+<code class="descname">setBackgroundColor</code><span class="sig-paren">(</span><em>index</em>, <em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setContextHasParent">
+<code class="descname">setContextHasParent</code><span class="sig-paren">(</span><em>contextHasParent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setContextHasParent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setContextHasParent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setDataEncoding">
+<code class="descname">setDataEncoding</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setDataEncoding"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setDataEncoding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setDataValue">
+<code class="descname">setDataValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setDataValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setDataValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setVarEnabled">
+<code class="descname">setVarEnabled</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setVarEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setVarEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.setVariables">
+<code class="descname">setVariables</code><span class="sig-paren">(</span><em>variabledict</em>, <em>contextName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.setVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.setVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulseProgram.VariableTableModel.VariableTableModel.toggleBold">
+<code class="descname">toggleBold</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulseProgram/VariableTableModel.html#VariableTableModel.toggleBold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulseProgram.VariableTableModel.VariableTableModel.toggleBold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

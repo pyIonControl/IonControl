@@ -1,0 +1,245 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>externalParameter.persistence &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>externalParameter.persistence</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for externalParameter.persistence</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">persist.ValueHistory</span> <span class="k">import</span> <span class="n">ValueHistoryStore</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">ProjectConfig.Project</span> <span class="k">import</span> <span class="n">getProject</span>
+<span class="kn">from</span> <span class="nn">modules.Observable</span> <span class="k">import</span> <span class="n">Observable</span>
+
+<div class="viewcode-block" id="DBPersist"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist">[docs]</a><span class="k">class</span> <span class="nc">DBPersist</span><span class="p">:</span>
+    <span class="n">store</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;DB Persist&quot;</span>
+    <span class="n">newPersistData</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="DBPersist.initDB"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist.initDB">[docs]</a>    <span class="k">def</span> <span class="nf">initDB</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dbConnection</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span><span class="o">.</span><span class="n">dbConnection</span>
+        <span class="k">if</span> <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">ValueHistoryStore</span><span class="p">(</span><span class="n">dbConnection</span><span class="p">)</span>
+            <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">open_session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="DBPersist.persist"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist.persist">[docs]</a>    <span class="k">def</span> <span class="nf">persist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">minval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maxval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initDB</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">source</span><span class="p">:</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+            <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">ts</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">minval</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">maxval</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">newPersistData</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span> <span class="n">space</span><span class="o">=</span><span class="n">space</span><span class="p">,</span> <span class="n">parameter</span><span class="o">=</span><span class="n">source</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">ts</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">minval</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">maxval</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBPersist.rename"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">oldsourcename</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initDB</span><span class="p">()</span>
+        <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">oldsourcename</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DBPersist.paramDef"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist.paramDef">[docs]</a>    <span class="k">def</span> <span class="nf">paramDef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="DBPersist.sourceDict"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.persistence.DBPersist.sourceDict">[docs]</a>    <span class="k">def</span> <span class="nf">sourceDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initDB</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">DBPersist</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">sourceDict</span></div></div>
+
+<span class="n">persistenceDict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">DBPersist</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">DBPersist</span> <span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

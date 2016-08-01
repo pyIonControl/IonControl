@@ -1,0 +1,650 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>externalParameter.PicoampMeterControl &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>externalParameter.PicoampMeterControl</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for externalParameter.PicoampMeterControl</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">scan.ScanList</span> <span class="k">import</span> <span class="n">scanList</span>
+<span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TraceCollection</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">trace.PlottedTrace</span> <span class="k">import</span> <span class="n">PlottedTrace</span>
+<span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">pens</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/PicoampMeterControl.ui&#39;</span><span class="p">)</span>
+<span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="find_index_nearest"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.find_index_nearest">[docs]</a><span class="k">def</span> <span class="nf">find_index_nearest</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">array</span><span class="o">-</span><span class="n">value</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">index</span></div>
+
+
+<div class="viewcode-block" id="MeterState"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.MeterState">[docs]</a><span class="k">class</span> <span class="nc">MeterState</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zeroCheck</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zeroCheck_2</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zeroCheck_3</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEnabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEnabled_2</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEnabled_3</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRange</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRange_2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRange_3</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimit</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimit_2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimit_3</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltage_2</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltage_3</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRange</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRange_2</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRange_3</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument_2</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument_3</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanType</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;IV.txt&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeDelta</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settlingDelay</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MeterState.__setstate__"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.MeterState.__setstate__">[docs]</a>    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;this function ensures that the given fields are present in the class object</span>
+<span class="sd">        after unpickling. Only new class attributes need to be added here.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;scanType&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="s1">&#39;IV.txt&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;timeDelta&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;zeroCheck_2&#39;</span><span class="p">,</span> <span class="kc">True</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;zeroCheck_3&#39;</span><span class="p">,</span> <span class="kc">True</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltageEnabled_2&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltageEnabled_3&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltageRange_2&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltageRange_3&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;currentLimit_2&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;currentLimit_3&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltage_2&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;voltage_3&#39;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;autoRange_2&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;autoRange_3&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;instrument_2&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;instrument_3&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="PicoampMeterControl"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl">[docs]</a><span class="k">class</span> <span class="nc">PicoampMeterControl</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">Form</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span> <span class="n">traceui</span><span class="p">,</span> <span class="n">plotdict</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">meter</span><span class="p">,</span> <span class="n">meter_2</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">meter_3</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span> <span class="o">=</span> <span class="n">traceui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotDict</span> <span class="o">=</span> <span class="n">plotdict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span> <span class="o">=</span> <span class="n">meter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span> <span class="o">=</span> <span class="n">meter_2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span> <span class="o">=</span> <span class="n">meter_3</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PicoampMeterControl</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;PicoampMeterState&quot;</span><span class="p">,</span> <span class="n">MeterState</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanMode</span> <span class="o">=</span> <span class="s2">&quot;V&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingActive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanRunning</span> <span class="o">=</span> <span class="kc">False</span>
+            
+<div class="viewcode-block" id="PicoampMeterControl.writeAll"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.writeAll">[docs]</a>    <span class="k">def</span> <span class="nf">writeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.writeAll_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.writeAll_2">[docs]</a>    <span class="k">def</span> <span class="nf">writeAll_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage_2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput_2</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit_2</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange_2</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck_2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange_2</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_2</span> <span class="p">)</span></div>
+           
+<div class="viewcode-block" id="PicoampMeterControl.writeAll_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.writeAll_3">[docs]</a>    <span class="k">def</span> <span class="nf">writeAll_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage_3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput_3</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit_3</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange_3</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck_3</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange_3</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_3</span> <span class="p">)</span></div>
+           
+<div class="viewcode-block" id="PicoampMeterControl.setupUi"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PicoampMeterControl</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">openInstrument</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_2</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_2</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">openInstrument_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_3</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_3</span><span class="o">.</span><span class="n">returnPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">openInstrument_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox_2</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox_2</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox_3</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onZeroCheck_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableMeasurementBox_3</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox_2</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox_2</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox_3</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAutoRange_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoRangeBox_3</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_2</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_2</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_2</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_2</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_3</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltageRange_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_3</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRangeSelect_3</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_3</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect_2</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect_2</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect_3</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentLimit_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLimitSelect_3</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox_2</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox_2</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox_3</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableOutput_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableOutputBox_3</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit_2</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit_2</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit_3</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageEdit_3</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">start</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">stop</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stepsEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">steps</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stepsEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;steps&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settlingDelayEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">settlingDelay</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settlingDelayEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;settlingDelay&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeDeltaEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">timeDelta</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeDeltaEdit</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;timeDelta&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zeroButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onZero</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">measureButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onMeasure</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onScan</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanTypeCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">scanType</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanTypeCombo</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="s1">&#39;scanType&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">filename</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameEdit</span><span class="o">.</span><span class="n">textChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onStringValueChanged</span><span class="p">,</span> <span class="s1">&#39;filename&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLogging</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onLogging"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onLogging">[docs]</a>    <span class="k">def</span> <span class="nf">onLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">checked</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggingActive</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">startLogging</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopLogging</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.startLogging"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.startLogging">[docs]</a>    <span class="k">def</span> <span class="nf">startLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">TraceCollection</span><span class="p">()</span>
+<span class="c1">#         self.trace.addColumn(&#39;voltage_2&#39;)</span>
+<span class="c1">#         self.trace.addColumn(&#39;voltage_3&#39;)</span>
+<span class="c1">#         self.trace.addColumn(&#39;current_2&#39;)</span>
+<span class="c1">#         self.trace.addColumn(&#39;current_3&#39;)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scan&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span> <span class="o">=</span>  <span class="n">PlottedTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotDict</span><span class="p">[</span><span class="s1">&#39;Time&#39;</span><span class="p">][</span><span class="s1">&#39;view&#39;</span><span class="p">],</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span> <span class="p">)</span>
+<span class="c1">#         self.plottedTrace_2 =  PlottedTrace(self.trace, self.plotDict[&#39;Time&#39;][&#39;view&#39;], yColumn=&#39;current_2&#39;, penList=pens.penList )</span>
+<span class="c1">#         self.plottedTrace_3 =  PlottedTrace(self.trace, self.plotDict[&#39;Time&#39;][&#39;view&#39;], yColumn=&#39;current_3&#39;, penList=pens.penList )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltagePlottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotDict</span><span class="p">[</span><span class="s1">&#39;Voltage&#39;</span><span class="p">][</span><span class="s1">&#39;view&#39;</span><span class="p">],</span> <span class="n">yColumn</span><span class="o">=</span><span class="s1">&#39;voltage&#39;</span><span class="p">,</span> <span class="n">penList</span><span class="o">=</span><span class="n">pens</span><span class="o">.</span><span class="n">penList</span> <span class="p">)</span>
+<span class="c1">#         self.voltagePlottedTrace_2 = PlottedTrace(self.trace, self.plotDict[&#39;Voltage&#39;][&#39;view&#39;], yColumn=&#39;voltage_2&#39;, penList=pens.penList )</span>
+<span class="c1">#         self.voltagePlottedTrace_3 = PlottedTrace(self.trace, self.plotDict[&#39;Voltage&#39;][&#39;view&#39;], yColumn=&#39;voltage_3&#39;, penList=pens.penList )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">filenameCallback</span> <span class="o">=</span>  <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceFilename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">filename</span> <span class="p">)</span>           
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltagePlottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">filenameCallback</span> <span class="o">=</span>  <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceFilename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">filename</span> <span class="p">)</span>           
+<span class="c1">#         self.plottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+<span class="c1">#         self.voltagePlottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+<span class="c1">#         self.plottedTrace_3.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+<span class="c1">#         self.voltagePlottedTrace_3.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">takeLoggingPoint</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingActive</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.takeLoggingPoint"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.takeLoggingPoint">[docs]</a>    <span class="k">def</span> <span class="nf">takeLoggingPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">startTime</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">value</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="s1">&#39;voltage&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="s1">&#39;voltage&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span> <span class="p">)</span>
+<span class="c1">#         self.trace.voltage_2 = numpy.append( self.trace.voltage_2, self.meterState.voltage_2.m_as(&#39;V&#39;) )</span>
+<span class="c1">#         self.trace.voltage_3 = numpy.append( self.trace.voltage_3, self.meterState.voltage_3.m_as(&#39;V&#39;) )</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltagePlottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+<span class="c1">#             self.traceui.addTrace( self.plottedTrace_2, pen=-1)</span>
+<span class="c1">#             self.traceui.addTrace( self.voltagePlottedTrace_2, pen=0 )</span>
+<span class="c1">#             self.traceui.addTrace( self.plottedTrace_3, pen=-1)</span>
+<span class="c1">#             self.traceui.addTrace( self.voltagePlottedTrace_3, pen=0 )</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voltagePlottedTrace</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+<span class="c1">#             self.plottedTrace_2.replot()</span>
+<span class="c1">#             self.voltagePlottedTrace_3.replot()</span>
+<span class="c1">#             self.plottedTrace_2.replot()</span>
+<span class="c1">#             self.voltagePlottedTrace_3.replot()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalizeScan</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loggingActive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">timeDelta</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;ms&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">takeLoggingPoint</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.stopLogging"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.stopLogging">[docs]</a>    <span class="k">def</span> <span class="nf">stopLogging</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span> <span class="o">=</span> <span class="kc">True</span></div>
+       
+<div class="viewcode-block" id="PicoampMeterControl.onScan"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onScan">[docs]</a>    <span class="k">def</span> <span class="nf">onScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startScan</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onStop"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onStop">[docs]</a>    <span class="k">def</span> <span class="nf">onStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span> <span class="o">=</span> <span class="kc">True</span>               </div>
+                
+<div class="viewcode-block" id="PicoampMeterControl.startScan"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.startScan">[docs]</a>    <span class="k">def</span> <span class="nf">startScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanRunning</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanList</span> <span class="o">=</span> <span class="n">scanList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">steps</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">scanType</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">scanType</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">find_index_nearest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scanList</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">roll</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanList</span><span class="p">,</span> <span class="o">-</span><span class="n">index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">TraceCollection</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scan&quot;</span>
+<span class="c1">#             self.trace.addColumn(&#39;current_2&#39;)</span>
+<span class="c1">#             self.trace.addColumn(&#39;current_3&#39;)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span> <span class="o">=</span>  <span class="n">PlottedTrace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">][</span><span class="s1">&#39;view&#39;</span><span class="p">],</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span> <span class="p">)</span>
+<span class="c1">#             self.plottedTrace_2 =  PlottedTrace(self.trace, self.plotDict[&#39;Scan&#39;][&#39;view&#39;], yColumn=&#39;current_2&#39;, penList=pens.penList )</span>
+<span class="c1">#             self.plottedTrace_3 =  PlottedTrace(self.trace, self.plotDict[&#39;Scan&#39;][&#39;view&#39;], yColumn=&#39;current_3&#39;, penList=pens.penList )</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">filenameCallback</span> <span class="o">=</span>  <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceFilename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">filename</span> <span class="p">)</span>           
+<span class="c1">#             self.plottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+<span class="c1">#             self.plottedTrace_3.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           </span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setZeroCheck</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1">#             self.meter_2.setZeroCheck(False)</span>
+<span class="c1">#             self.meter_3.setZeroCheck(False)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">voltageEnable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1">#             self.meter_2.voltageEnable(True)</span>
+<span class="c1">#             self.meter_3.voltageEnable(True)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;startScan&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanRunning</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initPoint</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="PicoampMeterControl.initPoint"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.initPoint">[docs]</a>    <span class="k">def</span> <span class="nf">initPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanList</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopRequested</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">]</span> <span class="p">)</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">settlingDelay</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;ms&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">takeScanPoint</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">finalizeScan</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="PicoampMeterControl.takeScanPoint"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.takeScanPoint">[docs]</a>    <span class="k">def</span> <span class="nf">takeScanPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">]</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">value</span> <span class="p">)</span>
+<span class="c1">#         self.trace.current_2 = numpy.append( self.trace.current_2, float( self.meter_2.read() ) )</span>
+<span class="c1">#         self.trace.current_3 = numpy.append( self.trace.current_3, float( self.meter_3.read() )  )</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1">#             self.traceui.addTrace( self.plottedTrace_2, pen=-1)</span>
+<span class="c1">#             self.traceui.addTrace( self.plottedTrace_3, pen=-1)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceAdded</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+<span class="c1">#             self.plottedTrace_2.replot()</span>
+<span class="c1">#             self.plottedTrace_3.replot()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initPoint</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="PicoampMeterControl.finalizeScan"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.finalizeScan">[docs]</a>    <span class="k">def</span> <span class="nf">finalizeScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;traceFinalized&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">resave</span><span class="p">(</span><span class="n">saveIfUnsaved</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanRunning</span> <span class="o">=</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onMeasure"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onMeasure">[docs]</a>    <span class="k">def</span> <span class="nf">onMeasure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onMeasure_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onMeasure_2">[docs]</a>    <span class="k">def</span> <span class="nf">onMeasure_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLabel_2</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onMeasure_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onMeasure_3">[docs]</a>    <span class="k">def</span> <span class="nf">onMeasure_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLabel_3</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onZero"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZero">[docs]</a>    <span class="k">def</span> <span class="nf">onZero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onZero_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZero_2">[docs]</a>    <span class="k">def</span> <span class="nf">onZero_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onZero_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZero_3">[docs]</a>    <span class="k">def</span> <span class="nf">onZero_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onValueChanged"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onValueChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onValueChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onStringValueChanged"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onStringValueChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onStringValueChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onVoltage"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltage">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage</span> <span class="o">=</span> <span class="n">value</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onVoltage_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltage_2">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltage_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_2</span> <span class="o">=</span> <span class="n">value</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onVoltage_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltage_3">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltage_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s2">&quot;V&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltage_3</span> <span class="o">=</span> <span class="n">value</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onEnableOutput"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onEnableOutput">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">voltageEnable</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onEnableOutput_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onEnableOutput_2">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableOutput_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">voltageEnable</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled_2</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onEnableOutput_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onEnableOutput_3">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableOutput_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">voltageEnable</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageEnabled_3</span> <span class="o">=</span> <span class="n">enable</span></div>
+        
+    <span class="n">currentLimits</span> <span class="o">=</span> <span class="p">[</span><span class="mf">2.5e-5</span><span class="p">,</span> <span class="mf">2.5e-4</span><span class="p">,</span> <span class="mf">2.5e-3</span><span class="p">,</span> <span class="mf">2.5e-2</span><span class="p">]</span>
+<div class="viewcode-block" id="PicoampMeterControl.onCurrentLimit"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onCurrentLimit">[docs]</a>    <span class="k">def</span> <span class="nf">onCurrentLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentLimits</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setCurrentLimit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onCurrentLimit_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onCurrentLimit_2">[docs]</a>    <span class="k">def</span> <span class="nf">onCurrentLimit_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentLimits</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">setCurrentLimit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_2</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onCurrentLimit_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onCurrentLimit_3">[docs]</a>    <span class="k">def</span> <span class="nf">onCurrentLimit_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentLimits</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">setCurrentLimit</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">currentLimit_3</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+    <span class="n">voltageRanges</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span>
+<div class="viewcode-block" id="PicoampMeterControl.onVoltageRange"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltageRange">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltageRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">vrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRanges</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setVoltageRange</span><span class="p">(</span> <span class="n">vrange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onVoltageRange_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltageRange_2">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltageRange_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">vrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRanges</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">setVoltageRange</span><span class="p">(</span> <span class="n">vrange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_2</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onVoltageRange_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onVoltageRange_3">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltageRange_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">vrange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageRanges</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">setVoltageRange</span><span class="p">(</span> <span class="n">vrange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">voltageRange_3</span> <span class="o">=</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="PicoampMeterControl.onZeroCheck"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZeroCheck">[docs]</a>    <span class="k">def</span> <span class="nf">onZeroCheck</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setZeroCheck</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onZeroCheck_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZeroCheck_2">[docs]</a>    <span class="k">def</span> <span class="nf">onZeroCheck_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">setZeroCheck</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_2</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onZeroCheck_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onZeroCheck_3">[docs]</a>    <span class="k">def</span> <span class="nf">onZeroCheck_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">setZeroCheck</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">zeroCheck_3</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onAutoRange"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onAutoRange">[docs]</a>    <span class="k">def</span> <span class="nf">onAutoRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">setAutoRange</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onAutoRange_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onAutoRange_2">[docs]</a>    <span class="k">def</span> <span class="nf">onAutoRange_2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">setAutoRange</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_2</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.onAutoRange_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.onAutoRange_3">[docs]</a>    <span class="k">def</span> <span class="nf">onAutoRange_3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">enable</span> <span class="o">=</span> <span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">setAutoRange</span><span class="p">(</span><span class="n">enable</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">autoRange_3</span> <span class="o">=</span> <span class="n">enable</span></div>
+
+<div class="viewcode-block" id="PicoampMeterControl.openInstrument"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.openInstrument">[docs]</a>    <span class="k">def</span> <span class="nf">openInstrument</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeAll</span><span class="p">()</span></div>
+ 
+<div class="viewcode-block" id="PicoampMeterControl.openInstrument_2"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.openInstrument_2">[docs]</a>    <span class="k">def</span> <span class="nf">openInstrument_2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_2</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_2</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_2</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeAll_2</span><span class="p">()</span></div>
+ 
+<div class="viewcode-block" id="PicoampMeterControl.openInstrument_3"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.openInstrument_3">[docs]</a>    <span class="k">def</span> <span class="nf">openInstrument_3</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_3</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instrumentEdit_3</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span><span class="o">.</span><span class="n">instrument_3</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">meter_3</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeAll_3</span><span class="p">()</span></div>
+ 
+<div class="viewcode-block" id="PicoampMeterControl.saveConfig"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.PicoampMeterControl.PicoampMeterControl.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;PicoampMeterState&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">meterState</span></div></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

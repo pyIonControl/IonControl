@@ -1,0 +1,175 @@
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser}{\section{Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser Class Reference}
+\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser}\index{Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser@{Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser}}
+}
+
+
+This class can read and write a Waveform\-Chassis configuration file.  
+
+
+Inheritance diagram for Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a05d032cd996fdab14bda3fbbb8ef89e8}{write}
+\begin{DoxyCompactList}\small\item\em The function writes and creates a configuration file based on the input parameters. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a4b91ec923539b6a8550b3efffd90d53c}{create\-Default\-File}
+\begin{DoxyCompactList}\small\item\em This function will create a default file with default values at the location specified by the file\-Path parameter. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_adf3ea2bef0d00bee4a2a0a01381ecc3d}{read}
+\begin{DoxyCompactList}\small\item\em This function will return the information read from the configuration file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0b517157b2e9e349aa62190c45dd529}{read\-Cntr\-Section}
+\begin{DoxyCompactList}\small\item\em This function will return the infromation for the photon counter section of the configuration file only. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0cadbc5a2dabc7ec503266ce91282c8}{ao\-Channels}
+\begin{DoxyCompactList}\small\item\em This is a list of strings containing the ao channels in the config file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a9de4cc429f9dc26bf12adfb55aea4e62}{do\-Channels}
+\begin{DoxyCompactList}\small\item\em This is a list of strings containing the do channels in the config file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_afb537d5df40696da1456733f4f58071c}{ni\-Sync\-Dev}
+\begin{DoxyCompactList}\small\item\em This is a string that refers to the ni sync card used for channel synchronization. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_af532aa2b066a478c55f7c525f4e76f2b}{edge\-Counter}
+\begin{DoxyCompactList}\small\item\em This is a string that refers to the D\-A\-Qmx counter that will perform edge counting functionality for the photon counter. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aedfd8adf268a65231021c9ad818ba252}{clock\-Counter}
+\begin{DoxyCompactList}\small\item\em This is a string that refers to the D\-A\-Qmx counter that will create a clock for the edge counter. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class can read and write a Waveform\-Chassis configuration file. 
+
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a4b91ec923539b6a8550b3efffd90d53c}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!create\-Default\-File@{create\-Default\-File}}
+\index{create\-Default\-File@{create\-Default\-File}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{create\-Default\-File}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-create\-Default\-File (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a4b91ec923539b6a8550b3efffd90d53c}
+
+
+This function will create a default file with default values at the location specified by the file\-Path parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em file\-Path} & The location of the file to be created. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_adf3ea2bef0d00bee4a2a0a01381ecc3d}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!read@{read}}
+\index{read@{read}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-read (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_adf3ea2bef0d00bee4a2a0a01381ecc3d}
+
+
+This function will return the information read from the configuration file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Path} & The file path to the configuration file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0b517157b2e9e349aa62190c45dd529}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!read\-Cntr\-Section@{read\-Cntr\-Section}}
+\index{read\-Cntr\-Section@{read\-Cntr\-Section}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{read\-Cntr\-Section}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-read\-Cntr\-Section (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{filepath = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0b517157b2e9e349aa62190c45dd529}
+
+
+This function will return the infromation for the photon counter section of the configuration file only. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer \\
+\hline
+{\em filepath} & The file path to the configuration file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a05d032cd996fdab14bda3fbbb8ef89e8}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!write@{write}}
+\index{write@{write}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-write (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path, }
+\item[{}]{data, }
+\item[{}]{ni\-Sync\-Dev, }
+\item[{}]{edge\-Counter, }
+\item[{}]{clock\-Counter}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a05d032cd996fdab14bda3fbbb8ef89e8}
+
+
+The function writes and creates a configuration file based on the input parameters. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Path} & The location of the file to be created \\
+\hline
+{\em data} & A dictionary containing the analog output and digital output channel names. \\
+\hline
+{\em ni\-Sync\-Dev} & The name of the N\-I-\/\-Sync card. \\
+\hline
+{\em edge\-Counter} & This is a string that refers to the D\-A\-Qmx counter that will perform edge counting functionality for the photon counter. \\
+\hline
+{\em clock\-Counter} & This is a string that refers to the D\-A\-Qmx counter that will create a clock for the edge counter. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0cadbc5a2dabc7ec503266ce91282c8}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!ao\-Channels@{ao\-Channels}}
+\index{ao\-Channels@{ao\-Channels}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{ao\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-ao\-Channels}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aa0cadbc5a2dabc7ec503266ce91282c8}
+
+
+This is a list of strings containing the ao channels in the config file. 
+
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aedfd8adf268a65231021c9ad818ba252}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!clock\-Counter@{clock\-Counter}}
+\index{clock\-Counter@{clock\-Counter}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{clock\-Counter}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-clock\-Counter}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_aedfd8adf268a65231021c9ad818ba252}
+
+
+This is a string that refers to the D\-A\-Qmx counter that will create a clock for the edge counter. 
+
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a9de4cc429f9dc26bf12adfb55aea4e62}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!do\-Channels@{do\-Channels}}
+\index{do\-Channels@{do\-Channels}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{do\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-do\-Channels}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_a9de4cc429f9dc26bf12adfb55aea4e62}
+
+
+This is a list of strings containing the do channels in the config file. 
+
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_af532aa2b066a478c55f7c525f4e76f2b}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!edge\-Counter@{edge\-Counter}}
+\index{edge\-Counter@{edge\-Counter}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{edge\-Counter}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-edge\-Counter}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_af532aa2b066a478c55f7c525f4e76f2b}
+
+
+This is a string that refers to the D\-A\-Qmx counter that will perform edge counting functionality for the photon counter. 
+
+\hypertarget{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_afb537d5df40696da1456733f4f58071c}{\index{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}!ni\-Sync\-Dev@{ni\-Sync\-Dev}}
+\index{ni\-Sync\-Dev@{ni\-Sync\-Dev}!Chassis.git::chassisConfigParser::chassisConfigParser@{Chassis.\-git\-::chassis\-Config\-Parser\-::chassis\-Config\-Parser}}
+\subsubsection[{ni\-Sync\-Dev}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-chassis\-Config\-Parser.\-chassis\-Config\-Parser.\-ni\-Sync\-Dev}}\label{class_chassis_8git_1_1chassis_config_parser_1_1chassis_config_parser_afb537d5df40696da1456733f4f58071c}
+
+
+This is a string that refers to the ni sync card used for channel synchronization. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+chassis\-Config\-Parser.\-py\end{DoxyCompactItemize}

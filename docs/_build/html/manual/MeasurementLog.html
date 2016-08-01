@@ -1,0 +1,240 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Measurement Log &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Hardware" href="Hardware.html"/>
+        <link rel="prev" title="Scripting" href="Scripting.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Measurement Log</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/MeasurementLog.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="measurement-log">
+<span id="measurementlog"></span><h1>Measurement Log<a class="headerlink" href="#measurement-log" title="Permalink to this headline">¶</a></h1>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/MeasurementLog.png"><img alt="../_images/MeasurementLog.png" src="../_images/MeasurementLog.png" style="width: 6224.0px; height: 3371.0px;" /></a>
+</div>
+<p>Whenever you run any scan, an entry is created in the measurement log. These entries are stored in the postgres database, and can be accessed here. The measurement log contains the entire history of all scans that have been performed on this experiment, since the project was first created. From here, old data can be easily viewed, and long term trends can be studied.</p>
+<p>At the top of the measurement log window is the control that determines what range of dates you would like to see displayed. Click the drop down to select a range (or a custom range), and then click <a class="reference internal" href="../_images/view-refresh-7.png"><img alt="refresh" src="../_images/view-refresh-7.png" style="width: 19.200000000000003px; height: 19.200000000000003px;" /></a>. The table of measurements will be updated.</p>
+<p>You can also filter by the name of the scan using the interface indicated in the image. Select the scans you wish to see, and then click <a class="reference internal" href="../_images/view-filter.png"><img alt="filter" src="../_images/view-filter.png" style="width: 24.0px; height: 24.0px;" /></a>. Right click to choose select or deselect all.</p>
+<p>Click the checkbox next to a measurement to plot that measurement. This will plot the traces associated with that measurement, and create an entry in the trace dock. It is equivalent to opening an old trace via the <a class="reference internal" href="../_images/document-open-5.png"><img alt="open" src="../_images/document-open-5.png" style="width: 24.0px; height: 24.0px;" /></a> button on the trace dock. If the measurement occurred since the last time the program started, so that the traces are already in the trace dock, the checkbox is equivalent to the checkbox in the trace dock.</p>
+<p>The columns of the measurement log show information about that scan. When you click on a measurement, the parameters table will display all of the parameters that were present when that measurement was taken. The results table will show all analysis results associated with that scan. When you right click an anything in the parameters or fit results tables, you can select &#8220;add as column to measurement.&#8221; This will add a new column on the right hand side of the measurement with the selected element. Any measurement which has that element will display its value. This allows you to quickly see the value from any measurement of any individual parameter or fit result.</p>
+<p>When you right click in the Parameters table, you can also select &#8220;add manual parameter.&#8221; This will add a new line to the parameters table, which you can edit to record the value of anything you&#8217;d like to record associated with that measurement.</p>
+<p>In the bottom left corner is a plot control, which allows you to create meta-measurement plots based on your measurement history. Your options for x- and y-axes are the time the plot was created, together with any column you have added by right clicking in the parameters or results windows. For example, suppose you have a set of scans each of which has a parameter &#8220;MicrowaveResonance,&#8221; which may have been drifting around over the past few weeks. To plot the drift, first right click &#8220;MicrowaveResonance&#8221; in the Parameters window and select &#8220;add as column to measurement.&#8221; Then in the plot section, choose &#8220;Started&#8221; for x-axis and &#8220;MicrowaveResonance&#8221; for y-axis, and the window in which you would like the plot to appear. Then click &#8220;plot,&#8221; and you will get the desired plot. If you wish to see if there has been any correlation between &#8220;MicrowaveResonance&#8221; and &#8220;MoonPhase,&#8221; add &#8220;MoonPhase&#8221; as a column and choose it as the x-axis.</p>
+<p>Added columns can be removed by right clicking in the table and selecting &#8220;remove selected column.&#8221;</p>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">The database stores all the meta-data associated with a scan, but it does NOT stores the data itself. That is stored in the text file in the data directory. The database only stores the path to that file. An entry is created in the measurement log whenever a scan is started, whether or not auto-save is on. If you choose to disable auto-save, and subsequently close the program without saving the scan, you will lose the data. The entry in the measurement log will still be there, but you will not be able to plot the data via the checkbox. Similarly, if you move (or delete) the saved file, the measurement log checkbox will not work unless you manually alter the entry in the database.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Hardware.html" class="btn btn-neutral float-right" title="Hardware" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Scripting.html" class="btn btn-neutral" title="Scripting" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

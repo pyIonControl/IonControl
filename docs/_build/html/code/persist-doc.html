@@ -1,0 +1,856 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>persist &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>persist</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/persist-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="persist">
+<h1>persist<a class="headerlink" href="#persist" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-persist.configshelve">
+<span id="configshelve"></span><h2>configshelve<a class="headerlink" href="#module-persist.configshelve" title="Permalink to this headline">¶</a></h2>
+<p>Wrapper for python shelve module to be able to use it with the with expression.
+It also includes default directory for storing of config files.</p>
+<dl class="class">
+<dt id="persist.configshelve.DatabaseVersion">
+<em class="property">class </em><code class="descname">DatabaseVersion</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#DatabaseVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.DatabaseVersion" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.configshelve.DatabaseVersion.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.configshelve.DatabaseVersion.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.DatabaseVersion.upd_date">
+<code class="descname">upd_date</code><a class="headerlink" href="#persist.configshelve.DatabaseVersion.upd_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.configshelve.PgShelveEntry">
+<em class="property">class </em><code class="descname">PgShelveEntry</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#PgShelveEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.PgShelveEntry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.digest">
+<code class="descname">digest</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.digest" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.key">
+<code class="descname">key</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.pvalue">
+<code class="descname">pvalue</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.pvalue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.upd_date">
+<code class="descname">upd_date</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.upd_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.PgShelveEntry.value">
+<code class="descname">value</code><a class="headerlink" href="#persist.configshelve.PgShelveEntry.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.configshelve.ShelveEntry">
+<em class="property">class </em><code class="descname">ShelveEntry</code><span class="sig-paren">(</span><em>key</em>, <em>value</em>, <em>category='main'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#ShelveEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.ShelveEntry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.configshelve.ShelveEntry.category">
+<code class="descname">category</code><a class="headerlink" href="#persist.configshelve.ShelveEntry.category" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.ShelveEntry.key">
+<code class="descname">key</code><a class="headerlink" href="#persist.configshelve.ShelveEntry.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.ShelveEntry.pvalue">
+<code class="descname">pvalue</code><a class="headerlink" href="#persist.configshelve.ShelveEntry.pvalue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.ShelveEntry.value">
+<code class="descname">value</code><a class="headerlink" href="#persist.configshelve.ShelveEntry.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.configshelve.configshelve">
+<em class="property">class </em><code class="descname">configshelve</code><span class="sig-paren">(</span><em>dbConnection</em>, <em>filename=None</em>, <em>loadFromDate=None</em>, <em>filetype='sqlite'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="persist.configshelve.configshelve.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.commitToDatabase">
+<code class="descname">commitToDatabase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.commitToDatabase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.commitToDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>key</em>, <em>default=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.loadFromDatabase">
+<code class="descname">loadFromDatabase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.loadFromDatabase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.loadFromDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.loadFromFile">
+<code class="descname">loadFromFile</code><span class="sig-paren">(</span><em>filename</em>, <em>filetype='sqlite'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.loadFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.loadFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><em>copyTo=None</em>, <em>yamlfile=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.configshelve.configshelve.upgradeDatabase">
+<code class="descname">upgradeDatabase</code><span class="sig-paren">(</span><em>databaseVersion</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/configshelve.html#configshelve.upgradeDatabase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.configshelve.configshelve.upgradeDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.configshelve.configshelve.version">
+<code class="descname">version</code><em class="property"> = 1</em><a class="headerlink" href="#persist.configshelve.configshelve.version" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-persist.DatabaseConnectionSettings">
+<span id="databaseconnectionsettings"></span><h2>DatabaseConnectionSettings<a class="headerlink" href="#module-persist.DatabaseConnectionSettings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="persist.DatabaseConnectionSettings.DatabaseConnectionSettings">
+<em class="property">class </em><code class="descname">DatabaseConnectionSettings</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/DatabaseConnectionSettings.html#DatabaseConnectionSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.DatabaseConnectionSettings.DatabaseConnectionSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to encapsulate database connection settings</p>
+<dl class="attribute">
+<dt id="persist.DatabaseConnectionSettings.DatabaseConnectionSettings.connectionString">
+<code class="descname">connectionString</code><a class="headerlink" href="#persist.DatabaseConnectionSettings.DatabaseConnectionSettings.connectionString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create database connection string</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-persist.LoadingEvent">
+<span id="loadingevent"></span><h2>LoadingEvent<a class="headerlink" href="#module-persist.LoadingEvent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="persist.LoadingEvent.LoadingEvent">
+<em class="property">class </em><code class="descname">LoadingEvent</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.ionCount">
+<code class="descname">ionCount</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.ionCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.loadingDuration">
+<code class="descname">loadingDuration</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.loadingDuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.loadingProfile">
+<code class="descname">loadingProfile</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.loadingProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.trappingDuration">
+<code class="descname">trappingDuration</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.trappingDuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.trappingTime">
+<code class="descname">trappingTime</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.trappingTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingEvent.valid">
+<code class="descname">valid</code><a class="headerlink" href="#persist.LoadingEvent.LoadingEvent.valid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.LoadingEvent.LoadingHistory">
+<em class="property">class </em><code class="descname">LoadingHistory</code><span class="sig-paren">(</span><em>dbConnection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.addLoadingEvent">
+<code class="descname">addLoadingEvent</code><span class="sig-paren">(</span><em>loadingEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.addLoadingEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.addLoadingEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.commit">
+<code class="descname">commit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.commit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.getProfiles">
+<code class="descname">getProfiles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.getProfiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.getProfiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.lastEvent">
+<code class="descname">lastEvent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.lastEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.lastEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.LoadingEvent.LoadingHistory.loadingEvents">
+<code class="descname">loadingEvents</code><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.loadingEvents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>fromTime</em>, <em>toTime</em>, <em>loadingProfile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.LoadingEvent.LoadingHistory.setTrappingDuration">
+<code class="descname">setTrappingDuration</code><span class="sig-paren">(</span><em>duration</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/LoadingEvent.html#LoadingHistory.setTrappingDuration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.LoadingEvent.LoadingHistory.setTrappingDuration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-persist.MeasurementLog">
+<span id="measurementlog"></span><h2>MeasurementLog<a class="headerlink" href="#module-persist.MeasurementLog" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="persist.MeasurementLog.Measurement">
+<em class="property">class </em><code class="descname">Measurement</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Measurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Measurement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="persist.MeasurementLog.Measurement.addResult">
+<code class="descname">addResult</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Measurement.addResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Measurement.addResult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.comment">
+<code class="descname">comment</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.duration">
+<code class="descname">duration</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.duration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.evaluation">
+<code class="descname">evaluation</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.evaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.failedAnalysis">
+<code class="descname">failedAnalysis</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.failedAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.filename">
+<code class="descname">filename</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.longComment">
+<code class="descname">longComment</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.longComment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.Measurement.parameterByName">
+<code class="descname">parameterByName</code><span class="sig-paren">(</span><em>space</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Measurement.parameterByName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Measurement.parameterByName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.plottedTraceList">
+<code class="descname">plottedTraceList</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.plottedTraceList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.Measurement.resultByName">
+<code class="descname">resultByName</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Measurement.resultByName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Measurement.resultByName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.scanName">
+<code class="descname">scanName</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.scanName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.scanPP">
+<code class="descname">scanPP</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.scanPP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.scanParameter">
+<code class="descname">scanParameter</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.scanParameter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.scanTarget">
+<code class="descname">scanTarget</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.scanTarget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.scanType">
+<code class="descname">scanType</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.scanType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.startDate">
+<code class="descname">startDate</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.startDate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.study">
+<code class="descname">study</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.study" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Measurement.study_id">
+<code class="descname">study_id</code><a class="headerlink" href="#persist.MeasurementLog.Measurement.study_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.MeasurementLog.MeasurementContainer">
+<em class="property">class </em><code class="descname">MeasurementContainer</code><span class="sig-paren">(</span><em>dbConnection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.addMeasurement">
+<code class="descname">addMeasurement</code><span class="sig-paren">(</span><em>measurement</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.addMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.addMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.commit">
+<code class="descname">commit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.commit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.getSpace">
+<code class="descname">getSpace</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.getSpace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.getSpace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.query">
+<code class="descname">query</code><span class="sig-paren">(</span><em>fromTime</em>, <em>toTime</em>, <em>scanNameFilter=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.refreshLookups">
+<code class="descname">refreshLookups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.refreshLookups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.refreshLookups" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the basic short tables into memory
+those are: Space</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.MeasurementContainer.scanNames">
+<code class="descname">scanNames</code><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.scanNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.MeasurementLog.MeasurementContainer.setScanNameFilter">
+<code class="descname">setScanNameFilter</code><span class="sig-paren">(</span><em>scanNameFilter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#MeasurementContainer.setScanNameFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.MeasurementContainer.setScanNameFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.MeasurementLog.Parameter">
+<em class="property">class </em><code class="descname">Parameter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Parameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.definition">
+<code class="descname">definition</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.definition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.manual">
+<code class="descname">manual</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.manual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.measurement">
+<code class="descname">measurement</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.measurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.measurement_id">
+<code class="descname">measurement_id</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.measurement_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.name">
+<code class="descname">name</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.space">
+<code class="descname">space</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.space_id">
+<code class="descname">space_id</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.space_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.unit">
+<code class="descname">unit</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Parameter.value">
+<code class="descname">value</code><a class="headerlink" href="#persist.MeasurementLog.Parameter.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.MeasurementLog.Result">
+<em class="property">class </em><code class="descname">Result</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Result" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.MeasurementLog.Result.bottom">
+<code class="descname">bottom</code><a class="headerlink" href="#persist.MeasurementLog.Result.bottom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.MeasurementLog.Result.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.manual">
+<code class="descname">manual</code><a class="headerlink" href="#persist.MeasurementLog.Result.manual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.measurement">
+<code class="descname">measurement</code><a class="headerlink" href="#persist.MeasurementLog.Result.measurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.measurement_id">
+<code class="descname">measurement_id</code><a class="headerlink" href="#persist.MeasurementLog.Result.measurement_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.name">
+<code class="descname">name</code><a class="headerlink" href="#persist.MeasurementLog.Result.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.top">
+<code class="descname">top</code><a class="headerlink" href="#persist.MeasurementLog.Result.top" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.unit">
+<code class="descname">unit</code><a class="headerlink" href="#persist.MeasurementLog.Result.unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Result.value">
+<code class="descname">value</code><a class="headerlink" href="#persist.MeasurementLog.Result.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.MeasurementLog.Space">
+<em class="property">class </em><code class="descname">Space</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Space"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Space" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.MeasurementLog.Space.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.MeasurementLog.Space.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Space.name">
+<code class="descname">name</code><a class="headerlink" href="#persist.MeasurementLog.Space.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.MeasurementLog.Study">
+<em class="property">class </em><code class="descname">Study</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/MeasurementLog.html#Study"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.MeasurementLog.Study" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.MeasurementLog.Study.endDate">
+<code class="descname">endDate</code><a class="headerlink" href="#persist.MeasurementLog.Study.endDate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Study.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.MeasurementLog.Study.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Study.name">
+<code class="descname">name</code><a class="headerlink" href="#persist.MeasurementLog.Study.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.MeasurementLog.Study.startDate">
+<code class="descname">startDate</code><a class="headerlink" href="#persist.MeasurementLog.Study.startDate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-persist.ValueHistory">
+<span id="valuehistory"></span><h2>ValueHistory<a class="headerlink" href="#module-persist.ValueHistory" title="Permalink to this headline">¶</a></h2>
+<dl class="exception">
+<dt id="persist.ValueHistory.HistoryException">
+<em class="property">exception </em><code class="descname">HistoryException</code><a class="reference internal" href="../_modules/persist/ValueHistory.html#HistoryException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.HistoryException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="persist.ValueHistory.HistorySource">
+<em class="property">class </em><code class="descname">HistorySource</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#HistorySource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.HistorySource" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.ValueHistory.HistorySource.id">
+<code class="descname">id</code><a class="headerlink" href="#persist.ValueHistory.HistorySource.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.HistorySource.name">
+<code class="descname">name</code><a class="headerlink" href="#persist.ValueHistory.HistorySource.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.HistorySource.space">
+<code class="descname">space</code><a class="headerlink" href="#persist.ValueHistory.HistorySource.space" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.ValueHistory.ValueHistoryEntry">
+<em class="property">class </em><code class="descname">ValueHistoryEntry</code><span class="sig-paren">(</span><em>sourceObj</em>, <em>value</em>, <em>unit</em>, <em>upd_date</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.bottom">
+<code class="descname">bottom</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.bottom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.source">
+<code class="descname">source</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.source_id">
+<code class="descname">source_id</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.source_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.top">
+<code class="descname">top</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.top" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.unit">
+<code class="descname">unit</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.upd_date">
+<code class="descname">upd_date</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.upd_date" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="persist.ValueHistory.ValueHistoryEntry.value">
+<code class="descname">value</code><a class="headerlink" href="#persist.ValueHistory.ValueHistoryEntry.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="persist.ValueHistory.ValueHistoryStore">
+<em class="property">class </em><code class="descname">ValueHistoryStore</code><span class="sig-paren">(</span><em>dbConnection</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>space</em>, <em>source</em>, <em>value</em>, <em>unit</em>, <em>upd_date</em>, <em>bottom=None</em>, <em>top=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.close_session">
+<code class="descname">close_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.close_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.close_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.commit">
+<code class="descname">commit</code><span class="sig-paren">(</span><em>copyTo=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.commit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.commit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>space</em>, <em>source</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.getHistory">
+<code class="descname">getHistory</code><span class="sig-paren">(</span><em>space</em>, <em>source</em>, <em>fromTime</em>, <em>toTime</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.getHistory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.getHistory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.getSource">
+<code class="descname">getSource</code><span class="sig-paren">(</span><em>space</em>, <em>source</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.getSource"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.getSource" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.open_session">
+<code class="descname">open_session</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.open_session"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.open_session" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.refreshSourceDict">
+<code class="descname">refreshSourceDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.refreshSourceDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.refreshSourceDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="persist.ValueHistory.ValueHistoryStore.rename">
+<code class="descname">rename</code><span class="sig-paren">(</span><em>space</em>, <em>oldsourcename</em>, <em>newsourcename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/persist/ValueHistory.html#ValueHistoryStore.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#persist.ValueHistory.ValueHistoryStore.rename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

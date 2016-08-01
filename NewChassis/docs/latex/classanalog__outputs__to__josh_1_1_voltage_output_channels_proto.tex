@@ -1,0 +1,64 @@
+\hypertarget{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto}{\section{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto Class Reference}
+\label{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto}\index{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto}}
+}
+Inheritance diagram for analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_a75bb5457f0f5698c8cb368e143e89978}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_aba4f449380f46cabc431bb770695e05c}{stop}
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}TODO: can't write less then 2 samples?
+The Number of Samples Per Channel determines how many samples are pulled from the hardware buffer to the software buffer.
+It is recommended that the number of samples be 1/10th the rate specified on the DAQmx Timing VI.
+For example, if the rate input on the DAQmx is 1000 (Hz), then the number of samples per channel should be no more than 100.
+This is to ensure there are not buffer overwrite or underwrite errors.  Refer to KnowledgeBase 4EPF28F9: Why Do I Get Error
+-200279 from my DAQmx Read VI or Property Node?
+base class
+\end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_a75bb5457f0f5698c8cb368e143e89978}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!analog_outputs_to_josh::VoltageOutputChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{channel\-Names, }
+\item[{}]{task\-Handle = {\ttfamily None}, }
+\item[{}]{nidll = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_a75bb5457f0f5698c8cb368e143e89978}
+\begin{DoxyVerb}'
+constructor:
+channels to be written to
+NI task handle
+NI dll
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_aba4f449380f46cabc431bb770695e05c}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto}!stop@{stop}}
+\index{stop@{stop}!analog_outputs_to_josh::VoltageOutputChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Voltage\-Output\-Channels\-Proto}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Voltage\-Output\-Channels\-Proto.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto_aba4f449380f46cabc431bb770695e05c}
+\begin{DoxyVerb}stop task
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+analog\-\_\-outputs\-\_\-to\-\_\-josh.\-py\end{DoxyCompactItemize}

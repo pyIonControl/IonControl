@@ -1,0 +1,574 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>trace.PlottedTrace &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>trace.PlottedTrace</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for trace.PlottedTrace</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">pens</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.ErrorBarItem</span> <span class="k">import</span> <span class="n">ErrorBarItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.PlotCurveItem</span> <span class="k">import</span> <span class="n">PlotCurveItem</span>
+
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TracePlotting</span>
+<span class="kn">import</span> <span class="nn">time</span> 
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">WeakMethod</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+
+<div class="viewcode-block" id="sort_lists_by"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.sort_lists_by">[docs]</a><span class="k">def</span> <span class="nf">sort_lists_by</span><span class="p">(</span><span class="n">lists</span><span class="p">,</span> <span class="n">key_list</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">lists</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                 <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="n">key_list</span><span class="p">])))</span></div>
+    
+<div class="viewcode-block" id="PlottedTrace"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace">[docs]</a><span class="k">class</span> <span class="nc">PlottedTrace</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">Styles</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">enum</span><span class="p">(</span><span class="s1">&#39;lines&#39;</span><span class="p">,</span> <span class="s1">&#39;points&#39;</span><span class="p">,</span> <span class="s1">&#39;linespoints&#39;</span><span class="p">,</span> <span class="s1">&#39;lines_with_errorbars&#39;</span><span class="p">,</span> <span class="s1">&#39;points_with_errorbars&#39;</span><span class="p">,</span> <span class="s1">&#39;linepoints_with_errorbars&#39;</span><span class="p">)</span>
+    <span class="n">PointsStyles</span> <span class="o">=</span> <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span> <span class="p">]</span>
+    <span class="n">Types</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">enum</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;steps&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">Trace</span><span class="p">,</span><span class="n">graphicsView</span><span class="p">,</span><span class="n">penList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">pen</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">plotType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">xColumn</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="n">yColumn</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="n">topColumn</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span><span class="n">bottomColumn</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span><span class="n">heightColumn</span><span class="o">=</span><span class="s1">&#39;height&#39;</span><span class="p">,</span>
+                 <span class="n">rawColumn</span><span class="o">=</span><span class="s1">&#39;raw&#39;</span><span class="p">,</span> <span class="n">tracePlotting</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">xAxisLabel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">xAxisUnit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">yAxisLabel</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">yAxisUnit</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">windowName</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill</span> <span class="o">=</span> <span class="n">fill</span>
+        <span class="k">if</span> <span class="n">penList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">penList</span> <span class="o">=</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penList</span> <span class="o">=</span> <span class="n">penList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="n">graphicsView</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="p">,</span> <span class="s1">&#39;penUsageDict&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">penUsageDict</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">penUsageDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">penUsageDict</span>        <span class="c1"># TODO circular reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">Trace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">lines</span> <span class="k">if</span> <span class="n">style</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">style</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">default</span> <span class="k">if</span> <span class="n">plotType</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plotType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span> <span class="o">=</span> <span class="n">xAxisLabel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span> <span class="o">=</span> <span class="n">xAxisUnit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAxisLabel</span> <span class="o">=</span> <span class="n">yAxisLabel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAxisUnit</span> <span class="o">=</span> <span class="n">yAxisUnit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPlotTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">needsReplot</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># we use pointers to the relevant columns in trace</span>
+        <span class="k">if</span> <span class="n">tracePlotting</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span> <span class="o">=</span> <span class="n">tracePlotting</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">xColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_yColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">yColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">topColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">bottomColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">heightColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">rawColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">xAxisLabel</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">xAxisUnit</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">windowName</span> <span class="o">=</span> <span class="n">tracePlotting</span><span class="o">.</span><span class="n">windowName</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_xColumn</span> <span class="o">=</span> <span class="n">xColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_yColumn</span> <span class="o">=</span> <span class="n">yColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span> <span class="o">=</span> <span class="n">topColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span> <span class="o">=</span> <span class="n">bottomColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span> <span class="o">=</span> <span class="n">heightColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span> <span class="o">=</span> <span class="n">rawColumn</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span> <span class="o">=</span> <span class="n">TracePlotting</span><span class="p">(</span><span class="n">xColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_xColumn</span><span class="p">,</span> <span class="n">yColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_yColumn</span><span class="p">,</span> <span class="n">topColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span><span class="p">,</span> <span class="n">bottomColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span><span class="p">,</span>   <span class="c1"># TODO double check for reference</span>
+                                               <span class="n">heightColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span><span class="p">,</span> <span class="n">rawColumn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">type_</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">xAxisUnit</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">,</span> <span class="n">xAxisLabel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">,</span>
+                                               <span class="n">windowName</span><span class="o">=</span><span class="n">windowName</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">addTracePlotting</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span> <span class="p">)</span>   <span class="c1"># TODO check for reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">windowName</span> <span class="o">=</span> <span class="n">windowName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stylesLookup</span> <span class="o">=</span> <span class="p">{</span> <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotLines</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">points</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotPoints</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">linespoints</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotLinespoints</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> 
+                         <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">lines_with_errorbars</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotLines</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">points_with_errorbars</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotPoints</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">Styles</span><span class="o">.</span><span class="n">linepoints_with_errorbars</span><span class="p">:</span> <span class="n">partial</span><span class="p">(</span> <span class="n">WeakMethod</span><span class="o">.</span><span class="n">ref</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotLinespoints</span><span class="p">),</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span><span class="p">)}</span>
+
+<div class="viewcode-block" id="PlottedTrace.setGraphicsView"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.setGraphicsView">[docs]</a>    <span class="k">def</span> <span class="nf">setGraphicsView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graphicsView</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">graphicsView</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removePlots</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="n">graphicsView</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">windowName</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span><span class="o">.</span><span class="n">windowName</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">okToDelete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A trace is OK to delete if it has been finalized&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;traceFinalized&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">description</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">traceCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is to make the code more readable while maintaining backwards compatibility. self.traceCollection is the same thing as self.trace.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+
+    <span class="nd">@traceCollection</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">traceCollection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span> <span class="o">=</span> <span class="n">t</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasTopColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasBottomColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasHeightColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasRawColumn</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span>
+        
+<div class="viewcode-block" id="PlottedTrace.timeintervalAppend"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.timeintervalAppend">[docs]</a>    <span class="k">def</span> <span class="nf">timeintervalAppend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeinterval</span><span class="p">,</span> <span class="n">maxPoints</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">timeintervalAppend</span><span class="p">(</span><span class="n">timeinterval</span><span class="p">,</span> <span class="n">maxPoints</span><span class="p">)</span></div>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timeinterval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">timeinterval</span>
+        
+    <span class="nd">@timeinterval</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">timeinterval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">timeinterval</span> <span class="o">=</span> <span class="n">val</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_xColumn</span><span class="p">]</span>
+    
+    <span class="nd">@x</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">x</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_xColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_yColumn</span><span class="p">]</span>
+    
+    <span class="nd">@y</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">y</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_yColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span><span class="p">]</span>
+    
+    <span class="nd">@top</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">top</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_topColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span><span class="p">]</span>
+    
+    <span class="nd">@bottom</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">bottom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_bottomColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span><span class="p">]</span>
+    
+    <span class="nd">@height</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_heightColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span><span class="p">]</span>
+    
+    <span class="nd">@raw</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">raw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_rawColumn</span><span class="p">]</span> <span class="o">=</span> <span class="n">column</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">isPlotted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span><span class="o">&gt;</span><span class="mi">0</span>
+    
+    <span class="nd">@isPlotted</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">isPlotted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plotted</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">plotted</span> <span class="o">!=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">plotted</span> <span class="k">else</span> <span class="mi">0</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="PlottedTrace.removePlots"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.removePlots">[docs]</a>    <span class="k">def</span> <span class="nf">removePlots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curve</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">penUsageDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span><span class="p">)</span>  
+                <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="kc">None</span></div>
+                
+<div class="viewcode-block" id="PlottedTrace.plotFitfunction"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotFitfunction">[docs]</a>    <span class="k">def</span> <span class="nf">plotFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitFunctionPenIndex</span> <span class="o">=</span> <span class="n">penindex</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="mi">300</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span></div>
+ 
+<div class="viewcode-block" id="PlottedTrace.replotFitFunction"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.replotFitFunction">[docs]</a>    <span class="k">def</span> <span class="nf">replotFitFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="mi">300</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;fitFunctionPenIndex&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fitFunctionPenIndex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span></div>
+ 
+<div class="viewcode-block" id="PlottedTrace.plotStepsFitfunction"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotStepsFitfunction">[docs]</a>    <span class="k">def</span> <span class="nf">plotStepsFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitFunctionPenIndex</span> <span class="o">=</span> <span class="n">penindex</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span></div>
+            
+<div class="viewcode-block" id="PlottedTrace.replotStepsFitFunction"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.replotStepsFitFunction">[docs]</a>    <span class="k">def</span> <span class="nf">replotStepsFitFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;fitFunctionPenIndex&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fity</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fitFunctionPenIndex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PlottedTrace.plotErrorBars"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotErrorBars">[docs]</a>    <span class="k">def</span> <span class="nf">plotErrorBars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasHeightColumn</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="o">=</span> <span class="n">ErrorBarItem</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">),</span>
+                                                           <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasTopColumn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasBottomColumn</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="o">=</span> <span class="n">ErrorBarItem</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">top</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">),</span> <span class="n">bottom</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">),</span>
+                                                           <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="PlottedTrace.plotLines"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotLines">[docs]</a>    <span class="k">def</span> <span class="nf">plotLines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">penindex</span><span class="p">,</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errorbars</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotErrorBars</span><span class="p">(</span><span class="n">penindex</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sort_lists_by</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">key_list</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>            
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="PlottedTrace.plotPoints"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotPoints">[docs]</a>    <span class="k">def</span> <span class="nf">plotPoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">penindex</span><span class="p">,</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errorbars</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotErrorBars</span><span class="p">(</span><span class="n">penindex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">pen</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">symbolPen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PlottedTrace.plotLinespoints"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotLinespoints">[docs]</a>    <span class="k">def</span> <span class="nf">plotLinespoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">penindex</span><span class="p">,</span> <span class="n">errorbars</span><span class="o">=</span><span class="kc">True</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">errorbars</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">plotErrorBars</span><span class="p">(</span><span class="n">penindex</span><span class="p">)</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sort_lists_by</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">key_list</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">symbol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="n">symbolPen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span> <span class="n">symbolBrush</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">))</span></div>
+                
+<div class="viewcode-block" id="PlottedTrace.plotSteps"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plotSteps">[docs]</a>    <span class="k">def</span> <span class="nf">plotSteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penindex</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mycolor</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">mycolor</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="mi">80</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="o">=</span> <span class="n">PlotCurveItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">stepMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillLevel</span><span class="o">=</span><span class="mi">0</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">mycolor</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fill</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">penList</span><span class="p">[</span><span class="n">penindex</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAxisUnit</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">setLabel</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAxisLabel</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span> <span class="o">=</span> <span class="n">penindex</span></div>
+    
+<div class="viewcode-block" id="PlottedTrace.plot"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">penindex</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">style</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="k">if</span> <span class="n">style</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">style</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">removePlots</span><span class="p">()</span>
+            <span class="n">penindex</span> <span class="o">=</span> <span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;curvePen&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                         <span class="o">-</span><span class="mi">1</span><span class="p">:</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penUsageDict</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penUsageDict</span><span class="p">)))))[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">penindex</span><span class="p">,</span> <span class="n">penindex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">penindex</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">plotFitfunction</span><span class="p">(</span><span class="n">penindex</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stylesLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotLines</span><span class="p">)(</span><span class="n">penindex</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">plotStepsFitfunction</span><span class="p">(</span><span class="n">penindex</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">plotSteps</span><span class="p">(</span><span class="n">penindex</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">penUsageDict</span><span class="p">[</span><span class="n">penindex</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curvePen</span> <span class="o">=</span> <span class="n">penindex</span></div>
+        
+<div class="viewcode-block" id="PlottedTrace.replot"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.replot">[docs]</a>    <span class="k">def</span> <span class="nf">replot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">500</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">lastPlotTime</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="mf">500.</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">needsReplot</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">needsReplot</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replot</span><span class="p">)</span> 
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_replot</span><span class="p">()</span></div>
+            
+    <span class="k">def</span> <span class="nf">_replot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;curve&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">PointsStyles</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">sort_lists_by</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">key_list</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;errorBarItem&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasHeightColumn</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">height</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="o">.</span><span class="n">height</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">errorBarItem</span><span class="o">.</span><span class="n">setOpts</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">),</span> <span class="n">top</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top</span><span class="p">),</span> <span class="n">bottom</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitFunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">replotFitFunction</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">Types</span><span class="o">.</span><span class="n">steps</span><span class="p">:</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">replotStepsFitFunction</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitcurve</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastPlotTime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">needsReplot</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="PlottedTrace.setView"><a class="viewcode-back" href="../../code/trace-doc.html#trace.PlottedTrace.PlottedTrace.setView">[docs]</a>    <span class="k">def</span> <span class="nf">setView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graphicsView</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removePlots</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="n">graphicsView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fitFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span><span class="o">.</span><span class="n">fitFunction</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span> <span class="k">else</span> <span class="kc">None</span>
+    
+    <span class="nd">@fitFunction</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">fitFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitfunction</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracePlotting</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">fitfunction</span></div>
+
+<span class="c1">#     def __del__(self):</span>
+<span class="c1">#         super(PlottedTrace, self)__del__()</span>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TraceCollection</span>
+    <span class="kn">import</span> <span class="nn">gc</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="n">TraceCollection</span><span class="p">(),</span> <span class="kc">None</span><span class="p">,</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">getrefcount</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">))</span>
+    <span class="n">plottedTrace</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">del</span> <span class="n">plottedTrace</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Press Enter&quot;</span><span class="p">)</span>
+                
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

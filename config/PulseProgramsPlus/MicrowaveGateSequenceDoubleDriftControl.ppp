@@ -1,0 +1,309 @@
+###########################################################################
+#
+# GateSet Tomography with Microwaves
+#
+
+const DDSDetect = 1
+const DDSMicrowave = 2
+const PMTChannel = 8
+const CalibrationCounterNo = 5
+const RamseyCalibrationCounterNo = 13
+const PiTimeChannel = 1
+const DebugChannel = 2
+const DebugChannel2 = 3
+const MicrowaveFreqChannel = 4
+const MicrowaveFreqCalDetectChannel = 5
+
+# DDS frequencies and amplitudes
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter DetectAmp = 1023
+parameter<AD9912_FRQ> MicrowaveFreq = 40 MHz
+parameter<AD9912_PHASE> MicrowaveInitPhase = 0
+parameter<AD9912_PHASE> MicrowaveAnalyzePhase = 0
+
+# masks and shutters
+shutter InitializationShutter = 1
+masked_shutter CoolingOn
+masked_shutter PumpingOn 
+masked_shutter MicrowaveOn
+masked_shutter DetectOn
+
+# times
+parameter CoolingTime = 1 ms
+parameter PumpTime = 0 ms
+parameter PreWaitTime = 0 ms
+parameter MicrowaveInitTime = 0 ms
+parameter GateInit = 1
+parameter QubitWaitTime = 0 ms
+parameter MicrowaveAnalyzeTime = 0 ms
+parameter PostWaitTime = 0ms
+parameter DetectTime = 1 ms
+parameter piTime = 40 us
+parameter GateTime
+parameter PostPulseWaitTime = 0 ms
+
+# control parameters
+parameter MaxInitRepeat = 10
+parameter experiments  = 100
+counter CheckIonCounters = 0
+counter DetectCounters = 0
+trigger ddsApplyTrigger = 3
+trigger ddsMicrowaveApply = 0
+parameter PresenceThreshold = 6
+parameter UseGateSequence = 0
+parameter offset = 40ns
+
+# exitcodes
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xfffe000000000000
+
+# internal variables
+var experimentsleft = 100
+var initRemaining = 0
+var trainPhase = 0
+parameter pulseTime = 0
+parameter gapTime = 0
+var PulsesRemaining = 0
+address RamStartAddress = 0
+var currentexperiment = 0
+var coolPhotons = 0
+
+#PiTimeCalibration
+parameter NumberIgnoredBits
+parameter CalibrateEvery
+parameter DetectThreshold = 1
+parameter CalibrationGates
+var PiTimeIntegrator
+var CalibrationSkipCounter = 0
+var MicrowaveCalibrationTime
+counter CalibrationCounters
+var CalibrationDetectPhotons
+var temp
+var one = 1
+
+#RamseyCalibration
+parameter RamseyCalibrateEvery
+parameter RamseyCalWaitTime
+var RamseySkipCounter
+parameter RamseyCalInitPhase
+parameter RamseyCalAnalyzePhase
+parameter<AD9912_FRQ>  RamseyCalAdjustGain
+counter RamseyCalCounter
+var RamseyCalDetectPhotons
+var RTemp
+var RamseySkipCounter
+
+
+def cool():
+    set_shutter( CoolingOn )
+    set_counter( CheckIonCounters )
+    update( CoolingTime )
+    clear_counter()
+    update( )
+    coolPhotons = load_count( PMTChannel )
+    set_inv_shutter( CoolingOn )
+
+def pump():
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+
+def qubitInit():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    update( MicrowaveInitTime )
+    set_inv_shutter( MicrowaveOn )
+
+def gateInit():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    temp = GateTime
+    temp *= GateInit
+    update( temp )
+    set_inv_shutter( MicrowaveOn )
+
+def calibrationPulse():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    update( MicrowaveCalibrationTime )
+    set_inv_shutter( MicrowaveOn )
+
+def qubitAnalyze():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveAnalyzePhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    update( MicrowaveAnalyzeTime )
+    set_inv_shutter( MicrowaveOn )
+    
+def detect():
+    set_dds( channel=DDSDetect, freq=DetectFreq )
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+    set_trigger( ddsApplyTrigger )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    clear_counter()
+    update()
+
+def calibrationDetect():
+    set_dds( channel=DDSDetect, freq=DetectFreq )
+    set_shutter( DetectOn )
+    set_counter( CalibrationCounters )
+    set_trigger( ddsApplyTrigger )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    clear_counter()
+    update()
+
+def gateSequence():
+    PulsesRemaining = read_ram() 
+    while PulsesRemaining>0:
+        PulsesRemaining -= 1
+        trainPhase = read_ram()
+        gapTime = read_ram()
+        set_dds( channel=DDSMicrowave, phase=trainPhase )
+        set_trigger( ddsMicrowaveApply )
+        update( gapTime )
+        pulseTime = read_ram()     # has to be given in units of pi/2 time
+        pulseTime *= GateTime
+        if pulseTime>0:
+            pulseTime += offset     # we don't want an exdended I
+            set_shutter( MicrowaveOn )
+            update( pulseTime )
+            set_inv_shutter( MicrowaveOn )
+            update( PostPulseWaitTime )
+
+def calibrate():
+    cool()
+    if MaxInitRepeat>0:
+        while coolPhotons<PresenceThreshold:
+            if initRemaining==0:
+                exit( IonLostExitcode )
+            initRemaining -= 1
+            cool()
+    if PumpTime>0:
+        pump()
+    MicrowaveCalibrationTime = GateTime
+    MicrowaveCalibrationTime *= CalibrationGates
+    MicrowaveCalibrationTime += offset
+    calibrationPulse()
+    if DetectTime>0:
+        calibrationDetect()
+        CalibrationDetectPhotons = load_count(CalibrationCounterNo)
+        if CalibrationDetectPhotons > DetectThreshold:
+            PiTimeIntegrator -= 1
+        else:
+            PiTimeIntegrator += 1
+        write_result( DebugChannel, CalibrationDetectPhotons )
+        GateTime = PiTimeIntegrator >> NumberIgnoredBits
+        piTime = GateTime >> one
+        write_result( PiTimeChannel, PiTimeIntegrator )
+
+def RamseyCalInitPulse():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=RamseyCalInitPhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    update( MicrowaveCalibrationTime )
+    set_inv_shutter( MicrowaveOn )
+
+def RamseyCalAnalyzePulse():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=RamseyCalAnalyzePhase )
+    set_trigger( ddsMicrowaveApply )
+    set_shutter( MicrowaveOn )
+    update( MicrowaveCalibrationTime )
+    set_inv_shutter( MicrowaveOn )
+
+def ramseyCalibrationDetect():
+    set_dds( channel=DDSDetect, freq=DetectFreq )
+    set_shutter( DetectOn )
+    set_counter( RamseyCalCounter )
+    set_trigger( ddsApplyTrigger )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    clear_counter()
+    update()
+
+def calibrateRamsey():
+    cool()
+    if MaxInitRepeat>0:
+        while coolPhotons<PresenceThreshold:
+            if initRemaining==0:
+                exit( IonLostExitcode )
+            initRemaining -= 1
+            cool()
+    if PumpTime>0:
+        pump()
+    MicrowaveCalibrationTime = GateTime
+    MicrowaveCalibrationTime += offset
+    RamseyCalInitPulse()
+    update( RamseyCalWaitTime )
+    RamseyCalAnalyzePulse()
+    if DetectTime>0:
+        ramseyCalibrationDetect()
+        CalibrationDetectPhotons = load_count(RamseyCalibrationCounterNo)
+        if CalibrationDetectPhotons > DetectThreshold:
+            MicrowaveFreq -= 1
+        else:
+            MicrowaveFreq += 1
+        write_result( MicrowaveFreqCalDetectChannel, CalibrationDetectPhotons )
+        write_result( MicrowaveFreqChannel, MicrowaveFreq )
+
+
+# startup switching on cooling quickly
+set_shutter( InitializationShutter )
+set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+set_trigger( ddsApplyTrigger )
+set_trigger( ddsMicrowaveApply )
+PiTimeIntegrator = GateTime << NumberIgnoredBits
+
+while not pipe_empty():
+    update()
+    apply_next_scan_point()
+    
+    currentexperiment = 0
+    while currentexperiment < experiments:
+        set_ram_address( RamStartAddress )
+        cool()
+        if MaxInitRepeat>0:
+            initRemaining = MaxInitRepeat
+            while coolPhotons<PresenceThreshold:
+                if initRemaining==0:
+                    exit( IonLostExitcode )
+                initRemaining -= 1
+                cool()
+        if PumpTime>0:
+            pump()
+        if PreWaitTime>0:
+            update( PreWaitTime )
+        if MicrowaveInitTime>0: 
+            qubitInit()
+        if GateInit>0: 
+           gateInit()
+        if UseGateSequence>0:
+            gateSequence()
+        if QubitWaitTime>0:
+            update( QubitWaitTime )
+        if MicrowaveAnalyzeTime>0:
+            qubitAnalyze()
+        if PostWaitTime>0:
+            update( PostWaitTime )
+        if DetectTime>0:
+            detect()
+        if CalibrateEvery>0:
+            CalibrationSkipCounter += 1
+            if CalibrationSkipCounter >= CalibrateEvery:
+                calibrate()
+                CalibrationSkipCounter = 0
+        if RamseyCalibrateEvery>0:
+            RamseySkipCounter += 1
+            if RamseySkipCounter>=RamseyCalibrateEvery:
+                calibrateRamsey()
+                RamseySkipCounter = 0
+        currentexperiment += 1
+
+exit( endLabel )
+

@@ -1,0 +1,210 @@
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing}{\section{Chassis.\-git.\-Timing.\-Timing Class Reference}
+\label{class_chassis_8git_1_1_timing_1_1_timing}\index{Chassis.\-git.\-Timing.\-Timing@{Chassis.\-git.\-Timing.\-Timing}}
+}
+
+
+This class will generate perform the timing and synchronization required to synchronize all cards on the P\-X\-I backplane.  
+
+
+Inheritance diagram for Chassis.\-git.\-Timing.\-Timing\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1_timing_1_1_timing}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_timing_1_1_timing_af865d81cbb943ef3c589e1468a2c505e}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_timing_1_1_timing}{Timing} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a48c44c6e572b44297469ac3da312d48a}{init}
+\begin{DoxyCompactList}\small\item\em This function connects to the ni\-Sync device and starts to setup clock and trigger connections. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a4da2ff1918154adb5ff6f1f8a1fd681a}{send\-Software\-Trigger}
+\begin{DoxyCompactList}\small\item\em This function will send a trigger to all devices when it is called. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a2b2792f5c874a45cbe34298b1f4c1584}{close}
+\begin{DoxyCompactList}\small\item\em This function will close the connection to the ni\-Sync device. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_timing_1_1_timing_aeb465d81f1da5b3e5784a87870a302dd}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_chassis_8git_1_1_timing_1_1_timing}{Timing} class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a8bce703953eed1bd9c9cfd33a28515a2}{session}
+\begin{DoxyCompactList}\small\item\em This is the reference to the N\-I-\/\-Sync session. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a3357175a0fe511b96437a0fd8baf3fc4}{resource\-Name}
+\begin{DoxyCompactList}\small\item\em This the name of the N\-I-\/\-Sync resource that refers to the synchronization P\-X\-I card. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_aa436c65a85fddf23300de2af3e2f01f6}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the N\-I-\/\-Sync session. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_adb8c3cb047beca2237a36edf1ea42432}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the N\-I-\/\-Sync session has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_aaaf0df2e649cc66725ef0578a9b4ad39}{divisor}
+\begin{DoxyCompactList}\small\item\em The dds is used to generate the sample clock. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a6d07dfa513f351c6e1f8ccd283439207}{dds\-Freq}
+\begin{DoxyCompactList}\small\item\em This is the D\-D\-S frequency that is calculated from the sample rate and the divisor. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_ab50b63f49e67b9dfc14cdcdc9b562a51}{pxi\-Star\-Slots}
+\begin{DoxyCompactList}\small\item\em This is the number of pxi star slots available on the chassis. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_timing_1_1_timing_a45aa2c7a4bbb7155298c1bf737608863}{sample\-Rate} property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the sample clock that gets distributed to all of the cards on a P\-X\-I Chassis. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate perform the timing and synchronization required to synchronize all cards on the P\-X\-I backplane. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_af865d81cbb943ef3c589e1468a2c505e}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Timing.\-Timing.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_timing_1_1_timing_af865d81cbb943ef3c589e1468a2c505e}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_timing_1_1_timing}{Timing} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_aeb465d81f1da5b3e5784a87870a302dd}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Timing.\-Timing.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_timing_1_1_timing_aeb465d81f1da5b3e5784a87870a302dd}
+
+
+This is the destructor for the \hyperlink{class_chassis_8git_1_1_timing_1_1_timing}{Timing} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a2b2792f5c874a45cbe34298b1f4c1584}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!close@{close}}
+\index{close@{close}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Timing.\-Timing.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_timing_1_1_timing_a2b2792f5c874a45cbe34298b1f4c1584}
+
+
+This function will close the connection to the ni\-Sync device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a48c44c6e572b44297469ac3da312d48a}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!init@{init}}
+\index{init@{init}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Timing.\-Timing.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{device\-Name}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_timing_1_1_timing_a48c44c6e572b44297469ac3da312d48a}
+
+
+This function connects to the ni\-Sync device and starts to setup clock and trigger connections. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em device\-Name} & The name of the ni\-Sync device. This name can be found in Measurement and Automation Explorer. Example value\-: \char`\"{}\-P\-X\-I1\-Slot14\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a4da2ff1918154adb5ff6f1f8a1fd681a}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!send\-Software\-Trigger@{send\-Software\-Trigger}}
+\index{send\-Software\-Trigger@{send\-Software\-Trigger}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{send\-Software\-Trigger}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Timing.\-Timing.\-send\-Software\-Trigger (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_timing_1_1_timing_a4da2ff1918154adb5ff6f1f8a1fd681a}
+
+
+This function will send a trigger to all devices when it is called. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a6d07dfa513f351c6e1f8ccd283439207}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!dds\-Freq@{dds\-Freq}}
+\index{dds\-Freq@{dds\-Freq}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{dds\-Freq}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-dds\-Freq}}\label{class_chassis_8git_1_1_timing_1_1_timing_a6d07dfa513f351c6e1f8ccd283439207}
+
+
+This is the D\-D\-S frequency that is calculated from the sample rate and the divisor. 
+
+The D\-D\-S frequency is the sample rate divided by the divisor. \hypertarget{class_chassis_8git_1_1_timing_1_1_timing_aaaf0df2e649cc66725ef0578a9b4ad39}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!divisor@{divisor}}
+\index{divisor@{divisor}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{divisor}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-divisor}}\label{class_chassis_8git_1_1_timing_1_1_timing_aaaf0df2e649cc66725ef0578a9b4ad39}
+
+
+The dds is used to generate the sample clock. 
+
+The lower the value of the divisor the more inaccurate the sample clock. This value is defualted to its maximum of 32. \hypertarget{class_chassis_8git_1_1_timing_1_1_timing_adb8c3cb047beca2237a36edf1ea42432}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!initialized@{initialized}}
+\index{initialized@{initialized}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-initialized}}\label{class_chassis_8git_1_1_timing_1_1_timing_adb8c3cb047beca2237a36edf1ea42432}
+
+
+This is a boolean that is true when the N\-I-\/\-Sync session has been initialized. 
+
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_ab50b63f49e67b9dfc14cdcdc9b562a51}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!pxi\-Star\-Slots@{pxi\-Star\-Slots}}
+\index{pxi\-Star\-Slots@{pxi\-Star\-Slots}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{pxi\-Star\-Slots}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-pxi\-Star\-Slots}}\label{class_chassis_8git_1_1_timing_1_1_timing_ab50b63f49e67b9dfc14cdcdc9b562a51}
+
+
+This is the number of pxi star slots available on the chassis. 
+
+In order for the sample clock to be distributed to all cards, this value must be equal to or larger than the number of potential cards on the Chassis. \hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a3357175a0fe511b96437a0fd8baf3fc4}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!resource\-Name@{resource\-Name}}
+\index{resource\-Name@{resource\-Name}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{resource\-Name}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-resource\-Name}}\label{class_chassis_8git_1_1_timing_1_1_timing_a3357175a0fe511b96437a0fd8baf3fc4}
+
+
+This the name of the N\-I-\/\-Sync resource that refers to the synchronization P\-X\-I card. 
+
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a8bce703953eed1bd9c9cfd33a28515a2}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!session@{session}}
+\index{session@{session}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{session}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-session}}\label{class_chassis_8git_1_1_timing_1_1_timing_a8bce703953eed1bd9c9cfd33a28515a2}
+
+
+This is the reference to the N\-I-\/\-Sync session. 
+
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_aa436c65a85fddf23300de2af3e2f01f6}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!status@{status}}
+\index{status@{status}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-status}}\label{class_chassis_8git_1_1_timing_1_1_timing_aa436c65a85fddf23300de2af3e2f01f6}
+
+
+This is the status of the N\-I-\/\-Sync session. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. 
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1_timing_1_1_timing_a45aa2c7a4bbb7155298c1bf737608863}{\index{Chassis.\-git\-::\-Timing\-::\-Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Chassis.git::Timing::Timing@{Chassis.\-git\-::\-Timing\-::\-Timing}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Timing.\-Timing.\-sample\-Rate property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_timing_1_1_timing_a45aa2c7a4bbb7155298c1bf737608863}
+
+
+This is the sample rate of the sample clock that gets distributed to all of the cards on a P\-X\-I Chassis. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Timing.\-py\end{DoxyCompactItemize}

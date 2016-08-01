@@ -1,0 +1,1510 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>uiModules &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>uiModules</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/uiModules-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="uimodules">
+<h1>uiModules<a class="headerlink" href="#uimodules" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-uiModules.CamelionDelegate">
+<span id="cameliondelegate"></span><h2>CamelionDelegate<a class="headerlink" href="#module-uiModules.CamelionDelegate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.CamelionDelegate.CamelionDelegate">
+<em class="property">class </em><code class="descname">CamelionDelegate</code><span class="sig-paren">(</span><em>emptyStringValue=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CamelionDelegate.html#CamelionDelegate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CamelionDelegate.CamelionDelegate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for combo box editors in models</p>
+<dl class="method">
+<dt id="uiModules.CamelionDelegate.CamelionDelegate.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CamelionDelegate.html#CamelionDelegate.createEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CamelionDelegate.CamelionDelegate.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the combo box editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CamelionDelegate.CamelionDelegate.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>editor</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CamelionDelegate.html#CamelionDelegate.setEditorData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CamelionDelegate.CamelionDelegate.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the editor based on the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CamelionDelegate.CamelionDelegate.setModelData">
+<code class="descname">setModelData</code><span class="sig-paren">(</span><em>editor</em>, <em>model</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CamelionDelegate.html#CamelionDelegate.setModelData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CamelionDelegate.CamelionDelegate.setModelData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the model based on the editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CamelionDelegate.CamelionDelegate.updateEditorGeometry">
+<code class="descname">updateEditorGeometry</code><span class="sig-paren">(</span><em>editor</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CamelionDelegate.html#CamelionDelegate.updateEditorGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CamelionDelegate.CamelionDelegate.updateEditorGeometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.CategoryTree">
+<span id="categorytree"></span><h2>CategoryTree<a class="headerlink" href="#module-uiModules.CategoryTree" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.CategoryTree.CategoryTreeModel">
+<em class="property">class </em><code class="descname">CategoryTreeModel</code><span class="sig-paren">(</span><em>contentList=[]</em>, <em>parent=None</em>, <em>categoriesAttr='categories'</em>, <em>nodeNameAttr='name'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for category trees.</p>
+<p>A category tree is a simplified tree structure in which a flat list of data is broken down by categories. It
+is intended to be an extension of a table model, in which the elements of the table are broken down into different
+categories. The data itself is not hierarchical. For that reasons, the data can be presented to the model as a
+flat list. If a given element of the list has an attribute defined by categoriesAttr, then that element will be displayed
+beneath those categories. categoriesAttr is a list of strings, with the most general category first. If categoriesAttr
+is a string, it is interpreted as a list of strings of length 1.</p>
+<p>Other attributes that are respected are &#8220;hasDepedency&#8221; and &#8220;isBold.&#8221; If the content has one of those attributes,
+the content is displayed accordingly.</p>
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.addNode">
+<code class="descname">addNode</code><span class="sig-paren">(</span><em>content</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.addNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.addNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a node to the tree containing &#8216;content&#8217; with name &#8216;name&#8217;. Return new Node.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.addNodeList">
+<code class="descname">addNodeList</code><span class="sig-paren">(</span><em>contentList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.addNodeList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.addNodeList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a list of nodes to the tree</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.addRow">
+<code class="descname">addRow</code><span class="sig-paren">(</span><em>parent</em>, <em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.addRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.addRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add &#8216;node&#8217; to the table under &#8216;parent&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.changeCategory">
+<code class="descname">changeCategory</code><span class="sig-paren">(</span><em>node</em>, <em>categories=None</em>, <em>deleteOldIfEmpty=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.changeCategory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.changeCategory" title="Permalink to this definition">¶</a></dt>
+<dd><p>change node category
+:param node: the node to move
+:type node: Node
+:param categories: new category(ies) for node. defaults to None
+:type categories: str or list[str]
+:param deleteOldIfEmpty: if True, delete the node&#8217;s former category node if it is now empty
+:type deleteOldIfEmpty: bool</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>clear the tree content</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.contentFromIndex">
+<code class="descname">contentFromIndex</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.contentFromIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.contentFromIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the content associated with the given index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.getDataNodes">
+<code class="descname">getDataNodes</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.getDataNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.getDataNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all data nodes under (and including) node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.getFirstDataNode">
+<code class="descname">getFirstDataNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.getFirstDataNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.getFirstDataNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the first data node under (and including) node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.getLastDataNode">
+<code class="descname">getLastDataNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.getLastDataNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.getLastDataNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the last data node under (and including) node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.getLocation">
+<code class="descname">getLocation</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.getLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.getLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the node, column at the given index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.getTopNode">
+<code class="descname">getTopNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.getTopNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.getTopNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the highest level category node before root in the tree above node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>row</em>, <em>column</em>, <em>parentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a model index for the node at the given row, column, parentIndex</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.indexFromNode">
+<code class="descname">indexFromNode</code><span class="sig-paren">(</span><em>node</em>, <em>col=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.indexFromNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.indexFromNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a model index for the given node column</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.makeCategoryNodes">
+<code class="descname">makeCategoryNodes</code><span class="sig-paren">(</span><em>categories</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.makeCategoryNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.makeCategoryNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursively creates tree nodes from the provided list of categories</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.moveRow">
+<code class="descname">moveRow</code><span class="sig-paren">(</span><em>index</em>, <em>up</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.moveRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.moveRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>move modelIndex &#8216;index&#8217; up if up is True, else down</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.nodeFromContent">
+<code class="descname">nodeFromContent</code><span class="sig-paren">(</span><em>content</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.nodeFromContent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.nodeFromContent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the node associated with the specified content.</p>
+<p>This is an inefficient O(n) search. However, there is no other way to do this reverse lookup without
+making assumptions about the nature of &#8216;content&#8217;. Child classes can re-implement this function to
+make it more efficient.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.nodeFromId">
+<code class="descname">nodeFromId</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.nodeFromId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.nodeFromId" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the node associated with the specified node id</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.nodeFromIndex">
+<code class="descname">nodeFromIndex</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.nodeFromIndex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.nodeFromIndex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the node at the given index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.parent">
+<code class="descname">parent</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.removeAllEmptyParents">
+<code class="descname">removeAllEmptyParents</code><span class="sig-paren">(</span><em>oldParent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.removeAllEmptyParents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.removeAllEmptyParents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.removeNode">
+<code class="descname">removeNode</code><span class="sig-paren">(</span><em>node</em>, <em>useModelReset=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.removeNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.removeNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the specified node from the tree
+if useModelReset is True, the calling function will use beginModelReset and endModelReset.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.CategoryTree.CategoryTreeView">
+<em class="property">class </em><code class="descname">CategoryTreeView</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for viewing category trees</p>
+<dl class="staticmethod">
+<dt id="uiModules.CategoryTree.CategoryTreeView.colorName">
+<em class="property">static </em><code class="descname">colorName</code><span class="sig-paren">(</span><em>child</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.colorName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.colorName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.expandToNode">
+<code class="descname">expandToNode</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.expandToNode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.expandToNode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand all parents above specified node</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onBold">
+<code class="descname">onBold</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onBold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onBold" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onControl">
+<code class="descname">onControl</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onControl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onDelete">
+<code class="descname">onDelete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onDelete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onDelete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onKey">
+<code class="descname">onKey</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onRemoveBackgroundColor">
+<code class="descname">onRemoveBackgroundColor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onRemoveBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onRemoveBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onReorder">
+<code class="descname">onReorder</code><span class="sig-paren">(</span><em>up</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onReorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onReorder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.onSetBackgroundColor">
+<code class="descname">onSetBackgroundColor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.onSetBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.onSetBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.restoreTreeColumnWidth">
+<code class="descname">restoreTreeColumnWidth</code><span class="sig-paren">(</span><em>columnWidths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.restoreTreeColumnWidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.restoreTreeColumnWidth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.restoreTreeMarkup">
+<code class="descname">restoreTreeMarkup</code><span class="sig-paren">(</span><em>nodeStates</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.restoreTreeMarkup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.restoreTreeMarkup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.restoreTreeState">
+<code class="descname">restoreTreeState</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.restoreTreeState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.restoreTreeState" title="Permalink to this definition">¶</a></dt>
+<dd><p>load in a tree state from the given column widths and state</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.selectedDataNodes">
+<code class="descname">selectedDataNodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.selectedDataNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.selectedDataNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of first data nodes of selected nodes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.selectedNodes">
+<code class="descname">selectedNodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.selectedNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.selectedNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as selectedRows, but returns list of nodes rather than list of model indexes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.selectedRowIndexes">
+<code class="descname">selectedRowIndexes</code><span class="sig-paren">(</span><em>col=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.selectedRowIndexes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.selectedRowIndexes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of unique model indexes corresponding to column &#8216;col&#8217; of each selected element, sorted by row.</p>
+<p>Built-in selectionModel().selectedRows function seems to have a bug</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.selectedTopIndexes">
+<code class="descname">selectedTopIndexes</code><span class="sig-paren">(</span><em>col=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.selectedTopIndexes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.selectedTopIndexes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns list of unique top level model indexes corresponding to column &#8216;col&#8217; of the top level of each selected element, sorted by row.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.selectedTopNodes">
+<code class="descname">selectedTopNodes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.selectedTopNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.selectedTopNodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Same as selectedTopIndexes, but returns list of nodes rather than list of model indexes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.setBackgroundColor">
+<code class="descname">setBackgroundColor</code><span class="sig-paren">(</span><em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.setBackgroundColor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.setBackgroundColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.treeColumnWidth">
+<code class="descname">treeColumnWidth</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.treeColumnWidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.treeColumnWidth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.treeMarkup">
+<code class="descname">treeMarkup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.treeMarkup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.treeMarkup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.CategoryTreeView.treeState">
+<code class="descname">treeState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#CategoryTreeView.treeState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.CategoryTreeView.treeState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns tree state for saving config</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.CategoryTree.Node">
+<em class="property">class </em><code class="descname">Node</code><span class="sig-paren">(</span><em>parent</em>, <em>id</em>, <em>nodeType</em>, <em>content</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#Node"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.Node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for tree nodes</p>
+<dl class="method">
+<dt id="uiModules.CategoryTree.Node.child">
+<code class="descname">child</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#Node.child"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.Node.child" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CategoryTree.Node.childCount">
+<code class="descname">childCount</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CategoryTree.html#Node.childCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CategoryTree.Node.childCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.CategoryTree.Node.row">
+<code class="descname">row</code><a class="headerlink" href="#uiModules.CategoryTree.Node.row" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return this node&#8217;s row in its parent&#8217;s list of children</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.ComboBoxDelegate">
+<span id="comboboxdelegate"></span><h2>ComboBoxDelegate<a class="headerlink" href="#module-uiModules.ComboBoxDelegate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegate">
+<em class="property">class </em><code class="descname">ComboBoxDelegate</code><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for combo box editors in models</p>
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegate.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegate.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the combo box editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegate.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>editor</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegate.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the editor based on the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegate.setModelData">
+<code class="descname">setModelData</code><span class="sig-paren">(</span><em>editor</em>, <em>model</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegate.setModelData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the model based on the editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegate.updateEditorGeometry">
+<code class="descname">updateEditorGeometry</code><span class="sig-paren">(</span><em>editor</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegate.updateEditorGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegate.updateEditorGeometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegateMixin">
+<em class="property">class </em><code class="descname">ComboBoxDelegateMixin</code><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegateMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegateMixin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegateMixin.createEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the combo box editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>editor</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegateMixin.setEditorData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the editor based on the model</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.setModelData">
+<code class="descname">setModelData</code><span class="sig-paren">(</span><em>editor</em>, <em>model</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ComboBoxDelegate.html#ComboBoxDelegateMixin.setModelData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ComboBoxDelegate.ComboBoxDelegateMixin.setModelData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the data in the model based on the editor</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.CoordinatePlotWidget">
+<span id="coordinateplotwidget"></span><h2>CoordinatePlotWidget<a class="headerlink" href="#module-uiModules.CoordinatePlotWidget" title="Permalink to this headline">¶</a></h2>
+<p>This is the main plotting element used in the control program. It adds the
+coordinates of the cursor position as a second element also allows one to
+copy the coordinates to the clipboard. It uses a custom version of PlotItem
+which includes custom range options.</p>
+<dl class="class">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget">
+<em class="property">class </em><code class="descname">CoordinatePlotWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>axisItems=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main widget for plotting data. It consists of a plot, a
+coordinate display, and custom buttons.</p>
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.addCustomPlot">
+<code class="descname">addCustomPlot</code><span class="sig-paren">(</span><em>row=None</em>, <em>col=None</em>, <em>rowspan=1</em>, <em>colspan=1</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.addCustomPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.addCustomPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a duplicate of addPlot from GraphicsLayout.py. The only change
+is CustomPlotItem instead of PlotItem.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRange">
+<code class="descname">autoRange</code><span class="sig-paren">(</span><em>padding=None</em>, <em>items=None</em>, <em>item=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.autoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRangeEnabled">
+<code class="descname">autoRangeEnabled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.autoRangeEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRangeEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.copyPointsToClipboard">
+<code class="descname">copyPointsToClipboard</code><span class="sig-paren">(</span><em>modifiers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.copyPointsToClipboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.copyPointsToClipboard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.enableAutoRange">
+<code class="descname">enableAutoRange</code><span class="sig-paren">(</span><em>axes=None</em>, <em>enable=True</em>, <em>x=None</em>, <em>y=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.enableAutoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.enableAutoRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.keyReleaseEvent">
+<code class="descname">keyReleaseEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.mouseReleaseEvent">
+<code class="descname">mouseReleaseEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onCopyLocation">
+<code class="descname">onCopyLocation</code><span class="sig-paren">(</span><em>which</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.onCopyLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onCopyLocation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onMouseMoved">
+<code class="descname">onMouseMoved</code><span class="sig-paren">(</span><em>pos</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.onMouseMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onMouseMoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute when mouse is moved. If mouse is over plot, show cursor
+coordinates on coordinateLabel.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onToggleTimeAxis">
+<code class="descname">onToggleTimeAxis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.onToggleTimeAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onToggleTimeAxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setPrintView">
+<code class="descname">setPrintView</code><span class="sig-paren">(</span><em>printview=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.setPrintView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setPrintView" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setTimeAxis">
+<code class="descname">setTimeAxis</code><span class="sig-paren">(</span><em>timeAxis=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CoordinatePlotWidget.setTimeAxis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setTimeAxis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem">
+<em class="property">class </em><code class="descname">CustomPlotItem</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot using pyqtgraph.PlotItem, with extra buttons.</p>
+<dl class="docutils">
+<dt>The added buttons are:</dt>
+<dd>-A unity range button which sets the y axis range to 1.
+-A hold zero button which keeps the y minimum at zero while autoranging.</dd>
+</dl>
+<p>resizeEvent is extended to set the position of the two new buttons correctly.</p>
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.autoBtnClicked">
+<code class="descname">autoBtnClicked</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.autoBtnClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.autoBtnClicked" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute when the the autoBtn is clicked. Set the holdZero variable to False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.hideAllButtons">
+<code class="descname">hideAllButtons</code><span class="sig-paren">(</span><em>hide</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.hideAllButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.hideAllButtons" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.onHoldZero">
+<code class="descname">onHoldZero</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.onHoldZero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.onHoldZero" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute when holdZeroBtn is clicked. Autorange, but leave the y minimum at zero.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.onUnityRange">
+<code class="descname">onUnityRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.onUnityRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.onUnityRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute when unityRangeBtn is clicked. Set the yrange to 0 to 1.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.resizeEvent">
+<code class="descname">resizeEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.resizeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the button sizes appropriately.</p>
+<p>The code is borrowed from the same code applied to autoBtn in the parent method in PlotItem.py.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomPlotItem.updateButtons">
+<code class="descname">updateButtons</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomPlotItem.updateButtons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomPlotItem.updateButtons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides parent method updateButtons. Makes the autoscale button visible all the time.</p>
+<p>In the parent method, the auto button disappears when autoranging is enabled, or when the mouse moved off the plot window.
+I didn&#8217;t like that feature, so this method disables it.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.CoordinatePlotWidget.CustomViewBox">
+<em class="property">class </em><code class="descname">CustomViewBox</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomViewBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomViewBox" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override of pyqtgraph ViewBox class. Modifies setRange method to allow for autoranging while keeping the minimum at zero.</p>
+<p>Adds a variable &#8220;holdZero&#8221; which indicates whether the ViewBox should hold the minimum y value at zero while autoranging.
+If this variable is True, the setRange method forces the minimum y value to be zero. If it is False, the setRange method
+is identical to that of pyqtgraph.ViewBox.</p>
+<dl class="method">
+<dt id="uiModules.CoordinatePlotWidget.CustomViewBox.updateAutoRange">
+<code class="descname">updateAutoRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/CoordinatePlotWidget.html#CustomViewBox.updateAutoRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.CoordinatePlotWidget.CustomViewBox.updateAutoRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.DateTimePlotWidget">
+<span id="datetimeplotwidget"></span><h2>DateTimePlotWidget<a class="headerlink" href="#module-uiModules.DateTimePlotWidget" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.DateTimePlotWidget.DateTimePlotWidget">
+<em class="property">class </em><code class="descname">DateTimePlotWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/DateTimePlotWidget.html#DateTimePlotWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.DateTimePlotWidget.DateTimePlotWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main widget for plotting data. It consists of a plot, a
+coordinate display, and custom buttons.</p>
+<dl class="method">
+<dt id="uiModules.DateTimePlotWidget.DateTimePlotWidget.onMouseMoved">
+<code class="descname">onMouseMoved</code><span class="sig-paren">(</span><em>pos</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/DateTimePlotWidget.html#DateTimePlotWidget.onMouseMoved"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.DateTimePlotWidget.DateTimePlotWidget.onMouseMoved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Execute when mouse is moved. If mouse is over plot, show cursor
+coordinates on coordinateLabel.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.ExpressionSpinBox">
+<span id="expressionspinbox"></span><h2>ExpressionSpinBox<a class="headerlink" href="#module-uiModules.ExpressionSpinBox" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox">
+<em class="property">class </em><code class="descname">ExpressionSpinBox</code><span class="sig-paren">(</span><em>parent=None</em>, <em>globalDict=None</em>, <em>valueChangedOnEditingFinished=True</em>, <em>emptyStringValue=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.dependentUpdate">
+<code class="descname">dependentUpdate</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>string</em>, <em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.dependentUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.dependentUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.expressionChanged">
+<code class="descname">expressionChanged</code><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.expressionChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.focusInEvent">
+<code class="descname">focusInEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.focusInEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.focusInEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.focusOutEvent">
+<code class="descname">focusOutEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.focusOutEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.focusOutEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.onEditingFinished">
+<code class="descname">onEditingFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.onEditingFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.onEditingFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.onStepBy">
+<code class="descname">onStepBy</code><span class="sig-paren">(</span><em>newvalue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.onStepBy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.onStepBy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.setExpression">
+<code class="descname">setExpression</code><span class="sig-paren">(</span><em>expressionValue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.setExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.setExpression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.updateStyleSheet">
+<code class="descname">updateStyleSheet</code><span class="sig-paren">(</span><em>hasFocus=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.updateStyleSheet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.updateStyleSheet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.ExpressionSpinBox.ExpressionSpinBox.value">
+<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ExpressionSpinBox.html#ExpressionSpinBox.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ExpressionSpinBox.ExpressionSpinBox.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.FileComboWidget">
+<span id="filecombowidget"></span><h2>FileComboWidget<a class="headerlink" href="#module-uiModules.FileComboWidget" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.FileComboWidget.FileComboWidget">
+<em class="property">class </em><code class="descname">FileComboWidget</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ui for opening files.</p>
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.currentFile">
+<code class="descname">currentFile</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.currentFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.defaultDir">
+<code class="descname">defaultDir</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.defaultDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.fileType">
+<code class="descname">fileType</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.fileType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.getFilename">
+<code class="descname">getFilename</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.getFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.getFilename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onFilenameChange">
+<code class="descname">onFilenameChange</code><span class="sig-paren">(</span><em>ind</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onFilenameChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onFilenameChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>The combo box is changed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onNew">
+<code class="descname">onNew</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onNew"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onNew" title="Permalink to this definition">¶</a></dt>
+<dd><p>The new button is clicked. Open file prompt for new file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onOpen">
+<code class="descname">onOpen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onOpen" title="Permalink to this definition">¶</a></dt>
+<dd><p>The open button is clicked. Open file prompt for file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onRemoveCurrent">
+<code class="descname">onRemoveCurrent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onRemoveCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onRemoveCurrent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove current button is clicked. Remove file from combo box.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onReset">
+<code class="descname">onReset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onReset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onReset" title="Permalink to this definition">¶</a></dt>
+<dd><p>reset button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.onSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>save button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.openFile">
+<code class="descname">openFile</code><span class="sig-paren">(</span><em>filename</em>, <em>new=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.openFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.openFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>open the file &#8216;filename.&#8217; &#8216;new&#8217; indicates if this is a new file or not.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.openFileSignal">
+<code class="descname">openFileSignal</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.openFileSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.readOnly">
+<code class="descname">readOnly</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.readOnly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.recentFiles">
+<code class="descname">recentFiles</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.recentFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.FileComboWidget.FileComboWidget.saveFileSignal">
+<code class="descname">saveFileSignal</code><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.saveFileSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.FileComboWidget.FileComboWidget.updateValidator">
+<code class="descname">updateValidator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/FileComboWidget.html#FileComboWidget.updateValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.FileComboWidget.FileComboWidget.updateValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the validator match the recentFiles list. Uses regExp b(f1|f2|f3...)b, where fn are filenames.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.GenericTableModel">
+<span id="generictablemodel"></span><h2>GenericTableModel<a class="headerlink" href="#module-uiModules.GenericTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.GenericTableModel.GenericTableModel">
+<em class="property">class </em><code class="descname">GenericTableModel</code><span class="sig-paren">(</span><em>config</em>, <em>data</em>, <em>objectName</em>, <em>columnHeaders</em>, <em>printers=None</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F5620B8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.remove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F562358&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.GenericTableModel.GenericTableModel.setDataTable">
+<code class="descname">setDataTable</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/GenericTableModel.html#GenericTableModel.setDataTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.GenericTableModel.GenericTableModel.setDataTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.ImportErrorPopup">
+<span id="importerrorpopup"></span><h2>ImportErrorPopup<a class="headerlink" href="#module-uiModules.ImportErrorPopup" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="uiModules.ImportErrorPopup.importErrorPopup">
+<code class="descname">importErrorPopup</code><span class="sig-paren">(</span><em>moduleName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/ImportErrorPopup.html#importErrorPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.ImportErrorPopup.importErrorPopup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.KeyboardFilter">
+<span id="keyboardfilter"></span><h2>KeyboardFilter<a class="headerlink" href="#module-uiModules.KeyboardFilter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.KeyboardFilter.KeyFilter">
+<em class="property">class </em><code class="descname">KeyFilter</code><span class="sig-paren">(</span><em>key</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/KeyboardFilter.html#KeyFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.KeyboardFilter.KeyFilter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.KeyboardFilter.KeyFilter.eventFilter">
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>obj</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/KeyboardFilter.html#KeyFilter.eventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.KeyboardFilter.KeyFilter.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.KeyboardFilter.KeyFilter.keyPressed">
+<code class="descname">keyPressed</code><a class="headerlink" href="#uiModules.KeyboardFilter.KeyFilter.keyPressed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.KeyboardFilter.KeyListFilter">
+<em class="property">class </em><code class="descname">KeyListFilter</code><span class="sig-paren">(</span><em>keys</em>, <em>controlKeys=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/KeyboardFilter.html#KeyListFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.KeyboardFilter.KeyListFilter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="uiModules.KeyboardFilter.KeyListFilter.controlKeyPressed">
+<code class="descname">controlKeyPressed</code><a class="headerlink" href="#uiModules.KeyboardFilter.KeyListFilter.controlKeyPressed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.KeyboardFilter.KeyListFilter.eventFilter">
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>obj</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/KeyboardFilter.html#KeyListFilter.eventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.KeyboardFilter.KeyListFilter.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.KeyboardFilter.KeyListFilter.keyPressed">
+<code class="descname">keyPressed</code><a class="headerlink" href="#uiModules.KeyboardFilter.KeyListFilter.keyPressed" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.MagnitudeParameter">
+<span id="magnitudeparameter"></span><h2>MagnitudeParameter<a class="headerlink" href="#module-uiModules.MagnitudeParameter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.MagnitudeParameter.ExpressionParameter">
+<em class="property">class </em><code class="descname">ExpressionParameter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#ExpressionParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.ExpressionParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="uiModules.MagnitudeParameter.ExpressionParameter.itemClass">
+<code class="descname">itemClass</code><a class="headerlink" href="#uiModules.MagnitudeParameter.ExpressionParameter.itemClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#uiModules.MagnitudeParameter.ExpressionWidgetParameterItem" title="uiModules.MagnitudeParameter.ExpressionWidgetParameterItem"><code class="xref py py-class docutils literal"><span class="pre">ExpressionWidgetParameterItem</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeParameter.ExpressionParameter.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>value</em>, <em>blockSignal=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#ExpressionParameter.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.ExpressionParameter.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.MagnitudeParameter.ExpressionWidgetParameterItem">
+<em class="property">class </em><code class="descname">ExpressionWidgetParameterItem</code><span class="sig-paren">(</span><em>param</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#ExpressionWidgetParameterItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.ExpressionWidgetParameterItem" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.MagnitudeParameter.ExpressionWidgetParameterItem.makeWidget">
+<code class="descname">makeWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#ExpressionWidgetParameterItem.makeWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.ExpressionWidgetParameterItem.makeWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.MagnitudeParameter.MagnitudeParameter">
+<em class="property">class </em><code class="descname">MagnitudeParameter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#MagnitudeParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.MagnitudeParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="uiModules.MagnitudeParameter.MagnitudeParameter.itemClass">
+<code class="descname">itemClass</code><a class="headerlink" href="#uiModules.MagnitudeParameter.MagnitudeParameter.itemClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem" title="uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem"><code class="xref py py-class docutils literal"><span class="pre">MagnitudeWidgetParameterItem</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem">
+<em class="property">class </em><code class="descname">MagnitudeWidgetParameterItem</code><span class="sig-paren">(</span><em>param</em>, <em>depth</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#MagnitudeWidgetParameterItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem.makeWidget">
+<code class="descname">makeWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeParameter.html#MagnitudeWidgetParameterItem.makeWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeParameter.MagnitudeWidgetParameterItem.makeWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.MagnitudeSpinBox">
+<span id="magnitudespinbox"></span><h2>MagnitudeSpinBox<a class="headerlink" href="#module-uiModules.MagnitudeSpinBox" title="Permalink to this headline">¶</a></h2>
+<p>A QSpinBox for Physical quantities. It accepts for example &#8220;10 MHz&#8221;
+Features are: up-down arrows will increase/decrease the digit left to the cursor position</p>
+<dl class="exception">
+<dt id="uiModules.MagnitudeSpinBox.DimensionMismatch">
+<em class="property">exception </em><code class="descname">DimensionMismatch</code><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#DimensionMismatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.DimensionMismatch" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox">
+<em class="property">class </em><code class="descname">MagnitudeSpinBox</code><span class="sig-paren">(</span><em>parent=None</em>, <em>globalDict=None</em>, <em>valueChangedOnEditingFinished=True</em>, <em>emptyStringValue=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.dimension">
+<code class="descname">dimension</code><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.dimension" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object&gt;</em><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.fixup">
+<code class="descname">fixup</code><span class="sig-paren">(</span><em>inputstring</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.fixup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.fixup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.interpretText">
+<code class="descname">interpretText</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.interpretText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.interpretText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.onEditingFinished">
+<code class="descname">onEditingFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.onEditingFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.onEditingFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.setText">
+<code class="descname">setText</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.setText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.sizeHint">
+<code class="descname">sizeHint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.sizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.sizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.stepBy">
+<code class="descname">stepBy</code><span class="sig-paren">(</span><em>steps</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.stepBy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.stepBy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.stepEnabled">
+<code class="descname">stepEnabled</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.stepEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.stepEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.text">
+<code class="descname">text</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.text" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.textValueChanged">
+<code class="descname">textValueChanged</code><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.textValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.validate">
+<code class="descname">validate</code><span class="sig-paren">(</span><em>inputstring</em>, <em>pos</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.value">
+<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBox.MagnitudeSpinBox.wheelEvent">
+<code class="descname">wheelEvent</code><span class="sig-paren">(</span><em>wheelEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBox.html#MagnitudeSpinBox.wheelEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBox.MagnitudeSpinBox.wheelEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.MagnitudeSpinBoxDelegate">
+<span id="magnitudespinboxdelegate"></span><h2>MagnitudeSpinBoxDelegate<a class="headerlink" href="#module-uiModules.MagnitudeSpinBoxDelegate" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate">
+<em class="property">class </em><code class="descname">MagnitudeSpinBoxDelegate</code><span class="sig-paren">(</span><em>globalDict=None</em>, <em>emptyStringValue=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>editor</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setGlobalVariables">
+<code class="descname">setGlobalVariables</code><span class="sig-paren">(</span><em>variables</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegate.setGlobalVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setGlobalVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setModelData">
+<code class="descname">setModelData</code><span class="sig-paren">(</span><em>editor</em>, <em>model</em>, <em>index</em><span class="sig-paren">)</span><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.setModelData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.updateEditorGeometry">
+<code class="descname">updateEditorGeometry</code><span class="sig-paren">(</span><em>editor</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegate.updateEditorGeometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegate.updateEditorGeometry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin">
+<em class="property">class </em><code class="descname">MagnitudeSpinBoxDelegateMixin</code><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegateMixin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.createEditor">
+<code class="descname">createEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>option</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegateMixin.createEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.createEditor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.setEditorData">
+<code class="descname">setEditorData</code><span class="sig-paren">(</span><em>editor</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegateMixin.setEditorData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.setEditorData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.setModelData">
+<code class="descname">setModelData</code><span class="sig-paren">(</span><em>editor</em>, <em>model</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/MagnitudeSpinBoxDelegate.html#MagnitudeSpinBoxDelegateMixin.setModelData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.MagnitudeSpinBoxDelegate.MagnitudeSpinBoxDelegateMixin.setModelData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.RedBlackComboBox">
+<span id="redblackcombobox"></span><h2>RedBlackComboBox<a class="headerlink" href="#module-uiModules.RedBlackComboBox" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox">
+<em class="property">class </em><code class="descname">RedBlackComboBox</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox.addUnselectableItems">
+<code class="descname">addUnselectableItems</code><span class="sig-paren">(</span><em>itemlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox.addUnselectableItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox.addUnselectableItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox.findText">
+<code class="descname">findText</code><span class="sig-paren">(</span><em>text</em>, <em>flags=&lt;PyQt5.QtCore.MatchFlags object at 0x000002665C639898&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox.findText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox.findText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add searched item as unselectable item if it is not available in the regular items</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox.highlightCurrentAsUnselectable">
+<code class="descname">highlightCurrentAsUnselectable</code><span class="sig-paren">(</span><em>unselectable=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox.highlightCurrentAsUnselectable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox.highlightCurrentAsUnselectable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RedBlackComboBox.RedBlackComboBox.onCurrentIndexChanged">
+<code class="descname">onCurrentIndexChanged</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RedBlackComboBox.html#RedBlackComboBox.onCurrentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RedBlackComboBox.RedBlackComboBox.onCurrentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.RotatedHeaderView">
+<span id="rotatedheaderview"></span><h2>RotatedHeaderView<a class="headerlink" href="#module-uiModules.RotatedHeaderView" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView">
+<em class="property">class </em><code class="descname">RotatedHeaderView</code><span class="sig-paren">(</span><em>orientation</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView.minimumSizeHint">
+<code class="descname">minimumSizeHint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView.minimumSizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView.minimumSizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView.paintSection">
+<code class="descname">paintSection</code><span class="sig-paren">(</span><em>painter</em>, <em>rect</em>, <em>logicalIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView.paintSection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView.paintSection" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView.sectionSizeFromContents">
+<code class="descname">sectionSizeFromContents</code><span class="sig-paren">(</span><em>logicalIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView.sectionSizeFromContents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView.sectionSizeFromContents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView.sectionSizeHint">
+<code class="descname">sectionSizeHint</code><span class="sig-paren">(</span><em>logicalIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView.sectionSizeHint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView.sectionSizeHint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.RotatedHeaderView.RotatedHeaderView.sizeHintForColumn">
+<code class="descname">sizeHintForColumn</code><span class="sig-paren">(</span><em>logicalIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/RotatedHeaderView.html#RotatedHeaderView.sizeHintForColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.RotatedHeaderView.RotatedHeaderView.sizeHintForColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.SoftStart">
+<span id="softstart"></span><h2>SoftStart<a class="headerlink" href="#module-uiModules.SoftStart" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.SoftStart.LinearStart">
+<em class="property">class </em><code class="descname">LinearStart</code><a class="reference internal" href="../_modules/uiModules/SoftStart.html#LinearStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.LinearStart" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.SoftStart.LinearStart.effectiveLength">
+<code class="descname">effectiveLength</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#LinearStart.effectiveLength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.LinearStart.effectiveLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.SoftStart.LinearStart.name">
+<code class="descname">name</code><em class="property"> = 'Linear'</em><a class="headerlink" href="#uiModules.SoftStart.LinearStart.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.LinearStart.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#LinearStart.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.LinearStart.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.LinearStart.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#LinearStart.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.LinearStart.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.SoftStart.SinSqStart">
+<em class="property">class </em><code class="descname">SinSqStart</code><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SinSqStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SinSqStart" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.SoftStart.SinSqStart.effectiveLength">
+<code class="descname">effectiveLength</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SinSqStart.effectiveLength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SinSqStart.effectiveLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.SoftStart.SinSqStart.name">
+<code class="descname">name</code><em class="property"> = 'Sine square'</em><a class="headerlink" href="#uiModules.SoftStart.SinSqStart.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.SinSqStart.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SinSqStart.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SinSqStart.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.SinSqStart.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SinSqStart.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SinSqStart.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.SoftStart.SoftStart">
+<em class="property">class </em><code class="descname">SoftStart</code><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SoftStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SoftStart" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.SoftStart.SoftStart.effectiveLength">
+<code class="descname">effectiveLength</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SoftStart.effectiveLength"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SoftStart.effectiveLength" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.SoftStart.SoftStart.name">
+<code class="descname">name</code><em class="property"> = ''</em><a class="headerlink" href="#uiModules.SoftStart.SoftStart.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.SoftStart.start">
+<code class="descname">start</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SoftStart.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SoftStart.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.SoftStart.SoftStart.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>edge</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/SoftStart.html#SoftStart.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.SoftStart.SoftStart.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.TableViewExtended">
+<span id="tableviewextended"></span><h2>TableViewExtended<a class="headerlink" href="#module-uiModules.TableViewExtended" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.TableViewExtended.TableViewExtended">
+<em class="property">class </em><code class="descname">TableViewExtended</code><a class="reference internal" href="../_modules/uiModules/TableViewExtended.html#TableViewExtended"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TableViewExtended.TableViewExtended" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds Ctrl+C copy functionality to table view</p>
+<dl class="method">
+<dt id="uiModules.TableViewExtended.TableViewExtended.keyReleaseEvent">
+<code class="descname">keyReleaseEvent</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TableViewExtended.html#TableViewExtended.keyReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TableViewExtended.TableViewExtended.keyReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.TableViewRotatedHorizontalHeader">
+<span id="tableviewrotatedhorizontalheader"></span><h2>TableViewRotatedHorizontalHeader<a class="headerlink" href="#module-uiModules.TableViewRotatedHorizontalHeader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.TableViewRotatedHorizontalHeader.TableViewRotatedHorizontalHeader">
+<em class="property">class </em><code class="descname">TableViewRotatedHorizontalHeader</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TableViewRotatedHorizontalHeader.html#TableViewRotatedHorizontalHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TableViewRotatedHorizontalHeader.TableViewRotatedHorizontalHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>TableView with rotated Horizontal Header</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-uiModules.TreeViewAdapter">
+<span id="treeviewadapter"></span><h2>TreeViewAdapter<a class="headerlink" href="#module-uiModules.TreeViewAdapter" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="uiModules.TreeViewAdapter.Structure">
+<em class="property">class </em><code class="descname">Structure</code><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.TreeViewAdapter.Structure.addChild">
+<code class="descname">addChild</code><span class="sig-paren">(</span><em>parent</em>, <em>child</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.addChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.addChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.Structure.addChildren">
+<code class="descname">addChildren</code><span class="sig-paren">(</span><em>parent</em>, <em>children</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.addChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.addChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="uiModules.TreeViewAdapter.Structure.flatStructure">
+<em class="property">static </em><code class="descname">flatStructure</code><span class="sig-paren">(</span><em>rootNode</em>, <em>dictionary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.flatStructure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.flatStructure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.Structure.insertChild">
+<code class="descname">insertChild</code><span class="sig-paren">(</span><em>parent</em>, <em>child</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.insertChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.insertChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.Structure.insertChildren">
+<code class="descname">insertChildren</code><span class="sig-paren">(</span><em>parent</em>, <em>children</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.insertChildren"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.insertChildren" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.Structure.removeChild">
+<code class="descname">removeChild</code><span class="sig-paren">(</span><em>parent</em>, <em>child</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#Structure.removeChild"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.Structure.removeChild" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter">
+<em class="property">class </em><code class="descname">TreeViewModelAdapter</code><span class="sig-paren">(</span><em>data</em>, <em>structure=None</em>, <em>rootNode='rootNode'</em>, <em>denyStructuralChanges=False</em>, <em>keyColumn=0</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.addRow">
+<code class="descname">addRow</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.addRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.addRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.dropMimeData">
+<code class="descname">dropMimeData</code><span class="sig-paren">(</span><em>mimedata</em>, <em>action</em>, <em>row</em>, <em>column</em>, <em>parentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.dropMimeData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.dropMimeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.getItem">
+<code class="descname">getItem</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.getItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.getItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.headerLookup">
+<code class="descname">headerLookup</code><em class="property"> = ['Key', 'Value']</em><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.headerLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>row</em>, <em>column</em>, <em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.insertItems">
+<code class="descname">insertItems</code><span class="sig-paren">(</span><em>row</em>, <em>items</em>, <em>parentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.insertItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.insertItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeData">
+<code class="descname">mimeData</code><span class="sig-paren">(</span><em>indices</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.mimeData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeTypes">
+<code class="descname">mimeTypes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.mimeTypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeTypes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.parent">
+<code class="descname">parent</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.parent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.parent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.popRow">
+<code class="descname">popRow</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.popRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.popRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.removeRows">
+<code class="descname">removeRows</code><span class="sig-paren">(</span><em>row</em>, <em>count</em>, <em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.removeRows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.removeRows" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is called internally upon drag move, however it is only called AFTER the drop.
+We need the entry to be removed before it is re-added, thus the drop target takes care
+of both and this function does nothing and returns success.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDragActions">
+<code class="descname">supportedDragActions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.supportedDragActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDragActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDropActions">
+<code class="descname">supportedDropActions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/uiModules/TreeViewAdapter.html#TreeViewModelAdapter.supportedDropActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDropActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

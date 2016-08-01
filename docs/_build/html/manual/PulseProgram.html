@@ -1,0 +1,660 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Pulse Program &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Scans" href="Scans.html"/>
+        <link rel="prev" title="FPGA Control" href="FPGAControl.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Pulse Program</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pulse-program-syntax">Pulse Program Syntax</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#introduction">Introduction</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#control-structures">control structures</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#variable-types">Variable Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#encodings">Encodings</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#commands">Commands</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Pulse Program</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/PulseProgram.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pulse-program">
+<span id="pulseprogram"></span><h1>Pulse Program<a class="headerlink" href="#pulse-program" title="Permalink to this headline">¶</a></h1>
+<p>Once the configuration files have been setup, the main program opens. The first time the program runs, the pulse program window will also open. On subsequent runs, it will return to whatever state it was in when it was closed last. To open the pulse program window, click <a class="reference internal" href="../_images/pulser1.png"><img alt="pulses" src="../_images/pulser1.png" style="width: 22.05px; height: 22.05px;" /></a> .</p>
+<div class="figure" id="id1">
+<a class="reference internal image-reference" href="../_images/PulseProgram.png"><img alt="../_images/PulseProgram.png" src="../_images/PulseProgram.png" style="width: 1919.0px; height: 1080.0px;" /></a>
+<p class="caption"><span class="caption-text">The pulse program interface</span></p>
+</div>
+<p>The pulse program window consists of the following docks:</p>
+<blockquote>
+<div><ul>
+<li><dl class="first docutils">
+<dt>Pulse Program</dt>
+<dd><p class="first">This is the primary dock, which is the text file itself. Ideally this is changed rarely, i.e. only when some sort of fundamental change to the experiment structure is needed. Generally different pieces of the experimental sequence can be included or omitted simply based on whether their duration is non-zero, i.e.:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">PumpTime</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+   <span class="n">pump</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="last">By using conditionals this way, you do not need to modify the pulse program itself when you want to turn off pumping. Instead, just set PumpTime to zero, which can be done using the checkboxes in the parameters dock (see below).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Parameters</dt>
+<dd><p class="first">This is an interface for setting parameters which are declared in the pulse program. Any expression can be typed in here, and the result will be shown under &#8220;evaluated.&#8221; Expressions can reference global variables, and can also reference other pulse program parameters. If parameter <em>A</em> depends on parameter <em>B</em>, and parameter <em>B</em> is scanned, parameter <em>A</em> is scanned too. This allows things like this:</p>
+<div class="figure align-center" id="id2">
+<a class="reference internal image-reference" href="../_images/parameterDependenciesExample.png"><img alt="../_images/parameterDependenciesExample.png" src="../_images/parameterDependenciesExample.png" style="width: 442.0px; height: 206.0px;" /></a>
+<p class="caption"><span class="caption-text">Example of pulse program dependencies. If <em>GateDetuning</em> is now scanned, <em>detuning</em> will be scanned as well (because it depends on <em>GateDetuning</em>), as will <em>RamanGateDDSFreq1</em> and <em>RamanGateDDSFreq2</em> (because they depend on detuning). The code will not allow circular dependencies.</span></p>
+</div>
+<p>All parameters can be scanned in the scan control, see <a class="reference internal" href="Scans.html#scans"><span class="std std-ref">Scans</span></a>. If the checkbox next to a parameter is unchecked, the parameter is set to zero. Unchecking the checkbox is equivalent to typing &#8216;0&#8217; into the value field, without losing the contents of the value field.</p>
+<div class="last admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">Scanning a parameter overrides the checkbox. If a parameter which is unchecked is subsequently scanned, it will be changed to a non-zero value by the scan.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Shutters</dt>
+<dd><p class="first">Interface for defining shutters. When a <cite>shutter</cite> or <cite>masked_shutter</cite> is declared in the pulse program, a new line will show up here to define that shutter. The columns correspond to individual TTL lines, with names set in the main GUI shutters interface. A shutter sets every TTL bit, while a masked_shutter only sets specified bits.</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>Green:</strong> TTL High</li>
+<li><strong>Red:</strong> TTL Low</li>
+<li><strong>White:</strong> No change</li>
+</ul>
+</div></blockquote>
+<p class="last">The last 16 bits are internal control lines for turning on and off the PI Loops, and turning on and off the DAC scans.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Triggers</dt>
+<dd><p class="first last">Interface for defining triggers. A trigger is an internal signal that goes high for one clock cycle (= 10 ns) before going low again. There are trigger lines for updating the DDSs, updating the DACs, and resetting the PI Loops. When a <cite>trigger</cite> is declared in the pulse program, a line is added.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Counters</dt>
+<dd><p class="first">Interface for defining specific counters to gate, or other types of measurements done by the FPGA. The counters interface has the following columns:</p>
+<blockquote class="last">
+<div><ul>
+<li><dl class="first docutils">
+<dt>Count&lt;n&gt;:</dt>
+<dd><p class="first last">TTL input line &lt;n&gt;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>TS&lt;n&gt;:</dt>
+<dd><p class="first last">Timestamp line for TTL input &lt;n&gt;, see <a class="reference internal" href="Scans.html#timestamps"><span class="std std-ref">Timestamps</span></a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ADC&lt;n&gt;:</dt>
+<dd><p class="first last">Voltage on ADC&lt;n&gt;</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>PI&lt;n&gt;:</dt>
+<dd><p class="first">line for monitoring output of PI&lt;n&gt;.</p>
+<div class="last admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">This is not to be confused with the PI&lt;n&gt; enable lines in the shutters interface! Those lines are for turning PI loops on and off, while these lines are for monitoring the output of PI loops.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>timeTick:</dt>
+<dd><p class="first last">On rising edge of counter, inserts the current time tick into the stream to the computer. It is saved in the raw data and results file, and can be used as an x-axis in plots. It is intended to give absolute hardware timestamps to experiments to check for things like 60 Hz noise.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>id:</dt>
+<dd><p class="first last">Assigning a counter line an id allows using the same physical counter in multiple roles. For example, suppose you want to monitor fluorescence during cooling and during detection, and you have a single PMT connected to channel 0. You would have two lines for creating the counters, <cite>counter CoolingCounters</cite> and <cite>counter DetectionCounters</cite>. Both would have <em>channel 0</em> selected, but one with <em>id 0</em> and one with <em>id 1</em>. The two counters can then be treated as if they were different physical counters.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>RAM Control</dt>
+<dd><p class="first">Interface for selecting a file to directly write to the RAM on the FPGA board. If the checkbox is checked, the RAM will be written.</p>
+<div class="admonition important">
+<p class="first admonition-title">Important</p>
+<p class="last">This overwrites the RAM values set by the <a class="reference internal" href="GateSequences.html#gatesequences"><span class="std std-ref">Gate Sequences</span></a> interface.</p>
+</div>
+<p class="last">The RAM Control file is a YAML file, with a line for each entry in the RAM specifying a value, unit, and encoding. An example can be found in \IonControl\config\RAMFiles\RamExample.yml. These can then be read out in the program using the <cite>read_ram()</cite> command. This file must be generated by you. One application would be something like sideband cooling with unequal red sideband pi times. The RAM file could specify a list of pi times to use as the sideband cooling progresses.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>When a pulse program is saved (CTRL-S in the editor, or click <a class="reference internal" href="../_images/filesave.png"><img alt="save" src="../_images/filesave.png" style="width: 24.0px; height: 24.0px;" /></a>), the program attempts to compile it. If it fails, it indicates where and why it failed. If it is successful, it updates the parameters, shutters, triggers, and counters displays to match the pulse program.</p>
+<p>The pulse program is run on the FPGA. It is compiled to a machine code that contains microcontroller instructions that are understood by the FPGA. A moderately complex pulse program, with lots of comments, can be seen in /IonControl/config/PulseProgramsPlus/Example.ppp.</p>
+<p>The pulse program configuration (which includes everything in the pulse program window) can be saved using the drop down menu in the parameters dock. This allows rapidly switching between different pulse program configurations. To make a new configuration set, just type a new name in the drop down menu and hit enter. By default, all changes made to any aspect of the pulse program window are saved to the currently selected configuration. If you do not want that behavior, right click anywhere in the pulse program window and de-select &#8220;Automatically Save Configuration.&#8221; Do so at your own peril. If you do disable autosaving, you can save a configuration by clicking the <a class="reference internal" href="../_images/filesave.png"><img alt="save" src="../_images/filesave.png" style="width: 24.0px; height: 24.0px;" /></a> icon next to the drop down menu.</p>
+<div class="section" id="pulse-program-syntax">
+<h2>Pulse Program Syntax<a class="headerlink" href="#pulse-program-syntax" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="update">
+<h4>update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h4>
+<p>The most important pulse program command to understand is the <cite>update(duration)</cite> command. Most pulse program commands to not effect any physical change to the FPGA behavior until the next <cite>update</cite>. When the program reaches an <cite>update</cite>, it has two effects: First, it simultaneously triggers all the commands since the last update, and second, it starts a timer of length equal to the argument of the update command. The effect of the timer is to prevent any subsequent <cite>update</cite> command from executing until the timer has elapsed. For example, consider the following code:</p>
+<blockquote>
+<div><div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">set_shutter</span><span class="p">(</span> <span class="n">DetectOn</span> <span class="p">)</span>         <span class="c1"># Get ready to set shutter DetectOn at the next update</span>
+<span class="n">set_counter</span><span class="p">(</span> <span class="n">DetectCounters</span> <span class="p">)</span>   <span class="c1"># Get ready to count on counter DetectCounters at the next update</span>
+<span class="n">update</span><span class="p">(</span> <span class="n">DetectTime</span> <span class="p">)</span>            <span class="c1"># simultaneously trigger previous two commands, and start counter of length DetectTime</span>
+<span class="n">set_inv_shutter</span><span class="p">(</span> <span class="n">DetectOn</span> <span class="p">)</span>     <span class="c1"># Get ready to set inverse shutter of DetectOn</span>
+<span class="n">set_shutter</span><span class="p">(</span> <span class="n">CoolingOn</span> <span class="p">)</span>        <span class="c1"># Get ready to set shutter CoolingOn</span>
+<span class="n">clear_counter</span><span class="p">()</span>                 <span class="c1"># Get ready to stop counting on previously set counter, and transmit result to the computer</span>
+<span class="n">update</span><span class="p">()</span>                        <span class="c1"># Simultaneously trigger previous three commands. This does not execute until DetectTime has elapsed since the last update</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The effect of this code is to simultaneously turn on the <cite>DetectOn</cite> shutter and count on the <cite>DetectCounters</cite> counter for a time <cite>DetectTime</cite>. After <cite>DetectTime</cite> has elapsed, it will simultaneously reverse the <cite>DetectOn</cite> shutter, turn on the <cite>CoolingOn</cite> shutter, stop counting, and transmit the count results to the computer.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The commands executed between update commands take a finite amount of time to execute. Many commands take about 50 ns (= 1 microcontroller cycle = 5x 100 MHz clock cycles). Some commands, such as <cite>set_dds</cite>, can take as much as 2 us if all possible bits are sent to the DDS. Therefore, in the example above, if DetectTime is set to be extremely short, it is possible that DetectTime will elapse <em>before</em> the next update is reached, the result being that the detect shutter and counter are on longer than was likely intended. When this happens, the FPGA will tell the computer and the program will report a timing violation warning.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">DDS 9912 amplitude changes happen <em>immediately</em>, not with the next trigger.</p>
+</div>
+</div>
+<div class="section" id="running-scans">
+<h4>running scans<a class="headerlink" href="#running-scans" title="Permalink to this headline">¶</a></h4>
+<p>When running a scan, the computer has a deep pipe to the FPGA which it populates with scan values. The overall structure of a pulse program is typically something like this:</p>
+<blockquote>
+<div><div class="highlight-Python"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="ow">not</span> <span class="n">pipe_empty</span><span class="p">():</span>
+   <span class="n">apply_next_scan_point</span><span class="p">()</span>
+
+   <span class="c1">#&lt;...all your code goes here...&gt;</span>
+
+<span class="nb">exit</span><span class="p">(</span> <span class="n">endLabel</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>The <cite>pipe_empty()</cite> command checks whether there are still scan values in the pipe. The <cite>apply_next_scan_point()</cite> command sets all parameters that being scanned (i.e., the scan parameter and all its dependencies) to the new value pulled off the pipe. Once the pipe is empty, the program ends.</p>
+<p>Typically a pulse program also has an inner loop to execute an experiment multiple times, which might look something like this:</p>
+<blockquote>
+<div><div class="highlight-Python"><div class="highlight"><pre><span></span><span class="k">while</span> <span class="ow">not</span> <span class="n">pipe_empty</span><span class="p">():</span>
+   <span class="n">apply_next_scan_point</span><span class="p">()</span>
+
+   <span class="c1">#&lt;...code that runs before experiment loop goes here...&gt;</span>
+
+   <span class="n">currentexperiment</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1">#currentexperiment is a var (an internal variable) that keeps track of how many repetitions have been done</span>
+
+   <span class="k">while</span> <span class="n">currentexperiment</span> <span class="o">&lt;</span> <span class="n">experiments</span><span class="p">:</span> <span class="c1"># experiments is a parameter defining how many times to repeat each point</span>
+
+      <span class="c1">#&lt;...code for each experiment goes here...&gt;</span>
+
+      <span class="n">currentexperiment</span> <span class="o">+=</span> <span class="mi">1</span>
+
+   <span class="c1">#&lt;...code that runs after experiment loop goes here...&gt;</span>
+
+<span class="nb">exit</span><span class="p">(</span> <span class="n">endLabel</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="functions">
+<h4>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h4>
+<p>Functions defined in the pulse program are macros rather than true functions. They cannot take arguments. The code defined in a function is substituted in-line in the location where the function is called.</p>
+</div>
+<div class="section" id="minimal-example">
+<h4>Minimal example<a class="headerlink" href="#minimal-example" title="Permalink to this headline">¶</a></h4>
+<p>Below is a complete bare bones example of a very simple pulse program, which turns on four different shutters for times given by a parameter, set one DDS, and counts during detection. A more complex pulse program, with comments, can be found in \IonControl\config\Example.ppp.</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">DDSMicrowave</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">const</span> <span class="n">PMTChannel</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">shutter</span> <span class="n">InitializationShutter</span>
+<span class="n">masked_shutter</span> <span class="n">CoolingOn</span>
+<span class="n">masked_shutter</span> <span class="n">PumpingOn</span>
+<span class="n">masked_shutter</span> <span class="n">MicrowaveOn</span>
+<span class="n">masked_shutter</span> <span class="n">DetectOn</span>
+
+<span class="n">parameter</span> <span class="o">&lt;</span><span class="n">AD9912_FRQ</span><span class="o">&gt;</span> <span class="n">MicrowaveFreq</span>
+<span class="n">parameter</span> <span class="n">CoolingTime</span>
+<span class="n">parameter</span> <span class="n">PumpTime</span>
+<span class="n">parameter</span> <span class="n">MicrowaveTime</span>
+<span class="n">parameter</span> <span class="n">DetectTime</span>
+<span class="n">parameter</span> <span class="n">experiments</span>
+
+<span class="n">counter</span> <span class="n">DetectCounters</span>
+<span class="n">trigger</span> <span class="n">ddsApplyAll</span>
+<span class="n">exitcode</span> <span class="n">endLabel</span> <span class="o">=</span> <span class="mh">0xffffffffffffffff</span>
+<span class="n">var</span> <span class="n">currentexperiment</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">cool</span><span class="p">():</span>
+  <span class="n">set_shutter</span><span class="p">(</span> <span class="n">CoolingOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">(</span> <span class="n">CoolingTime</span> <span class="p">)</span>
+  <span class="n">set_inv_shutter</span><span class="p">(</span> <span class="n">CoolingOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">pump</span><span class="p">():</span>
+  <span class="n">set_shutter</span><span class="p">(</span> <span class="n">PumpingOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">(</span> <span class="n">PumpTime</span> <span class="p">)</span>
+  <span class="n">set_inv_shutter</span><span class="p">(</span> <span class="n">PumpingOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">microwave</span><span class="p">():</span>
+  <span class="n">set_shutter</span><span class="p">(</span> <span class="n">MicrowaveOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">(</span> <span class="n">MicrowaveTime</span> <span class="p">)</span>
+  <span class="n">set_inv_shutter</span><span class="p">(</span> <span class="n">MicrowaveOn</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">detect</span><span class="p">():</span>
+  <span class="n">set_shutter</span><span class="p">(</span> <span class="n">DetectOn</span> <span class="p">)</span>
+  <span class="n">set_counter</span><span class="p">(</span> <span class="n">DetectCounters</span> <span class="p">)</span>
+  <span class="n">update</span><span class="p">(</span> <span class="n">DetectTime</span> <span class="p">)</span>
+  <span class="n">set_inv_shutter</span><span class="p">(</span> <span class="n">DetectOn</span> <span class="p">)</span>
+  <span class="n">set_shutter</span><span class="p">(</span> <span class="n">CoolingOn</span> <span class="p">)</span>
+  <span class="n">clear_counter</span><span class="p">()</span>
+  <span class="n">update</span><span class="p">()</span>
+
+<span class="n">set_shutter</span><span class="p">(</span><span class="n">InitializationShutter</span><span class="p">)</span>
+<span class="n">update</span><span class="p">()</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">pipe_empty</span><span class="p">():</span>
+  <span class="n">apply_next_scan_point</span><span class="p">()</span>
+
+  <span class="n">set_dds</span><span class="p">(</span> <span class="n">channel</span><span class="o">=</span><span class="n">DDSMicrowave</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">MicrowaveFreq</span> <span class="p">)</span>
+  <span class="n">set_trigger</span><span class="p">(</span> <span class="n">ddsApplyAll</span> <span class="p">)</span>
+
+  <span class="n">currentexperiment</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">while</span> <span class="n">currentexperiment</span> <span class="o">&lt;</span> <span class="n">experiments</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">CoolingTime</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">cool</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">PumpTime</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">pump</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">MicrowaveTime</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">microwave</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">DetectTime</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">detect</span><span class="p">()</span>
+      <span class="n">currentexperiment</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nb">exit</span><span class="p">(</span> <span class="n">endLabel</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="control-structures">
+<h3>control structures<a class="headerlink" href="#control-structures" title="Permalink to this headline">¶</a></h3>
+<p>The following control structures are supported:</p>
+<ul>
+<li><p class="first">while loops</p>
+<blockquote>
+<div><div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">experimentsleft</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">while</span> <span class="n">experimentsleft</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+   <span class="n">experimentsleft</span> <span class="o">-=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+<li><p class="first">if then else conditionals</p>
+<blockquote>
+<div><div class="highlight-Python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">photonsfound</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+   <span class="n">experimentsleft</span> <span class="o">-=</span> <span class="mi">1</span>
+<span class="k">else</span><span class="p">:</span>
+   <span class="nb">exit</span><span class="p">(</span> <span class="n">IonLostExitcode</span> <span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="variable-types">
+<h3>Variable Types<a class="headerlink" href="#variable-types" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="const">
+<code class="descname">const</code><a class="headerlink" href="#const" title="Permalink to this definition">¶</a></dt>
+<dd><p>A constant value, which is typically used for things like DDS Channel numbers, which do not change.</p>
+<p>For example:</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">DDSDetect</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">const</span> <span class="n">DDSCooling</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="data">
+<dt id="parameter">
+<code class="descname">parameter</code><a class="headerlink" href="#parameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A numerical value that is set by the user or by a scan. This is the main variable type which allows configuring the experiment. When the pulse program is saved, the list of parameters in the parameter window is updated.</p>
+<p>The simplest parameter declaration would be:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">parameter</span> <span class="n">CoolingTime</span>
+</pre></div>
+</div>
+<p>This initializes a parameter named &#8220;CoolingTime,&#8221; which will show up in the parameter table and as a scan target. You can also type:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">parameter</span> <span class="n">CoolingTime</span> <span class="o">=</span> <span class="mi">500</span> <span class="n">us</span>
+</pre></div>
+</div>
+<p>The effect of this will be to set CoolingTime to 500 us when you save the program and CoolingTime is added to the parameter list. However, that is the only time the 500 us value is read! Every subsequent time the program is run, the value of CoolingTime will be set via whatever is typed into the Parameters table, or via a scan. Therefore, this is to be avoided, as it can lead to confusion, and instead parameters should be declared without any value called out in the pulse program code.</p>
+<p>A parameter can also have a device specific <em>encoding</em>. An encoding is a way of translating something like &#8220;200 MHz&#8221; into a frequency tuning word used to program a DDS. An encoding is written like this:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">parameter</span> <span class="o">&lt;</span><span class="n">AD9912_FRQ</span><span class="o">&gt;</span> <span class="n">CoolingFreq</span>
+</pre></div>
+</div>
+<p>This means that <code class="code python docutils literal"><span class="name"><span class="pre">CoolingFreq</span></span></code>, which is in MHz, will be converted appropriately to program an AD9912 DDS. Encodings are only necessary on a frequency that is actually written to a DDS. For example, the following is fine:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">const</span> <span class="n">DDSRaman1</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">parameter</span> <span class="n">RamanCarrierFreq</span>
+<span class="n">parameter</span> <span class="n">RamanDetuning</span>
+<span class="n">parameter</span> <span class="o">&lt;</span><span class="n">AD9912_FRQ</span><span class="o">&gt;</span> <span class="n">DDSRaman1Freq</span>
+<span class="n">set_dds</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="n">DDSRaman1</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="n">DDSRaman1Freq</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where in the parameters table, <code class="code python docutils literal"><span class="name"><span class="pre">DDSRaman1Freq</span></span></code> is set to <code class="code python docutils literal"><span class="name"><span class="pre">RamanCarrierFreq</span></span> <span class="operator"><span class="pre">+</span></span> <span class="name"><span class="pre">RamanDetuning</span></span></code>. Only <code class="code python docutils literal"><span class="name"><span class="pre">DDSRaman1Freq</span></span></code> need have the encoding, as it is the only one which is directly written to the DDS, while the others are used indirectly.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="var">
+<code class="descname">var</code><a class="headerlink" href="#var" title="Permalink to this definition">¶</a></dt>
+<dd><p>An internal variable. This is something that might change throughout the course of an experiment (unlike <strong>const</strong>), but which is set within the experiment rather than by the user.</p>
+<p>For example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">var</span> <span class="n">experimentsleft</span> <span class="o">=</span> <span class="mi">100</span>
+</pre></div>
+</div>
+<p>where experimentleft is an internal variable, initialized to 100. The difference between <strong>var</strong> and <strong>parameter</strong> is only in how they are treated by the GUI; <strong>var</strong> variables are not shown in the GUI as something to be scanned or set by the user. Also, normally there are programmatic changes made to <strong>vars</strong>, while <strong>parameters</strong> are not changed by the program unless they are being scanned. This is for clarity, though, not a requirement. As with parameters, vars can have an encoding.</p>
+<p>Unlike parameters, vars normally need to be initialized in the code, as they are not overridden from outside the code.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="shutter">
+<code class="descname">shutter</code><a class="headerlink" href="#shutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A shutter specifies the state of every TTL output of the FPGA, whether every PI loop is on or off, and whether the DAC scans are on or off (see <a class="reference internal" href="FPGAControl.html#piloops"><span class="std std-ref">PI Loops</span></a> for an explanation of the last two). When a shutter is added to the pulse program, a new line appears in the shutters window.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="counter">
+<code class="descname">counter</code><a class="headerlink" href="#counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>A counter variable. When a counter is added, a new line appears in the counters GUI. Counters are gates to count on input channels or to record ADC channels or PI channels. Results are transmitted to the computer.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="masked_shutter">
+<code class="descname">masked_shutter</code><a class="headerlink" href="#masked_shutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>As shutter, however it has three states: red: off, green: on, white: do not change</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="trigger">
+<code class="descname">trigger</code><a class="headerlink" href="#trigger" title="Permalink to this definition">¶</a></dt>
+<dd><p>A set of channels to trigger.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="address">
+<code class="descname">address</code><a class="headerlink" href="#address" title="Permalink to this definition">¶</a></dt>
+<dd><p>An address is just a parameter which is used specifically as a RAM address.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="exitcode">
+<code class="descname">exitcode</code><a class="headerlink" href="#exitcode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exitcodes are transmitted to the computer when the pulse program stops executing. Exitcodes are 64bit numbers where the most significant bits are 0xfffe.</p>
+<p>For example:</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">exitcode</span> <span class="n">IonLostExitcode</span> <span class="o">=</span> <span class="mh">0xfffe000000000001</span>
+<span class="n">exitcode</span> <span class="n">SuccessExitcode</span> <span class="o">=</span> <span class="mh">0xfffe000000000000</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="encodings">
+<h3>Encodings<a class="headerlink" href="#encodings" title="Permalink to this headline">¶</a></h3>
+<dl class="data">
+<dt id="AD9912_FRQ">
+<code class="descname">AD9912_FRQ</code><a class="headerlink" href="#AD9912_FRQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>For writing frequency to an Analog Devices AD9912 DDS. Converts to 48 bit frequency word (0xffffffffffff = 1 GHz).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="AD9910_FRQ">
+<code class="descname">AD9910_FRQ</code><a class="headerlink" href="#AD9910_FRQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>For writing frequency to an Analog Devices AD9910 DDS. Converts to 32 bit frequency word (0xffffffff = 1 GHz).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="AD9912_PHASE">
+<code class="descname">AD9912_PHASE</code><a class="headerlink" href="#AD9912_PHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>For writing phase to an Analog Devices AD9912 DDS. Converts to 14 bit phase word (0x3fff = 360 degrees).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="AD9910_PHASE">
+<code class="descname">AD9910_PHASE</code><a class="headerlink" href="#AD9910_PHASE" title="Permalink to this definition">¶</a></dt>
+<dd><p>For writing phase to an Analog Devices AD9910 DDS. Converts to 16 bit phase word (0xffff = 360 degrees).</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="DAC8568_VOLTAGE">
+<code class="descname">DAC8568_VOLTAGE</code><a class="headerlink" href="#DAC8568_VOLTAGE" title="Permalink to this definition">¶</a></dt>
+<dd><p>For writing voltage to a Texas Instruments DAC8568 DAC. Converts to 16 bit voltage word (0xffff = 5 V).</p>
+</dd></dl>
+
+</div>
+<div class="section" id="commands">
+<h3>Commands<a class="headerlink" href="#commands" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div></div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Scans.html" class="btn btn-neutral float-right" title="Scans" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="FPGAControl.html" class="btn btn-neutral" title="FPGA Control" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<GateDefinition>
+	<PulseDefinition>
+		<Pulse name="phase" type="value">AD9912_PHASE</Pulse>
+		<Pulse name="waittime" type="value">TIME</Pulse>
+		<Pulse name="pulsetime" type="value">TIME</Pulse>
+	</PulseDefinition>
+	<GateDictionary>
+		<Gate name="I">
+			<Pulse name="phase">0</Pulse>
+			<Pulse name="waittime">gateTime</Pulse>
+			<Pulse name="pulsetime">0</Pulse>
+		</Gate>
+		<Gate name="x">
+			<Pulse name="phase">0</Pulse>
+			<Pulse name="waittime">gateTime-piTime/2</Pulse>
+			<Pulse name="pulsetime">piTime/2</Pulse>
+		</Gate>
+		<Gate name="y">
+			<Pulse name="phase">90</Pulse>
+			<Pulse name="waittime">gateTime-piTime/2</Pulse>
+			<Pulse name="pulsetime">piTime/2</Pulse>
+		</Gate>
+		<Gate name="-x">
+			<Pulse name="phase">180</Pulse>
+			<Pulse name="waittime">gateTime-piTime/2</Pulse>
+			<Pulse name="pulsetime">piTime/2</Pulse>
+		</Gate>
+		<Gate name="-y">
+			<Pulse name="phase">270</Pulse>
+			<Pulse name="waittime">gateTime-piTime/2</Pulse>
+			<Pulse name="pulsetime">piTime/2</Pulse>
+		</Gate>
+		<Gate name="x2">
+			<Pulse name="phase">0</Pulse>
+			<Pulse name="waittime">gateTime-piTime</Pulse>
+			<Pulse name="pulsetime">piTime</Pulse>
+		</Gate>
+		<Gate name="y2">
+			<Pulse name="phase">90</Pulse>
+			<Pulse name="waittime">gateTime-piTime</Pulse>
+			<Pulse name="pulsetime">piTime</Pulse>
+		</Gate>
+	</GateDictionary>
+</GateDefinition>

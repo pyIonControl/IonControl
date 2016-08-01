@@ -1,0 +1,503 @@
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output}{\section{Chassis.\-git.\-Digital\-Output.\-Digital\-Output Class Reference}
+\label{class_chassis_8git_1_1_digital_output_1_1_digital_output}\index{Chassis.\-git.\-Digital\-Output.\-Digital\-Output@{Chassis.\-git.\-Digital\-Output.\-Digital\-Output}}
+}
+
+
+This class will generate digital outputs using py\-D\-A\-Qmx.  
+
+
+Inheritance diagram for Chassis.\-git.\-Digital\-Output.\-Digital\-Output\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1_digital_output_1_1_digital_output}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a514d7da1f494d60c8abc2591662de4f9}{get\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function returns the sample rate configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_aedacbf4ed01d8c5ce2d33fb807c19859}{set\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function sets the sample rate in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a9dabf4d6ff1f1f59e7829efea80a2512}{get\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function returns the samples per channel configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac3f88d2f34642621ba2d485174e8e3ad}{set\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function sets the samples per channel in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_acc51d4045f6c8cbf5825dc4cf1dfc459}{get\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function returns the sample clock source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_aa188b505b8d9d68fee45180cda9b66e5}{set\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the sample clock source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a7ab9a21c470d9a453d090770fd1d958c}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output}{Digital\-Output} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_adf35fabba6014d608be1250b5046f6a2}{init}
+\begin{DoxyCompactList}\small\item\em Initialize the digital outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5291fe57ed3662505956d9d5ff53cbfd}{create\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a random 1\-D numpy array of samples for writing the buffer of digital output channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a6a3f42eeb7ee5c640992a7e82230f149}{get\-Num\-Lines}
+\begin{DoxyCompactList}\small\item\em This function returns the number of digital lines configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a296b6f4d60dd9bd7a39a4dcfc5923784}{get\-Num\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the number of digital channels configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a336402c8845e8439060103d36549d223}{write\-To\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_af3640c99351422417698e41b9d18f467}{write\-Static}
+\begin{DoxyCompactList}\small\item\em This function writes a static value to the digital line(s) configured in the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_adf35fabba6014d608be1250b5046f6a2}{init()} method. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a1564f645624ff164cf402b0d5dd07c0c}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a69988683bd514cf79aef357f62542889}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a25ea5c7440311f73c1ae463da9c57211}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_ad13b6aba032d6fcf7da28e2098d08d11}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the digital ouput device and channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a51e94cf4bda8d8f5df3c5c1baab827b3}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output}{Digital\-Output} Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac80a92816c0356806a9f38349efd5d9a}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the D\-A\-Qmx task. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5cf84621110f881f2142f4af58c28926}{task\-Ref}
+\begin{DoxyCompactList}\small\item\em The D\-A\-Qmx task reference. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a04c8f6bec665c117376e77f330f95e46}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the D\-A\-Qmx task has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a0fe7aca56fb6dd3a7b1b070840b49c56}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for the digital outputs. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a8a736e7414b55063694cde94c7f38161}{{\bfseries trigger\-Type}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a8a736e7414b55063694cde94c7f38161}
+
+\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a63c305430aa7ad4e132bd9e32f3ae443}{loops}
+\begin{DoxyCompactList}\small\item\em The number of time to iterate over a Finite number of samples. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a869babc61b66d203a05e3e1998bb4a9f}{timeout}
+\begin{DoxyCompactList}\small\item\em The time in seconds to wait for a trigger or for a digital state change. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_acfa136c887a669d231615c1576b0c494}{{\bfseries timeout\-Pad}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_acfa136c887a669d231615c1576b0c494}
+
+\item 
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_aacb0740743e35148f9225dad57366d75}{{\bfseries buff}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_aacb0740743e35148f9225dad57366d75}
+
+\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a46deeb00292a346ffa3eb95ab37118ac}{sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the digital output. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_af81269c5bfd307e6b82d645552e5a13f}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of samples per channel that will be generated in Finite mode. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac73336fea1019e4177461ac06c3f26a7}{clk\-Source}
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\item 
+{\bfseries start\-Trigger\-Source}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate digital outputs using py\-D\-A\-Qmx. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a7ab9a21c470d9a453d090770fd1d958c}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a7ab9a21c470d9a453d090770fd1d958c}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output}{Digital\-Output} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+\begin{DoxyParams}{Parameters}
+{\em self} & This object pointer \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a51e94cf4bda8d8f5df3c5c1baab827b3}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a51e94cf4bda8d8f5df3c5c1baab827b3}
+
+
+This is the destructor for the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output}{Digital\-Output} Class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_ad13b6aba032d6fcf7da28e2098d08d11}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!close@{close}}
+\index{close@{close}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_ad13b6aba032d6fcf7da28e2098d08d11}
+
+
+This function will close connection to the digital ouput device and channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5291fe57ed3662505956d9d5ff53cbfd}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!create\-Test\-Buffer@{create\-Test\-Buffer}}
+\index{create\-Test\-Buffer@{create\-Test\-Buffer}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{create\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-create\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5291fe57ed3662505956d9d5ff53cbfd}
+
+
+This function returns a random 1\-D numpy array of samples for writing the buffer of digital output channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The objet pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_acc51d4045f6c8cbf5825dc4cf1dfc459}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!get\-Clk\-Source@{get\-Clk\-Source}}
+\index{get\-Clk\-Source@{get\-Clk\-Source}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-get\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_acc51d4045f6c8cbf5825dc4cf1dfc459}
+
+
+This function returns the sample clock source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a296b6f4d60dd9bd7a39a4dcfc5923784}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!get\-Num\-Channels@{get\-Num\-Channels}}
+\index{get\-Num\-Channels@{get\-Num\-Channels}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-get\-Num\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a296b6f4d60dd9bd7a39a4dcfc5923784}
+
+
+This function returns the number of digital channels configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a6a3f42eeb7ee5c640992a7e82230f149}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!get\-Num\-Lines@{get\-Num\-Lines}}
+\index{get\-Num\-Lines@{get\-Num\-Lines}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Num\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-get\-Num\-Lines (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a6a3f42eeb7ee5c640992a7e82230f149}
+
+
+This function returns the number of digital lines configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a514d7da1f494d60c8abc2591662de4f9}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!get\-Sample\-Rate@{get\-Sample\-Rate}}
+\index{get\-Sample\-Rate@{get\-Sample\-Rate}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-get\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a514d7da1f494d60c8abc2591662de4f9}
+
+
+This function returns the sample rate configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a9dabf4d6ff1f1f59e7829efea80a2512}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}}
+\index{get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-get\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a9dabf4d6ff1f1f59e7829efea80a2512}
+
+
+This function returns the samples per channel configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_adf35fabba6014d608be1250b5046f6a2}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!init@{init}}
+\index{init@{init}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{physical\-Channel}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_adf35fabba6014d608be1250b5046f6a2}
+
+
+Initialize the digital outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em physical\-Channel} & A string representing the device and digital output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_aa188b505b8d9d68fee45180cda9b66e5}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!set\-Clk\-Source@{set\-Clk\-Source}}
+\index{set\-Clk\-Source@{set\-Clk\-Source}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-set\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_aa188b505b8d9d68fee45180cda9b66e5}
+
+
+This function sets the sample clock source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the clock source. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_aedacbf4ed01d8c5ce2d33fb807c19859}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!set\-Sample\-Rate@{set\-Sample\-Rate}}
+\index{set\-Sample\-Rate@{set\-Sample\-Rate}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-set\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_aedacbf4ed01d8c5ce2d33fb807c19859}
+
+
+This function sets the sample rate in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the sample rate. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac3f88d2f34642621ba2d485174e8e3ad}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}}
+\index{set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-set\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac3f88d2f34642621ba2d485174e8e3ad}
+
+
+This function sets the samples per channel in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the samples per channel. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a1564f645624ff164cf402b0d5dd07c0c}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!start@{start}}
+\index{start@{start}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a1564f645624ff164cf402b0d5dd07c0c}
+
+
+This function starts the digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a25ea5c7440311f73c1ae463da9c57211}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!stop@{stop}}
+\index{stop@{stop}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a25ea5c7440311f73c1ae463da9c57211}
+
+
+This function stops the digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a69988683bd514cf79aef357f62542889}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a69988683bd514cf79aef357f62542889}
+
+
+This functions waits for the digital output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_af3640c99351422417698e41b9d18f467}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!write\-Static@{write\-Static}}
+\index{write\-Static@{write\-Static}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{write\-Static}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-write\-Static (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_af3640c99351422417698e41b9d18f467}
+
+
+This function writes a static value to the digital line(s) configured in the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_adf35fabba6014d608be1250b5046f6a2}{init()} method. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & The static value to send to the digital line(s). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a336402c8845e8439060103d36549d223}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!write\-To\-Buffer@{write\-To\-Buffer}}
+\index{write\-To\-Buffer@{write\-To\-Buffer}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{write\-To\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-write\-To\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a336402c8845e8439060103d36549d223}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians samples for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a04c8f6bec665c117376e77f330f95e46}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!initialized@{initialized}}
+\index{initialized@{initialized}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-initialized}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a04c8f6bec665c117376e77f330f95e46}
+
+
+This is a boolean that is true when the D\-A\-Qmx task has been initialized. 
+
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a63c305430aa7ad4e132bd9e32f3ae443}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!loops@{loops}}
+\index{loops@{loops}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-loops}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a63c305430aa7ad4e132bd9e32f3ae443}
+
+
+The number of time to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of digital samples will be looped. The default is allways 1. \hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a0fe7aca56fb6dd3a7b1b070840b49c56}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!mode@{mode}}
+\index{mode@{mode}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-mode}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a0fe7aca56fb6dd3a7b1b070840b49c56}
+
+
+This is the mode of operation for the digital outputs. 
+
+There are currently three modes available. Static mode is where one static digital sample is set with no need for a sample clock. Finite mode is where a finite number of digital samples will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_chassis_8git_1_1_digital_output_1_1_digital_output_a25ea5c7440311f73c1ae463da9c57211}{stop()} method is called. \hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac80a92816c0356806a9f38349efd5d9a}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!status@{status}}
+\index{status@{status}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-status}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac80a92816c0356806a9f38349efd5d9a}
+
+
+This is the status of the D\-A\-Qmx task. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. \hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5cf84621110f881f2142f4af58c28926}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!task\-Ref@{task\-Ref}}
+\index{task\-Ref@{task\-Ref}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{task\-Ref}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-task\-Ref}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a5cf84621110f881f2142f4af58c28926}
+
+
+The D\-A\-Qmx task reference. 
+
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a869babc61b66d203a05e3e1998bb4a9f}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!timeout@{timeout}}
+\index{timeout@{timeout}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{timeout}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-timeout}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a869babc61b66d203a05e3e1998bb4a9f}
+
+
+The time in seconds to wait for a trigger or for a digital state change. 
+
+
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac73336fea1019e4177461ac06c3f26a7}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-clk\-Source\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_ac73336fea1019e4177461ac06c3f26a7}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getClkSource, setClkSource, \_delClkSource,
+2     \textcolor{stringliteral}{"""The clock source for the digital outputsample clock."""})
+\end{DoxyCode}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a46deeb00292a346ffa3eb95ab37118ac}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-sample\-Rate\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a46deeb00292a346ffa3eb95ab37118ac}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSampleRate, setSampleRate, \_delSampleRate, doc=
+2                              \textcolor{stringliteral}{"""The sample rate of the digital output."""})
+\end{DoxyCode}
+
+
+This is the sample rate of the digital output. 
+
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_af81269c5bfd307e6b82d645552e5a13f}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-samples\-Per\-Channel\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_af81269c5bfd307e6b82d645552e5a13f}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSamplesPerChannel, setSamplesPerChannel,
+2             \_delSamplesPerChannel,
+3             \textcolor{stringliteral}{"""The samples per channel of the digital output."""})
+\end{DoxyCode}
+
+
+This is the number of samples per channel that will be generated in Finite mode. 
+
+\hypertarget{class_chassis_8git_1_1_digital_output_1_1_digital_output_a7c8d1ce1ce6bd23b7147fbe9ab7663c0}{\index{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!Chassis.git::DigitalOutput::DigitalOutput@{Chassis.\-git\-::\-Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Digital\-Output.\-Digital\-Output.\-start\-Trigger\-Source\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_digital_output_1_1_digital_output_a7c8d1ce1ce6bd23b7147fbe9ab7663c0}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(\_getStartTriggerSource,
+2             \_setStartTriggerSource)
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Digital\-Output.\-py\end{DoxyCompactItemize}

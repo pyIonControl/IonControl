@@ -1,0 +1,443 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.PulserHardwareClient &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.PulserHardwareClient</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.PulserHardwareClient</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Encapsulation of the Pulse Programmer Hardware </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Queue</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">from</span> <span class="nn">multiprocessing.sharedctypes</span> <span class="k">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="k">import</span> <span class="n">c_longlong</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">.PulserHardwareServer</span> <span class="k">import</span> <span class="n">FinishException</span>
+<span class="kn">from</span> <span class="nn">pulser.OKBase</span> <span class="k">import</span> <span class="n">ErrorMessages</span><span class="p">,</span> <span class="n">FPGAException</span>
+<span class="kn">from</span> <span class="nn">.PulserHardwareServer</span> <span class="k">import</span> <span class="n">PulserHardwareServer</span>
+<span class="kn">from</span> <span class="nn">pulser.PulserHardwareServer</span> <span class="k">import</span> <span class="n">PulserHardwareException</span>
+
+
+<div class="viewcode-block" id="check"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.check">[docs]</a><span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">command</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">number</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">FPGAException</span><span class="p">(</span><span class="s2">&quot;OpalKelly exception &#39;</span><span class="si">{0}</span><span class="s2">&#39; in command </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ErrorMessages</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">number</span><span class="p">,</span> <span class="n">number</span><span class="p">),</span> <span class="n">command</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="QueueReader"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.QueueReader">[docs]</a><span class="k">class</span> <span class="nc">QueueReader</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>      
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulserHardware</span><span class="p">,</span> <span class="n">dataQueue</span><span class="p">,</span> <span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span> <span class="o">=</span> <span class="n">pulserHardware</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataMutex</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutex</span><span class="p">()</span>           <span class="c1"># protects the thread data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span> <span class="o">=</span> <span class="n">dataQueue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataHandler</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;Data&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">dataAvailable</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">),</span>
+                             <span class="s1">&#39;DedicatedData&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">dedicatedDataAvailable</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                             <span class="s1">&#39;FinishException&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">raise_</span><span class="p">(</span><span class="n">FinishException</span><span class="p">()),</span>
+                             <span class="s1">&#39;LogicAnalyzerData&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLogicAnalyzerData</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">}</span>
+   
+<div class="viewcode-block" id="QueueReader.onLogicAnalyzerData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.QueueReader.onLogicAnalyzerData">[docs]</a>    <span class="k">def</span> <span class="nf">onLogicAnalyzerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">logicAnalyzerDataAvailable</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="QueueReader.raise_"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.QueueReader.raise_">[docs]</a>    <span class="k">def</span> <span class="nf">raise_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ex</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ex</span></div>
+   
+<div class="viewcode-block" id="QueueReader.run"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.QueueReader.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;QueueReader thread started.&quot;</span> <span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataHandler</span><span class="p">[</span> <span class="n">data</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="p">](</span> <span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span> <span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">,</span> <span class="n">FinishException</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception in QueueReader&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;QueueReader thread finished.&quot;</span> <span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="LoggingReader"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.LoggingReader">[docs]</a><span class="k">class</span> <span class="nc">LoggingReader</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loggingQueue</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QThread</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span> <span class="o">=</span> <span class="n">loggingQueue</span>
+        
+<div class="viewcode-block" id="LoggingReader.run"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.LoggingReader.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LoggingReader Thread running&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">record</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1"># We send this as a sentinel to tell the listener to quit.</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;LoggingReader Thread shutdown requested&quot;</span><span class="p">)</span>
+                    <span class="k">break</span>
+                <span class="n">clientlogger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span><span class="o">&gt;=</span><span class="n">clientlogger</span><span class="o">.</span><span class="n">getEffectiveLevel</span><span class="p">():</span>
+                    <span class="n">clientlogger</span><span class="o">.</span><span class="n">handle</span><span class="p">(</span><span class="n">record</span><span class="p">)</span> <span class="c1"># No level or filter logic applied - just do it!</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyboardInterrupt</span><span class="p">,</span> <span class="ne">SystemExit</span><span class="p">):</span>
+                <span class="k">raise</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Exception in Logging Reader Thread&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;LoggingReader Thread finished&quot;</span><span class="p">)</span></div></div>
+
+                
+
+<div class="viewcode-block" id="PulserHardware"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware">[docs]</a><span class="k">class</span> <span class="nc">PulserHardware</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">serverClass</span> <span class="o">=</span> <span class="n">PulserHardwareServer</span>
+    <span class="n">sleepQueue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>   <span class="c1"># used to be able to interrupt the sleeping procedure</span>
+
+    <span class="n">dataAvailable</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="s1">&#39;PyQt_PyObject&#39;</span><span class="p">,</span> <span class="nb">object</span> <span class="p">)</span>
+    <span class="n">dedicatedDataAvailable</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="s1">&#39;PyQt_PyObject&#39;</span> <span class="p">)</span>
+    <span class="n">logicAnalyzerDataAvailable</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="s1">&#39;PyQt_PyObject&#39;</span> <span class="p">)</span>
+    <span class="n">shutterChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="s1">&#39;PyQt_PyObject&#39;</span> <span class="p">)</span>
+    <span class="n">ppActiveChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">object</span> <span class="p">)</span>
+    
+    <span class="n">timestep</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+
+    <span class="n">sharedMemorySize</span> <span class="o">=</span> <span class="mi">256</span><span class="o">*</span><span class="mi">1024</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PulserHardware</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xem</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Mutex</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adcCounterMask</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_integrationTime</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverPipe</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Pipe</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span> <span class="o">=</span> <span class="n">Array</span><span class="p">(</span> <span class="n">c_longlong</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemorySize</span><span class="p">,</span> <span class="n">lock</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+                
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverProcess</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">serverPipe</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverProcess</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">queueReader</span> <span class="o">=</span> <span class="n">QueueReader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queueReader</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingReader</span> <span class="o">=</span> <span class="n">LoggingReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingReader</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppActive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span> <span class="o">=</span> <span class="kc">None</span>
+        
+<div class="viewcode-block" id="PulserHardware.shutdown"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;finish&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serverProcess</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">queueReader</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingReader</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;PulseHardwareClient Shutdown completed&quot;</span><span class="p">)</span></div>
+        
+    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PulserHardware</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>      
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">shutter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;getShutter&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+         
+    <span class="nd">@shutter</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">shutter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setShutter&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span> <span class="p">)</span> <span class="p">)</span>      
+        <span class="n">_shutter</span> <span class="o">=</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutterChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">_shutter</span> <span class="p">)</span>          
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;getTrigger&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+            
+    <span class="nd">@trigger</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setTrigger&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span> <span class="p">)</span> <span class="p">)</span>        
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">counterMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;getCounterMask&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        
+    <span class="nd">@counterMask</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">counterMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setCounterMask&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span> <span class="p">)</span> <span class="p">)</span>        
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">adcMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;getAdcMask&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        
+    <span class="nd">@adcMask</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">adcMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setAdcMask&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span> <span class="p">)</span> <span class="p">)</span>        
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">integrationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;getIntegrationTime&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">openModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">((</span><span class="s1">&#39;getOpenModule&#39;</span><span class="p">,</span> <span class="p">()))</span>
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">())</span>
+
+    <span class="nd">@integrationTime</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">integrationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setIntegrationTime&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span> <span class="p">)</span> <span class="p">)</span>        
+        <span class="k">return</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+            
+<div class="viewcode-block" id="PulserHardware.ppStart"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.ppStart">[docs]</a>    <span class="k">def</span> <span class="nf">ppStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;ppStart&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppActive</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppActiveChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+            
+<div class="viewcode-block" id="PulserHardware.ppStop"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.ppStop">[docs]</a>    <span class="k">def</span> <span class="nf">ppStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;ppStop&#39;</span><span class="p">,</span> <span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppActive</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppActiveChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+            
+<div class="viewcode-block" id="PulserHardware.setShutterBit"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.setShutterBit">[docs]</a>    <span class="k">def</span> <span class="nf">setShutterBit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bit</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;setShutterBit&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">bit</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>  
+        <span class="n">_shutter</span> <span class="o">=</span> <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutterChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">_shutter</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_shutter</span> </div>
+  
+<div class="viewcode-block" id="PulserHardware.wordListToBytearray"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.wordListToBytearray">[docs]</a>    <span class="k">def</span> <span class="nf">wordListToBytearray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; convert list of words to binary bytearray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wordlist</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PulserHardware.bytearrayToWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.bytearrayToWordList">[docs]</a>    <span class="k">def</span> <span class="nf">bytearrayToWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">barray</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">barray</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span> <span class="p">))</span></div>
+
+<div class="viewcode-block" id="PulserHardware.ppWriteRamWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.ppWriteRamWordList">[docs]</a>    <span class="k">def</span> <span class="nf">ppWriteRamWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">address</span> <span class="o">+</span> <span class="mi">8</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mi">2</span> <span class="o">&lt;&lt;</span> <span class="mi">27</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;Wordlist of length </span><span class="si">{0}</span><span class="s2"> exceeds memory depth (</span><span class="si">{1}</span><span class="s2"> words)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">),</span> <span class="mi">2</span><span class="o">**</span><span class="mi">24</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemorySize</span> <span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemorySize</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">)</span><span class="o">-</span><span class="n">start</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">length</span><span class="p">]</span> <span class="o">=</span> <span class="n">wordlist</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">length</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;ppWriteRamWordListShared&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">address</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">start</span><span class="p">,</span> <span class="n">check</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+            
+<div class="viewcode-block" id="PulserHardware.ppReadRamWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardware.ppReadRamWordList">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadRamWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemorySize</span> <span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemorySize</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">)</span><span class="o">-</span><span class="n">start</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;ppReadRamWordListShared&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">address</span><span class="o">+</span><span class="mi">8</span><span class="o">*</span><span class="n">start</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="n">processReturn</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">clientPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span> <span class="p">)</span>
+            <span class="n">wordlist</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">length</span><span class="p">]</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">length</span><span class="p">]</span> 
+        <span class="k">return</span> <span class="n">wordlist</span></div></div>
+
+<div class="viewcode-block" id="processReturn"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.processReturn">[docs]</a><span class="k">def</span> <span class="nf">processReturn</span><span class="p">(</span> <span class="n">returnvalue</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span> <span class="n">returnvalue</span><span class="p">,</span> <span class="ne">Exception</span> <span class="p">):</span>
+        <span class="k">raise</span> <span class="n">returnvalue</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">returnvalue</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

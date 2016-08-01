@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>trace.TraceModel &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>trace.TraceModel</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for trace.TraceModel</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is the model used for the list of traces.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">modules.enum</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">.PlottedTrace</span> <span class="k">import</span> <span class="n">PlottedTrace</span>
+<span class="kn">from</span> <span class="nn">uiModules.CategoryTree</span> <span class="k">import</span> <span class="n">CategoryTreeModel</span><span class="p">,</span> <span class="n">nodeTypes</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
+<div class="viewcode-block" id="TraceComboDelegate"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceComboDelegate">[docs]</a><span class="k">class</span> <span class="nc">TraceComboDelegate</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for combo box editor to select what trace color to use</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        penicons (list[Qicon]): list of icons to select trace color&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">penicons</span><span class="p">):</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penicons</span> <span class="o">=</span> <span class="n">penicons</span>        
+        
+<div class="viewcode-block" id="TraceComboDelegate.createEditor"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceComboDelegate.createEditor">[docs]</a>    <span class="k">def</span> <span class="nf">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the combo box editor&quot;&quot;&quot;</span>
+        <span class="n">editor</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c1">#for icon, string in zip(self.penicons, [&quot;{0}&quot;.format(i) for i in range(0,len(self.penicons))] ):</span>
+        <span class="k">for</span> <span class="n">icon</span><span class="p">,</span> <span class="n">string</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">)</span> <span class="p">):</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="n">icon</span><span class="p">,</span> <span class="n">string</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">editor</span></div>
+
+<div class="viewcode-block" id="TraceComboDelegate.setEditorData"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceComboDelegate.setEditorData">[docs]</a>    <span class="k">def</span> <span class="nf">setEditorData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the data in the editor based on the model&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">)</span> 
+        <span class="n">editor</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="TraceComboDelegate.setModelData"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceComboDelegate.setModelData">[docs]</a>    <span class="k">def</span> <span class="nf">setModelData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the data in the model based on the editor&quot;&quot;&quot;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">editor</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">)</span></div>
+         
+<div class="viewcode-block" id="TraceComboDelegate.updateEditorGeometry"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceComboDelegate.updateEditorGeometry">[docs]</a>    <span class="k">def</span> <span class="nf">updateEditorGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">editor</span><span class="p">,</span> <span class="n">option</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="n">editor</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">option</span><span class="o">.</span><span class="n">rect</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="TraceModel"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel">[docs]</a><span class="k">class</span> <span class="nc">TraceModel</span><span class="p">(</span><span class="n">CategoryTreeModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Construct the TraceModel.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        traceList (list[PlottedTrace]): The initial list of traces</span>
+<span class="sd">        penicons (list[QtGui.QIcon]): Icons for showing available plot colors</span>
+<span class="sd">        graphicsViewDict (dict): dictionary of the available plot windows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">traceModelDataChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="c1">#string with trace creation date, change type, new value</span>
+    <span class="n">traceRemoved</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="c1">#string with trace creation date</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traceList</span><span class="p">,</span> <span class="n">penicons</span><span class="p">,</span> <span class="n">graphicsViewDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">highlightUnsaved</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TraceModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">traceList</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">categoriesAttr</span><span class="o">=</span><span class="s1">&#39;category&#39;</span><span class="p">)</span>
+        <span class="c1">#traceDict is a mapping between trace collection creation times and trace collection top level nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span> <span class="p">:</span> <span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">children</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">penicons</span> <span class="o">=</span> <span class="n">penicons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span> <span class="o">=</span> <span class="n">graphicsViewDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowDeletion</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowReordering</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">columnNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;pen&#39;</span><span class="p">,</span> <span class="s1">&#39;window&#39;</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="s1">&#39;filename&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numColumns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columnNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">column</span> <span class="o">=</span> <span class="n">enum</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">columnNames</span><span class="p">)</span>
+        <span class="n">unsavedBG</span> <span class="o">=</span>  <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">220</span><span class="p">,</span> <span class="mi">220</span><span class="p">)</span> <span class="k">if</span> <span class="n">highlightUnsaved</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="s2">&quot;Name&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">):</span> <span class="s2">&quot;Pen    &quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">):</span> <span class="s2">&quot;Window&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="s2">&quot;Comment&quot;</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">filename</span><span class="p">):</span> <span class="s2">&quot;Filename&quot;</span>
+            <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCategoryChecked</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span>
+        <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataAllColLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">bgColor</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isCategorySaved</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">else</span> <span class="n">unsavedBG</span><span class="p">,</span>
+        <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">curvePen</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DecorationRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">penicons</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">curvePen</span><span class="p">])</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;curve&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">curve</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">curvePen</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">windowName</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">windowName</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">filename</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="p">,</span> <span class="s1">&#39;fileleaf&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataAllColLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">bgColor</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">saved</span> <span class="k">else</span> <span class="n">unsavedBG</span>
+        <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkboxChange</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">penChange</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">windowChange</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentChange</span>
+            <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorySetDataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoryCheckboxChange</span><span class="p">,</span>
+            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">commentChange</span>
+        <span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flagsLookup</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">filename</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span>
+            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryFlagsLookup</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">filename</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span>
+            <span class="p">}</span>
+
+<div class="viewcode-block" id="TraceModel.isCategoryChecked"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.isCategoryChecked">[docs]</a>    <span class="k">def</span> <span class="nf">isCategoryChecked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">categoryNode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine if category node should be checked or not, based on plot status of children&quot;&quot;&quot;</span>
+        <span class="n">childNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">categoryNode</span><span class="p">)</span>
+        <span class="n">plottedList</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">curvePen</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">childNodes</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">plottedList</span><span class="p">:</span> <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span>
+        <span class="k">elif</span> <span class="nb">all</span><span class="p">(</span><span class="n">plottedList</span><span class="p">):</span> <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="n">plottedList</span><span class="p">):</span> <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">PartiallyChecked</span>
+        <span class="k">else</span><span class="p">:</span> <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span></div>
+
+<div class="viewcode-block" id="TraceModel.isCategorySaved"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.isCategorySaved">[docs]</a>    <span class="k">def</span> <span class="nf">isCategorySaved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">categoryNode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine if category node has been saved or not&quot;&quot;&quot;</span>
+        <span class="n">dataNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">categoryNode</span><span class="p">)</span>
+        <span class="n">plottedTrace</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">traceCollection</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="s1">&#39;traceCollection&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">saved</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">traceCollection</span><span class="p">,</span> <span class="s1">&#39;saved&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">saved</span></div>
+
+<div class="viewcode-block" id="TraceModel.comment"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.comment">[docs]</a>    <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return comment associated with node&quot;&quot;&quot;</span>
+        <span class="n">dataNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">plottedTrace</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">traceCollection</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="s1">&#39;traceCollection&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">comment</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">traceCollection</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">comment</span></div>
+
+<div class="viewcode-block" id="TraceModel.choice"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.choice">[docs]</a>    <span class="k">def</span> <span class="nf">choice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return available plot windows&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span> <span class="k">else</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="TraceModel.setValue"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set index EditRole to value&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceModel.windowChange"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.windowChange">[docs]</a>    <span class="k">def</span> <span class="nf">windowChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;change the plot window on which the plottedTrace is displayed&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span>
+        <span class="n">plotname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">plotname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="p">:</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">setGraphicsView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">graphicsViewDict</span><span class="p">[</span><span class="n">plotname</span><span class="p">][</span><span class="s1">&#39;view&#39;</span><span class="p">],</span> <span class="n">plotname</span><span class="p">)</span>
+            <span class="n">leftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftInd</span><span class="p">,</span> <span class="n">rightInd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;isPlotted&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TraceModel.penChange"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.penChange">[docs]</a>    <span class="k">def</span> <span class="nf">penChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;plot using the pen specified by value&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">leftInd</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftInd</span><span class="p">,</span> <span class="n">rightInd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;isPlotted&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TraceModel.checkboxChange"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.checkboxChange">[docs]</a>    <span class="k">def</span> <span class="nf">checkboxChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot or unplot the plottedTrace at the given index based on the checkbox&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">curvePen</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">#unplot if unchecked</span>
+            <span class="n">success</span><span class="o">=</span><span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span> <span class="c1">#Make sure the x array isn&#39;t empty before trying to plot</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">success</span><span class="o">=</span><span class="kc">True</span>
+        <span class="k">if</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">leftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">rightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">pen</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftInd</span><span class="p">,</span> <span class="n">rightInd</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emitParentDataChanged</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">leftCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">rightCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;isPlotted&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">success</span></div>
+
+<div class="viewcode-block" id="TraceModel.emitParentDataChanged"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.emitParentDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">emitParentDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively tell parent nodes to update data from leftCol to rightCol&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">or</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">leftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">leftCol</span><span class="p">)</span>
+        <span class="n">rightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">rightCol</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftInd</span><span class="p">,</span> <span class="n">rightInd</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emitParentDataChanged</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceModel.commentChange"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.commentChange">[docs]</a>    <span class="k">def</span> <span class="nf">commentChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;change the comment and resave the trace&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">dataNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataNode</span><span class="p">:</span>
+            <span class="n">traceCollection</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">comment</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">comment</span> <span class="o">==</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span> <span class="c1">#only update if comment has changed</span>
+                <span class="n">traceCollection</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+                <span class="n">alreadySaved</span> <span class="o">=</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">saved</span>
+                <span class="n">traceCollection</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+                <span class="n">leftCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span>
+                <span class="n">rightCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">comment</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">alreadySaved</span><span class="p">:</span> <span class="c1">#if this is the first time the trace is saved, update entire collection and emit filename change signal</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">onSaveUnsavedTrace</span><span class="p">(</span><span class="n">dataNode</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;filename&#39;</span><span class="p">,</span> <span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+                    <span class="n">leftCol</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="n">rightCol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">numColumns</span><span class="o">-</span><span class="mi">1</span>
+
+                <span class="c1">#entire collection is updated if the data node is not a top level node</span>
+                <span class="n">topLeftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span> <span class="k">if</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="k">else</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">leftCol</span><span class="p">)</span>
+                <span class="n">bottomRightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span> <span class="k">if</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="k">else</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="n">rightCol</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">topLeftInd</span><span class="p">,</span> <span class="n">bottomRightInd</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emitParentDataChanged</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">leftCol</span><span class="p">,</span> <span class="n">rightCol</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="TraceModel.categoryCheckboxChange"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.categoryCheckboxChange">[docs]</a>    <span class="k">def</span> <span class="nf">categoryCheckboxChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check or uncheck the filename category of a set of traces&quot;&quot;&quot;</span>
+        <span class="n">categoryNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">categoryNode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataNodes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+            <span class="n">dataIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkboxChange</span><span class="p">(</span><span class="n">dataIndex</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="c1">#change each data node checkbox</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">categoryNode</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceModelDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">),</span> <span class="s1">&#39;isPlotted&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="TraceModel.addTrace"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.addTrace">[docs]</a>    <span class="k">def</span> <span class="nf">addTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;add a trace to the model&quot;&quot;&quot;</span>
+        <span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">addNode</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTopNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceModel.nodeFromContent"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.nodeFromContent">[docs]</a>    <span class="k">def</span> <span class="nf">nodeFromContent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Use traceDict to efficiently find node from trace&quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span> <span class="ow">is</span> <span class="n">trace</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">dataNode</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="TraceModel.removeNode"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.removeNode">[docs]</a>    <span class="k">def</span> <span class="nf">removeNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">useModelReset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the node from the model, unplotting all connected traces</span>
+<span class="sd">        if useModelReset is True, the calling function will use beginModelReset and endModelReset.&quot;&quot;&quot;</span>
+        <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">nodeIsNotData</span> <span class="o">=</span> <span class="n">node</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataNodes</span>
+        <span class="n">okToDelete</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;okToDelete&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">okToDelete</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">:</span>
+                <span class="n">nodeHasNoSiblings</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasSiblings</span><span class="p">(</span><span class="n">dataNode</span><span class="p">)</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span>
+                <span class="k">if</span> <span class="n">trace</span><span class="o">.</span><span class="n">curvePen</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="n">trace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">traceCreation</span><span class="p">)</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">TraceModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">dataNode</span><span class="p">,</span> <span class="n">useModelReset</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">or</span> <span class="n">nodeHasNoSiblings</span><span class="p">):</span>
+                    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">traceRemoved</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">and</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">node</span><span class="p">:</span>
+                        <span class="nb">super</span><span class="p">(</span><span class="n">TraceModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">useModelReset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nodeIsNotData</span><span class="p">:</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">TraceModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">useModelReset</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceModel.hasSiblings"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.hasSiblings">[docs]</a>    <span class="k">def</span> <span class="nf">hasSiblings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns True if node is not the only child of its parent, else False&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="TraceModel.onSaveUnsavedTrace"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.onSaveUnsavedTrace">[docs]</a>    <span class="k">def</span> <span class="nf">onSaveUnsavedTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataNode</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;rename the category associated with dataNode, if any&quot;&quot;&quot;</span>
+        <span class="n">categoryNode</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">parent</span>
+        <span class="k">if</span> <span class="n">categoryNode</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">categoryNode</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">newName</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">newName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getUniqueCategory</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span> <span class="c1">#get a unique new category for trace collection</span>
+            <span class="n">categoryNode</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">newName</span>
+            <span class="n">categoryNode</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">newName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">newName</span><span class="p">]</span> <span class="o">=</span> <span class="n">categoryNode</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">categoryNode</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span>
+                <span class="n">trace</span><span class="o">.</span><span class="n">category</span> <span class="o">=</span> <span class="n">newName</span> <span class="c1">#rename node category</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">newName</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">trace</span><span class="o">.</span><span class="n">name</span> <span class="c1">#rename the node id</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span></div>
+
+<div class="viewcode-block" id="TraceModel.isDataNode"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.isDataNode">[docs]</a>    <span class="k">def</span> <span class="nf">isDataNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;check if index refers to a data node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">data</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="TraceModel.onMeasurementModelDataChanged"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.onMeasurementModelDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onMeasurementModelDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traceCreation</span><span class="p">,</span> <span class="n">changeType</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Trace data changed via MeasurementTableModel. Update model.&quot;&quot;&quot;</span>
+        <span class="n">traceCreation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceCreation</span><span class="p">)</span>
+        <span class="n">changeType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">changeType</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">traceCreation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">changeType</span><span class="o">==</span><span class="s1">&#39;comment&#39;</span><span class="p">:</span>
+                <span class="n">comment</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="ow">and</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">comment</span> <span class="o">!=</span> <span class="n">comment</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commentChange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">comment</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">changeType</span><span class="o">==</span><span class="s1">&#39;isPlotted&#39;</span><span class="p">:</span>
+                <span class="n">topLeftInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">bottomRightInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">topLeftInd</span><span class="p">,</span> <span class="n">bottomRightInd</span><span class="p">)</span>
+                <span class="n">parentInd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">parentInd</span><span class="p">,</span> <span class="n">parentInd</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceModel.getUniqueCategory"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.getUniqueCategory">[docs]</a>    <span class="k">def</span> <span class="nf">getUniqueCategory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a valid category for the trace filename&quot;&quot;&quot;</span>
+        <span class="n">pathparts</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">pathparts</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">pathpart</span> <span class="ow">in</span> <span class="n">pathparts</span><span class="p">:</span> <span class="c1">#loop through parts of the directory</span>
+            <span class="n">category</span> <span class="o">=</span> <span class="n">pathpart</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">category</span> <span class="k">else</span> <span class="n">pathpart</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">category</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">existingCategories</span><span class="p">():</span>
+                <span class="k">return</span> <span class="n">category</span>
+        <span class="k">return</span> <span class="n">filename</span> <span class="c1">#This should never happen</span></div>
+
+<div class="viewcode-block" id="TraceModel.existingCategories"><a class="viewcode-back" href="../../code/trace-doc.html#trace.TraceModel.TraceModel.existingCategories">[docs]</a>    <span class="k">def</span> <span class="nf">existingCategories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;list of categories in traces currently shown&quot;&quot;&quot;</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">traceDict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">dataNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">dataNode</span><span class="o">.</span><span class="n">content</span>
+            <span class="n">categories</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">trace</span><span class="o">.</span><span class="n">category</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">categories</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

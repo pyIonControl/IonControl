@@ -1,0 +1,348 @@
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter}{\section{Chassis.\-git.\-p\-Counter.\-p\-Counter Class Reference}
+\label{class_chassis_8git_1_1p_counter_1_1p_counter}\index{Chassis.\-git.\-p\-Counter.\-p\-Counter@{Chassis.\-git.\-p\-Counter.\-p\-Counter}}
+}
+
+
+This class will count edges of a ditial signal at a sample clock rate specified, and has capability of being triggered to start.  
+
+
+Inheritance diagram for Chassis.\-git.\-p\-Counter.\-p\-Counter\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_chassis_8git_1_1p_counter_1_1p_counter}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a133977682f974d9c5251e6f5afeb3d1c}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is the constructor for the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a0a9ce5a19b35626e94d103d91e88821c}{init}
+\begin{DoxyCompactList}\small\item\em This function initializes the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class and opens a reference to the D\-A\-Qmx device(s). \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a4b9db5d3fd9ed787f308dfc2e76707cc}{init\-From\-File}
+\begin{DoxyCompactList}\small\item\em This function initializes the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class using the chassis config file and opens a reference to the D\-A\-Qmx device(s). \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the measurement. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ab8bfeabc13832e4b7d409bfbf7c20d90}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the measurement. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{read}
+\begin{DoxyCompactList}\small\item\em This function returns an array of the edge counts with an array size equal to the number of samples. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ab857f95f27c53280488d54999ffee4c6}{measure}
+\begin{DoxyCompactList}\small\item\em This function performs the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start()}, \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{read()}, and \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ab8bfeabc13832e4b7d409bfbf7c20d90}{stop()} methods in one function call. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a94f72092f1d0f0cec7b16e5c857f9246}{close}
+\begin{DoxyCompactList}\small\item\em This function closes the refences to the D\-A\-Qmx devices. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_af2cfe16174ae7c08fcbe673fdff92e41}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is the destructor for the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a6a6ad59340a0bdbce0e21115116cd10c}{edge\-Counter}
+\begin{DoxyCompactList}\small\item\em The string that identifies the D\-A\-Qmx device and counter for the counter that is used to count edges. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a786395b8325d54efca86113bb85f0a11}{clock\-Counter}
+\begin{DoxyCompactList}\small\item\em The string that identifies the D\-A\-Qmx device and counter for the counter that is used to create the sample clock. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ac4e636f13e97b17017621f43e4d65c95}{enable\-Start\-Trigger}
+\begin{DoxyCompactList}\small\item\em A boolean that enables the start trigger. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_abcaca1083cd7a8476fb6ecb127761640}{edge\-Cntr\-Term}
+\begin{DoxyCompactList}\small\item\em A string that identifies the D\-A\-Qmx digital line that will be used as an input to the edge counter. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a2308c1aa3a3c94cea864af076275b37a}{trigger\-Source}
+\begin{DoxyCompactList}\small\item\em A string that identifies the D\-A\-Qmx digital line that will be used as the start trigger. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a2fb27f44005a6ee09baa193c2e1fcd5b}{clock\-Source\-Term}
+\begin{DoxyCompactList}\small\item\em A string that identifies the D\-A\-Qmx digital line that will output the sample clock. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa9f5bba0fb4280d94d7e800a02f0b941}{edge\-Cntr\-Task}
+\begin{DoxyCompactList}\small\item\em The task reference for the edge counter. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a24e9aefcb3db02d776ddf8f3a0a532c9}{clock\-Cntr\-Task}
+\begin{DoxyCompactList}\small\item\em The task reference for the sample clock counter. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ac2ada7a331b6be8cbd540485f0d90edd}{timeout}
+\begin{DoxyCompactList}\small\item\em This is the time to wait for a start trigger. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_acfa466a92fa7a706ba68493e1ff59441}{samples} property(\-\_\-get\-Samples, \-\_\-set\-Samples)
+\begin{DoxyCompactList}\small\item\em This is the number of samples to take. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a29044984e50fe6405e37cf63880c0bf6}{sample\-Rate} property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)
+\begin{DoxyCompactList}\small\item\em This is the sample rate to use when counting edges. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a490e12592d8045195f68cc17bcc8fcf4}{bin\-Time} property(\-\_\-get\-Bin\-Time, \-\_\-set\-Bin\-Time)
+\begin{DoxyCompactList}\small\item\em This is the time in millisenconds to take a single sample. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a052d0809530db74794149e44570812d9}{acq\-Time} property(\-\_\-get\-Acq\-Time, \-\_\-set\-Acq\-Time)
+\begin{DoxyCompactList}\small\item\em This is the time in milliseconds for a full acquisition period. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will count edges of a ditial signal at a sample clock rate specified, and has capability of being triggered to start. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a133977682f974d9c5251e6f5afeb3d1c}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{kwargs}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a133977682f974d9c5251e6f5afeb3d1c}
+
+
+This function is the constructor for the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class. 
+
+It creates internal variables required to perform functions within the class. This function does not initialize any hardware. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_af2cfe16174ae7c08fcbe673fdff92e41}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_af2cfe16174ae7c08fcbe673fdff92e41}
+
+
+This function is the destructor for the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class. 
+
+It deletes internal variables and closes the references to the D\-A\-Qmx devices if they are not already closed. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a94f72092f1d0f0cec7b16e5c857f9246}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!close@{close}}
+\index{close@{close}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a94f72092f1d0f0cec7b16e5c857f9246}
+
+
+This function closes the refences to the D\-A\-Qmx devices. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a0a9ce5a19b35626e94d103d91e88821c}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!init@{init}}
+\index{init@{init}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{clock\-Counter = {\ttfamily None}, }
+\item[{}]{edge\-Counter = {\ttfamily None}, }
+\item[{}]{acq\-Time = {\ttfamily None}, }
+\item[{}]{bin\-Time = {\ttfamily None}, }
+\item[{}]{samples = {\ttfamily None}, }
+\item[{}]{sample\-Rate = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a0a9ce5a19b35626e94d103d91e88821c}
+
+
+This function initializes the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class and opens a reference to the D\-A\-Qmx device(s). 
+
+If specifiying a acq\-Time and bin\-Time or samples and sample\-Rate, only one pair of parameters need to be provided. When specifying acq\-Time and bin\-Time, the samples and sample\-Rate are calculated. When specifying the samples and sample\-Rate, the acq\-Time and bin\-Time are calculated.
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em clock\-Counter} & The string that identifies the D\-A\-Qmx device and counter for the counter that is used to create the sample clock. \\
+\hline
+{\em edge\-Counter} & The string that identifies the D\-A\-Qmx device and counter for the counter that is used to count edges. \\
+\hline
+{\em acq\-Time} & This is the time in milliseconds for a full acquisition period. \\
+\hline
+{\em bin\-Time} & This is the time in millisenconds to take a single sample. \\
+\hline
+{\em samples} & The number of samples for the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} to take. \\
+\hline
+{\em sample\-Rate} & The frequency of the samples taken by the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter}. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a4b9db5d3fd9ed787f308dfc2e76707cc}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!init\-From\-File@{init\-From\-File}}
+\index{init\-From\-File@{init\-From\-File}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{init\-From\-File}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-init\-From\-File (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{filepath}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a4b9db5d3fd9ed787f308dfc2e76707cc}
+
+
+This function initializes the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} class using the chassis config file and opens a reference to the D\-A\-Qmx device(s). 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em filepath} & The path to the chassis config file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_ab857f95f27c53280488d54999ffee4c6}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!measure@{measure}}
+\index{measure@{measure}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{measure}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-measure (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_ab857f95f27c53280488d54999ffee4c6}
+
+
+This function performs the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start()}, \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{read()}, and \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_ab8bfeabc13832e4b7d409bfbf7c20d90}{stop()} methods in one function call. 
+
+This is useful for when the results of the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{read()} method can be retrieved immediately after a \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start()} 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!read@{read}}
+\index{read@{read}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-read (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}
+
+
+This function returns an array of the edge counts with an array size equal to the number of samples. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!start@{start}}
+\index{start@{start}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}
+
+
+This function starts the measurement. 
+
+If the start trigger is enabled, then a the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter}{p\-Counter} waits for that digital trigger. Otherwise the measurement takes place immediately. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_ab8bfeabc13832e4b7d409bfbf7c20d90}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!stop@{stop}}
+\index{stop@{stop}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-p\-Counter.\-p\-Counter.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_ab8bfeabc13832e4b7d409bfbf7c20d90}
+
+
+This function stops the measurement. 
+
+It needs to be called everytime the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start()} method is called. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a24e9aefcb3db02d776ddf8f3a0a532c9}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!clock\-Cntr\-Task@{clock\-Cntr\-Task}}
+\index{clock\-Cntr\-Task@{clock\-Cntr\-Task}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{clock\-Cntr\-Task}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-clock\-Cntr\-Task}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a24e9aefcb3db02d776ddf8f3a0a532c9}
+
+
+The task reference for the sample clock counter. 
+
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a786395b8325d54efca86113bb85f0a11}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!clock\-Counter@{clock\-Counter}}
+\index{clock\-Counter@{clock\-Counter}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{clock\-Counter}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-clock\-Counter}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a786395b8325d54efca86113bb85f0a11}
+
+
+The string that identifies the D\-A\-Qmx device and counter for the counter that is used to create the sample clock. 
+
+Example\-: /\-P\-X\-I1\-Slot5/ctr0 \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a2fb27f44005a6ee09baa193c2e1fcd5b}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!clock\-Source\-Term@{clock\-Source\-Term}}
+\index{clock\-Source\-Term@{clock\-Source\-Term}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{clock\-Source\-Term}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-clock\-Source\-Term}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a2fb27f44005a6ee09baa193c2e1fcd5b}
+
+
+A string that identifies the D\-A\-Qmx digital line that will output the sample clock. 
+
+Default\-: P\-F\-I12 \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_aa9f5bba0fb4280d94d7e800a02f0b941}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!edge\-Cntr\-Task@{edge\-Cntr\-Task}}
+\index{edge\-Cntr\-Task@{edge\-Cntr\-Task}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{edge\-Cntr\-Task}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-edge\-Cntr\-Task}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_aa9f5bba0fb4280d94d7e800a02f0b941}
+
+
+The task reference for the edge counter. 
+
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_abcaca1083cd7a8476fb6ecb127761640}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!edge\-Cntr\-Term@{edge\-Cntr\-Term}}
+\index{edge\-Cntr\-Term@{edge\-Cntr\-Term}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{edge\-Cntr\-Term}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-edge\-Cntr\-Term}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_abcaca1083cd7a8476fb6ecb127761640}
+
+
+A string that identifies the D\-A\-Qmx digital line that will be used as an input to the edge counter. 
+
+Default\-: P\-F\-I0 \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a6a6ad59340a0bdbce0e21115116cd10c}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!edge\-Counter@{edge\-Counter}}
+\index{edge\-Counter@{edge\-Counter}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{edge\-Counter}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-edge\-Counter}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a6a6ad59340a0bdbce0e21115116cd10c}
+
+
+The string that identifies the D\-A\-Qmx device and counter for the counter that is used to count edges. 
+
+Example\-: P\-X\-I\-Slot5/ctr0 \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_ac4e636f13e97b17017621f43e4d65c95}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!enable\-Start\-Trigger@{enable\-Start\-Trigger}}
+\index{enable\-Start\-Trigger@{enable\-Start\-Trigger}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{enable\-Start\-Trigger}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-enable\-Start\-Trigger}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_ac4e636f13e97b17017621f43e4d65c95}
+
+
+A boolean that enables the start trigger. 
+
+The default is false, which disables the start trigger. The measurement will immediately start when the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_a70605632a820fcbded267beb432fcdb4}{start()} method is called. A true value will make the measurement start when a digital trigger is received on the line specified by the trigger\-Source variable. \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_ac2ada7a331b6be8cbd540485f0d90edd}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!timeout@{timeout}}
+\index{timeout@{timeout}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{timeout}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-timeout}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_ac2ada7a331b6be8cbd540485f0d90edd}
+
+
+This is the time to wait for a start trigger. 
+
+If the timeout passes, then an error is generated. Ignore this variable if the start trigger is disabled. \hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a2308c1aa3a3c94cea864af076275b37a}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!trigger\-Source@{trigger\-Source}}
+\index{trigger\-Source@{trigger\-Source}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-trigger\-Source}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a2308c1aa3a3c94cea864af076275b37a}
+
+
+A string that identifies the D\-A\-Qmx digital line that will be used as the start trigger. 
+
+Default\-: P\-F\-I1 
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a052d0809530db74794149e44570812d9}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!acq\-Time@{acq\-Time}}
+\index{acq\-Time@{acq\-Time}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{acq\-Time}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-acq\-Time property(\-\_\-get\-Acq\-Time, \-\_\-set\-Acq\-Time)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a052d0809530db74794149e44570812d9}
+
+
+This is the time in milliseconds for a full acquisition period. 
+
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a490e12592d8045195f68cc17bcc8fcf4}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!bin\-Time@{bin\-Time}}
+\index{bin\-Time@{bin\-Time}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{bin\-Time}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-bin\-Time property(\-\_\-get\-Bin\-Time, \-\_\-set\-Bin\-Time)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a490e12592d8045195f68cc17bcc8fcf4}
+
+
+This is the time in millisenconds to take a single sample. 
+
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_a29044984e50fe6405e37cf63880c0bf6}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-sample\-Rate property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_a29044984e50fe6405e37cf63880c0bf6}
+
+
+This is the sample rate to use when counting edges. 
+
+\hypertarget{class_chassis_8git_1_1p_counter_1_1p_counter_acfa466a92fa7a706ba68493e1ff59441}{\index{Chassis.\-git\-::p\-Counter\-::p\-Counter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}!samples@{samples}}
+\index{samples@{samples}!Chassis.git::pCounter::pCounter@{Chassis.\-git\-::p\-Counter\-::p\-Counter}}
+\subsubsection[{samples}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-p\-Counter.\-p\-Counter.\-samples property(\-\_\-get\-Samples, \-\_\-set\-Samples)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1p_counter_1_1p_counter_acfa466a92fa7a706ba68493e1ff59441}
+
+
+This is the number of samples to take. 
+
+It is the size of the data array returned by the \hyperlink{class_chassis_8git_1_1p_counter_1_1p_counter_aa462351619f5172f6ac669b4a1ba84d3}{read()} method. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+p\-Counter.\-py\end{DoxyCompactItemize}

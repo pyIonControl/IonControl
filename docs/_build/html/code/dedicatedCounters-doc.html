@@ -1,0 +1,741 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>dedicatedCounters &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>dedicatedCounters</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/dedicatedCounters-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="dedicatedcounters">
+<h1>dedicatedCounters<a class="headerlink" href="#dedicatedcounters" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-dedicatedCounters.AnalogInputCalibration">
+<span id="analoginputcalibration"></span><h2>AnalogInputCalibration<a class="headerlink" href="#module-dedicatedCounters.AnalogInputCalibration" title="Permalink to this headline">¶</a></h2>
+<p>Analog Input calibrations
+to create a new calibration derive a new class from AnalogInputCalibration,
+overwrite the necessary functions and add the new class to AnalogInputCalibrationMap</p>
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration">
+<em class="property">class </em><code class="descname">AnalogInputCalibration</code><span class="sig-paren">(</span><em>name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.convert">
+<code class="descname">convert</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibration.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the binary representation from the ADC chip to voltage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.convertMagnitude">
+<code class="descname">convertMagnitude</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibration.convertMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.convertMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the binary representation from the ADC chip to a magnitude object</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.paramDef">
+<code class="descname">paramDef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibration.paramDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.paramDef" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the parameter definition used by pyqtgraph parametertree to show the gui</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>param</em>, <em>changes</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibration.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibration.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the parameter, called by the signal of pyqtgraph parametertree</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608">
+<em class="property">class </em><code class="descname">AnalogInputCalibrationAD7608</code><span class="sig-paren">(</span><em>name='AD7608'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibrationAD7608"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.convert">
+<code class="descname">convert</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibrationAD7608.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the binary representation from the ADC chip to voltage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.convertMagnitude">
+<code class="descname">convertMagnitude</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#AnalogInputCalibrationAD7608.convertMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.convertMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert the binary representation from the ADC chip to a magnitude object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.referenceVoltage">
+<code class="descname">referenceVoltage</code><em class="property"> = 5.0</em><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.AnalogInputCalibrationAD7608.referenceVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.Parameters">
+<em class="property">class </em><code class="descname">Parameters</code><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#Parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration">
+<em class="property">class </em><code class="descname">PowerDetectorCalibration</code><span class="sig-paren">(</span><em>name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration" title="Permalink to this definition">¶</a></dt>
+<dd><p>data is being fitted to p*x**2 + m*x + c
+is valid between minimum and maximum input voltage</p>
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.convert">
+<code class="descname">convert</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibration.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.convert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.convertMagnitude">
+<code class="descname">convertMagnitude</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibration.convertMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.convertMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.paramDef">
+<code class="descname">paramDef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibration.paramDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibration.paramDef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608">
+<em class="property">class </em><code class="descname">PowerDetectorCalibrationAD7608</code><span class="sig-paren">(</span><em>name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibrationAD7608"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608" title="Permalink to this definition">¶</a></dt>
+<dd><p>data is being fitted to p*x**2 + m*x + c
+is valid between minimum and maximum input voltage</p>
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.convert">
+<code class="descname">convert</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibrationAD7608.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.convert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.convertMagnitude">
+<code class="descname">convertMagnitude</code><span class="sig-paren">(</span><em>binary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibrationAD7608.convertMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.convertMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.paramDef">
+<code class="descname">paramDef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibrationAD7608.paramDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.paramDef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.referenceVoltage">
+<code class="descname">referenceVoltage</code><em class="property"> = 5.0</em><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationAD7608.referenceVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationTwo">
+<em class="property">class </em><code class="descname">PowerDetectorCalibrationTwo</code><span class="sig-paren">(</span><em>name='default'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/AnalogInputCalibration.html#PowerDetectorCalibrationTwo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.AnalogInputCalibration.PowerDetectorCalibrationTwo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Temporary fix until the parameters can be changed from the gui</p>
+</dd></dl>
+
+</div>
+<div class="section" id="autoload">
+<h2>AutoLoad<a class="headerlink" href="#autoload" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="id1">
+<h2>DedicatedCounters<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dedicatedCounters.DedicatedCountersSettings">
+<span id="dedicatedcounterssettings"></span><h2>DedicatedCountersSettings<a class="headerlink" href="#module-dedicatedCounters.DedicatedCountersSettings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings">
+<em class="property">class </em><code class="descname">DedicatedCountersSettings</code><span class="sig-paren">(</span><em>config</em>, <em>plotDict</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onCounterRemoveSetting">
+<code class="descname">onCounterRemoveSetting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onCounterRemoveSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onCounterRemoveSetting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onIndexChanged">
+<code class="descname">onIndexChanged</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onLoadProfile">
+<code class="descname">onLoadProfile</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onLoadProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onLoadProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onRemoveProfile">
+<code class="descname">onRemoveProfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onRemoveProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onRemoveProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onSaveProfile">
+<code class="descname">onSaveProfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onSaveProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onSaveProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onValueChanged">
+<code class="descname">onValueChanged</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.onValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.onValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.saveable">
+<code class="descname">saveable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.saveable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.saveable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.setProfile">
+<code class="descname">setProfile</code><span class="sig-paren">(</span><em>name</em>, <em>profile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.setProfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.setProfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.updateMask">
+<code class="descname">updateMask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#DedicatedCountersSettings.updateMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.updateMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.DedicatedCountersSettings.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.DedicatedCountersSettings.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.DedicatedCountersSettings.Settings.__setstate__">
+<code class="descname">__setstate__</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#Settings.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.Settings.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function ensures that the given fields are present in the class object
+after unpickling. Only new class attributes need to be added here.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dedicatedCounters.DedicatedCountersSettings.now">
+<code class="descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedCountersSettings.html#now"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedCountersSettings.now" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.DedicatedDisplay">
+<span id="dedicateddisplay"></span><h2>DedicatedDisplay<a class="headerlink" href="#module-dedicatedCounters.DedicatedDisplay" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.DedicatedDisplay.DedicatedDisplay">
+<em class="property">class </em><code class="descname">DedicatedDisplay</code><span class="sig-paren">(</span><em>config</em>, <em>name</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedDisplay.html#DedicatedDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.DedicatedDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.DedicatedDisplay.DedicatedDisplay.onAverageChanged">
+<code class="descname">onAverageChanged</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedDisplay.html#DedicatedDisplay.onAverageChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.DedicatedDisplay.onAverageChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedDisplay.DedicatedDisplay.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedDisplay.html#DedicatedDisplay.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.DedicatedDisplay.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.DedicatedDisplay.DedicatedDisplay.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedDisplay.html#DedicatedDisplay.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.DedicatedDisplay.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.DedicatedDisplay.DedicatedDisplay.values">
+<code class="descname">values</code><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.DedicatedDisplay.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.DedicatedDisplay.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/dedicatedCounters/DedicatedDisplay.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.DedicatedDisplay.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.InputCalibrationUi">
+<span id="inputcalibrationui"></span><h2>InputCalibrationUi<a class="headerlink" href="#module-dedicatedCounters.InputCalibrationUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.InputCalibrationUi.ChannelSettings">
+<em class="property">class </em><code class="descname">ChannelSettings</code><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#ChannelSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.ChannelSettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationChannel">
+<em class="property">class </em><code class="descname">InputCalibrationChannel</code><span class="sig-paren">(</span><em>config</em>, <em>channel</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationChannel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.onCalibrationChanged">
+<code class="descname">onCalibrationChanged</code><span class="sig-paren">(</span><em>calibration</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationChannel.onCalibrationChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.onCalibrationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationChannel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>callback</em>, <em>MainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationChannel.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationChannel.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationUi">
+<em class="property">class </em><code class="descname">InputCalibrationUi</code><span class="sig-paren">(</span><em>config</em>, <em>numChannels</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>MainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.InputCalibrationUi.InputCalibrationUi.updateCalibration">
+<code class="descname">updateCalibration</code><span class="sig-paren">(</span><em>channel</em>, <em>calibration</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#InputCalibrationUi.updateCalibration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.InputCalibrationUi.updateCalibration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.InputCalibrationUi.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/dedicatedCounters/InputCalibrationUi.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.InputCalibrationUi.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.LoadingHistoryModel">
+<span id="loadinghistorymodel"></span><h2>LoadingHistoryModel<a class="headerlink" href="#module-dedicatedCounters.LoadingHistoryModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel">
+<em class="property">class </em><code class="descname">LoadingHistoryModel</code><span class="sig-paren">(</span><em>history</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.beginInsertRows">
+<code class="descname">beginInsertRows</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.beginInsertRows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.beginInsertRows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C4BDF98&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.formatDelta">
+<code class="descname">formatDelta</code><span class="sig-paren">(</span><em>delta</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.formatDelta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.formatDelta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.history">
+<code class="descname">history</code><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.history" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C4BDF28&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.updateLast">
+<code class="descname">updateLast</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/LoadingHistoryModel.html#LoadingHistoryModel.updateLast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.LoadingHistoryModel.LoadingHistoryModel.updateLast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.StatusDisplay">
+<span id="statusdisplay"></span><h2>StatusDisplay<a class="headerlink" href="#module-dedicatedCounters.StatusDisplay" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.StatusDisplay.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/dedicatedCounters/StatusDisplay.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusDisplay.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.StatusDisplay.StatusDisplay">
+<em class="property">class </em><code class="descname">StatusDisplay</code><span class="sig-paren">(</span><em>config</em>, <em>pulserConfiguration</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusDisplay.html#StatusDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusDisplay.StatusDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.StatusDisplay.StatusDisplay.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusDisplay.html#StatusDisplay.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusDisplay.StatusDisplay.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusDisplay.StatusDisplay.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusDisplay.html#StatusDisplay.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusDisplay.StatusDisplay.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusDisplay.StatusDisplay.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusDisplay.html#StatusDisplay.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusDisplay.StatusDisplay.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.StatusTableModel">
+<span id="statustablemodel"></span><h2>StatusTableModel<a class="headerlink" href="#module-dedicatedCounters.StatusTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel">
+<em class="property">class </em><code class="descname">StatusTableModel</code><span class="sig-paren">(</span><em>description</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.colorLookup">
+<code class="descname">colorLookup</code><em class="property"> = {('success', True): &lt;PyQt5.QtGui.QColor object at 0x000002665DDFF668&gt;, ('error', True): &lt;PyQt5.QtGui.QColor object at 0x000002665DDFF6D8&gt;, ('success', False): &lt;PyQt5.QtGui.QColor object at 0x000002665DDFF748&gt;, ('error', False): &lt;PyQt5.QtGui.QColor object at 0x000002665DDFF7B8&gt;}</em><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.colorLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665DDFF898&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.remove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.remove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665DDFF828&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.StatusTableModel.StatusTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/StatusTableModel.html#StatusTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.StatusTableModel.StatusTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-dedicatedCounters.WavemeterInterlockTableModel">
+<span id="wavemeterinterlocktablemodel"></span><h2>WavemeterInterlockTableModel<a class="headerlink" href="#module-dedicatedCounters.WavemeterInterlockTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.InterlockChannel">
+<em class="property">class </em><code class="descname">InterlockChannel</code><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#InterlockChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.InterlockChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel">
+<em class="property">class </em><code class="descname">WavemeterInterlockTableModel</code><span class="sig-paren">(</span><em>channeldict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.addChannel">
+<code class="descname">addChannel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.addChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.addChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.attributeLookup">
+<code class="descname">attributeLookup</code><em class="property"> = ['enable', 'channel', 'current', 'min', 'max']</em><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.attributeLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665B8A8128&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.edited">
+<code class="descname">edited</code><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.edited" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.getWavemeterData">
+<code class="descname">getWavemeterData</code><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.getWavemeterData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Enable', 'Channel', 'Current', 'Minimum', 'Maximum']</em><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.removeChannel">
+<code class="descname">removeChannel</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.removeChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.removeChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665B8A80B8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setChannel">
+<code class="descname">setChannel</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setChannelDict">
+<code class="descname">setChannelDict</code><span class="sig-paren">(</span><em>channelDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setChannelDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setChannelDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setCurrent">
+<code class="descname">setCurrent</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setCurrent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setEnable">
+<code class="descname">setEnable</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setEnable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setEnable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setMax">
+<code class="descname">setMax</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setMax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setMax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setMin">
+<code class="descname">setMin</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setMin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setMin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.sort">
+<code class="descname">sort</code><span class="sig-paren">(</span><em>column</em>, <em>order</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/dedicatedCounters/WavemeterInterlockTableModel.html#WavemeterInterlockTableModel.sort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dedicatedCounters.WavemeterInterlockTableModel.WavemeterInterlockTableModel.sort" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,548 @@
+###########################################################################
+#
+#  example for PulseProgramPlus input
+#
+
+#const DDSDetect = 1
+const DDSCooling = 5
+const DDSRaman2_1 = 4
+const DDSRaman2_2 = 0
+const DDSRaman2_carrier = 7
+const DDSRaman2_single = 6
+const PMTChannelSingle = 0
+const PMTChannelMulti1 = 9
+const PMTChannelMulti2 = 10
+const PMTChannelMulti3 = 11
+const PMTChannelMulti4 = 12
+const DDSMicrowave = 2
+const DetectSetpointParameter = 43
+const FreqCalChannelMode2 = 2
+const FreqCalChannelMode4 = 4
+
+# frequencies and amplitudes
+parameter dummy = 0
+parameter SetDetectAmpSetpoint  = 0
+parameter<AD9912_PHASE> GateInitPhase = 0
+parameter<AD9912_PHASE> GateFlippedPhase = 180
+parameter offResonanceShift = 0 MHz
+parameter RFFreq = 33 MHz
+parameter tickleOffset = 1 MHz
+parameter <AD9912_FRQ> MicrowaveFreq = 42 MHz
+parameter MicrowaveAmp = 1023
+#parameter<AD9912_FRQ> DetectFreq = 100 MHz
+#parameter DetectAmp = 1023
+parameter<ADCTI122S101_VOLTAGE> CoolingAmpSetpoint
+parameter<ADCTI122S101_VOLTAGE> DetectAmpSetpoint
+parameter<AD9912_FRQ> RamanFreq2_1 = 240 MHz
+parameter<AD9912_FRQ> RamanFreq2_2 = 240 MHz
+parameter RamanAmp2_2 = 900
+parameter<AD9912_FRQ> RamanFreq2_carrier = 240 MHz
+parameter<AD9912_FRQ> RamanFreq2_single = 240 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_1 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_2 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_3 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_4 = 247 MHz
+parameter<AD9912_FRQ> BlueSidebandFreq_2
+parameter<AD9912_FRQ> BlueSidebandFreq_4 
+
+parameter piTime
+parameter gateTime
+parameter RamanAOMCarrierFreq = 247 MHz
+parameter RamanCarrierShift = 0 kHz
+parameter RamanSingleDetuning = 0 MHz
+parameter RamanGateDetuning = 0 MHz
+parameter GateDetuningFromSideband = 8 kHz
+#parameter RamanAsymmetry = 0 MHz
+#Added for Ramsey coherence measurement
+parameter<AD9912_PHASE> RamanInitPhase = 0
+#End added for Ramsey coherence measurement
+parameter<AD9912_PHASE> RamanAnalyzePhase = 0
+parameter RedSidebandDetuning_1 = 2 MHz
+parameter RedSidebandDetuning_2 = 2 MHz
+parameter RedSidebandDetuning_3 = 2 MHz
+parameter RedSidebandDetuning_4 = 2 MHz
+parameter InitialRedSidebandPiTime_1 = 10 us
+parameter InitialRedSidebandPiTime_2 = 10 us
+parameter InitialRedSidebandPiTime_3 = 10 us
+parameter InitialRedSidebandPiTime_4 = 10 us
+parameter RSBIncrement_1 = 1 us
+parameter RSBIncrement_2 = 1 us
+parameter RSBIncrement_3 = 1 us
+parameter RSBIncrement_4 = 1 us
+#parameter DDSTrapAmp = 900
+
+# masks and shutters
+shutter InitializationShutter 
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter MicrowaveOn
+masked_shutter RamanSingleOn
+masked_shutter RamanGateOn
+masked_shutter RamanAnalyzeOn
+masked_shutter RamanOff
+masked_shutter DetectOn
+
+# times
+parameter CoolingTime = 1 ms
+parameter PumpTime = 0 ms
+parameter SbCoolingOn_1 = 0
+parameter SbCoolingOn_2 = 0
+parameter SbCoolingOn_3 = 0
+parameter SbCoolingOn_4 = 0
+parameter NumSBCoolingLoops = 0
+parameter PreWaitTime = 2 us
+parameter MicrowaveInitTime = 10 us
+parameter RamanInitTime = 0 ms
+#added for Ramsey coherence measurement
+parameter RamanWaitTime = 0 ms
+parameter RamanEchoTime = 0 ms
+parameter RamanAnalyzeTime = 0 ms
+#end added for Ramsey coherence measurement
+parameter GateTime = 125 us
+parameter numGates = 1
+parameter WalshNOn = 0
+parameter QubitWaitTime = 0 ms
+parameter GateTimeRamsey = 0 ms
+parameter numAnalyze = 1
+parameter AnalyzeTime = 0 ms
+parameter PostWaitTime = 2 us
+parameter DetectTime = 1 ms
+parameter DetectSetupTime = 100 ms
+
+# control parameters
+parameter MaxInitRepeatSingle = 10
+parameter MaxInitRepeatMulti = 10
+parameter experiments = 100
+counter DetectCounters = 0
+counter CheckIonCounters = 0
+trigger ddsApplyTrigger =  3
+trigger ddsRamanApply = 3
+trigger ddsApplyAll = 3
+parameter PresenceThresholdSingle = 6
+parameter PresenceThresholdMulti = 6
+
+# excitcodes
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xfffe000000000000
+
+# Ramsey Calibration
+parameter<AD9912_PHASE> RamseyCalInitPhase
+parameter<AD9912_PHASE> RamseyCalAnalyzePhase
+parameter RamseyCalTime
+counter RamseyCalCounterMode2
+counter RamseyCalCounterMode4
+parameter RamseyCalWaitTime
+var CalibrationDetectPhotons
+parameter<AD9912_FRQ> FrequencyAdjust
+parameter RamseyCalibrateEveryMode2
+parameter RamseyCalibrateEveryMode4
+var RamseySkipCounterMode2
+var RamseySkipCounterMode4
+parameter DetectThreshold
+var CalibrationPulseFrequency
+var RamseyCalCounter
+
+# internal variables
+var experimentsleft = 100
+var initRemaining = 0
+var currentexperiment = 0
+var coolPhotonsSingle = 0
+var coolPhotonsMulti = 0
+var coolPhotonsMulti1 = 0
+var coolPhotonsMulti2 = 0
+var coolPhotonsMulti3 = 0
+var coolPhotonsMulti4 = 0
+var SBCoolingLoopsLeft = 0
+var RedSidebandPiTime_1 = 10 us
+var RedSidebandPiTime_2 = 10 us
+var RedSidebandPiTime_3 = 10 us
+var RedSidebandPiTime_4 = 10 us
+var firstRun = 1
+var currentGateNum=1
+var currentAnalyzeNum=1
+
+def cool():
+    set_shutter( CoolingOn )
+    set_counter( CheckIonCounters )
+    update( CoolingTime )
+    clear_counter()
+    update( )
+    coolPhotonsSingle = load_count( PMTChannelSingle )
+    coolPhotonsMulti1 = load_count( PMTChannelMulti1 )
+    coolPhotonsMulti2 = load_count( PMTChannelMulti2 )
+    coolPhotonsMulti3 = load_count( PMTChannelMulti3 )
+    coolPhotonsMulti4 = load_count( PMTChannelMulti4 )
+    coolPhotonsMulti = coolPhotonsMulti1
+    coolPhotonsMulti += coolPhotonsMulti2
+    set_inv_shutter( CoolingOn )
+
+def pump():
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+    update()
+
+def microwaveInit():
+    set_shutter( MicrowaveOn )
+    update( MicrowaveInitTime )
+    set_inv_shutter( MicrowaveOn )
+    update()
+
+def ramanInit():
+    set_dds( channel=DDSRaman2_single, freq=RamanFreq2_single, phase=RamanInitPhase)
+#    set_dds( channel=DDSRaman2_2, freq=RamanFreq2_single, phase=RamanInitPhase )
+#    set_trigger( ddsRamanApply )
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanSingleOn )
+    update( RamanInitTime )
+    set_shutter( RamanOff )
+    update()
+
+#Add for Ramsey expt
+def ramanEcho():
+    set_shutter( RamanSingleOn )
+    update( RamanEchoTime )
+    set_shutter( RamanOff )
+
+def ramanAnalyzeRamsey():
+    set_dds( channel=DDSRaman2_single, freq=RamanFreq2_single, phase=RamanAnalyzePhase )
+    set_trigger( ddsRamanApply )
+    set_shutter( RamanSingleOn )
+    update( RamanAnalyzeTime )
+    set_shutter( RamanOff )
+#End add for Ramsey expt
+
+def ramanGate():
+    set_shutter( RamanGateOn )
+    update( GateTime )
+    set_shutter( RamanOff )
+    update()
+
+def ramanGateTimesTwo():
+    set_shutter( RamanGateOn ) 
+    update( GateTime )
+    update( GateTime )
+    set_shutter( RamanOff )
+    update()
+
+def ramanAnalyze():
+    set_shutter( RamanAnalyzeOn )
+    update(AnalyzeTime)
+    set_shutter( RamanOff )
+    update()
+    
+def detect():
+#    set_dds( channel=DDSDetect, freq=DetectFreq )
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+#    set_trigger( ddsApplyTrigger )
+#    set_trigger( ddsApplyAll )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+def setupDetect():
+    set_shutter( DetectOn )
+    update( DetectSetupTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    update()
+
+def sidebandCoolPulse_1():
+    set_dds( channel=DDSRaman2_single, freq=RedSidebandFreq_1 )
+#    set_trigger( ddsRamanApply )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanSingleOn )
+    update( RedSidebandPiTime_1 )
+    set_shutter( RamanOff )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_2():
+    set_dds( channel=DDSRaman2_single, freq=RedSidebandFreq_2 )
+#    set_trigger( ddsRamanApply )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanSingleOn )
+    update( RedSidebandPiTime_2 )
+    set_shutter( RamanOff )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_3():
+    set_dds( channel=DDSRaman2_single, freq=RedSidebandFreq_3 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanSingleOn )
+    update( RedSidebandPiTime_3 )
+    set_shutter( RamanOff )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_4():
+    set_dds( channel=DDSRaman2_single, freq=RedSidebandFreq_4 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanSingleOn )
+    update( RedSidebandPiTime_4 )
+    set_shutter( RamanOff )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+
+def WalshOneOn():
+    set_dds( channel=DDSRaman2_1, phase=GateFlippedPhase)
+    set_dds( channel=DDSRaman2_2, phase=GateFlippedPhase)
+    set_trigger( ddsApplyAll)
+    update()
+    ramanGate()
+    set_dds( channel=DDSRaman2_1, phase=GateInitPhase)
+    set_dds( channel=DDSRaman2_2, phase=GateInitPhase)
+    set_trigger(ddsApplyAll)
+    update()
+
+def WalshTwoOn():
+    set_dds( channel=DDSRaman2_1, phase=GateFlippedPhase)
+    set_dds( channel=DDSRaman2_2, phase=GateFlippedPhase)
+    set_trigger( ddsApplyAll)
+    update()
+    ramanGateTimesTwo()
+    set_dds( channel=DDSRaman2_1, phase=GateInitPhase)
+    set_dds( channel=DDSRaman2_2, phase=GateInitPhase)
+    set_trigger(ddsApplyAll)
+    update()
+    ramanGate()
+
+# Ramsey Calibration Code
+def RamseyCalInitPulse():
+    set_dds( channel=DDSRaman2_single, freq=CalibrationPulseFrequency, phase=RamseyCalInitPhase)
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanSingleOn )
+    update( RamseyCalTime )
+    set_shutter( RamanOff )
+    update()
+
+def RamseyCalAnalyzePulse():
+    set_dds( channel=DDSRaman2_single, freq=CalibrationPulseFrequency, phase=RamseyCalAnalyzePhase )
+    set_trigger( ddsRamanApply )
+    set_shutter( RamanSingleOn )
+    update( RamseyCalTime )
+    set_shutter( RamanOff )
+    update()
+
+def ramseyCalibrationDetect():
+    set_shutter( DetectOn )
+    set_counter( RamseyCalCounter )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+def calibrateRamsey():    
+    if RamseyCalibrateEveryMode2>0:
+        CalibrationPulseFrequency = BlueSidebandFreq_2
+        if RamseySkipCounterMode2 >= RamseyCalibrateEveryMode2:
+            cool()
+            if MaxInitRepeatSingle>0:
+                while coolPhotonsSingle<PresenceThresholdSingle:
+                    if initRemaining==0:
+                        exit( IonLostExitcode )
+                    initRemaining -= 1
+                    cool()
+            if PumpTime>0:
+                pump()
+            SBCoolingLoopsLeft = NumSBCoolingLoops
+            RedSidebandPiTime_1 = InitialRedSidebandPiTime_1
+            RedSidebandPiTime_2 = InitialRedSidebandPiTime_2
+            RedSidebandPiTime_3 = InitialRedSidebandPiTime_3
+            RedSidebandPiTime_4 = InitialRedSidebandPiTime_4
+            while SBCoolingLoopsLeft > 0:
+                if SbCoolingOn_1 > 0:
+                    sidebandCoolPulse_1()
+                if SbCoolingOn_2 > 0:
+                    sidebandCoolPulse_2()
+                if SbCoolingOn_3 > 0:
+                    sidebandCoolPulse_3()
+                if SbCoolingOn_4 > 0:
+                    sidebandCoolPulse_4()
+                SBCoolingLoopsLeft -= 1
+                RedSidebandPiTime_1 += RSBIncrement_1
+                RedSidebandPiTime_2 += RSBIncrement_2
+                RedSidebandPiTime_3 += RSBIncrement_3
+                RedSidebandPiTime_4 += RSBIncrement_4
+            RamseyCalInitPulse()
+            update( RamseyCalWaitTime )
+            RamseyCalAnalyzePulse()
+            if DetectTime>0:
+                RamseyCalCounter = RamseyCalCounterMode2
+                ramseyCalibrationDetect()
+                dummy = 3
+                CalibrationDetectPhotons = load_count(PMTChannelSingle)
+                if CalibrationDetectPhotons > DetectThreshold:
+                    CalibrationPulseFrequency -= FrequencyAdjust
+                else:
+                    CalibrationPulseFrequency += FrequencyAdjust
+            RamseySkipCounterMode2 = 1
+        else:
+            RamseySkipCounterMode2 += 1
+        BlueSidebandFreq_2 = CalibrationPulseFrequency
+        write_result( FreqCalChannelMode2, BlueSidebandFreq_2 )
+
+    if RamseyCalibrateEveryMode4>0:
+        CalibrationPulseFrequency = BlueSidebandFreq_4
+        if RamseySkipCounterMode4 >= RamseyCalibrateEveryMode4:
+            cool()
+            if MaxInitRepeatSingle>0:
+                while coolPhotonsSingle<PresenceThresholdSingle:
+                    if initRemaining==0:
+                        exit( IonLostExitcode )
+                    initRemaining -= 1
+                    cool()
+            if PumpTime>0:
+                pump()
+            SBCoolingLoopsLeft = NumSBCoolingLoops
+            RedSidebandPiTime_1 = InitialRedSidebandPiTime_1
+            RedSidebandPiTime_2 = InitialRedSidebandPiTime_2
+            RedSidebandPiTime_3 = InitialRedSidebandPiTime_3
+            RedSidebandPiTime_4 = InitialRedSidebandPiTime_4
+            while SBCoolingLoopsLeft > 0:
+                if SbCoolingOn_1 > 0:
+                    sidebandCoolPulse_1()
+                if SbCoolingOn_2 > 0:
+                    sidebandCoolPulse_2()
+                if SbCoolingOn_3 > 0:
+                    sidebandCoolPulse_3()
+                if SbCoolingOn_4 > 0:
+                    sidebandCoolPulse_4()
+                SBCoolingLoopsLeft -= 1
+                RedSidebandPiTime_1 += RSBIncrement_1
+                RedSidebandPiTime_2 += RSBIncrement_2
+                RedSidebandPiTime_3 += RSBIncrement_3
+                RedSidebandPiTime_4 += RSBIncrement_4
+            RamseyCalInitPulse()
+            update( RamseyCalWaitTime )
+            RamseyCalAnalyzePulse()
+            if DetectTime>0:
+                RamseyCalCounter = RamseyCalCounterMode4
+                ramseyCalibrationDetect()
+                dummy = 3
+                CalibrationDetectPhotons = load_count(PMTChannelSingle)
+                if CalibrationDetectPhotons > DetectThreshold:
+                    CalibrationPulseFrequency -= FrequencyAdjust
+                else:
+                    CalibrationPulseFrequency += FrequencyAdjust
+            RamseySkipCounterMode4 = 1
+        else:
+            RamseySkipCounterMode4 += 1
+        BlueSidebandFreq_4 = CalibrationPulseFrequency
+        write_result( FreqCalChannelMode4, BlueSidebandFreq_4 )
+
+# startup switching on cooling quickly
+set_shutter( InitializationShutter )
+update()
+#set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+#set_trigger( ddsApplyTrigger )
+set_trigger( ddsApplyAll )
+if firstRun > 0:
+    setupDetect()
+    firstRun=0
+
+while not pipe_empty():
+    update()
+    apply_next_scan_point()
+
+    set_dds( channel=DDSRaman2_1, freq=RamanFreq2_1)
+    set_dds( channel=DDSRaman2_2, freq=RamanFreq2_2, amp=RamanAmp2_2)
+    set_dds( channel=DDSRaman2_single, freq=RamanFreq2_single )
+    set_dds( channel=DDSRaman2_carrier, freq=RamanFreq2_carrier, phase=RamanAnalyzePhase )
+#    set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+#    set_dds( channel=DDSCooling, amp=CoolingAmp )
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, amp=MicrowaveAmp)
+    if SetDetectAmpSetpoint > 0:
+        set_parameter( DetectSetpointParameter, DetectAmpSetpoint )
+
+#    set_trigger( ddsRamanApply )
+    set_trigger( ddsApplyAll )
+    
+    currentexperiment = 0
+    while currentexperiment < experiments:
+        cool()
+        if MaxInitRepeatSingle>0: 
+            initRemaining = MaxInitRepeatSingle
+            while coolPhotonsSingle<PresenceThresholdSingle: 
+                if initRemaining==0:
+                    exit( IonLostExitcode )
+                initRemaining -= 1
+                cool()
+        if MaxInitRepeatMulti>0: 
+            initRemaining = MaxInitRepeatMulti
+            while coolPhotonsMulti<PresenceThresholdMulti:
+                if initRemaining==0:
+                    exit( IonLostExitcode )
+                initRemaining -= 1
+                cool()
+        if PumpTime>0:
+            pump()
+        SBCoolingLoopsLeft = NumSBCoolingLoops
+        RedSidebandPiTime_1 = InitialRedSidebandPiTime_1
+        RedSidebandPiTime_2 = InitialRedSidebandPiTime_2
+        RedSidebandPiTime_3 = InitialRedSidebandPiTime_3
+        RedSidebandPiTime_4 = InitialRedSidebandPiTime_4
+        while SBCoolingLoopsLeft > 0:
+            if SbCoolingOn_1 > 0:
+                sidebandCoolPulse_1()
+            if SbCoolingOn_2 > 0:
+                sidebandCoolPulse_2()
+            if SbCoolingOn_3 > 0:
+                sidebandCoolPulse_3()
+            if SbCoolingOn_4 > 0:
+                sidebandCoolPulse_4()
+            SBCoolingLoopsLeft -= 1
+#            RedSidebandPiTime_1 += RSBIncrement_1
+#            RedSidebandPiTime_2 += RSBIncrement_2
+#            RedSidebandPiTime_3 += RSBIncrement_3
+            RedSidebandPiTime_4 += RSBIncrement_4
+        if PreWaitTime>0:
+            update( PreWaitTime )
+        if MicrowaveInitTime>0:
+            microwaveInit()
+        if RamanInitTime>0:
+            ramanInit()
+#added for Ramsey expt
+        if RamanWaitTime>0:
+            update( RamanWaitTime )
+        if RamanEchoTime>0:
+            ramanEcho()
+            update( RamanWaitTime )
+        if RamanAnalyzeTime>0:
+            ramanAnalyzeRamsey()
+#end added for Ramsey expt
+        if GateTime>0:
+            currentGateNum = numGates
+            while currentGateNum > 0:
+                currentGateNum -= 1
+                ramanGate()
+                if WalshNOn==1:
+                    WalshOneOn()
+                if WalshNOn==2:
+                    WalshTwoOn()
+        if QubitWaitTime>0:
+            update( QubitWaitTime )
+        if GateTimeRamsey>0:
+            ramanGate()
+        if AnalyzeTime>0:
+            currentAnalyzeNum= numAnalyze
+            while currentAnalyzeNum > 0:
+                currentAnalyzeNum -= 1
+                ramanAnalyze()
+        if PostWaitTime>0:
+            update( PostWaitTime )
+        if DetectTime>0:
+            detect()
+        calibrateRamsey()
+        currentexperiment += 1
+
+exit( endLabel )

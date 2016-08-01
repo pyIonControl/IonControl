@@ -1,0 +1,534 @@
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output}{\section{Chassis.\-git.\-Analog\-Output.\-Analog\-Output Class Reference}
+\label{class_chassis_8git_1_1_analog_output_1_1_analog_output}\index{Chassis.\-git.\-Analog\-Output.\-Analog\-Output@{Chassis.\-git.\-Analog\-Output.\-Analog\-Output}}
+}
+
+
+This class will generate analog outputs using py\-D\-A\-Qmx.  
+
+
+Inheritance diagram for Chassis.\-git.\-Analog\-Output.\-Analog\-Output\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1_analog_output_1_1_analog_output}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_acd0485666c89db7bf7d29c8358bfc8d2}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output}{Analog\-Output} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a44f5dd6ea894853b77f6f18b3b03ca06}{init}
+\begin{DoxyCompactList}\small\item\em Initializes the analog outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3bcdcfbda98a73ae82c9a30877ccb455}{get\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function returns the samples per channel configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_acffabdf6defa7d994c363cb9cd83cb5b}{set\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function sets the samples per channel in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a1ba576d85e63c6c3aac5ad6fe899ee91}{get\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function returns the sample clock source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a67c1392eefe5fc6e243a0354f5c79c35}{set\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the sample clock source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae0e482ce7f377942d8aa1f0c17e25e4d}{get\-Start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This function return the start trigger source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0c98b6dc3f661278349fa23bfa8c7e87}{set\-Start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the start trigger source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a58db66325e0a66d02e31ca78ddb7f6ee}{get\-Num\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the number of channels configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a40bd6b48848f454a0e86bab3d637da0a}{get\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function returns the sample rate configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a57cd627a46ed340e5c6a2b8926f6e812}{set\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This funciton sets the sample rate in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a023ba6c2263002abdc045360bc563bbd}{create\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of samples with random voltages. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ace5d5f7391b706d3d9fc765f8400f54f}{create\-Sine\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of sine waves. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a63ec98994d5077ff4f2829bd2b2ce0b9}{write\-To\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a677b68740e6aae3773cc29cb649affef}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ab7770a4b0c3eb18368a5b623435f9705}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0925cf3df53bab026bc23547f8a072b0}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a28ea1620eefeae3acd14f5b77a4b0b5d}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the analog output device and channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a5107259ccff63da6c02ef6774b398b1b}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output}{Analog\-Output} Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a85213a49732be73c70723a37e03e9c5b}{task\-Ref}
+\begin{DoxyCompactList}\small\item\em The D\-A\-Qmx task reference. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a00be43ede9819a99e9b7d093c88278d1}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the D\-A\-Qmx task has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae2a69d59152cb45ae0875a42ab203efd}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the D\-A\-Qmx task. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_adf297d1ff53368377985602e6a37faff}{start\-Trigger\-Sync\-Card}
+\begin{DoxyCompactList}\small\item\em This is the start trigger terminal of the N\-I-\/\-Sync card. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a296d34f273903586b812eea08f6f5e1e}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad8b0482efeef548c4443affd2957fbdb}{trigger\-Type}
+\begin{DoxyCompactList}\small\item\em The trigger type for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a25cbfcf5aff7cc620b02748d12a07f39}{loops}
+\begin{DoxyCompactList}\small\item\em The number of times to iterate over a Finite number of samples. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a08a90c17370cd645157b45d891d82f74}{est\-Acq\-Time}
+\begin{DoxyCompactList}\small\item\em The estimated time to generate the samples for a Finite generation. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3b5a60696ee0dfe637469f9087367933}{buff}
+\begin{DoxyCompactList}\small\item\em The analog output buffer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a8084800d7b837e849ef8d28399734c8d}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of samples per channel that will be generated in Finite mode. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a37ac13275c8e900e56d9209f585463d7}{clk\-Source} property(\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a1ba576d85e63c6c3aac5ad6fe899ee91}{get\-Clk\-Source}, \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a67c1392eefe5fc6e243a0354f5c79c35}{set\-Clk\-Source}, \-\_\-del\-Clk\-Source)
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a77277af6c02de05964114f91af9fab28}{start\-Trigger\-Source} property(\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae0e482ce7f377942d8aa1f0c17e25e4d}{get\-Start\-Trigger\-Source}, \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0c98b6dc3f661278349fa23bfa8c7e87}{set\-Start\-Trigger\-Source}, \-\_\-del\-Start\-Trigger\-Source)
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3de173dc3a4ea7afe4e12c95e4a99269}{num\-Channels} property(\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a58db66325e0a66d02e31ca78ddb7f6ee}{get\-Num\-Channels})
+\begin{DoxyCompactList}\small\item\em This is the number of channels configured in the task. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad2431ae041aef61c1bd11893a074d0a7}{sample\-Rate} property(\hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a40bd6b48848f454a0e86bab3d637da0a}{get\-Sample\-Rate}, \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a57cd627a46ed340e5c6a2b8926f6e812}{set\-Sample\-Rate}, \-\_\-del\-Sample\-Rate)
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the analog output. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate analog outputs using py\-D\-A\-Qmx. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_acd0485666c89db7bf7d29c8358bfc8d2}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_acd0485666c89db7bf7d29c8358bfc8d2}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output}{Analog\-Output} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a5107259ccff63da6c02ef6774b398b1b}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a5107259ccff63da6c02ef6774b398b1b}
+
+
+This is the destructor for the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output}{Analog\-Output} Class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a28ea1620eefeae3acd14f5b77a4b0b5d}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!close@{close}}
+\index{close@{close}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a28ea1620eefeae3acd14f5b77a4b0b5d}
+
+
+This function will close connection to the analog output device and channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ace5d5f7391b706d3d9fc765f8400f54f}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!create\-Sine\-Test\-Buffer@{create\-Sine\-Test\-Buffer}}
+\index{create\-Sine\-Test\-Buffer@{create\-Sine\-Test\-Buffer}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{create\-Sine\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-create\-Sine\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ace5d5f7391b706d3d9fc765f8400f54f}
+
+
+This function returns a 1\-D numpy array of sine waves. 
+
+The returned value is intended to be used to write samples to the buffer with the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a63ec98994d5077ff4f2829bd2b2ce0b9}{write\-To\-Buffer()} method. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a023ba6c2263002abdc045360bc563bbd}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!create\-Test\-Buffer@{create\-Test\-Buffer}}
+\index{create\-Test\-Buffer@{create\-Test\-Buffer}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{create\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-create\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Channels = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a023ba6c2263002abdc045360bc563bbd}
+
+
+This function returns a 1\-D numpy array of samples with random voltages. 
+
+The returned value is intended to be used to write samples to the buffer with the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a63ec98994d5077ff4f2829bd2b2ce0b9}{write\-To\-Buffer()} method. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Channels} & The number of channels to generate. If this parameter is not provided, Then the function will generate the number of channels configured in the analog output task. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a1ba576d85e63c6c3aac5ad6fe899ee91}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!get\-Clk\-Source@{get\-Clk\-Source}}
+\index{get\-Clk\-Source@{get\-Clk\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-get\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a1ba576d85e63c6c3aac5ad6fe899ee91}
+
+
+This function returns the sample clock source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a58db66325e0a66d02e31ca78ddb7f6ee}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!get\-Num\-Channels@{get\-Num\-Channels}}
+\index{get\-Num\-Channels@{get\-Num\-Channels}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-get\-Num\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a58db66325e0a66d02e31ca78ddb7f6ee}
+
+
+This function returns the number of channels configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a40bd6b48848f454a0e86bab3d637da0a}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!get\-Sample\-Rate@{get\-Sample\-Rate}}
+\index{get\-Sample\-Rate@{get\-Sample\-Rate}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-get\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a40bd6b48848f454a0e86bab3d637da0a}
+
+
+This function returns the sample rate configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3bcdcfbda98a73ae82c9a30877ccb455}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}}
+\index{get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-get\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3bcdcfbda98a73ae82c9a30877ccb455}
+
+
+This function returns the samples per channel configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae0e482ce7f377942d8aa1f0c17e25e4d}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!get\-Start\-Trigger\-Source@{get\-Start\-Trigger\-Source}}
+\index{get\-Start\-Trigger\-Source@{get\-Start\-Trigger\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-get\-Start\-Trigger\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae0e482ce7f377942d8aa1f0c17e25e4d}
+
+
+This function return the start trigger source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a44f5dd6ea894853b77f6f18b3b03ca06}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!init@{init}}
+\index{init@{init}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{physical\-Channel}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a44f5dd6ea894853b77f6f18b3b03ca06}
+
+
+Initializes the analog outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em physical\-Channel} & A string representing the device and analog output channels. Example Value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a67c1392eefe5fc6e243a0354f5c79c35}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!set\-Clk\-Source@{set\-Clk\-Source}}
+\index{set\-Clk\-Source@{set\-Clk\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-set\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a67c1392eefe5fc6e243a0354f5c79c35}
+
+
+This function sets the sample clock source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The string value for the clock source terminal. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a57cd627a46ed340e5c6a2b8926f6e812}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!set\-Sample\-Rate@{set\-Sample\-Rate}}
+\index{set\-Sample\-Rate@{set\-Sample\-Rate}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-set\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a57cd627a46ed340e5c6a2b8926f6e812}
+
+
+This funciton sets the sample rate in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value of the sample rate. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_acffabdf6defa7d994c363cb9cd83cb5b}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}}
+\index{set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-set\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_acffabdf6defa7d994c363cb9cd83cb5b}
+
+
+This function sets the samples per channel in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the samples per channel. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0c98b6dc3f661278349fa23bfa8c7e87}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!set\-Start\-Trigger\-Source@{set\-Start\-Trigger\-Source}}
+\index{set\-Start\-Trigger\-Source@{set\-Start\-Trigger\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-set\-Start\-Trigger\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0c98b6dc3f661278349fa23bfa8c7e87}
+
+
+This function sets the start trigger source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The string vaue of the start trigger source. Example value\-: \char`\"{}\textbackslash{}\-P\-X\-I1\-Slot3\textbackslash{}\-P\-F\-I0\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a677b68740e6aae3773cc29cb649affef}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!start@{start}}
+\index{start@{start}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a677b68740e6aae3773cc29cb649affef}
+
+
+This function starts the analog output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0925cf3df53bab026bc23547f8a072b0}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!stop@{stop}}
+\index{stop@{stop}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0925cf3df53bab026bc23547f8a072b0}
+
+
+This function stops the analog output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ab7770a4b0c3eb18368a5b623435f9705}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ab7770a4b0c3eb18368a5b623435f9705}
+
+
+This functions waits for the analog output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a63ec98994d5077ff4f2829bd2b2ce0b9}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!write\-To\-Buffer@{write\-To\-Buffer}}
+\index{write\-To\-Buffer@{write\-To\-Buffer}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{write\-To\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-write\-To\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a63ec98994d5077ff4f2829bd2b2ce0b9}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 64-\/bit floating point numpy array that contians data for each channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3b5a60696ee0dfe637469f9087367933}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!buff@{buff}}
+\index{buff@{buff}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{buff}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-buff}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3b5a60696ee0dfe637469f9087367933}
+
+
+The analog output buffer. 
+
+This is the data that is stored in the buffer of the Analog Output card. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a08a90c17370cd645157b45d891d82f74}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!est\-Acq\-Time@{est\-Acq\-Time}}
+\index{est\-Acq\-Time@{est\-Acq\-Time}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{est\-Acq\-Time}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-est\-Acq\-Time}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a08a90c17370cd645157b45d891d82f74}
+
+
+The estimated time to generate the samples for a Finite generation. 
+
+Once the input buffer of the analog input is configured, the amount of time it takes to generate the voltages in the buffer can be estimated. This is a function of the sample rate and the number of samples per channel. (This attribute is for internal use only. This attribute may not return an accurate value.) \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a00be43ede9819a99e9b7d093c88278d1}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!initialized@{initialized}}
+\index{initialized@{initialized}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-initialized}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a00be43ede9819a99e9b7d093c88278d1}
+
+
+This is a boolean that is true when the D\-A\-Qmx task has been initialized. 
+
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a25cbfcf5aff7cc620b02748d12a07f39}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!loops@{loops}}
+\index{loops@{loops}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-loops}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a25cbfcf5aff7cc620b02748d12a07f39}
+
+
+The number of times to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a296d34f273903586b812eea08f6f5e1e}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!mode@{mode}}
+\index{mode@{mode}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-mode}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a296d34f273903586b812eea08f6f5e1e}
+
+
+This is the mode of operation for the analog outputs. 
+
+There are currently three modes available. Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_chassis_8git_1_1_analog_output_1_1_analog_output_a0925cf3df53bab026bc23547f8a072b0}{stop()} method is called. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_adf297d1ff53368377985602e6a37faff}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!start\-Trigger\-Sync\-Card@{start\-Trigger\-Sync\-Card}}
+\index{start\-Trigger\-Sync\-Card@{start\-Trigger\-Sync\-Card}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start\-Trigger\-Sync\-Card}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-start\-Trigger\-Sync\-Card}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_adf297d1ff53368377985602e6a37faff}
+
+
+This is the start trigger terminal of the N\-I-\/\-Sync card. 
+
+Setting this value will make sure that the start trigger will be propogated through the P\-X\-I backplane. If there is no sync card needed leave the value default. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae2a69d59152cb45ae0875a42ab203efd}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!status@{status}}
+\index{status@{status}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-status}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ae2a69d59152cb45ae0875a42ab203efd}
+
+
+This is the status of the D\-A\-Qmx task. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a85213a49732be73c70723a37e03e9c5b}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!task\-Ref@{task\-Ref}}
+\index{task\-Ref@{task\-Ref}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{task\-Ref}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-task\-Ref}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a85213a49732be73c70723a37e03e9c5b}
+
+
+The D\-A\-Qmx task reference. 
+
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad8b0482efeef548c4443affd2957fbdb}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-trigger\-Type}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad8b0482efeef548c4443affd2957fbdb}
+
+
+The trigger type for the analog outputs. 
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. 
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a37ac13275c8e900e56d9209f585463d7}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-clk\-Source property({\bf get\-Clk\-Source}, {\bf set\-Clk\-Source}, \-\_\-del\-Clk\-Source)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a37ac13275c8e900e56d9209f585463d7}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3de173dc3a4ea7afe4e12c95e4a99269}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!num\-Channels@{num\-Channels}}
+\index{num\-Channels@{num\-Channels}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-num\-Channels property({\bf get\-Num\-Channels})\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a3de173dc3a4ea7afe4e12c95e4a99269}
+
+
+This is the number of channels configured in the task. 
+
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad2431ae041aef61c1bd11893a074d0a7}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-sample\-Rate property({\bf get\-Sample\-Rate}, {\bf set\-Sample\-Rate}, \-\_\-del\-Sample\-Rate)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_ad2431ae041aef61c1bd11893a074d0a7}
+
+
+This is the sample rate of the analog output. 
+
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a8084800d7b837e849ef8d28399734c8d}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-samples\-Per\-Channel\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a8084800d7b837e849ef8d28399734c8d}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSamplesPerChannel, setSamplesPerChannel,
+2             \_delSamplesPerChannel)
+\end{DoxyCode}
+
+
+This is the number of samples per channel that will be generated in Finite mode. 
+
+\hypertarget{class_chassis_8git_1_1_analog_output_1_1_analog_output_a77277af6c02de05964114f91af9fab28}{\index{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!Chassis.git::AnalogOutput::AnalogOutput@{Chassis.\-git\-::\-Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Analog\-Output.\-Analog\-Output.\-start\-Trigger\-Source property({\bf get\-Start\-Trigger\-Source}, {\bf set\-Start\-Trigger\-Source}, \-\_\-del\-Start\-Trigger\-Source)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_analog_output_1_1_analog_output_a77277af6c02de05964114f91af9fab28}
+
+
+This is the start trigger source terminal. 
+
+The software ignores this value when the trigger\-Type is set to \char`\"{}\-Software\char`\"{}. Otherwise when the trigger\-Type is \char`\"{}\-Hardware,\char`\"{} this terminal is used to start analog generation. Example Value\-: \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I0\char`\"{} 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Analog\-Output.\-py\end{DoxyCompactItemize}

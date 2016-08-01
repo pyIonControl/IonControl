@@ -1,0 +1,27 @@
+const DDSDetect = 0
+const DDSRef = 5
+
+exitcode endLabel = 0xfffe0000
+
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter<AD9912_FRQFINE> DetectFreqFine = 100 MHz
+parameter<AD9912_FRQ> Ref = 100 MHz
+parameter<AD9912_FRQFINE> RefFine = 100 MHz
+parameter<AD9912_PHASE> DetectPhase = 0
+parameter DetectAmp = 1023
+shutter startup
+masked_shutter on
+parameter initTime = 1 ms
+parameter TriggerInMask = 1
+parameter waitTime
+trigger mytrigger
+ 
+set_dds( channel=DDSDetect, freq=DetectFreq, freqfine=DetectFreqFine )
+set_dds( channel=DDSRef, freq=Ref, freqfine=RefFine )
+set_shutter( on )
+set_trigger(mytrigger)
+update (waitTime)
+update()
+
+
+exit( endLabel )

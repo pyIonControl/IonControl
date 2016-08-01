@@ -1,0 +1,282 @@
+#channel settings. These are set using 'const' because they never change during an experiment
+#DDS Channels
+const DDSDetect = 0
+const DDSCooling = 1
+const DDSMicrowave = 2
+const DDSRaman1 = 3
+const DDSRaman2 = 4
+#PMT Channels
+const PMTChannel = 0
+#DAC Channels
+const dac369 = 3
+
+# frequencies and amplitudes
+parameter <AD9912_FRQ> CoolingFreq   #This needs the encoding <AD9912_FRQ> because it will be written directly to the 9912 DDS
+parameter CoolingAmp   #This does not need an encoding, because it is specified directly as a 10 bit number from 0-1023, rather than as number with units
+parameter <AD9912_FRQ> DetectFreq
+parameter DetectAmp
+parameter <AD9912_FRQ> MicrowaveFreq
+parameter MicrowaveAmp
+parameter <AD9912_FRQ> Raman1Freq
+parameter Raman1Amp
+parameter <AD9912_FRQ> Raman2Freq
+parameter Raman2Amp
+parameter Raman1SBCoolAmp
+parameter Raman2SBCoolAmp
+parameter <AD9912_FRQ> RedSidebandFreq_1
+parameter <AD9912_FRQ> RedSidebandFreq_2
+parameter <AD9912_FRQ> RedSidebandFreq_3
+parameter <AD9912_FRQ> RedSidebandFreq_4
+
+parameter RamanTwoCarrierFreq   #This does not need an encoding because it is never written directly to a DDS
+parameter RamanTwoDetuning
+parameter RedSidebandDetuning_1
+parameter RedSidebandDetuning_2
+parameter RedSidebandDetuning_3
+parameter RedSidebandDetuning_4
+parameter InitialRedSidebandPiTime_1
+parameter InitialRedSidebandPiTime_2
+parameter InitialRedSidebandPiTime_3
+parameter InitialRedSidebandPiTime_4
+parameter RSBIncrement_1
+parameter RSBIncrement_2
+parameter RSBIncrement_3
+parameter RSBIncrement_4
+
+# masks and shutters
+# A shutter specifies every bit, while a masked_shutter only specifies bits which change
+shutter InitializationShutter
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter MicrowaveOn
+masked_shutter RamanOn
+masked_shutter RamanPIOn
+masked_shutter DetectOn
+
+# times
+#All parameters will appear in the parameter table in the same order that they are written here.
+#Therefore, it's often useful to group the times together, and to put them in the order in which they occur in the experiment.
+#This makes it a little easier to see how the experiment sequence is currently configured.
+parameter CoolingTime
+parameter PumpTime
+parameter SbCoolingOn_1
+parameter SbCoolingOn_2
+parameter SbCoolingOn_3
+parameter SbCoolingOn_4
+parameter NumSBCoolingLoops
+parameter PreWaitTime
+parameter MicrowaveInitTime
+parameter RamanInitTime
+parameter RamanPITime
+parameter RamanPIAcquireTime
+parameter RamseyWaitTime
+parameter MicrowaveInitTime2
+parameter RamanInitTime2
+parameter PostWaitTime
+parameter DetectTime
+
+# control parameters
+parameter MaxCoolingRepeat
+parameter PresenceThreshold
+parameter experiments
+parameter <DAC8568_VOLTAGE> dac369voltage
+counter DetectCounters
+counter CheckIonCounters
+counter RamanCounters
+trigger ddsApplyAll
+
+#dummy
+#A "do nothing" dummy parameter can sometimes be useful
+parameter dummy 
+
+# exitcodes allow the FPGA to tell the computer why the pulse program stopped
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xffffffffffffffff
+
+# internal variables
+# These are modified or read during the experiment, but are not externally controllable
+var experimentsleft = 100
+var coolingRemaining = 0
+var currentexperiment = 0
+var coolPhotons = 0
+var SBCoolingLoopsLeft = 0
+var RedSidebandPiTime_1 = 10 us
+var RedSidebandPiTime_2 = 10 us
+var RedSidebandPiTime_3 = 10 us
+var RedSidebandPiTime_4 = 10 us
+
+# function for cooling
+def cool():
+    set_shutter( CoolingOn ) #setup the shutter configuration to be "CoolingOn" (this command doesn't do anything until 'update')
+    set_counter( CheckIonCounters ) #setup the counter configuration to be "CheckIonCounters" (this command also doesn't do anything until 'update')
+    update( CoolingTime ) #Trigger the previous two commands, and start a counter of duration "CoolingTime"
+    clear_counter() #setup the counters to turn off. As before, nothing happens until 'update'. When executed, this command will also send the counter data to the computer. Despite the name, it does not 'clear' any data.
+    update() #This will execute when "CoolingTime" (from the previous update) has elapsed, and will trigger the clear_counter command. There is no argument to this update command, meaning no counter will be set.
+    coolPhotons = load_count( PMTChannel ) #store the data from PMTChannel in the var "coolPhotons". Note that the data has already been sent to the computer; this command is only necessary because we wish to look at the data inside the pulse program.
+    set_inv_shutter( CoolingOn ) #setup the inverse shutter of CoolingOn
+    update() #trigger previous set_inv_shutter command
+
+def pump():
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+    update()
+
+def microwaveInit():
+    set_shutter( MicrowaveOn )
+    update( MicrowaveInitTime )
+    set_inv_shutter( MicrowaveOn )
+    update()
+
+def ramanPIInit():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq) #Transmit the frequency 'Raman2Freq' to 'DDSRaman2'
+    set_trigger( ddsApplyAll) #setup the trigger ddsApplyAll
+    set_shutter( RamanPIOn )
+    set_counter( RamanCounters )
+    update( RamanPITime ) #Trigger previous commands, with counter of duration 'RamanPITime'
+    set_inv_shutter( RamanPIOn )
+    clear_counter()
+    update()
+
+def ramanPIAcquire():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq)
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanPIOn )
+    set_counter( RamanCounters )
+    update( RamanPIAcquireTime )
+    set_inv_shutter( RamanPIOn )
+    clear_counter()
+    update()
+
+def ramanInit():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq)
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanOn )
+    set_counter( RamanCounters )
+    update( RamanInitTime )
+    set_inv_shutter( RamanOn )
+    clear_counter()
+    update()
+
+def detect():
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+def sidebandCoolPulse_1():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_1 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_1 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_2():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_2 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_2 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_3():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_3 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_3 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_4():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_4 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_4 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+
+# startup switching on cooling quickly
+set_shutter(InitializationShutter)
+update()
+while not pipe_empty():
+    update()
+    apply_next_scan_point()
+
+    #set_dds( channel=DDSRaman1, freq=Raman1Freq )
+    #set_dds( channel=DDSRaman2, freq=Raman2Freq )
+    set_dds( channel=DDSRaman1, freq=Raman1Freq, amp=Raman1Amp )
+    set_dds( channel=DDSRaman2, freq=Raman2Freq, amp=Raman2Amp )
+    set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+    set_dds( channel=DDSCooling, freq=CoolingFreq, amp=CoolingAmp )
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, amp=MicrowaveAmp )
+
+    if dac369voltage > 0:
+        set_dac(dac369, dac369voltage)
+
+    set_trigger( ddsApplyAll )
+    
+    currentexperiment = 0
+    ramanPIAcquire()
+    while currentexperiment < experiments:
+        cool()
+        if MaxCoolingRepeat>0: 
+            coolingRemaining = MaxCoolingRepeat
+            while coolPhotons<PresenceThreshold: 
+                if coolingRemaining==0:
+                    exit( IonLostExitcode )
+                coolingRemaining -= 1
+                cool()
+        if RamanPITime>0:
+            ramanPIInit()
+        if PumpTime>0:
+            pump()
+        SBCoolingLoopsLeft = NumSBCoolingLoops
+        RedSidebandPiTime_1 = InitialRedSidebandPiTime_1
+        RedSidebandPiTime_2 = InitialRedSidebandPiTime_2
+        RedSidebandPiTime_3 = InitialRedSidebandPiTime_3
+        RedSidebandPiTime_4 = InitialRedSidebandPiTime_4
+        while SBCoolingLoopsLeft > 0:
+            if SbCoolingOn_1 > 0:
+                sidebandCoolPulse_1()
+            if SbCoolingOn_2 > 0:
+                sidebandCoolPulse_2()
+            if SbCoolingOn_3 > 0:
+                sidebandCoolPulse_3()
+            if SbCoolingOn_4 > 0:
+                sidebandCoolPulse_4()
+            SBCoolingLoopsLeft -= 1
+            RedSidebandPiTime_1 += RSBIncrement_1
+            RedSidebandPiTime_2 += RSBIncrement_2
+            RedSidebandPiTime_3 += RSBIncrement_3
+            RedSidebandPiTime_4 += RSBIncrement_4
+        if PreWaitTime>0:
+            update( PreWaitTime )
+        if MicrowaveInitTime>0:
+            microwaveInit()
+        if RamanInitTime>0:
+            ramanInit()
+        if RamseyWaitTime>0:
+            update(RamseyWaitTime)
+        if MicrowaveInitTime2>0:
+            microwaveInit()
+        if RamanInitTime2>0:
+            ramanInit()
+        if PostWaitTime>0:
+            update( PostWaitTime )
+        if DetectTime>0:
+            detect()
+        currentexperiment += 1
+
+exit( endLabel )

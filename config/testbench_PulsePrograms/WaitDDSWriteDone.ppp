@@ -1,0 +1,18 @@
+const DDSDetect = 0
+
+exitcode endLabel = 0xfffe000000000001
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter<AD9912_PHASE> DetectPhase = 0
+parameter DetectAmp = 1023
+masked_shutter begin
+masked_shutter end
+parameter initTime = 1 ms
+
+set_shutter( begin )
+update (initTime)
+set_dds( channel=DDSDetect, freq=DetectFreq, phase=DetectPhase, amp=DetectAmp )
+#wait_dds()
+set_shutter(end)
+update(initTime, wait_dds=False)
+
+exit( endLabel )

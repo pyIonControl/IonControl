@@ -1,0 +1,547 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>uiModules.CoordinatePlotWidget &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>uiModules.CoordinatePlotWidget</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for uiModules.CoordinatePlotWidget</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is the main plotting element used in the control program. It adds the</span>
+<span class="sd">coordinates of the cursor position as a second element also allows one to</span>
+<span class="sd">copy the coordinates to the clipboard. It uses a custom version of PlotItem</span>
+<span class="sd">which includes custom range options.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="k">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.LabelItem</span> <span class="k">import</span> <span class="n">LabelItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.ButtonItem</span> <span class="k">import</span> <span class="n">ButtonItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.PlotItem.PlotItem</span> <span class="k">import</span> <span class="n">PlotItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.ViewBox</span> <span class="k">import</span> <span class="n">ViewBox</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtWidgets</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">modules.round</span> <span class="k">import</span> <span class="n">roundToNDigits</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pyqtgraphAddons.DateAxisItem</span> <span class="k">import</span> <span class="n">DateAxisItem</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.AxisItem</span> <span class="k">import</span> <span class="n">AxisItem</span>
+
+<span class="n">grid_opacity</span> <span class="o">=</span> <span class="mf">0.3</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">icons_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/icons/&#39;</span><span class="p">)</span>
+<span class="n">range_icon_file</span> <span class="o">=</span> <span class="n">icons_dir</span> <span class="o">+</span> <span class="s1">&#39;unity-range&#39;</span>
+<span class="n">holdZero_icon_file</span> <span class="o">=</span> <span class="n">icons_dir</span> <span class="o">+</span> <span class="s1">&#39;hold-zero&#39;</span>
+
+<div class="viewcode-block" id="CustomViewBox"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomViewBox">[docs]</a><span class="k">class</span> <span class="nc">CustomViewBox</span><span class="p">(</span><span class="n">ViewBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Override of pyqtgraph ViewBox class. Modifies setRange method to allow for autoranging while keeping the minimum at zero.</span>
+<span class="sd">    </span>
+<span class="sd">    Adds a variable &quot;holdZero&quot; which indicates whether the ViewBox should hold the minimum y value at zero while autoranging.</span>
+<span class="sd">    If this variable is True, the setRange method forces the minimum y value to be zero. If it is False, the setRange method</span>
+<span class="sd">    is identical to that of pyqtgraph.ViewBox.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CustomViewBox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holdZero</span> <span class="o">=</span> <span class="kc">False</span>
+    
+<div class="viewcode-block" id="CustomViewBox.updateAutoRange"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomViewBox.updateAutoRange">[docs]</a>    <span class="k">def</span> <span class="nf">updateAutoRange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">## Break recursive loops when auto-ranging.</span>
+        <span class="c1">## This is needed because some items change their size in response </span>
+        <span class="c1">## to a view change.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatingRange</span><span class="p">:</span>
+            <span class="k">return</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_updatingRange</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">targetRect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoRange&#39;</span><span class="p">]):</span>
+                <span class="k">return</span>
+                
+            <span class="n">fractionVisible</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoRange&#39;</span><span class="p">][:]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fractionVisible</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+                    <span class="n">fractionVisible</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+
+            <span class="n">childRange</span> <span class="o">=</span> <span class="kc">None</span>
+            
+            <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoVisibleOnly&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">order</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">args</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoRange&#39;</span><span class="p">][</span><span class="n">ax</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoVisibleOnly&#39;</span><span class="p">][</span><span class="n">ax</span><span class="p">]:</span>
+                    <span class="n">oRange</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                    <span class="n">oRange</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetRect</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">ax</span><span class="p">]</span>
+                    <span class="n">childRange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childrenBounds</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="n">fractionVisible</span><span class="p">,</span> <span class="n">orthoRange</span><span class="o">=</span><span class="n">oRange</span><span class="p">)</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">childRange</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">childRange</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">childrenBounds</span><span class="p">(</span><span class="n">frac</span><span class="o">=</span><span class="n">fractionVisible</span><span class="p">)</span>
+                
+                <span class="c1">## Make corrections to range</span>
+                <span class="n">xr</span> <span class="o">=</span> <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">xr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;autoPan&#39;</span><span class="p">][</span><span class="n">ax</span><span class="p">]:</span>
+                        <span class="n">x</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">xr</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span>
+                        <span class="n">w2</span> <span class="o">=</span> <span class="p">(</span><span class="n">targetRect</span><span class="p">[</span><span class="n">ax</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">targetRect</span><span class="p">[</span><span class="n">ax</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mf">2.</span>
+                        <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">-</span><span class="n">w2</span><span class="p">,</span> <span class="n">x</span><span class="o">+</span><span class="n">w2</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">padding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">suggestPadding</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
+                        <span class="n">wp</span> <span class="o">=</span> <span class="p">(</span><span class="n">xr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">xr</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">padding</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">holdZero</span> <span class="ow">and</span> <span class="n">ax</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="o">-</span><span class="n">wp</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">wp</span>
+                        <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">wp</span>
+                    <span class="n">targetRect</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span> <span class="o">=</span> <span class="n">childRange</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span>
+                    <span class="n">args</span><span class="p">[</span><span class="s1">&#39;xRange&#39;</span> <span class="k">if</span> <span class="n">ax</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;yRange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">targetRect</span><span class="p">[</span><span class="n">ax</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;padding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">args</span><span class="p">[</span><span class="s1">&#39;disableAutoRange&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="o">**</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_autoRangeNeedsUpdate</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_updatingRange</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+
+<div class="viewcode-block" id="CustomPlotItem"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem">[docs]</a><span class="k">class</span> <span class="nc">CustomPlotItem</span><span class="p">(</span><span class="n">PlotItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plot using pyqtgraph.PlotItem, with extra buttons.</span>
+
+<span class="sd">    The added buttons are:</span>
+<span class="sd">        -A unity range button which sets the y axis range to 1.</span>
+<span class="sd">        -A hold zero button which keeps the y minimum at zero while autoranging.</span>
+<span class="sd">    resizeEvent is extended to set the position of the two new buttons correctly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a new CustomPlotItem. In addition to the ordinary PlotItem, adds buttons and uses the custom ViewBox.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cvb</span> <span class="o">=</span> <span class="n">CustomViewBox</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CustomPlotItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">viewBox</span> <span class="o">=</span> <span class="n">cvb</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span> <span class="o">=</span> <span class="n">ButtonItem</span><span class="p">(</span><span class="n">imageFile</span><span class="o">=</span><span class="n">range_icon_file</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">parentItem</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Set y range to (0,1)&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onUnityRange</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span> <span class="o">=</span> <span class="n">ButtonItem</span><span class="p">(</span><span class="n">imageFile</span><span class="o">=</span><span class="n">holdZero_icon_file</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">parentItem</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Keep 0 as minimum y value while autoranging&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onHoldZero</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Autorange x and y axes&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">grid_opacity</span><span class="p">)</span> <span class="c1">#grid defaults to on</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allButtonsHidden</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="CustomPlotItem.hideAllButtons"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.hideAllButtons">[docs]</a>    <span class="k">def</span> <span class="nf">hideAllButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hide</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allButtonsHidden</span> <span class="o">=</span> <span class="n">hide</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allButtonsHidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="CustomPlotItem.resizeEvent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.resizeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the button sizes appropriately.</span>
+<span class="sd">        </span>
+<span class="sd">        The code is borrowed from the same code applied to autoBtn in the parent method in PlotItem.py.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">PlotItem</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">)</span>
+        <span class="n">autoBtnRect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapRectFromItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">())</span>
+        <span class="n">unityRangeBtnRect</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapRectFromItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">())</span>
+        <span class="n">holdZeroBtnRect</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mapRectFromItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">())</span>
+        <span class="n">yAuto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">autoBtnRect</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">yHoldZero</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">holdZeroBtnRect</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="n">yUnityRange</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">-</span> <span class="n">unityRangeBtnRect</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">yAuto</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unityRangeBtn</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">yUnityRange</span><span class="o">-</span><span class="mi">24</span><span class="p">)</span> <span class="c1">#The autoBtn height is 14, add 10 to leave a space</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">holdZeroBtn</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="n">yHoldZero</span><span class="o">-</span><span class="mi">67</span><span class="p">)</span> <span class="c1">#Leave some space above the unity range button</span></div>
+
+<div class="viewcode-block" id="CustomPlotItem.onUnityRange"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.onUnityRange">[docs]</a>    <span class="k">def</span> <span class="nf">onUnityRange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when unityRangeBtn is clicked. Set the yrange to 0 to 1.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">holdZero</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="CustomPlotItem.onHoldZero"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.onHoldZero">[docs]</a>    <span class="k">def</span> <span class="nf">onHoldZero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when holdZeroBtn is clicked. Autorange, but leave the y minimum at zero.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">#This is a shortcut to turn off the autoranging, so that we can turn it back on with holdZero&#39;s value changed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">holdZero</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CustomPlotItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">autoBtnClicked</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CustomPlotItem.autoBtnClicked"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.autoBtnClicked">[docs]</a>    <span class="k">def</span> <span class="nf">autoBtnClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when the the autoBtn is clicked. Set the holdZero variable to False.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setYRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1">#This is a shortcut to turn off the autoranging, so that we can turn it back on with holdZero&#39;s value changed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">holdZero</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CustomPlotItem</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">autoBtnClicked</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CustomPlotItem.updateButtons"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CustomPlotItem.updateButtons">[docs]</a>    <span class="k">def</span> <span class="nf">updateButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Overrides parent method updateButtons. Makes the autoscale button visible all the time.</span>
+<span class="sd">        </span>
+<span class="sd">        In the parent method, the auto button disappears when autoranging is enabled, or when the mouse moved off the plot window.</span>
+<span class="sd">        I didn&#39;t like that feature, so this method disables it.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;allButtonsHidden&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">allButtonsHidden</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoBtn</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+
+<div class="viewcode-block" id="CoordinatePlotWidget"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget">[docs]</a><span class="k">class</span> <span class="nc">CoordinatePlotWidget</span><span class="p">(</span><span class="n">pg</span><span class="o">.</span><span class="n">GraphicsLayoutWidget</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the main widget for plotting data. It consists of a plot, a</span>
+<span class="sd">       coordinate display, and custom buttons.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axisItems</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;foreground&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CoordinatePlotWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span> <span class="o">=</span> <span class="n">LabelItem</span><span class="p">(</span><span class="n">justify</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">addCustomPlot</span><span class="p">(</span><span class="n">row</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">axisItems</span><span class="o">=</span><span class="n">axisItems</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">sigMouseMoved</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onMouseMoved</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="s2">&quot;&lt;span style=&#39;font-size: 10pt&#39;&gt;x=</span><span class="si">{0}</span><span class="s2">, &lt;span style=&#39;color: red&#39;&gt;y=</span><span class="si">{1}</span><span class="s2">&lt;/span&gt;&lt;/span&gt;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">showGrid</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="n">grid_opacity</span><span class="p">)</span> <span class="c1">#grid defaults to on</span>
+        <span class="n">action</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;toggle time axis&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">ctrlMenu</span><span class="p">)</span>
+        <span class="n">action</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onToggleTimeAxis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">ctrlMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeAxis</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.onToggleTimeAxis"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onToggleTimeAxis">[docs]</a>    <span class="k">def</span> <span class="nf">onToggleTimeAxis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTimeAxis</span><span class="p">(</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeAxis</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.setTimeAxis"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setTimeAxis">[docs]</a>    <span class="k">def</span> <span class="nf">setTimeAxis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeAxis</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">timeAxis</span><span class="p">:</span>
+            <span class="n">dateAxisItem</span> <span class="o">=</span> <span class="n">DateAxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span> 
+            <span class="n">originalAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+            <span class="n">dateAxisItem</span><span class="o">.</span><span class="n">linkToView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dateAxisItem</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">originalAxis</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">originalAxis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">dateAxisItem</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeAxis</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">dateAxisItem</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="n">dateAxisItem</span><span class="o">.</span><span class="n">setFlag</span><span class="p">(</span><span class="n">dateAxisItem</span><span class="o">.</span><span class="n">ItemNegativeZStacksBehindParent</span><span class="p">)</span>
+            <span class="n">dateAxisItem</span><span class="o">.</span><span class="n">linkedViewChanged</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">axisItem</span> <span class="o">=</span> <span class="n">AxisItem</span><span class="p">(</span><span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span> 
+            <span class="n">originalAxis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">getAxis</span><span class="p">(</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+            <span class="n">axisItem</span><span class="o">.</span><span class="n">linkToView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">axes</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">][</span><span class="s1">&#39;item&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">axisItem</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">originalAxis</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">originalAxis</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">axisItem</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timeAxis</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">axisItem</span><span class="o">.</span><span class="n">setZValue</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">)</span>
+            <span class="n">axisItem</span><span class="o">.</span><span class="n">setFlag</span><span class="p">(</span><span class="n">axisItem</span><span class="o">.</span><span class="n">ItemNegativeZStacksBehindParent</span><span class="p">)</span>
+            <span class="n">axisItem</span><span class="o">.</span><span class="n">linkedViewChanged</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.setPrintView"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.setPrintView">[docs]</a>    <span class="k">def</span> <span class="nf">setPrintView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printview</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">hideAllButtons</span><span class="p">(</span><span class="n">printview</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">printview</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        
+    <span class="k">def</span> <span class="nf">autoRange</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set the display to autorange.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">enableAutoRange</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.addCustomPlot"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.addCustomPlot">[docs]</a>    <span class="k">def</span> <span class="nf">addCustomPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rowspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">colspan</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is a duplicate of addPlot from GraphicsLayout.py. The only change</span>
+<span class="sd">        is CustomPlotItem instead of PlotItem.&quot;&quot;&quot;</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">CustomPlotItem</span><span class="p">(</span><span class="o">**</span><span class="n">kargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">plot</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">rowspan</span><span class="p">,</span> <span class="n">colspan</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">plot</span></div>
+            
+<div class="viewcode-block" id="CoordinatePlotWidget.onMouseMoved"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onMouseMoved">[docs]</a>    <span class="k">def</span> <span class="nf">onMouseMoved</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Execute when mouse is moved. If mouse is over plot, show cursor</span>
+<span class="sd">           coordinates on coordinateLabel.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">sceneBoundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeAxis</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                    <span class="n">logY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">ctrl</span><span class="o">.</span><span class="n">logYCheck</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logY</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+                    <span class="n">vR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()</span>
+                    <span class="n">deltaY</span> <span class="o">=</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logY</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1">#Calculate x and y display ranges</span>
+                    <span class="n">precy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">deltaY</span><span class="p">))</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="p">)</span> <span class="k">if</span> <span class="n">y</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">deltaY</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="n">roundedy</span> <span class="o">=</span> <span class="n">roundToNDigits</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">precy</span> <span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">currentDateTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">currentDateTime</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">roundedy</span><span class="p">)</span> <span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="k">pass</span>  <span class="c1"># datetime concersion at mouse point failed</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">mapSceneToView</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+                    <span class="n">logY</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">ctrl</span><span class="o">.</span><span class="n">logYCheck</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                    <span class="n">logX</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">ctrl</span><span class="o">.</span><span class="n">logXCheck</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logY</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">())</span>
+                    <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logX</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())</span>
+                    <span class="n">vR</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">viewRange</span><span class="p">()</span>
+                    <span class="n">deltaY</span> <span class="o">=</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logY</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="c1">#Calculate x and y display ranges</span>
+                    <span class="n">deltaX</span> <span class="o">=</span> <span class="n">vR</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">vR</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">logX</span> <span class="k">else</span> <span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">vR</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">precx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="o">/</span><span class="n">deltaX</span><span class="p">))</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">deltaX</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="n">precy</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span> <span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">y</span><span class="o">/</span><span class="n">deltaY</span><span class="p">))</span> <span class="p">)</span> <span class="o">+</span> <span class="mi">3</span> <span class="p">)</span> <span class="k">if</span> <span class="n">y</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">deltaY</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+                    <span class="n">roundedx</span><span class="p">,</span> <span class="n">roundedy</span> <span class="o">=</span> <span class="n">roundToNDigits</span><span class="p">(</span> <span class="n">x</span><span class="p">,</span> <span class="n">precx</span><span class="p">),</span> <span class="n">roundToNDigits</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">precy</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">coordinateLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">repr</span><span class="p">(</span><span class="n">roundedx</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="n">roundedy</span><span class="p">)</span> <span class="p">))</span>
+                <span class="k">except</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">LinAlgError</span><span class="p">:</span>
+                    <span class="k">pass</span></div>
+                    
+            
+<div class="viewcode-block" id="CoordinatePlotWidget.onCopyLocation"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.onCopyLocation">[docs]</a>    <span class="k">def</span> <span class="nf">onCopyLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">which</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">())),</span>
+                <span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span> <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">which</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="o">.</span><span class="n">y</span><span class="p">()))</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">clipboard</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+        
+<span class="c1">#    def mouseDoubleClickEvent(self, ev):</span>
+<span class="c1">#        pg.GraphicsLayoutWidget.mouseDoubleClickEvent(self,ev)</span>
+<span class="c1">#        print &quot;CoordinatePlotWidget mouseDoubleClicked&quot;</span>
+<span class="c1">#        #self.onMouseClicked(ev)</span>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.copyPointsToClipboard"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.copyPointsToClipboard">[docs]</a>    <span class="k">def</span> <span class="nf">copyPointsToClipboard</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;copyPointsToClipboard&quot;</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ControlModifier</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">:</span>
+                <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">clipboard</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="n">modifiers</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AltModifier</span><span class="p">:</span>
+                <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">clipboard</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">clipboard</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">x</span><span class="p">(),</span> <span class="n">p</span><span class="o">.</span><span class="n">y</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span><span class="p">]))</span></div>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.keyReleaseEvent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.keyReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>  <span class="s2">&quot;Key released </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">(),</span> <span class="n">ev</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="p">{</span> <span class="mi">67</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">copyPointsToClipboard</span> <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">(),</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="kc">None</span><span class="p">)(</span><span class="n">ev</span><span class="o">.</span><span class="n">modifiers</span><span class="p">())</span></div>
+        
+<div class="viewcode-block" id="CoordinatePlotWidget.mouseReleaseEvent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.mouseReleaseEvent">[docs]</a>    <span class="k">def</span> <span class="nf">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="n">pg</span><span class="o">.</span><span class="n">GraphicsLayoutWidget</span><span class="o">.</span><span class="n">mouseReleaseEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span><span class="o">&amp;</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mousePointList</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">mousePoint</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CoordinatePlotWidget.autoRangeEnabled"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRangeEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">autoRangeEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">autoRangeEnabled</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CoordinatePlotWidget.enableAutoRange"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.enableAutoRange">[docs]</a>    <span class="k">def</span> <span class="nf">enableAutoRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">enable</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">enableAutoRange</span><span class="p">(</span><span class="n">axes</span><span class="p">,</span> <span class="n">enable</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CoordinatePlotWidget.autoRange"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CoordinatePlotWidget.CoordinatePlotWidget.autoRange">[docs]</a>    <span class="k">def</span> <span class="nf">autoRange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">autoRange</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">icons_dir</span> <span class="o">=</span> <span class="s1">&#39;../ui/icons/&#39;</span>
+    <span class="n">range_icon_file</span> <span class="o">=</span> <span class="n">icons_dir</span> <span class="o">+</span> <span class="s1">&#39;unity-range&#39;</span>
+    <span class="n">holdZero_icon_file</span> <span class="o">=</span> <span class="n">icons_dir</span> <span class="o">+</span> <span class="s1">&#39;hold-zero&#39;</span>
+    <span class="kn">import</span> <span class="nn">sys</span>    
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;background&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="c1">#set background to white</span>
+    <span class="n">pg</span><span class="o">.</span><span class="n">setConfigOption</span><span class="p">(</span><span class="s1">&#39;foreground&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">)</span> <span class="c1">#set foreground to black</span>
+    <span class="n">MainWindow</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">myPlotWidget</span> <span class="o">=</span> <span class="n">CoordinatePlotWidget</span><span class="p">()</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">myPlotWidget</span><span class="p">)</span>
+    <span class="n">pi</span> <span class="o">=</span> <span class="n">myPlotWidget</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">pi</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">36</span><span class="p">])</span>
+
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

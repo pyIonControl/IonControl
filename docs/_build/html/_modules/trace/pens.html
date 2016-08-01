@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>trace.pens &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>trace.pens</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for trace.pens</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">penList is a list of 4-tuples. It is used to define how to plot a trace.</span>
+<span class="sd">The first element of the tuple is the pen to use for drawing solid curves. The</span>
+<span class="sd">second element is the symbol to use for plotting datapoints. The third element</span>
+<span class="sd">is the pen to use for the symbol. The fourth element is the brush to use to</span>
+<span class="sd">fill in the symbol.</span>
+
+<span class="sd">Symbol letters are:</span>
+<span class="sd">    &#39;s&#39;: square</span>
+<span class="sd">    &#39;o&#39;: circle</span>
+<span class="sd">    &#39;t&#39;: triangle</span>
+<span class="sd">    &#39;d&#39;: diamond</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph</span> <span class="k">import</span> <span class="n">mkPen</span><span class="p">,</span> <span class="n">mkBrush</span>
+
+<span class="kn">from</span> <span class="nn">ui</span> <span class="k">import</span> <span class="n">Experiment_rc</span> <span class="c1">#@UnusedImport</span>
+
+
+<span class="n">yellow</span> <span class="o">=</span> <span class="p">(</span><span class="mi">180</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">orange</span> <span class="o">=</span> <span class="p">(</span><span class="mi">247</span><span class="p">,</span> <span class="mi">153</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">green</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">180</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">blue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">red</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">cyan</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">magenta</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">black</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">white</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">aquamarine</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">145</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">lightblue</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">191</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">purple</span> <span class="o">=</span> <span class="p">(</span><span class="mi">144</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+<span class="n">darkpink</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">157</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+<span class="n">blank</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">penWidth</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">solid</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">SolidLine</span>
+<span class="n">dashed</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DashLine</span>
+
+<span class="n">solidYellowPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">yellow</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedYellowPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">yellow</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidOrangePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">orange</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedOrangePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">orange</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidRedPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedRedPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">red</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span> 
+
+<span class="n">solidGreenPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">green</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedGreenPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">green</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidBluePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedBluePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">blue</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidCyanPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">cyan</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedCyanPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">cyan</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+<span class="n">cyanBrush</span> <span class="o">=</span> <span class="n">mkBrush</span><span class="p">(</span><span class="n">cyan</span><span class="p">)</span>
+
+<span class="n">solidMagentaPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">magenta</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedMagentaPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">magenta</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+<span class="n">magentaBrush</span> <span class="o">=</span> <span class="n">mkBrush</span><span class="p">(</span><span class="n">magenta</span><span class="p">)</span>
+
+<span class="n">solidBlackPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">black</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedBlackPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">black</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+<span class="n">blackBrush</span> <span class="o">=</span> <span class="n">mkBrush</span><span class="p">(</span><span class="n">black</span><span class="p">)</span>
+
+<span class="n">solidAquamarinePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">aquamarine</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedAquamarinePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">aquamarine</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidLightBluePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">lightblue</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedLightBluePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">lightblue</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidPurplePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">purple</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedPurplePen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">purple</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">solidDarkPinkPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">darkpink</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">solid</span><span class="p">)</span>
+<span class="n">dashedDarkPinkPen</span> <span class="o">=</span> <span class="n">mkPen</span><span class="p">(</span><span class="n">darkpink</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">penWidth</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">dashed</span><span class="p">)</span>
+
+<span class="n">penList</span> <span class="o">=</span> <span class="p">[</span> <span class="p">(</span><span class="n">solidYellowPen</span><span class="p">,),</span>
+            <span class="p">(</span><span class="n">solidBluePen</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">solidBluePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">blue</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidRedPen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">solidRedPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">red</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidGreenPen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">solidGreenPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">green</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidOrangePen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">solidOrangePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">yellow</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidCyanPen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cyanBrush</span><span class="p">,</span> <span class="n">cyan</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidMagentaPen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">magentaBrush</span><span class="p">,</span> <span class="n">magenta</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidBlackPen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">blackBrush</span><span class="p">,</span> <span class="n">black</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidAquamarinePen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">solidAquamarinePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">aquamarine</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidLightBluePen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">solidLightBluePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">lightblue</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidPurplePen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">solidPurplePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">purple</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">solidDarkPinkPen</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">solidDarkPinkPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">darkpink</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedYellowPen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dashedYellowPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">yellow</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedRedPen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">dashedRedPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">red</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedGreenPen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">dashedGreenPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">green</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedBluePen</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">dashedBluePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">blue</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedCyanPen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">cyanBrush</span><span class="p">,</span> <span class="n">cyan</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedMagentaPen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">magentaBrush</span><span class="p">,</span> <span class="n">magenta</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedBlackPen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">blackBrush</span><span class="p">,</span> <span class="n">black</span><span class="p">)</span> <span class="p">,</span>
+            <span class="p">(</span><span class="n">dashedOrangePen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dashedOrangePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">orange</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedAquamarinePen</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">,</span> <span class="n">dashedAquamarinePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">aquamarine</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedLightBluePen</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">dashedLightBluePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">lightblue</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedPurplePen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">dashedPurplePen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">purple</span><span class="p">),</span>
+            <span class="p">(</span><span class="n">dashedDarkPinkPen</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="n">dashedDarkPinkPen</span><span class="p">,</span> <span class="n">blank</span><span class="p">,</span> <span class="n">darkpink</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="penicons"><a class="viewcode-back" href="../../code/trace-doc.html#trace.pens.penicons">[docs]</a><span class="k">class</span> <span class="nc">penicons</span><span class="p">:</span>
+<div class="viewcode-block" id="penicons.penicons"><a class="viewcode-back" href="../../code/trace-doc.html#trace.pens.penicons.penicons">[docs]</a>    <span class="k">def</span> <span class="nf">penicons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;icons&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadicons</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">icons</span></div>
+        
+<div class="viewcode-block" id="penicons.loadicons"><a class="viewcode-back" href="../../code/trace-doc.html#trace.pens.penicons.loadicons">[docs]</a>    <span class="k">def</span> <span class="nf">loadicons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">icons</span> <span class="o">=</span> <span class="p">[</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(),</span> 
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/blue.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/red.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/green.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/247-153-0.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/cyan.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/magenta.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/white.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/0-255-200.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/0-191-255.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/144-0-255.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/255-0-157.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/yellow-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/red-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/green-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/blue-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/cyan-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/magenta-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/white-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/orange-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/aquamarine-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/light-blue-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/purple-dash.png&quot;</span><span class="p">),</span>
+            <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/penicon/icons/dark-pink-dash.png&quot;</span><span class="p">)]</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

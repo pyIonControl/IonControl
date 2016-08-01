@@ -1,0 +1,452 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fit.FitUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>fit.FitUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fit.FitUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">fit.FitFunctionBase</span> <span class="k">import</span> <span class="n">fitFunctionMap</span>
+<span class="kn">from</span> <span class="nn">fit.FitResultsTableModel</span> <span class="k">import</span> <span class="n">FitResultsTableModel</span>
+<span class="kn">from</span> <span class="nn">fit.FitUiTableModel</span> <span class="k">import</span> <span class="n">FitUiTableModel</span>
+<span class="kn">from</span> <span class="nn">modules.AttributeComparisonEquality</span> <span class="k">import</span> <span class="n">AttributeComparisonEquality</span>
+<span class="kn">from</span> <span class="nn">uiModules.MagnitudeSpinBoxDelegate</span> <span class="k">import</span> <span class="n">MagnitudeSpinBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">BlockSignals</span>
+<span class="kn">from</span> <span class="nn">modules.GuiAppearance</span> <span class="k">import</span> <span class="n">restoreGuiState</span><span class="p">,</span> <span class="n">saveGuiState</span>   <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">fit.StoredFitFunction</span> <span class="k">import</span> <span class="n">StoredFitFunction</span>               <span class="c1">#@UnresolvedImport</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/FitUi.ui&#39;</span><span class="p">)</span>
+<span class="n">fitForm</span><span class="p">,</span> <span class="n">fitBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="n">AttributeComparisonEquality</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="o">=</span> <span class="kc">False</span>       </div>
+
+            
+<div class="viewcode-block" id="FitUi"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi">[docs]</a><span class="k">class</span> <span class="nc">FitUi</span><span class="p">(</span><span class="n">fitForm</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">):</span>
+    <span class="n">analysisNamesChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traceui</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">parentname</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">fitForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parentname</span> <span class="o">=</span> <span class="n">parentname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span> <span class="o">=</span> <span class="n">traceui</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s2">&quot;FitUi.</span><span class="si">{0}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parentname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;FitfunctionCache&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;AnalysisDefinitions&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.Parameters&quot;</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+            
+<div class="viewcode-block" id="FitUi.setupUi"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">widget</span><span class="p">,</span> <span class="n">showCombos</span><span class="o">=</span><span class="kc">True</span> <span class="p">):</span>
+        <span class="n">fitForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onPlot</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removePlotButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onExtractFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getSmartStartButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onGetSmartStart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copyButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCopy</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeAnalysisButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveAnalysis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSaveAnalysis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadAnalysis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fitFunctionMap</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFitfunctionChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span> <span class="o">=</span> <span class="n">FitUiTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">parametersChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span> <span class="o">=</span> <span class="n">MagnitudeSpinBoxDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">emptyStringValue</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span> <span class="o">=</span> <span class="n">FitResultsTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resultsTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onFitfunctionChanged</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()))</span>
+        <span class="c1"># Analysis stuff</span>
+        <span class="n">lastAnalysisName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;LastAnalysis&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadAnalysis</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">lastAnalysisName</span> <span class="ow">and</span> <span class="n">lastAnalysisName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">lastAnalysisName</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fitfunction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;LastFitfunction&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">fitfunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">fitfunction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">fitfunction</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUseSmartStartValues</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBarsCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUseErrorBars</span> <span class="p">)</span>
+        <span class="c1"># Context Menu</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ActionsContextMenu</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;auto save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAutoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span> <span class="p">)</span>
+        <span class="n">restoreGuiState</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.guiState&quot;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">showCombos</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+            
+<div class="viewcode-block" id="FitUi.onAutoSave"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onAutoSave">[docs]</a>    <span class="k">def</span> <span class="nf">onAutoSave</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+            
+<div class="viewcode-block" id="FitUi.onShowAnalysisEnabled"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onShowAnalysisEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">onShowAnalysisEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">status</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showAnalysisEnabled</span> <span class="o">=</span> <span class="n">status</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span></div>
+        
+<div class="viewcode-block" id="FitUi.onUseSmartStartValues"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onUseSmartStartValues">[docs]</a>    <span class="k">def</span> <span class="nf">onUseSmartStartValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="o">=</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FitUi.onUseErrorBars"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onUseErrorBars">[docs]</a>    <span class="k">def</span> <span class="nf">onUseErrorBars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useErrorBars</span> <span class="o">=</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FitUi.onFitfunctionChanged"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onFitfunctionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onFitfunctionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">fitFunctionMap</span><span class="p">[</span><span class="n">name</span><span class="p">]()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="FitUi.setFitfunction"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.setFitfunction">[docs]</a>    <span class="k">def</span> <span class="nf">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitfunction</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">functionString</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span><span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">hasSmartStart</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">hasSmartStart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBarsCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useErrorBars</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="FitUi.onGetSmartStart"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onGetSmartStart">[docs]</a>    <span class="k">def</span> <span class="nf">onGetSmartStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">selectedTraces</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">smartParameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">enabledSmartStartValues</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">smartParameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">startDataChanged</span><span class="p">()</span>     </div>
+        
+<div class="viewcode-block" id="FitUi.onFit"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onFit">[docs]</a>    <span class="k">def</span> <span class="nf">onFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit the selected traces using the current fit settings&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">plottedTrace</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">selectedTraces</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitUi.fit"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plottedTrace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit plottedTrace using the current fit settings&quot;&quot;&quot;</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">hasHeightColumn</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">height</span>
+        <span class="k">elif</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">hasTopColumn</span> <span class="ow">and</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">hasBottomColumn</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">top</span> <span class="o">+</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">leastsq</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="n">plottedTrace</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="n">plottedTrace</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FitUi.showAnalysis"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.showAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">showAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysis</span><span class="p">,</span> <span class="n">fitfunction</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">showAnalysisEnabled</span> <span class="ow">and</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">analysis</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">fitfunction</span> <span class="p">)</span></div>
+                
+<div class="viewcode-block" id="FitUi.onPlot"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onPlot">[docs]</a>    <span class="k">def</span> <span class="nf">onPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">selectedTraces</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">allowUnplotted</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="n">fitfunction</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+            <span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span><span class="p">]</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">fitfunction</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+                
+<div class="viewcode-block" id="FitUi.onRemoveFit"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onRemoveFit">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">plot</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">selectedTraces</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="FitUi.onExtractFit"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onExtractFit">[docs]</a>    <span class="k">def</span> <span class="nf">onExtractFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">plots</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">selectedTraces</span><span class="p">(</span><span class="n">useLastIfNoSelection</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;onExtractFit </span><span class="si">{0}</span><span class="s2"> plots selected&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">plots</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">plots</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="n">plots</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitSelectionComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="FitUi.onCopy"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onCopy">[docs]</a>    <span class="k">def</span> <span class="nf">onCopy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">startDataChanged</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="FitUi.saveConfig"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;FitfunctionCache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;AnalysisDefinitions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;LastAnalysis&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;LastFitfunction&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.Parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.guiState&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saveGuiState</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span></div>
+                
+<div class="viewcode-block" id="FitUi.onRemoveAnalysis"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onRemoveAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisNamesChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitUi.onSaveAnalysis"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onSaveAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onSaveAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">definition</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+            <span class="n">definition</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="n">isNew</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">definition</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">isNew</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisNamesChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="FitUi.autoSave"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.autoSave">[docs]</a>    <span class="k">def</span> <span class="nf">autoSave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onSaveAnalysis</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveable</span><span class="p">()</span> <span class="p">)</span></div>
+ 
+<div class="viewcode-block" id="FitUi.saveable"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.saveable">[docs]</a>    <span class="k">def</span> <span class="nf">saveable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>       
+        <span class="n">definition</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="n">definition</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="p">(</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">==</span> <span class="n">definition</span><span class="p">)</span> <span class="p">)</span>             </div>
+                       
+<div class="viewcode-block" id="FitUi.onLoadAnalysis"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.onLoadAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="FitUi.analysisNames"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.analysisNames">[docs]</a>    <span class="k">def</span> <span class="nf">analysisNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+    
+<div class="viewcode-block" id="FitUi.analysisFitfunction"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.analysisFitfunction">[docs]</a>    <span class="k">def</span> <span class="nf">analysisFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="FitUi.evaluate"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitUi.FitUi.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span></div></div>
+            
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

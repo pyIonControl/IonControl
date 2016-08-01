@@ -1,0 +1,22 @@
+const DDSDetect = 0
+
+exitcode endLabel = 0xfffe0000
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter<AD9912_PHASE> DetectPhase = 0
+parameter DetectAmp = 1023
+shutter startup
+masked_shutter on
+parameter initTime = 1 ms
+parameter TriggerInMask = 1
+
+set_shutter( startup )
+update (initTime)
+set_shutter(on)
+wait_trigger( TriggerInMask )
+update()
+set_inv_shutter(on)
+wait_trigger(TriggerInMask)
+update()
+
+
+exit( endLabel )

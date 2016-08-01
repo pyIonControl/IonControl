@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram.QPPPEditor &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulseProgram.QPPPEditor</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulseProgram.QPPPEditor</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5.Qsci</span> <span class="k">import</span> <span class="n">QsciScintilla</span><span class="p">,</span> <span class="n">QsciLexerPython</span>
+<span class="kn">from</span> <span class="nn">PyQt5.QtGui</span> <span class="k">import</span> <span class="n">QFont</span><span class="p">,</span> <span class="n">QFontMetrics</span><span class="p">,</span> <span class="n">QColor</span><span class="p">,</span> <span class="n">QPixmap</span>
+
+
+<div class="viewcode-block" id="MyPythonLexer"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.MyPythonLexer">[docs]</a><span class="k">class</span> <span class="nc">MyPythonLexer</span><span class="p">(</span><span class="n">QsciLexerPython</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="p">[],</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize lexer with extra keywords set.&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MyPythonLexer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extraKeywords1</span> <span class="o">=</span> <span class="n">extraKeywords1</span> <span class="c1">#keywords to join to keyset 1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extraKeywords2</span> <span class="o">=</span> <span class="n">extraKeywords2</span> <span class="c1">#keywords for keyset 2</span>
+        
+<div class="viewcode-block" id="MyPythonLexer.keywords"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.MyPythonLexer.keywords">[docs]</a>    <span class="k">def</span> <span class="nf">keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return standard keywords and extra keywords.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">keyset</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extraKeywords1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">QsciLexerPython</span><span class="o">.</span><span class="n">keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyset</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">keyset</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extraKeywords2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QsciLexerPython</span><span class="o">.</span><span class="n">keywords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyset</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="QPPPEditor"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor">[docs]</a><span class="k">class</span> <span class="nc">QPPPEditor</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="p">):</span>
+    <span class="n">ARROW_MARKER_NUM</span> <span class="o">=</span> <span class="mi">8</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="p">[],</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">QPPPEditor</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+        <span class="c1"># Set the default font</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myfont</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="o">.</span><span class="n">setFamily</span><span class="p">(</span><span class="s1">&#39;Courier&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="o">.</span><span class="n">setFixedPitch</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="o">.</span><span class="n">setPointSize</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginsFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">myboldfont</span> <span class="o">=</span> <span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myboldfont</span><span class="o">.</span><span class="n">setBold</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Margin 0 is used for line numbers</span>
+        <span class="n">fontmetrics</span> <span class="o">=</span> <span class="n">QFontMetrics</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginsFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginWidth</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">fontmetrics</span><span class="o">.</span><span class="n">width</span><span class="p">(</span><span class="s2">&quot;00000&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginLineNumbers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginsBackgroundColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#cccccc&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Clickable margin 1 for showing markers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarginSensitivity</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marginClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_margin_clicked</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">markerDefine</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="o">.</span><span class="n">RightArrow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARROW_MARKER_NUM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMarkerBackgroundColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#ee1111&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARROW_MARKER_NUM</span><span class="p">)</span>
+
+        <span class="c1"># Brace matching: enable for a brace immediately before or after</span>
+        <span class="c1"># the current position</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBraceMatching</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="o">.</span><span class="n">SloppyBraceMatch</span><span class="p">)</span>
+
+        <span class="c1"># Current line visible with special background color</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCaretLineVisible</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCaretLineBackgroundColor</span><span class="p">(</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#ffe4e4&quot;</span><span class="p">))</span>
+
+        <span class="c1"># Set Python lexer</span>
+        <span class="c1"># Set style for Python comments (style number 1) to a fixed-width</span>
+        <span class="c1"># courier.</span>
+        <span class="c1">#</span>
+        <span class="n">lexer</span> <span class="o">=</span> <span class="n">MyPythonLexer</span><span class="p">(</span><span class="n">extraKeywords1</span><span class="o">=</span><span class="n">extraKeywords1</span><span class="p">,</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="n">extraKeywords2</span><span class="p">)</span>
+        <span class="n">lexer</span><span class="o">.</span><span class="n">setDefaultFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myfont</span><span class="p">)</span>
+        <span class="c1">#lexer.setColor( QColor(&#39;red&#39;), lexer.SingleQuotedString )</span>
+        <span class="n">lexer</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">myboldfont</span><span class="p">,</span> <span class="n">lexer</span><span class="o">.</span><span class="n">Keyword</span><span class="p">)</span>
+        <span class="n">lexer</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">myboldfont</span><span class="p">,</span> <span class="n">lexer</span><span class="o">.</span><span class="n">HighlightedIdentifier</span> <span class="p">)</span>
+        <span class="n">lexer</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span> <span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;blue&#39;</span><span class="p">),</span> <span class="n">lexer</span><span class="o">.</span><span class="n">HighlightedIdentifier</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setLexer</span><span class="p">(</span><span class="n">lexer</span><span class="p">)</span>
+        <span class="c1">#TODO self.SendScintilla(QsciScintilla.SCI_STYLESETFONT, 1, &#39;Courier&#39;)</span>
+
+        <span class="c1"># Don&#39;t want to see the horizontal scrollbar at all</span>
+        <span class="c1"># Use raw message to Scintilla here (all messages are documented</span>
+        <span class="c1"># here: http://www.scintilla.org/ScintillaDoc.html)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">SendScintilla</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="o">.</span><span class="n">SCI_SETHSCROLLBAR</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIndentationWidth</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIndentationsUseTabs</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setTabIndents</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setIndentationGuides</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1">#self.SendScintilla(QsciScintilla.SCI_SETINDENTATIONGUIDES, QsciScintilla.SC_IV_LOOKFORWARD )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setEolMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">EolUnix</span><span class="p">)</span>
+
+        <span class="c1"># not too small</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorIndicators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QPixmap</span><span class="p">(</span><span class="s1">&#39;ui/icons/hg-16.png&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timingMarker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">markerDefine</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+
+<div class="viewcode-block" id="QPPPEditor.on_margin_clicked"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.on_margin_clicked">[docs]</a>    <span class="k">def</span> <span class="nf">on_margin_clicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmargin</span><span class="p">,</span> <span class="n">nline</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">):</span>
+        <span class="c1"># Toggle marker for the line the margin was clicked on</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">markersAtLine</span><span class="p">(</span><span class="n">nline</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">markerDelete</span><span class="p">(</span><span class="n">nline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARROW_MARKER_NUM</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">markerAdd</span><span class="p">(</span><span class="n">nline</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ARROW_MARKER_NUM</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="QPPPEditor.setPlainText"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.setPlainText">[docs]</a>    <span class="k">def</span> <span class="nf">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="QPPPEditor.toPlainText"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.toPlainText">[docs]</a>    <span class="k">def</span> <span class="nf">toPlainText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="QPPPEditor.cursorPosition"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.cursorPosition">[docs]</a>    <span class="k">def</span> <span class="nf">cursorPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCursorPosition</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="QPPPEditor.scrollPosition"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.scrollPosition">[docs]</a>    <span class="k">def</span> <span class="nf">scrollPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">firstVisibleLine</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="QPPPEditor.setScrollPosition"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.setScrollPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setScrollPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFirstVisibleLine</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="QPPPEditor.highlightError"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.highlightError">[docs]</a>    <span class="k">def</span> <span class="nf">highlightError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">toline</span><span class="p">,</span> <span class="n">tocol</span><span class="p">):</span>
+        <span class="n">tocolumn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineLength</span><span class="p">(</span><span class="n">toline</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">tocol</span><span class="o">&lt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">tocol</span>
+        <span class="n">fromcol</span> <span class="o">=</span> <span class="n">col</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">col</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fillIndicatorRange</span><span class="p">(</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fromcol</span><span class="p">,</span> <span class="n">toline</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tocolumn</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorIndicators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">fromcol</span><span class="p">,</span> <span class="n">toline</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">tocolumn</span><span class="p">)</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="QPPPEditor.clearError"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.clearError">[docs]</a>    <span class="k">def</span> <span class="nf">clearError</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="c1">#         for line, col, toline, tocol in self.errorIndicators:</span>
+<span class="c1">#             self.clearIndicatorRange(line, col, toline, tocol, 2)</span>
+        <span class="n">toline</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineLength</span><span class="p">(</span><span class="n">toline</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clearIndicatorRange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">toline</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">2</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorIndicators</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="QPPPEditor.highlightTimingViolation"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.QPPPEditor.QPPPEditor.highlightTimingViolation">[docs]</a>    <span class="k">def</span> <span class="nf">highlightTimingViolation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linelist</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">linelist</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">linelist</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">markerAdd</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timingMarker</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>    
+            <span class="bp">self</span><span class="o">.</span><span class="n">markerDeleteAll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timingMarker</span><span class="p">)</span></div></div>
+            
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,514 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fit.FitFunctionBase &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>fit.FitFunctionBase</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fit.FitFunctionBase</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">zip_longest</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">sqrt</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">leastsq</span>
+
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ElementTree</span>
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">modules.Observable</span> <span class="k">import</span> <span class="n">Observable</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">leastsqbound</span> <span class="k">import</span> <span class="n">leastsqbound</span>
+
+
+<div class="viewcode-block" id="FitFunctionException"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionException">[docs]</a><span class="k">class</span> <span class="nc">FitFunctionException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ResultRecord"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.ResultRecord">[docs]</a><span class="k">class</span> <span class="nc">ResultRecord</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">definition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="n">definition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">stateFields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;definition&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span> 
+        
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ResultRecord</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">))</span></div>
+    
+<span class="n">fitFunctionMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>    
+   
+<div class="viewcode-block" id="FitFunctionMeta"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionMeta">[docs]</a><span class="k">class</span> <span class="nc">FitFunctionMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">FitFunctionException</span><span class="p">(</span><span class="s2">&quot;Fitfunction class needs to have class attribute &#39;name&#39;&quot;</span><span class="p">)</span>
+        <span class="n">instrclass</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FitFunctionMeta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">!=</span><span class="s1">&#39;FitFunctionBase&#39;</span><span class="p">:</span>
+            <span class="n">fitFunctionMap</span><span class="p">[</span><span class="n">dct</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">instrclass</span>
+        <span class="k">return</span> <span class="n">instrclass</span></div>
+    
+<div class="viewcode-block" id="native"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.native">[docs]</a><span class="k">def</span> <span class="nf">native</span><span class="p">(</span><span class="n">method</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Tag a method native to detect function overwrites in derived classes.</span>
+<span class="sd">    Used to detect whether smartStartValues are implemented&quot;&quot;&quot;</span>
+    <span class="n">method</span><span class="o">.</span><span class="n">isNative</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">method</span>    </div>
+
+<div class="viewcode-block" id="FitFunctionBase"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase">[docs]</a><span class="k">class</span> <span class="nc">FitFunctionBase</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FitFunctionMeta</span><span class="p">):</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+    <span class="n">parameterNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">numParameters</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsfcn</span><span class="o">=</span><span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">numParameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">numParameters</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">startParameterExpressions</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># will be initialized by FitUiTableModel if values are available</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">numParameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">numParameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="n">SequenceDict</span><span class="p">({</span><span class="s1">&#39;RMSres&#39;</span><span class="p">:</span> <span class="n">ResultRecord</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;RMSres&#39;</span><span class="p">)})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hasSmartStart</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smartStartValues</span><span class="p">,</span> <span class="s1">&#39;isNative&#39;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parametersUpdated</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span> <span class="o">=</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numParameters</span><span class="p">)</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterBoundsExpressions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBars</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;parameterNames&#39;</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cov_x&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;infodict&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;laguerreCacheEta&#39;</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;laguerreTable&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;pnCacheBeta&#39;</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;pnTable&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;useSmartStartValues&#39;</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;startParameterExpressions&#39;</span><span class="p">,</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;parameterBounds&#39;</span><span class="p">,</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">))</span> <span class="p">]</span>  <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;parameterBoundsExpressions&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;useErrorBars&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hasSmartStart</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smartStartValues</span><span class="p">,</span> <span class="s1">&#39;isNative&#39;</span> <span class="p">)</span>
+ 
+<div class="viewcode-block" id="FitFunctionBase.allFitParameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.allFitParameters">[docs]</a>    <span class="k">def</span> <span class="nf">allFitParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a list where the disabled parameters are added to the enabled parameters given in p&quot;&quot;&quot;</span>
+        <span class="n">pindex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">enabled</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">pindex</span><span class="p">])</span>
+                <span class="n">pindex</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span><span class="p">[</span><span class="n">index</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+    
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="FitFunctionBase.coercedValue"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.coercedValue">[docs]</a>    <span class="k">def</span> <span class="nf">coercedValue</span><span class="p">(</span> <span class="n">val</span><span class="p">,</span> <span class="n">bounds</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">val</span><span class="o">&gt;=</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.95</span><span class="o">*</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.05</span><span class="o">*</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">val</span><span class="o">&lt;=</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.95</span><span class="o">*</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.05</span><span class="o">*</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">val</span></div>
+    
+<div class="viewcode-block" id="FitFunctionBase.enabledStartParameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.enabledStartParameters">[docs]</a>    <span class="k">def</span> <span class="nf">enabledStartParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a list of only the enabled start parameters&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">bounded</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coercedValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">),</span> <span class="n">bounds</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.enabledFitParameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.enabledFitParameters">[docs]</a>    <span class="k">def</span> <span class="nf">enabledFitParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a list of only the enabled fit parameters&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.enabledParameterNames"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.enabledParameterNames">[docs]</a>    <span class="k">def</span> <span class="nf">enabledParameterNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a list of only the enabled fit parameters&quot;&quot;&quot;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="n">params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span></div>
+    
+<div class="viewcode-block" id="FitFunctionBase.setEnabledFitParameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.setEnabledFitParameters">[docs]</a>    <span class="k">def</span> <span class="nf">setEnabledFitParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set the fitted parameters if enabled&quot;&quot;&quot;</span>
+        <span class="n">pindex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">enabled</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameters</span><span class="p">[</span><span class="n">pindex</span><span class="p">]</span>
+                <span class="n">pindex</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span><span class="p">[</span><span class="n">index</span><span class="p">])</span></div>
+    
+<div class="viewcode-block" id="FitFunctionBase.setEnabledConfidenceParameters"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.setEnabledConfidenceParameters">[docs]</a>    <span class="k">def</span> <span class="nf">setEnabledConfidenceParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">confidence</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set the parameter confidence values for the enabled parameters&quot;&quot;&quot;</span>
+        <span class="n">pindex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">enabled</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">enabled</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">confidence</span><span class="p">[</span><span class="n">pindex</span><span class="p">]</span>
+                <span class="n">pindex</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>        </div>
+
+    <span class="nd">@native</span>
+<div class="viewcode-block" id="FitFunctionBase.smartStartValues"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.smartStartValues">[docs]</a>    <span class="k">def</span> <span class="nf">smartStartValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+    
+<div class="viewcode-block" id="FitFunctionBase.enabledSmartStartValues"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.enabledSmartStartValues">[docs]</a>    <span class="k">def</span> <span class="nf">enabledSmartStartValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="n">smartParameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smartStartValues</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span> <span class="n">smartparam</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="n">param</span> <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">smartparam</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">smartParameters</span><span class="p">)]</span> <span class="k">if</span> <span class="n">smartParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.evaluate"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">):</span>
+        <span class="n">myReplacementDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">globalDict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">myReplacementDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">globalDict</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameterExpressions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span> <span class="k">if</span> <span class="n">expr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">myReplacementDict</span> <span class="p">)</span> <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameterExpressions</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBoundsExpressions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span> <span class="o">=</span> <span class="p">[[</span><span class="n">bound</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">expr</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">expr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">myReplacementDict</span><span class="p">),</span>
+                                     <span class="n">bound</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">expr</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">expr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">myReplacementDict</span><span class="p">)]</span>
+                                     <span class="k">for</span> <span class="n">bound</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBoundsExpressions</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.enabledBounds"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.enabledBounds">[docs]</a>    <span class="k">def</span> <span class="nf">enabledBounds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">float</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                   <span class="nb">float</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">]</span> <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span><span class="p">)</span> <span class="k">if</span> <span class="n">enabled</span><span class="p">]</span>
+        <span class="n">enabled</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="k">for</span> <span class="n">bounds</span> <span class="ow">in</span> <span class="n">result</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.leastsq"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.leastsq">[docs]</a>    <span class="k">def</span> <span class="nf">leastsq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="c1"># Ensure all values of sigma or non zero by replacing with the minimum nonzero value</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBars</span><span class="p">:</span>
+            <span class="n">nonzerosigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="n">sigma</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sigma</span><span class="p">[</span><span class="n">sigma</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">nonzerosigma</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nonzerosigma</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sigma</span> <span class="o">=</span> <span class="kc">None</span> 
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">useSmartStartValues</span><span class="p">:</span>
+            <span class="n">smartParameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">smartStartValues</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">smartParameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span> <span class="n">smartparam</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="n">param</span> <span class="k">for</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">smartparam</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">smartParameters</span><span class="p">)]</span>
+        
+        <span class="n">myEnabledBounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledBounds</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">myEnabledBounds</span><span class="p">:</span>
+            <span class="n">enabledOnlyParameters</span><span class="p">,</span> <span class="n">cov_x</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="o">=</span> <span class="n">leastsqbound</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledStartParameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">bounded</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                                                                                                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">),</span> <span class="n">epsfcn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsfcn</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="n">myEnabledBounds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">enabledOnlyParameters</span><span class="p">,</span> <span class="n">cov_x</span><span class="p">,</span> <span class="n">infodict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ier</span> <span class="o">=</span> <span class="n">leastsq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledStartParameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">),</span>
+                                                                                            <span class="n">epsfcn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">epsfcn</span><span class="p">,</span> <span class="n">full_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setEnabledFitParameters</span><span class="p">(</span><span class="n">enabledOnlyParameters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;chisq </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">sum</span><span class="p">(</span><span class="n">infodict</span><span class="p">[</span><span class="s2">&quot;fvec&quot;</span><span class="p">]</span><span class="o">*</span><span class="n">infodict</span><span class="p">[</span><span class="s2">&quot;fvec&quot;</span><span class="p">])</span> <span class="p">)</span> <span class="p">)</span>        
+        
+        <span class="c1"># calculate final chi square</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="o">=</span><span class="nb">sum</span><span class="p">(</span><span class="n">infodict</span><span class="p">[</span><span class="s2">&quot;fvec&quot;</span><span class="p">]</span><span class="o">*</span><span class="n">infodict</span><span class="p">[</span><span class="s2">&quot;fvec&quot;</span><span class="p">])</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">dof</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">RMSres</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span><span class="p">))</span>
+        <span class="n">RMSres</span><span class="o">.</span><span class="n">significantDigits</span> <span class="o">=</span> <span class="mi">3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;RMSres&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">RMSres</span>
+        <span class="c1"># chisq, sqrt(chisq/dof) agrees with gnuplot</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;success </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">ier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesg</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;Converged with chi squared </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;degrees of freedom, dof </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">dof</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;RMS of residuals (i.e. sqrt(chisq/dof)) </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">RMSres</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;Reduced chisq (i.e. variance of residuals) </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span> <span class="p">)</span> <span class="p">)</span>
+        
+        <span class="c1"># uncertainties are calculated as per gnuplot, &quot;fixing&quot; the result</span>
+        <span class="c1"># for non unit values of the reduced chisq.</span>
+        <span class="c1"># values at min match gnuplot</span>
+        <span class="n">enabledParameterNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParameterNames</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cov_x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">enabledOnlyParametersConfidence</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">cov_x</span><span class="p">))</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setEnabledConfidenceParameters</span><span class="p">(</span><span class="n">enabledOnlyParametersConfidence</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;Fitted parameters at minimum, with 68% C.I.:&quot;</span> <span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pmin</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">enabledOnlyParameters</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;</span><span class="si">%2i</span><span class="s2"> </span><span class="si">%-10s</span><span class="s2"> </span><span class="si">%12f</span><span class="s2"> +/- </span><span class="si">%10f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">enabledParameterNames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">pmin</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">cov_x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chisq</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">dof</span><span class="p">))</span> <span class="p">)</span>
+        
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;Correlation matrix&quot;</span> <span class="p">)</span>
+            <span class="c1"># correlation matrix close to gnuplot</span>
+            <span class="n">messagelist</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;               &quot;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enabledOnlyParameters</span><span class="p">)):</span> <span class="n">messagelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">%-10s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">enabledParameterNames</span><span class="p">[</span><span class="n">i</span><span class="p">],)</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">messagelist</span><span class="p">))</span>
+            <span class="n">messagelist</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">enabledOnlyParameters</span><span class="p">)):</span>
+                <span class="n">messagelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">%10s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">enabledParameterNames</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">messagelist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>  <span class="s2">&quot;</span><span class="si">%10f</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">cov_x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">cov_x</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">cov_x</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">])),)</span> <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">messagelist</span><span class="p">))</span>
+    
+                <span class="c1">#-----------------------------------------------</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span><span class="p">)</span>
+ 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span></div>
+                
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionString</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)])])</span>
+
+<div class="viewcode-block" id="FitFunctionBase.setConstant"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.setConstant">[docs]</a>    <span class="k">def</span> <span class="nf">setConstant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="FitFunctionBase.update"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parametersUpdated</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span> <span class="n">values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="FitFunctionBase.toXmlElement"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.toXmlElement">[docs]</a>    <span class="k">def</span> <span class="nf">toXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">myroot</span>  <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;FitFunction&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;functionString&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionString</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">startExpression</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">boundsexpression</span> <span class="ow">in</span> <span class="n">zip_longest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameterExpressions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBoundsExpressions</span><span class="p">):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span> <span class="n">myroot</span><span class="p">,</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;confidence&#39;</span><span class="p">:</span><span class="nb">repr</span><span class="p">(</span><span class="n">confidence</span><span class="p">),</span> <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">enabled</span><span class="p">),</span> <span class="s1">&#39;startExpression&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">startExpression</span><span class="p">),</span> <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)),</span>
+                                                              <span class="s1">&#39;boundsExpression&#39;</span><span class="p">:</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">boundsexpression</span><span class="p">))})</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">e</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span> <span class="n">myroot</span><span class="p">,</span> <span class="s1">&#39;Result&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;definition&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">definition</span><span class="p">)})</span>
+            <span class="n">e</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myroot</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.toHdf5"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.toHdf5">[docs]</a>    <span class="k">def</span> <span class="nf">toHdf5</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">):</span>
+        <span class="n">fitfunction_group</span> <span class="o">=</span> <span class="n">group</span><span class="o">.</span><span class="n">require_group</span><span class="p">(</span><span class="s1">&#39;fitfunction&#39;</span><span class="p">)</span>
+        <span class="n">fitfunction_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">fitfunction_group</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;functionString&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionString</span>
+        <span class="n">parameter_group</span> <span class="o">=</span> <span class="n">fitfunction_group</span><span class="o">.</span><span class="n">require_group</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">confidence</span><span class="p">,</span> <span class="n">enabled</span><span class="p">,</span> <span class="n">startExpression</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">boundsexpression</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">zip_longest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startParameterExpressions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterBoundsExpressions</span><span class="p">)):</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">parameter_group</span><span class="o">.</span><span class="n">require_group</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;confidence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">confidence</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;startExpression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">startExpression</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;bounds&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bounds</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;boundsExpression&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">boundsexpression</span><span class="p">))</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">results_group</span> <span class="o">=</span>  <span class="n">fitfunction_group</span><span class="o">.</span><span class="n">require_group</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">results_group</span><span class="o">.</span><span class="n">requie_group</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;definition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">definition</span><span class="p">)</span>
+            <span class="n">g</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.residuals"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allFitParameters</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">functionEval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">))</span><span class="o">/</span><span class="n">sigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">functionEval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="FitFunctionBase.value"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">p</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionEval</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="n">p</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="FitFunctionBase.replacementDict"><a class="viewcode-back" href="../../code/fit-doc.html#fit.FitFunctionBase.FitFunctionBase.replacementDict">[docs]</a>    <span class="k">def</span> <span class="nf">replacementDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">replacement</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)))</span>
+        <span class="n">replacement</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">replacement</span></div></div>
+    
+        
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

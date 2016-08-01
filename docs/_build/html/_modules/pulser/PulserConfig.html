@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.PulserConfig &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.PulserConfig</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.PulserConfig</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">lxml</span> <span class="k">import</span> <span class="n">etree</span>
+<span class="kn">from</span> <span class="nn">modules.stringutilit</span> <span class="k">import</span> <span class="n">stringToBool</span>
+
+<span class="n">xmlschema</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">XMLSchema</span><span class="p">(</span> <span class="n">etree</span><span class="o">.</span><span class="n">fromstring</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;&lt;?xml version=&quot;1.0&quot;?&gt;</span>
+<span class="s2">&lt;xs:schema xmlns:xs=&quot;http://www.w3.org/2001/XMLSchema&quot; attributeFormDefault=&quot;unqualified&quot; elementFormDefault=&quot;qualified&quot;&gt;</span>
+<span class="s2">  &lt;xs:element name=&quot;PulserList&quot; type=&quot;PulserListType&quot;/&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;PulserType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;xs:string&quot; name=&quot;Description&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ExtendedWireInsType&quot; name=&quot;ExtendedWireIns&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;StatusBitsType&quot; name=&quot;StatusBits&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ShutterBitsType&quot; name=&quot;ShutterBits&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;TriggerBitsType&quot; name=&quot;TriggerBits&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;DDSChannelsType&quot; name=&quot;DDSChannels&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;CommandMemoryType&quot; name=&quot;CommandMemory&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;CounterBitsType&quot; name=&quot;CounterBits&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;DACType&quot; name=&quot;DAC&quot; minOccurs=&quot;1&quot;/&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ADCType&quot; name=&quot;ADC&quot; minOccurs=&quot;1&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">    &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;configurationId&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;DACType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;numChannels&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;encoding&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;ADCType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;numChannels&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;encoding&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;dedicatedfirstChannelNo&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;ParameterType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;address&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;default&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;bitmask&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;shift&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;name&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;encoding&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;enabled&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;categories&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;ExtendedWireInsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ParameterType&quot; name=&quot;Parameter&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;StatusBitType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;bitNo&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;active&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;name&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;ShutterBitType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;bitNo&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;name&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;DDSChannelType&quot;&gt;</span>
+<span class="s2">    &lt;xs:simpleContent&gt;</span>
+<span class="s2">      &lt;xs:extension base=&quot;xs:string&quot;&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;channel&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:byte&quot; name=&quot;shutter&quot; use=&quot;required&quot;/&gt;</span>
+<span class="s2">        &lt;xs:attribute type=&quot;xs:string&quot; name=&quot;chip&quot; use=&quot;optional&quot;/&gt;</span>
+<span class="s2">      &lt;/xs:extension&gt;</span>
+<span class="s2">    &lt;/xs:simpleContent&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;ShutterBitsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ShutterBitType&quot; name=&quot;ShutterBit&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;TriggerBitsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ShutterBitType&quot; name=&quot;TriggerBit&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;CounterBitsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;ShutterBitType&quot; name=&quot;CounterBit&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;StatusBitsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;StatusBitType&quot; name=&quot;StatusBit&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;PulserListType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;PulserType&quot; name=&quot;Pulser&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;1&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;DDSChannelsType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;DDSChannelType&quot; name=&quot;DDSChannel&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;1&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">  &lt;xs:complexType name=&quot;CommandMemoryType&quot;&gt;</span>
+<span class="s2">    &lt;xs:sequence&gt;</span>
+<span class="s2">      &lt;xs:element type=&quot;CommandMemoryType&quot; name=&quot;CommandMemory&quot; maxOccurs=&quot;unbounded&quot; minOccurs=&quot;0&quot;/&gt;</span>
+<span class="s2">    &lt;/xs:sequence&gt;</span>
+<span class="s2">  &lt;/xs:complexType&gt;</span>
+<span class="s2">&lt;/xs:schema&gt;&quot;&quot;&quot;</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="ExtendedWireParameter"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.ExtendedWireParameter">[docs]</a><span class="k">class</span> <span class="nc">ExtendedWireParameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DAADInfo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.DAADInfo">[docs]</a><span class="k">class</span> <span class="nc">DAADInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numChannels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numChannels</span> <span class="o">=</span> <span class="n">numChannels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">encoding</span></div>
+
+<div class="viewcode-block" id="DDSInfo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.DDSInfo">[docs]</a><span class="k">class</span> <span class="nc">DDSInfo</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">shutter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chip</span><span class="o">=</span><span class="s2">&quot;AD9912&quot;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutter</span> <span class="o">=</span> <span class="n">shutter</span> <span class="k">if</span> <span class="n">shutter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">24</span><span class="o">+</span><span class="n">channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chip</span> <span class="o">=</span> <span class="n">chip</span></div>
+
+<div class="viewcode-block" id="PulserConfig"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.PulserConfig">[docs]</a><span class="k">class</span> <span class="nc">PulserConfig</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extendedWireIns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBits</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shutterBits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggerBits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">counterBits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span> <span class="o">=</span> <span class="n">DAADInfo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adc</span> <span class="o">=</span> <span class="n">DAADInfo</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ddsChannels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commandMemorySize</span> <span class="o">=</span> <span class="mi">4096</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataMemorySize</span> <span class="o">=</span> <span class="mi">4096</span></div>
+
+<div class="viewcode-block" id="startPulseProgrammer"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.startPulseProgrammer">[docs]</a><span class="k">def</span> <span class="nf">startPulseProgrammer</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">PulserConfig</span><span class="p">()</span>
+    <span class="n">parent</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="p">[</span><span class="s2">&quot;configurationId&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">context</span>
+    <span class="k">return</span> <span class="n">context</span></div>
+
+<div class="viewcode-block" id="endParameter"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endParameter">[docs]</a><span class="k">def</span> <span class="nf">endParameter</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">ExtendedWireParameter</span><span class="p">()</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;address&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">bitmask</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bitmask&#39;</span><span class="p">,</span> <span class="s1">&#39;0xffffffffffffffff&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">shift</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;shift&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;encoding&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">stringToBool</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;categories&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">categories</span><span class="p">:</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">categories</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="endDescription"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endDescription">[docs]</a><span class="k">def</span> <span class="nf">endDescription</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span></div>
+
+<div class="viewcode-block" id="endCommandMemory"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endCommandMemory">[docs]</a><span class="k">def</span> <span class="nf">endCommandMemory</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">commandMemorySize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="mi">4096</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="endStatusbit"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endStatusbit">[docs]</a><span class="k">def</span> <span class="nf">endStatusbit</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bitNo&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">),</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;active&#39;</span><span class="p">)))</span></div>
+    
+<div class="viewcode-block" id="endShutterbit"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endShutterbit">[docs]</a><span class="k">def</span> <span class="nf">endShutterbit</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">parent</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;bitNo&#39;</span><span class="p">),</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="endDDSChannel"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endDDSChannel">[docs]</a><span class="k">def</span> <span class="nf">endDDSChannel</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">parent</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">))]</span> <span class="o">=</span> <span class="n">DDSInfo</span><span class="p">(</span><span class="n">channel</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;channel&#39;</span><span class="p">)),</span> <span class="n">shutter</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;shutter&#39;</span><span class="p">)),</span> <span class="n">chip</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chip&#39;</span><span class="p">,</span> <span class="s2">&quot;AD9912&quot;</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="endDAC"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endDAC">[docs]</a><span class="k">def</span> <span class="nf">endDAC</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">dac</span> <span class="o">=</span> <span class="n">DAADInfo</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;numChannels&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;encoding&quot;</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="endADC"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.endADC">[docs]</a><span class="k">def</span> <span class="nf">endADC</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span>
+    <span class="n">parent</span><span class="o">.</span><span class="n">adc</span> <span class="o">=</span> <span class="n">DAADInfo</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;numChannels&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">)),</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;encoding&quot;</span><span class="p">,</span> <span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="p">)</span></div>
+    
+    
+<span class="n">starthandler</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;Pulser&#39;</span><span class="p">:</span> <span class="n">startPulseProgrammer</span><span class="p">,</span> 
+                 <span class="s1">&#39;ExtendedWireIns&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">extendedWireIns</span><span class="p">,</span>
+                 <span class="s1">&#39;StatusBits&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">statusBits</span><span class="p">,</span>
+                 <span class="s1">&#39;ShutterBits&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">shutterBits</span><span class="p">,</span>
+                 <span class="s1">&#39;TriggerBits&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">triggerBits</span><span class="p">,</span>
+                 <span class="s1">&#39;CounterBits&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">counterBits</span><span class="p">,</span>
+                 <span class="s1">&#39;DDSChannels&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="o">.</span><span class="n">ddsChannels</span> <span class="p">}</span>
+
+<span class="n">endhandler</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">:</span> <span class="n">endParameter</span><span class="p">,</span>
+               <span class="s1">&#39;Description&#39;</span><span class="p">:</span> <span class="n">endDescription</span><span class="p">,</span>
+               <span class="s1">&#39;CommandMemory&#39;</span><span class="p">:</span> <span class="n">endCommandMemory</span><span class="p">,</span>
+               <span class="s1">&#39;StatusBit&#39;</span><span class="p">:</span> <span class="n">endStatusbit</span><span class="p">,</span>
+               <span class="s1">&#39;ShutterBit&#39;</span><span class="p">:</span> <span class="n">endShutterbit</span><span class="p">,</span>
+               <span class="s1">&#39;TriggerBit&#39;</span><span class="p">:</span> <span class="n">endShutterbit</span><span class="p">,</span>
+               <span class="s1">&#39;CounterBit&#39;</span><span class="p">:</span> <span class="n">endShutterbit</span><span class="p">,</span>
+               <span class="s1">&#39;DAC&#39;</span><span class="p">:</span> <span class="n">endDAC</span><span class="p">,</span>
+               <span class="s1">&#39;ADC&#39;</span><span class="p">:</span> <span class="n">endADC</span><span class="p">,</span>
+               <span class="s1">&#39;DDSChannel&#39;</span><span class="p">:</span> <span class="n">endDDSChannel</span> <span class="p">}</span>
+
+
+<div class="viewcode-block" id="getPulserConfiguration"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserConfig.getPulserConfiguration">[docs]</a><span class="k">def</span> <span class="nf">getPulserConfiguration</span><span class="p">(</span> <span class="n">filename</span> <span class="p">):</span>
+    <span class="n">xmlschema</span><span class="o">.</span><span class="n">assertValid</span><span class="p">(</span><span class="n">etree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">etree</span><span class="o">.</span><span class="n">iterparse</span><span class="p">(</span> <span class="n">filename</span><span class="p">,</span> <span class="n">events</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">),</span> <span class="n">schema</span><span class="o">=</span><span class="n">xmlschema</span> <span class="p">)</span>
+    
+    <span class="n">stack</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span> 
+    <span class="n">parent</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">event</span><span class="p">,</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">context</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">event</span><span class="o">==</span><span class="s1">&#39;start&#39;</span><span class="p">:</span>
+            <span class="n">stack</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">starthandler</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span> <span class="p">:</span> <span class="n">parent</span><span class="p">)(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">event</span><span class="o">==</span><span class="s1">&#39;end&#39;</span><span class="p">:</span>
+            <span class="n">endhandler</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">:</span> <span class="n">parent</span><span class="p">)(</span><span class="n">parent</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">parent</span></div>
+
+    
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">getPulserConfiguration</span><span class="p">(</span><span class="s1">&#39;../config/PulserConfig.xml&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

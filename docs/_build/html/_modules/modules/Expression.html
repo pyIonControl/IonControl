@@ -1,0 +1,576 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.Expression &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.Expression</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.Expression</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">3rd generation of Expression, used for parsing arithmetic, units and custom functions in combo boxes</span>
+<span class="sd">this version uses PLY and is modeled off of http://www.dabeaz.com/ply/example.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">ChainMap</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">import</span> <span class="nn">ply.lex</span> <span class="k">as</span> <span class="nn">lex</span>
+<span class="kn">import</span> <span class="nn">ply.yacc</span> <span class="k">as</span> <span class="nn">yacc</span>
+
+<span class="kn">import</span> <span class="nn">expressionFunctions.UserFunctions</span> <span class="k">as</span> <span class="nn">UserFunctions</span>
+<span class="kn">from</span> <span class="nn">expressionFunctions.ExprFuncDecorator</span> <span class="k">import</span> <span class="n">ExpressionFunctions</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span><span class="p">,</span> <span class="n">is_Q</span>
+
+
+<div class="viewcode-block" id="ExpressionError"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.ExpressionError">[docs]</a><span class="k">class</span> <span class="nc">ExpressionError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Parser"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser">[docs]</a><span class="k">class</span> <span class="nc">Parser</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">functiondict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lexer</span> <span class="o">=</span> <span class="n">lex</span><span class="o">.</span><span class="n">lex</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span> <span class="o">=</span> <span class="n">yacc</span><span class="o">.</span><span class="n">yacc</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">useFloat</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constLookup</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;PI&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+                            <span class="s1">&#39;pi&#39;</span><span class="p">:</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+                            <span class="s1">&#39;E&#39;</span><span class="p">:</span>  <span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span>
+                            <span class="s1">&#39;e&#39;</span><span class="p">:</span>  <span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">,</span>
+                            <span class="s1">&#39;True&#39;</span><span class="p">:</span>  <span class="kc">True</span><span class="p">,</span>
+                            <span class="s1">&#39;False&#39;</span><span class="p">:</span> <span class="kc">False</span>
+                            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localFunctions</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;round&#39;</span><span class="p">:</span>   <span class="nb">round</span><span class="p">,</span>
+                               <span class="s1">&#39;sqrt&#39;</span><span class="p">:</span>    <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">,</span>
+                               <span class="s1">&#39;trunc&#39;</span><span class="p">:</span>   <span class="nb">int</span><span class="p">,</span>
+                               <span class="s1">&#39;sin&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">),</span>
+                               <span class="s1">&#39;cos&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">),</span>
+                               <span class="s1">&#39;tan&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">tan</span><span class="p">),</span>
+                               <span class="s1">&#39;acos&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">acos</span><span class="p">),</span>
+                               <span class="s1">&#39;asin&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">),</span>
+                               <span class="s1">&#39;atan&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan</span><span class="p">),</span>
+                               <span class="s1">&#39;degrees&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">degrees</span><span class="p">),</span>
+                               <span class="s1">&#39;radians&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">),</span>
+                               <span class="s1">&#39;erf&#39;</span><span class="p">:</span>     <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">erf</span><span class="p">),</span>
+                               <span class="s1">&#39;erfc&#39;</span><span class="p">:</span>    <span class="bp">self</span><span class="o">.</span><span class="n">nounitgen</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">erfc</span><span class="p">),</span>
+                               <span class="s1">&#39;abs&#39;</span><span class="p">:</span>     <span class="nb">abs</span><span class="p">,</span>
+                               <span class="s1">&#39;exp&#39;</span><span class="p">:</span>     <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">,</span>
+                               <span class="s1">&#39;sign&#39;</span><span class="p">:</span>    <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">,</span>
+                               <span class="s1">&#39;sgn&#39;</span><span class="p">:</span>     <span class="k">lambda</span> <span class="n">a</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">a</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="mi">0</span>
+                               <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultVarCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">variabledict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constLookup</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultFuncCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">ExpressionFunctions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">localFunctions</span><span class="p">,</span> <span class="n">functiondict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variableCM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultVarCM</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultFuncCM</span>
+
+<div class="viewcode-block" id="Parser.nounitgen"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.nounitgen">[docs]</a>    <span class="k">def</span> <span class="nf">nounitgen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fun</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">retfun</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="ow">or</span> <span class="n">x</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">fun</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must be dimensionless!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">retfun</span></div>
+
+    <span class="c1"># Token rules</span>
+    <span class="n">tokens</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;NAME&#39;</span><span class="p">,</span><span class="s1">&#39;INT&#39;</span><span class="p">,</span><span class="s1">&#39;FLOAT&#39;</span><span class="p">,</span><span class="s1">&#39;POW&#39;</span><span class="p">,</span> <span class="s1">&#39;MOD&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;PLUS&#39;</span><span class="p">,</span><span class="s1">&#39;MINUS&#39;</span><span class="p">,</span><span class="s1">&#39;TIMES&#39;</span><span class="p">,</span><span class="s1">&#39;DIVIDE&#39;</span><span class="p">,</span><span class="s1">&#39;EQUALS&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;LPAREN&#39;</span><span class="p">,</span><span class="s1">&#39;RPAREN&#39;</span><span class="p">,</span><span class="s1">&#39;COMMA&#39;</span><span class="p">,</span><span class="s1">&#39;RBRACK&#39;</span><span class="p">,</span><span class="s1">&#39;LBRACK&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;RBRACE&#39;</span><span class="p">,</span><span class="s1">&#39;LBRACE&#39;</span><span class="p">,</span><span class="s1">&#39;COLON&#39;</span><span class="p">,</span> <span class="s1">&#39;STRING&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">t_PLUS</span>    <span class="o">=</span> <span class="s1">r&#39;\+&#39;</span>
+    <span class="n">t_MINUS</span>   <span class="o">=</span> <span class="s1">r&#39;-&#39;</span>
+    <span class="n">t_TIMES</span>   <span class="o">=</span> <span class="s1">r&#39;\*&#39;</span>
+    <span class="n">t_DIVIDE</span>  <span class="o">=</span> <span class="s1">r&#39;/&#39;</span>
+    <span class="n">t_POW</span>     <span class="o">=</span> <span class="s1">r&#39;\^&#39;</span>
+    <span class="n">t_MOD</span>     <span class="o">=</span> <span class="s1">r&#39;\%&#39;</span>
+    <span class="n">t_EQUALS</span>  <span class="o">=</span> <span class="s1">r&#39;=&#39;</span>
+    <span class="n">t_LPAREN</span>  <span class="o">=</span> <span class="s1">r&#39;\(&#39;</span>
+    <span class="n">t_RPAREN</span>  <span class="o">=</span> <span class="s1">r&#39;\)&#39;</span>
+    <span class="n">t_NAME</span>    <span class="o">=</span> <span class="s1">r&#39;[a-zA-Z_][a-zA-Z0-9_]*&#39;</span>
+    <span class="n">t_COMMA</span>   <span class="o">=</span> <span class="s1">r&#39;,&#39;</span>
+    <span class="n">t_LBRACK</span>  <span class="o">=</span> <span class="s1">r&#39;\[&#39;</span>
+    <span class="n">t_RBRACK</span>  <span class="o">=</span> <span class="s1">r&#39;\]&#39;</span>
+    <span class="n">t_LBRACE</span>  <span class="o">=</span> <span class="s1">r&#39;\{&#39;</span>
+    <span class="n">t_RBRACE</span>  <span class="o">=</span> <span class="s1">r&#39;\}&#39;</span>
+    <span class="n">t_COLON</span>   <span class="o">=</span> <span class="s1">r&#39;:&#39;</span>
+
+<div class="viewcode-block" id="Parser.t_STRING"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.t_STRING">[docs]</a>    <span class="k">def</span> <span class="nf">t_STRING</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">r&#39;[</span><span class="se">\&#39;</span><span class="s1">|&quot;]([^</span><span class="se">\&#39;</span><span class="s1">&quot;]+)[</span><span class="se">\&#39;</span><span class="s1">|&quot;]&#39;</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">t</span></div>
+
+<div class="viewcode-block" id="Parser.t_FLOAT"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.t_FLOAT">[docs]</a>    <span class="k">def</span> <span class="nf">t_FLOAT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">r&#39;\d*((\.\d*)([eE][+-]?\d+)?|([eE][+-]?\d+))&#39;</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span></div>
+
+<div class="viewcode-block" id="Parser.t_INT"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.t_INT">[docs]</a>    <span class="k">def</span> <span class="nf">t_INT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">r&#39;(0x[0-9a-fA-F]+|0o[0-7]+|\d+)&#39;</span>
+        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;0x&#39;</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;0o&#39;</span><span class="p">):</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">useFloat</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span></div>
+
+    <span class="n">t_ignore</span> <span class="o">=</span> <span class="s2">&quot; </span><span class="se">\t</span><span class="s2">&quot;</span>
+
+<div class="viewcode-block" id="Parser.t_newline"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.t_newline">[docs]</a>    <span class="k">def</span> <span class="nf">t_newline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">r&#39;\n+&#39;</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">lineno</span> <span class="o">+=</span> <span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Parser.t_error"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.t_error">[docs]</a>    <span class="k">def</span> <span class="nf">t_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Illegal character &#39;</span><span class="si">%s</span><span class="s2">&#39;&quot;</span> <span class="o">%</span> <span class="n">t</span><span class="o">.</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">t</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">skip</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+    <span class="c1"># Parsing rules</span>
+    <span class="n">precedence</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="s1">&#39;MOD&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;PLUS&#39;</span><span class="p">,</span><span class="s1">&#39;MINUS&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;left&#39;</span><span class="p">,</span><span class="s1">&#39;TIMES&#39;</span><span class="p">,</span><span class="s1">&#39;DIVIDE&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span><span class="s1">&#39;UMINUS&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="s1">&#39;right&#39;</span><span class="p">,</span><span class="s1">&#39;POW&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Parser.p_statement_expr"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_statement_expr">[docs]</a>    <span class="k">def</span> <span class="nf">p_statement_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="s1">&#39;statement : expression&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_binop"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_binop">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;expression : expression PLUS expression</span>
+<span class="sd">                      | expression MINUS expression</span>
+<span class="sd">                      | expression TIMES expression</span>
+<span class="sd">                      | expression DIVIDE expression</span>
+<span class="sd">                      | expression POW expression</span>
+<span class="sd">                      | expression MOD expression&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span>  <span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;/&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;^&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">**</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;%&#39;</span><span class="p">:</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">%</span> <span class="n">p</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_uminus"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_uminus">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_uminus</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="s1">&#39;expression : MINUS expression %prec UMINUS&#39;</span>
+        <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_mag"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_mag">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_mag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;expression : FLOAT NAME</span>
+<span class="sd">                      | INT NAME&#39;&#39;&#39;</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_number"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_number">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;expression : FLOAT</span>
+<span class="sd">                      | INT&#39;&#39;&#39;</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_string"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_string">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="s1">&#39;expression : STRING&#39;</span>
+        <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_func"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_func">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;expression : NAME LPAREN arglist RPAREN</span>
+<span class="sd">                      | NAME LPAREN kwarglist RPAREN</span>
+<span class="sd">                      | NAME LPAREN arglist COMMA kwarglist RPAREN&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]](</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="o">**</span><span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;__exprfunc__&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+                <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]](</span><span class="o">**</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;__exprfunc__&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]](</span><span class="o">*</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;__exprfunc__&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_name"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_name">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">&#39;expression : NAME&#39;</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableCM</span><span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constLookup</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Parser.p_arglist"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_arglist">[docs]</a>    <span class="k">def</span> <span class="nf">p_arglist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;arglist : expression</span>
+<span class="sd">                   | arglist COMMA expression&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span></div>
+
+<div class="viewcode-block" id="Parser.p_kwarglist"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_kwarglist">[docs]</a>    <span class="k">def</span> <span class="nf">p_kwarglist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;kwarglist : NAME EQUALS expression</span>
+<span class="sd">                     | kwarglist COMMA NAME EQUALS expression&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">]})</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_list"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_list">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">&#39;expression : LBRACK listentry RBRACK&#39;</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_dict"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_dict">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="s1">&#39;expression : LBRACE dictentry RBRACE&#39;</span>
+        <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_listentry"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_listentry">[docs]</a>    <span class="k">def</span> <span class="nf">p_listentry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;listentry : expression</span>
+<span class="sd">                     | listentry COMMA expression&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]]</span></div>
+
+<div class="viewcode-block" id="Parser.p_dictentry"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_dictentry">[docs]</a>    <span class="k">def</span> <span class="nf">p_dictentry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;dictentry : expression COLON expression</span>
+<span class="sd">                     | dictentry COMMA expression COLON expression&#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">t</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">]})</span></div>
+
+<div class="viewcode-block" id="Parser.p_expression_group"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_expression_group">[docs]</a>    <span class="k">def</span> <span class="nf">p_expression_group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="s1">&#39;expression : LPAREN expression RPAREN&#39;</span>
+        <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Parser.p_error"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.p_error">[docs]</a>    <span class="k">def</span> <span class="nf">p_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">ExpressionError</span><span class="p">(</span><span class="s2">&quot;Syntax error at &#39;</span><span class="si">{0}</span><span class="s2">&#39; in &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">lexdata</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Parser.evaluate"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">functiondict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useFloat</span> <span class="o">=</span> <span class="n">useFloat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variableCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">variabledict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultVarCM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">functiondict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultFuncCM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">listDependencies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span></div>
+
+<div class="viewcode-block" id="Parser.evaluateAsMagnitude"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Parser.evaluateAsMagnitude">[docs]</a>    <span class="k">def</span> <span class="nf">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">functiondict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useFloat</span> <span class="o">=</span> <span class="n">useFloat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variableCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">variabledict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultVarCM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">functionCM</span> <span class="o">=</span> <span class="n">ChainMap</span><span class="p">(</span><span class="n">functiondict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultFuncCM</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">lexer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lexer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">val</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">listDependencies</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencies</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">val</span></div></div>
+
+
+<div class="viewcode-block" id="Expression"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Expression">[docs]</a><span class="k">class</span> <span class="nc">Expression</span><span class="p">:</span>
+    <span class="n">exprParser</span> <span class="o">=</span> <span class="n">Parser</span><span class="p">()</span>
+<div class="viewcode-block" id="Expression.evaluate"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Expression.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">functiondict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprParser</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="p">,</span> <span class="n">listDependencies</span><span class="p">,</span> <span class="n">useFloat</span><span class="p">,</span> <span class="n">functiondict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Expression.evaluateAsMagnitude"><a class="viewcode-back" href="../../code/modules-doc.html#AWG.AWGDevices.Expression.evaluateAsMagnitude">[docs]</a>    <span class="k">def</span> <span class="nf">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">functiondict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exprParser</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="p">,</span> <span class="n">listDependencies</span><span class="p">,</span> <span class="n">useFloat</span><span class="p">,</span> <span class="n">functiondict</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+    <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">tests</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;2*2</span>
+<span class="s2">          { &#39;A&#39;:1, &#39;B&#39;:2, &#39;C&#39;: {&#39;a&#39;: 1.2, &#39;b&#39;: 3.4} }</span>
+<span class="s2">           16.8 MHz</span>
+<span class="s2">           3.14159</span>
+<span class="s2">           42</span>
+<span class="s2">           1E6</span>
+<span class="s2">           -.43</span>
+<span class="s2">           6.02E23</span>
+<span class="s2">           6.02e+023</span>
+<span class="s2">           1.0e-7</span>
+<span class="s2">           tempfun(5)</span>
+<span class="s2">           addtwo(3,2)</span>
+<span class="s2">           kwfun(1,2)</span>
+<span class="s2">           kwfun(1,2,3)</span>
+<span class="s2">           kwfun(1,2,3,f=10,d=9)</span>
+<span class="s2">           kwfun(tempfun(4),2,3,f=10,d=9)</span>
+<span class="s2">           1+2</span>
+<span class="s2">           9+3+6</span>
+<span class="s2">           3^2+4*-3+5+6+7+9/5/4/3*3*(4*4+4*5)</span>
+<span class="s2">           3+tempfun(2)</span>
+<span class="s2">           PI</span>
+<span class="s2">           round(3.21)</span>
+<span class="s2">           round(PI)</span>
+<span class="s2">           (sqrt(1 s / 2 s))</span>
+<span class="s2">           (3^(tempfun(2)-1)*(1 kHz)+kwfun(tempfun(tempfun(1)),0,f=2^2,d=-9)*(1 MHz))</span>
+<span class="s2">           (3^(tempfun(2)-1)*(1 kHz)+kwfun(tempfun(tempfun(1)),0,d=2^2)*(1 MHz))</span>
+<span class="s2">           0x0000000000000001</span>
+<span class="s2">           sin(pi/2)</span>
+<span class="s2">           [1,2,3,4]</span>
+<span class="s2">           &#39;a quoted string&#39;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">ExprEvalOld</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">teststr</span> <span class="ow">in</span> <span class="n">tests</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Test:&quot;</span><span class="p">,</span> <span class="n">teststr</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ExprEvalOld</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">teststr</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Result:&quot;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span><span class="nb">dict</span><span class="p">):</span> <span class="nb">print</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">te</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="nb">print</span><span class="p">()</span>
+
+    <span class="n">ExprEval</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">test</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="n">expVal</span><span class="p">,</span> <span class="n">variabledict</span><span class="o">=</span><span class="nb">dict</span><span class="p">(),</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">listDependencies</span><span class="p">:</span>
+                <span class="n">vall</span><span class="p">,</span><span class="n">deps</span> <span class="o">=</span> <span class="n">ExprEval</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="p">,</span> <span class="n">listDependencies</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vall</span> <span class="o">=</span> <span class="n">ExprEval</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="n">s</span><span class="p">,</span> <span class="n">variabledict</span><span class="p">,</span> <span class="n">listDependencies</span><span class="p">,</span> <span class="n">useFloat</span><span class="o">=</span><span class="kc">False</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">vall</span> <span class="o">==</span> <span class="n">expVal</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="n">expVal</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">+</span><span class="s2">&quot;!!!&quot;</span><span class="p">,</span> <span class="n">vall</span><span class="p">,</span> <span class="s2">&quot;!=&quot;</span><span class="p">,</span> <span class="n">expVal</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;9&quot;</span><span class="p">,</span> <span class="mi">9</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;-9&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">9</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;-E&quot;</span><span class="p">,</span> <span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">e</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;9 + 3 + 6&quot;</span><span class="p">,</span> <span class="mi">9</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">+</span> <span class="mi">6</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;9 + 3 / 11&quot;</span><span class="p">,</span> <span class="mi">9</span> <span class="o">+</span> <span class="mf">3.0</span> <span class="o">/</span> <span class="mi">11</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;(9 + 3)&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">9</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;(9+3) / 11&quot;</span><span class="p">,</span> <span class="p">(</span><span class="mi">9</span><span class="o">+</span><span class="mf">3.0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">11</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;9 - 12 - 6&quot;</span><span class="p">,</span> <span class="mi">9</span> <span class="o">-</span> <span class="mi">12</span> <span class="o">-</span> <span class="mi">6</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;9 - (12 - 6)&quot;</span><span class="p">,</span> <span class="mi">9</span> <span class="o">-</span> <span class="p">(</span><span class="mi">12</span> <span class="o">-</span> <span class="mi">6</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2*3.14159&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="mf">3.14159</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;3.1415926535*3.1415926535 / 10&quot;</span><span class="p">,</span> <span class="mf">3.1415926535</span><span class="o">*</span><span class="mf">3.1415926535</span> <span class="o">/</span> <span class="mi">10</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;PI * PI / 10&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">10</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;PI*PI/10&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">10</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;PI^2&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;round(PI^2)&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;6.02E23 * 8.048&quot;</span><span class="p">,</span> <span class="mf">6.02E23</span> <span class="o">*</span> <span class="mf">8.048</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;e / 3&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">e</span> <span class="o">/</span> <span class="mi">3</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;sin(pi/2)&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;trunc(E)&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;trunc(-E)&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;round(E)&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;round(-E)&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="o">-</span><span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;E^PI&quot;</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">e</span><span class="o">**</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2^3^2&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">3</span><span class="o">**</span><span class="mi">2</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2^3+2&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">3</span><span class="o">+</span><span class="mi">2</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2^9&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">**</span><span class="mi">9</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;.5&quot;</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;-.7&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7</span><span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;-.7ms&quot;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="o">-</span><span class="mf">0.7</span><span class="p">,</span> <span class="s2">&quot;ms&quot;</span><span class="p">))</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;sgn(-2)&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;sgn(0)&quot;</span><span class="p">,</span> <span class="mi">0</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;sgn(0.1)&quot;</span><span class="p">,</span> <span class="mi">1</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2*(3+5)&quot;</span><span class="p">,</span> <span class="mi">16</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2*(alpha+beta)&quot;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;alpha&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="s1">&#39;beta&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">}</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span><span class="s2">&quot;kwfun(tempfun(4),2,3,f=10,d=9)&quot;</span><span class="p">,</span> <span class="n">UserFunctions</span><span class="o">.</span><span class="n">kwfun</span><span class="p">(</span><span class="n">UserFunctions</span><span class="o">.</span><span class="n">tempfun</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">f</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="mi">9</span><span class="p">))</span>
+        <span class="n">test</span><span class="p">(</span><span class="s2">&quot;kwfun(tempfun(4),2,3,f=10,d=myvar,verbose=1)&quot;</span><span class="p">,</span> <span class="n">UserFunctions</span><span class="o">.</span><span class="n">kwfun</span><span class="p">(</span><span class="n">UserFunctions</span><span class="o">.</span><span class="n">tempfun</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="n">f</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="n">d</span><span class="o">=</span><span class="mi">124</span><span class="p">),{</span><span class="s1">&#39;myvar&#39;</span><span class="p">:</span><span class="mi">124</span><span class="p">},</span><span class="n">listDependencies</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;-4 MHz&quot;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2*4 MHz&quot;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;2 * sqrt( 4 s / 1 s)&quot;</span><span class="p">,</span> <span class="mi">4</span> <span class="p">)</span>
+        <span class="n">test</span><span class="p">(</span><span class="s2">&quot;[1,2,3,4]&quot;</span><span class="p">,[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;sqrt( 4s*4s )&quot;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">))</span>
+        <span class="n">test</span><span class="p">(</span> <span class="s2">&quot;piTime&quot;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">),</span> <span class="p">{</span><span class="s1">&#39;piTime&#39;</span><span class="p">:</span><span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">)},</span><span class="n">listDependencies</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;elapsed time:&quot;</span><span class="p">,</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">start_time</span><span class="p">)</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

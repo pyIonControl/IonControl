@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>voltageControl.VoltageAdjust &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>voltageControl.VoltageAdjust</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for voltageControl.VoltageAdjust</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">modules.doProfile</span> <span class="k">import</span> <span class="n">doprofile</span>
+<span class="kn">from</span> <span class="nn">voltageControl.ShuttleEdgeTableModel</span> <span class="k">import</span> <span class="n">ShuttleEdgeTableModel</span>
+<span class="kn">from</span> <span class="nn">voltageControl.ShuttlingDefinition</span> <span class="k">import</span> <span class="n">ShuttlingGraph</span><span class="p">,</span> <span class="n">ShuttleEdge</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">updateComboBoxItems</span><span class="p">,</span> <span class="n">BlockSignals</span>
+<span class="kn">from</span> <span class="nn">modules.firstNotNone</span> <span class="k">import</span> <span class="n">firstNotNone</span>
+<span class="kn">from</span> <span class="nn">modules.Utility</span> <span class="k">import</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">modules.GuiAppearance</span> <span class="k">import</span> <span class="n">restoreGuiState</span><span class="p">,</span> <span class="n">saveGuiState</span>
+<span class="kn">from</span> <span class="nn">xml.etree</span> <span class="k">import</span> <span class="n">ElementTree</span> 
+<span class="kn">from</span> <span class="nn">xml.dom</span> <span class="k">import</span> <span class="n">minidom</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">gui.ExpressionValue</span> <span class="k">import</span> <span class="n">ExpressionValue</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">uiModules.ComboBoxDelegate</span> <span class="k">import</span> <span class="n">ComboBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">modules.DataChanged</span> <span class="k">import</span> <span class="n">DataChangedS</span>
+
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/VoltageAdjust.ui&#39;</span><span class="p">)</span>
+<span class="n">VoltageAdjustForm</span><span class="p">,</span> <span class="n">VoltageAdjustBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/ShuttlingEdge.ui&#39;</span><span class="p">)</span>
+<span class="n">ShuttlingEdgeForm</span><span class="p">,</span> <span class="n">ShuttlingEdgeBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+    
+<div class="viewcode-block" id="Adjust"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.Adjust">[docs]</a><span class="k">class</span> <span class="nc">Adjust</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="n">dataChangedObject</span> <span class="o">=</span> <span class="n">DataChangedS</span><span class="p">()</span>
+    <span class="n">dataChanged</span> <span class="o">=</span> <span class="n">dataChangedObject</span><span class="o">.</span><span class="n">dataChanged</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lineGain&quot;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;globalGain&quot;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">globalDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span>
+    
+    <span class="nd">@globalDict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">globalDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lineValue</span>
+    
+    <span class="nd">@line</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineValue</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lineGain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">value</span>
+    
+    <span class="nd">@lineGain</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">lineGain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">globalGain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">value</span>
+    
+    <span class="nd">@globalGain</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">globalGain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lineString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">string</span>
+    
+    <span class="nd">@lineString</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">lineString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lineGainString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">string</span>
+    
+    <span class="nd">@lineGainString</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">lineGainString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">globalGainString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">value</span>
+    
+    <span class="nd">@globalGainString</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">globalGainString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dictcopy</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+        <span class="n">dictcopy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_globalDict&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dictcopy</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_globalDict&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">state</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;line&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="p">,</span> <span class="n">ExpressionValue</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_line</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;line&quot;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="p">,</span> <span class="n">ExpressionValue</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;lineGain&#39;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="p">,</span> <span class="n">ExpressionValue</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;globalGain&#39;</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">Q</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_line</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lineGain</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalGain</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLineExpressionChanged</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Adjust.onLineExpressionChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.Adjust.onLineExpressionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onLineExpressionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;line&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_lineValue</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span> <span class="o">=</span> <span class="n">Adjust</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRoute</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRepetitions</span> <span class="o">=</span> <span class="mi">1</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;shuttlingRoute&#39;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;shuttlingRepetitions&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ShuttlingException"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.ShuttlingException">[docs]</a><span class="k">class</span> <span class="nc">ShuttlingException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="triplet_iterator"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.triplet_iterator">[docs]</a><span class="k">def</span> <span class="nf">triplet_iterator</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">i</span><span class="o">+</span><span class="mi">2</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">iterable</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">iterable</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="o">+</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="VoltageAdjust"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust">[docs]</a><span class="k">class</span> <span class="nc">VoltageAdjust</span><span class="p">(</span><span class="n">VoltageAdjustForm</span><span class="p">,</span> <span class="n">VoltageAdjustBase</span> <span class="p">):</span>
+    <span class="n">updateOutput</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+    <span class="n">shuttleOutput</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">voltageBlender</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">VoltageAdjustForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">VoltageAdjustBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s1">&#39;VoltageAdjust.Settings&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">,</span> <span class="n">Settings</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">adjust</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span> <span class="o">=</span> <span class="n">ShuttlingGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span> <span class="o">=</span> <span class="n">voltageBlender</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionFile</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="VoltageAdjust.setupUi"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">VoltageAdjustForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineBox</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineGainBox</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalGainBox</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineBox</span><span class="o">.</span><span class="n">setExpression</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">_line</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLineDisplay</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">_line</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineGainBox</span><span class="o">.</span><span class="n">setExpression</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">_lineGain</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalGainBox</span><span class="o">.</span><span class="n">setExpression</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">_globalGain</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpressionChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggerButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onTrigger</span> <span class="p">)</span>
+        <span class="c1"># Shuttling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addEdgeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">addShuttlingEdge</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeEdgeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeShuttlingEdge</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttleEdgeTableModel</span> <span class="o">=</span> <span class="n">ShuttleEdgeTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">ComboBoxDelegate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edgeTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttleEdgeTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edgeTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span> <span class="mi">8</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edgeTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">firstNotNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">currentPositionObservable</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentPositionEvent</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">setupGraphDependent</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupGraphDependent</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadDataButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUploadData</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadEdgesButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUploadEdgesButton</span> <span class="p">)</span>
+        <span class="n">restoreGuiState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;VoltageAdjust.GuiState&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">destinationComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onShuttleSequence</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRouteEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRoute</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRouteEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSetShuttlingRoute</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRouteButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onShuttlingRoute</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repetitionBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRepetitions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repetitionBox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onShuttlingRepetitions</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onTrigger"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onTrigger">[docs]</a>    <span class="k">def</span> <span class="nf">onTrigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onShuttlingRepetitions"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onShuttlingRepetitions">[docs]</a>    <span class="k">def</span> <span class="nf">onShuttlingRepetitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRepetitions</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onSetShuttlingRoute"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onSetShuttlingRoute">[docs]</a>    <span class="k">def</span> <span class="nf">onSetShuttlingRoute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRoute</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">r&#39;\s*(-|,)\s*&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingRouteEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onShuttlingRoute"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onShuttlingRoute">[docs]</a>    <span class="k">def</span> <span class="nf">onShuttlingRoute</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRoute</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">start</span><span class="p">,</span> <span class="n">transition</span><span class="p">,</span> <span class="n">stop</span> <span class="ow">in</span> <span class="n">triplet_iterator</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRoute</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">transition</span><span class="o">==</span><span class="s2">&quot;-&quot;</span><span class="p">:</span>
+                    <span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">shuttlePath</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttleOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">path</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">shuttlingRepetitions</span><span class="p">,</span> <span class="kc">False</span> <span class="p">)</span>                               </div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onUploadData"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onUploadData">[docs]</a>    <span class="k">def</span> <span class="nf">onUploadData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">writeData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageAdjust.onUploadEdgesButton"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onUploadEdgesButton">[docs]</a>    <span class="k">def</span> <span class="nf">onUploadEdgesButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeShuttleLookup</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.writeShuttleLookup"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.writeShuttleLookup">[docs]</a>    <span class="k">def</span> <span class="nf">writeShuttleLookup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">writeShuttleLookup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageAdjust.setupGraphDependent"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.setupGraphDependent">[docs]</a>    <span class="k">def</span> <span class="nf">setupGraphDependent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">updateComboBoxItems</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">destinationComboBox</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.shuttlingNodes"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.shuttlingNodes">[docs]</a>    <span class="k">def</span> <span class="nf">shuttlingNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">())</span> </div>
+    
+<div class="viewcode-block" id="VoltageAdjust.currentShuttlingPosition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.currentShuttlingPosition">[docs]</a>    <span class="k">def</span> <span class="nf">currentShuttlingPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">currentPositionName</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.onCurrentPositionEvent"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onCurrentPositionEvent">[docs]</a>    <span class="k">def</span> <span class="nf">onCurrentPositionEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLineDisplay</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">line</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">firstNotNone</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">)</span>           
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.onShuttleSequence"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onShuttleSequence">[docs]</a>    <span class="k">def</span> <span class="nf">onShuttleSequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">cont</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">instant</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">synchronize</span><span class="p">()</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;ShuttleSequence&quot;</span> <span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">shuttlePath</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">:</span>  
+            <span class="k">if</span> <span class="n">instant</span><span class="p">:</span>
+                <span class="n">edge</span> <span class="o">=</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">toLine</span> <span class="o">=</span> <span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">)</span> <span class="k">if</span> <span class="n">path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span> <span class="k">else</span> <span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">toLine</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentLineDisplay</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">toLine</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttleOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> <span class="n">cont</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.onShuttlingDone"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onShuttlingDone">[docs]</a>    <span class="k">def</span> <span class="nf">onShuttlingDone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentline</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLineDisplay</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">currentline</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">currentline</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.addShuttlingEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.addShuttlingEdge">[docs]</a>    <span class="k">def</span> <span class="nf">addShuttlingEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">getValidEdge</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttleEdgeTableModel</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.removeShuttlingEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.removeShuttlingEdge">[docs]</a>    <span class="k">def</span> <span class="nf">removeShuttlingEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edgeTableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span> <span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttleEdgeTableModel</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.onExpressionChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onExpressionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onExpressionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.onValueChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.onValueChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onValueChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageAdjust.setLine"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.setLine">[docs]</a>    <span class="k">def</span> <span class="nf">setLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span> <span class="n">line</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageAdjust.setCurrentPositionLabel"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.setCurrentPositionLabel">[docs]</a>    <span class="k">def</span> <span class="nf">setCurrentPositionLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">event</span><span class="o">.</span><span class="n">text</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageAdjust.saveConfig"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;VoltageAdjust.GuiState&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saveGuiState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s1">&#39;VoltageAdjust&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">toXmlElement</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionFile</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prettify</span><span class="p">(</span><span class="n">root</span><span class="p">))</span></div>
+            
+<div class="viewcode-block" id="VoltageAdjust.prettify"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.prettify">[docs]</a>    <span class="k">def</span> <span class="nf">prettify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a pretty-printed XML string for the Element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rough_string</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">tostring</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="n">reparsed</span> <span class="o">=</span> <span class="n">minidom</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">rough_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reparsed</span><span class="o">.</span><span class="n">toprettyxml</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.loadShuttleDef"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.loadShuttleDef">[docs]</a>    <span class="k">def</span> <span class="nf">loadShuttleDef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionFile</span> <span class="o">=</span> <span class="n">filename</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+                <span class="n">tree</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+                <span class="n">root</span> <span class="o">=</span> <span class="n">tree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()</span>
+                
+                <span class="c1"># load pulse definition</span>
+                <span class="n">ShuttlingGraphElement</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">&quot;ShuttlingGraph&quot;</span><span class="p">)</span>
+                <span class="n">newGraph</span> <span class="o">=</span> <span class="n">ShuttlingGraph</span><span class="o">.</span><span class="n">fromXmlElement</span><span class="p">(</span><span class="n">ShuttlingGraphElement</span><span class="p">)</span>
+                <span class="n">matchingPos</span> <span class="o">=</span> <span class="n">newGraph</span><span class="o">.</span><span class="n">getMatchingPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span> <span class="c1"># Try to match previous graph node/position</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span> <span class="o">=</span> <span class="n">newGraph</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttleEdgeTableModel</span><span class="o">.</span><span class="n">setShuttlingGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">firstNotNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">,</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">currentPositionObservable</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onCurrentPositionEvent</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">setupGraphDependent</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setupGraphDependent</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">matchingPos</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adjust</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="c1"># Update the output voltages by setting updateHardware to True</span></div>
+
+<div class="viewcode-block" id="VoltageAdjust.setPosition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.setPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Sets the current position in the shuttling graph. Provides a link for pyqtSignal connections</span>
+<span class="sd">            to access the shuttlingGraph even after loadShuttleDef replaces it.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
+
+    <span class="c1">#@doprofile</span>
+<div class="viewcode-block" id="VoltageAdjust.synchronize"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageAdjust.VoltageAdjust.synchronize">[docs]</a>    <span class="k">def</span> <span class="nf">synchronize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">hasChanged</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">shuttlingDataValid</span><span class="p">())</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">dacController</span><span class="o">.</span><span class="n">isOpen</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Uploading Shuttling data&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voltageBlender</span><span class="o">.</span><span class="n">writeData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeShuttleLookup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">hasChanged</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+            
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,296 @@
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{\section{Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator Class Reference}
+\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}\index{Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator@{Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator}}
+}
+
+
+This class contains an Analog\-Output and Digital\-Output object.  
+
+
+Inheritance diagram for Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4237d6315f3c435fbfbc93cebd0e3aac}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_ab7419a7f3cc1ab46bdb06542544bd5fd}{init}
+\begin{DoxyCompactList}\small\item\em Initialize the analog and digital outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aaa148cebc35a97c045dbcdafcea65d81}{write\-Ao\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a7b9c28d677ec361ed400f2e6b5a42d86}{write\-Do\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af00e236e9959fe2f769889fb28e28255}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a8defd8def0d6d078d4c3f9a0ffd18993}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog and digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_adfad9d232df552a816806584d30fd9ab}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog and digital output generation. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a1c55fd504c3c7918e507b679ffc1ab33}{def {\bfseries write\-Start\-Stop}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a1c55fd504c3c7918e507b679ffc1ab33}
+
+\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4b18a2741c804df25b8597d18152f064}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the analog and digital ouput device and channels. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a02eee3f13b9ae6399553205f3204f1d1}{ao}
+\begin{DoxyCompactList}\small\item\em This is an Analog\-Output object created using the Analog\-Output class. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a46a8a04fef697158b2274fa12033a6e0}{do}
+\begin{DoxyCompactList}\small\item\em This is a Digital\-Output object created using the Digita\-Output class. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a914dc22840386507f16100c0c7028b7e}{use\-Ao}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a94522148c84bc1c3af50f1b35d772e63}{use\-Do}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize digital outputs. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4152a26948eb36959f5ee99440dfa911}{sample\-Rate} property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the waveform generator. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aa02528250ab9e7fd9ab04c3244eb8299}{samples\-Per\-Channel} property(\-\_\-get\-Samples\-Per\-Channel, \-\_\-set\-Samples\-Per\-Channel)
+\begin{DoxyCompactList}\small\item\em This is the number of channels configured in the waveform generator. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a078c66a16dae8dc6bbf6c2ae55ff7c75}{clk\-Source} property(\-\_\-get\-Clk\-Source, \-\_\-set\-Clk\-Source)
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af18771d98f5d12ff87a18c94cc6e6035}{start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a1b91e7f61684217ac0067de9631b4603}{loops} property(\-\_\-get\-Loops, \-\_\-set\-Loops)
+\begin{DoxyCompactList}\small\item\em This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a523b65929f8a3fa8af88d5c6a2e4297e}{mode} property(\-\_\-get\-Mode, \-\_\-set\-Mode)
+\begin{DoxyCompactList}\small\item\em There are currently three modes available. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a16967bab9c78a174def6dca01776065f}{trigger\-Type} property(\-\_\-get\-Trigger\-Type, \-\_\-set\-Trigger\-Type)
+\begin{DoxyCompactList}\small\item\em There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a509336de00110ac0dd18a363a5dfe667}{{\bfseries ao\-Buff} property(\-\_\-get\-Ao\-Buffer)}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a509336de00110ac0dd18a363a5dfe667}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class contains an Analog\-Output and Digital\-Output object. 
+
+It is intended to represent a single P\-X\-I-\/6733 in software. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4237d6315f3c435fbfbc93cebd0e3aac}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4237d6315f3c435fbfbc93cebd0e3aac}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4b18a2741c804df25b8597d18152f064}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!close@{close}}
+\index{close@{close}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4b18a2741c804df25b8597d18152f064}
+
+
+This function will close connection to the analog and digital ouput device and channels. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_ab7419a7f3cc1ab46bdb06542544bd5fd}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!init@{init}}
+\index{init@{init}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Channels, }
+\item[{}]{do\-Channels = {\ttfamily ''}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_ab7419a7f3cc1ab46bdb06542544bd5fd}
+
+
+Initialize the analog and digital outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em ao\-Channels} & This is a string representing the device and analog output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+{\em do\-Channels} & This is a string representing the device and digital output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/port0/line0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af00e236e9959fe2f769889fb28e28255}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!start@{start}}
+\index{start@{start}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af00e236e9959fe2f769889fb28e28255}
+
+
+This function starts the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_adfad9d232df552a816806584d30fd9ab}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!stop@{stop}}
+\index{stop@{stop}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_adfad9d232df552a816806584d30fd9ab}
+
+
+This function stops the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a8defd8def0d6d078d4c3f9a0ffd18993}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a8defd8def0d6d078d4c3f9a0ffd18993}
+
+
+This functions waits for the analog and digital output generation to complete. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aaa148cebc35a97c045dbcdafcea65d81}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!write\-Ao\-Buffer@{write\-Ao\-Buffer}}
+\index{write\-Ao\-Buffer@{write\-Ao\-Buffer}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{write\-Ao\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-write\-Ao\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aaa148cebc35a97c045dbcdafcea65d81}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 64-\/bit float numpy array that contians data for each analog output. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a7b9c28d677ec361ed400f2e6b5a42d86}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!write\-Do\-Buffer@{write\-Do\-Buffer}}
+\index{write\-Do\-Buffer@{write\-Do\-Buffer}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{write\-Do\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-write\-Do\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a7b9c28d677ec361ed400f2e6b5a42d86}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital line. Lines are non-\/interleaved (line1 n-\/samples then line2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a02eee3f13b9ae6399553205f3204f1d1}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!ao@{ao}}
+\index{ao@{ao}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{ao}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-ao}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a02eee3f13b9ae6399553205f3204f1d1}
+
+
+This is an Analog\-Output object created using the Analog\-Output class. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a46a8a04fef697158b2274fa12033a6e0}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!do@{do}}
+\index{do@{do}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{do}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-do}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a46a8a04fef697158b2274fa12033a6e0}
+
+
+This is a Digital\-Output object created using the Digita\-Output class. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a914dc22840386507f16100c0c7028b7e}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!use\-Ao@{use\-Ao}}
+\index{use\-Ao@{use\-Ao}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{use\-Ao}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-use\-Ao}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a914dc22840386507f16100c0c7028b7e}
+
+
+This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize analog outputs. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a94522148c84bc1c3af50f1b35d772e63}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!use\-Do@{use\-Do}}
+\index{use\-Do@{use\-Do}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{use\-Do}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-use\-Do}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a94522148c84bc1c3af50f1b35d772e63}
+
+
+This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator}{Waveform\-Generator} is configured to utilize digital outputs. 
+
+
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a078c66a16dae8dc6bbf6c2ae55ff7c75}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-clk\-Source property(\-\_\-get\-Clk\-Source, \-\_\-set\-Clk\-Source)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a078c66a16dae8dc6bbf6c2ae55ff7c75}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a1b91e7f61684217ac0067de9631b4603}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!loops@{loops}}
+\index{loops@{loops}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-loops property(\-\_\-get\-Loops, \-\_\-set\-Loops)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a1b91e7f61684217ac0067de9631b4603}
+
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. 
+
+It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a523b65929f8a3fa8af88d5c6a2e4297e}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!mode@{mode}}
+\index{mode@{mode}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-mode property(\-\_\-get\-Mode, \-\_\-set\-Mode)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a523b65929f8a3fa8af88d5c6a2e4297e}
+
+
+There are currently three modes available. 
+
+Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_adfad9d232df552a816806584d30fd9ab}{stop()} method is called. \hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4152a26948eb36959f5ee99440dfa911}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-sample\-Rate property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a4152a26948eb36959f5ee99440dfa911}
+
+
+This is the sample rate of the waveform generator. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aa02528250ab9e7fd9ab04c3244eb8299}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-samples\-Per\-Channel property(\-\_\-get\-Samples\-Per\-Channel, \-\_\-set\-Samples\-Per\-Channel)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_aa02528250ab9e7fd9ab04c3244eb8299}
+
+
+This is the number of channels configured in the waveform generator. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af18771d98f5d12ff87a18c94cc6e6035}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-start\-Trigger\-Source\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_af18771d98f5d12ff87a18c94cc6e6035}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(\_getStartTriggerSource,
+2             \_setStartTriggerSource)
+\end{DoxyCode}
+
+
+This is the start trigger source terminal. 
+
+The software ignores this value when the trigger\-Type is set to \char`\"{}\-Software\char`\"{}. Otherwise when the trigger\-Type is \char`\"{}\-Hardware,\char`\"{} this terminal is used to start analog generation. Example Value\-: \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I0\char`\"{} \hypertarget{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a16967bab9c78a174def6dca01776065f}{\index{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!Chassis.git::WaveformGenerator::WaveformGenerator@{Chassis.\-git\-::\-Waveform\-Generator\-::\-Waveform\-Generator}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Generator.\-Waveform\-Generator.\-trigger\-Type property(\-\_\-get\-Trigger\-Type, \-\_\-set\-Trigger\-Type)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_generator_1_1_waveform_generator_a16967bab9c78a174def6dca01776065f}
+
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. 
+
+While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Waveform\-Generator.\-py\end{DoxyCompactItemize}

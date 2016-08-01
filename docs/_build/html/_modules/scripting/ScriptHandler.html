@@ -1,0 +1,782 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scripting.ScriptHandler &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scripting.ScriptHandler</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scripting.ScriptHandler</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">.Script</span> <span class="k">import</span> <span class="n">ScriptException</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">is_Q</span><span class="p">,</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">trace.PlottedTrace</span> <span class="k">import</span> <span class="n">PlottedTrace</span>
+<span class="kn">from</span> <span class="nn">trace.TraceCollection</span> <span class="k">import</span> <span class="n">TraceCollection</span>
+<span class="kn">from</span> <span class="nn">trace</span> <span class="k">import</span> <span class="n">pens</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.ViewBox</span> <span class="k">import</span> <span class="n">ViewBox</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">from</span> <span class="nn">persist.MeasurementLog</span> <span class="k">import</span>  <span class="n">Measurement</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Result</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+
+<div class="viewcode-block" id="ScriptHandler"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler">[docs]</a><span class="k">class</span> <span class="nc">ScriptHandler</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The ScriptHandler is what handles all the interfacing between the Script and the GUI. The Script</span>
+<span class="sd">    emits signals, which are picked up by the ScriptHandler, which executes the necessary changes on the</span>
+<span class="sd">    GUI.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">script</span><span class="p">,</span> <span class="n">experimentUi</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span> <span class="o">=</span> <span class="n">experimentUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span> <span class="o">=</span> <span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span> <span class="o">=</span> <span class="n">experimentUi</span><span class="o">.</span><span class="n">globalVariablesUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltageControlWindow</span> <span class="o">=</span> <span class="n">experimentUi</span><span class="o">.</span><span class="n">voltageControlWindow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">scanControlWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluationControlWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">evaluationControlWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisControlWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">analysisControlWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">fitWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">pulser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">script</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#Place to put traces generated by the script</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceAlreadyCreated</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#Place to keep track of whether or not a given trace has been added to the traceUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesRevertDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#original values of global variables which are changed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namedTraceList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        
+        <span class="c1">#Experiment information signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onScanStateChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">analysisResultSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAnalysisResult</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">evaluatedDataSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">allDataSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAllData</span><span class="p">)</span>
+        
+        <span class="c1">#status signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">locationSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLocation</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exceptionSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onException</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">consoleSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onConsoleSignal</span> <span class="p">)</span>
+
+        <span class="c1">#action signals</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">setGlobalSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSetGlobal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">addGlobalSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAddGlobal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">pauseScriptSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPauseScriptFromScript</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">stopScriptSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onStopScriptFromScript</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">startScanSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onStartScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">setScanSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSetScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">setEvaluationSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSetEvaluation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">setAnalysisSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSetAnalysis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">plotPointSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPlotPoint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">plotListSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPlotList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">addPlotSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAddPlot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">pauseScanSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPauseScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">stopScanSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onStopScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">abortScanSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAbortScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">createTraceSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onCreateTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">closeTraceSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onCloseTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">genericCallSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onGenericCall</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">consolePrintSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onConsolePrintSignal</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fitSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onFit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">namedTraceSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onPushToNamedTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">loadVoltageDefSignal</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onLoadVoltageDef</span><span class="p">)</span>
+
+        <span class="c1">#finished signal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onFinished</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScriptHandler.scriptCommand"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.scriptCommand">[docs]</a>    <span class="k">def</span> <span class="nf">scriptCommand</span><span class="p">(</span><span class="n">func</span><span class="p">):</span><span class="c1">#@NoSelf</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for script commands. </span>
+<span class="sd">        </span>
+<span class="sd">        Catches exceptions, sets the script exception variables, and wakes the script after the</span>
+<span class="sd">        specified action has been completed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">baseScriptCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">error</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">error</span> <span class="ow">and</span> <span class="n">message</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="n">ScriptException</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">error</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">message</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ScriptException</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="ow">not</span> <span class="n">error</span><span class="p">)</span> <span class="ow">and</span> <span class="n">message</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="n">e</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">guiWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+        <span class="n">baseScriptCommand</span><span class="o">.</span><span class="n">__name__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">baseScriptCommand</span><span class="o">.</span><span class="n">__doc__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span>
+        <span class="k">return</span> <span class="n">baseScriptCommand</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onAddGlobal"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onAddGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">onAddGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a global &#39;name&#39; and set it to &#39;value, unit&#39;&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="c1">#signal is passed as a QString</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">magValue</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">doesNotExist</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">doesNotExist</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">addVariable</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Global variable </span><span class="si">{0}</span><span class="s2"> created</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Global variable </span><span class="si">{0}</span><span class="s2"> already exists</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">update</span><span class="p">([(</span><span class="s1">&#39;Global&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">magValue</span><span class="p">)])</span>
+        <span class="n">message</span> <span class="o">+=</span>  <span class="s2">&quot;Global variable </span><span class="si">{0}</span><span class="s2"> set to </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onSetGlobal"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onSetGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">onSetGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set global &#39;name&#39; to &#39;value, unit&#39;&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="c1">#signal is passed as a QString</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+        <span class="n">magValue</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+        <span class="n">doesNotExist</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">doesNotExist</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Global variable </span><span class="si">{0}</span><span class="s2"> does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesRevertDict</span><span class="p">:</span> <span class="c1">#entry is added to revert dict only the first time a global is set in a script</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesRevertDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">globalDict</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">update</span><span class="p">([(</span><span class="s1">&#39;Global&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">magValue</span><span class="p">)])</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Global variable </span><span class="si">{0}</span><span class="s2"> set to </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onLoadVoltageDef"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onLoadVoltageDef">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadVoltageDef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load voltage definition given by name and the associated &#39;_shuttling.xml&#39; from path&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltageControlWindow</span><span class="p">:</span> <span class="c1"># can be None</span>
+            <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voltageControlWindow</span><span class="o">.</span><span class="n">voltageFilesUi</span><span class="o">.</span><span class="n">loadVoltageDef</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Loaded voltage definition file </span><span class="si">{0}</span><span class="s2"> &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Voltage control was disabled by the UI&quot;</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onGenericCall"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onGenericCall">[docs]</a>    <span class="k">def</span> <span class="nf">onGenericCall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a generic piece of data from the program, specified by &#39;funcname&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">funcname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">funcname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">genericResult</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcname</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">genericWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{0}{1}</span><span class="s2"> executed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">funcname</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.getGlobal"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.getGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">getGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">globalDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onStartScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStartScan">[docs]</a>    <span class="k">def</span> <span class="nf">onStartScan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalOverrides</span><span class="o">=</span><span class="nb">list</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;Start the scan</span>
+<span class="sd">        globalOverrrides is list of (name, magnitude) values or list of (name, (value, unit)) values</span>
+<span class="sd">        that will override global variables during the scan</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanIsRunning</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisReady</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">dataReady</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">allDataReady</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># make sure we hand on a list of (key, magnitude) pairs</span>
+        <span class="n">myGlobalOverrides</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">globalOverrides</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">Sized</span><span class="p">):</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">myGlobalOverrides</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">onStart</span><span class="p">(</span><span class="n">globalOverrides</span><span class="o">=</span><span class="n">myGlobalOverrides</span><span class="p">)</span>
+        <span class="n">scan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">settingsName</span>
+        <span class="n">evaluation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluationControlWidget</span><span class="o">.</span><span class="n">settingsName</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">currentAnalysisName</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan started at </span><span class="si">{0}</span><span class="s2"> with scan = </span><span class="si">{1}</span><span class="s2">, evaluation = </span><span class="si">{2}</span><span class="s2">, analysis = </span><span class="si">{3}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span> <span class="n">scan</span><span class="p">,</span> <span class="n">evaluation</span><span class="p">,</span> <span class="n">analysis</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onPauseScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPauseScan">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">actionPause</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan paused&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onStopScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStopScan">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">actionStop</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanIsRunning</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan stopped&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onAbortScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onAbortScan">[docs]</a>    <span class="k">def</span> <span class="nf">onAbortScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">actionAbort</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanIsRunning</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan aborted&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onSetScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onSetScan">[docs]</a>    <span class="k">def</span> <span class="nf">onSetScan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">doesNotExist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">==-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doesNotExist</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan </span><span class="si">{0}</span><span class="s2"> does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">loadSetting</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Scan set to </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onSetEvaluation"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onSetEvaluation">[docs]</a>    <span class="k">def</span> <span class="nf">onSetEvaluation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">doesNotExist</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluationControlWidget</span><span class="o">.</span><span class="n">comboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">==-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doesNotExist</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Evaluation </span><span class="si">{0}</span><span class="s2"> does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">evaluationControlWidget</span><span class="o">.</span><span class="n">loadSetting</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Evaluation set to </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onSetAnalysis"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onSetAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onSetAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">doesNotExist</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">doesNotExist</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Analysis </span><span class="si">{0}</span><span class="s2"> does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">onLoadAnalysisConfiguration</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Analysis set to </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onAddPlot"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onAddPlot">[docs]</a>    <span class="k">def</span> <span class="nf">onAddPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">plotDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">addPlot</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Plot </span><span class="si">{0}</span><span class="s1"> added&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Plot </span><span class="si">{0}</span><span class="s1"> already exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onCreateTrace"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onCreateTrace">[docs]</a>    <span class="k">def</span> <span class="nf">onCreateTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traceCreationData</span><span class="p">):</span>
+        <span class="n">traceCreationData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">traceCreationData</span><span class="p">))</span>
+        <span class="p">[</span><span class="n">traceName</span><span class="p">,</span> <span class="n">plotName</span><span class="p">,</span> <span class="n">xUnit</span><span class="p">,</span> <span class="n">xLabel</span><span class="p">,</span> <span class="n">comment</span><span class="p">]</span> <span class="o">=</span> <span class="n">traceCreationData</span>
+        <span class="k">if</span> <span class="n">plotName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">plotDict</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;plot </span><span class="si">{0}</span><span class="s2"> does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">plotName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">traceCollection</span> <span class="o">=</span> <span class="n">TraceCollection</span><span class="p">()</span>
+            <span class="n">yColumnName</span> <span class="o">=</span> <span class="s1">&#39;y0&#39;</span>
+            <span class="n">plottedTrace</span> <span class="o">=</span> <span class="n">PlottedTrace</span><span class="p">(</span><span class="n">traceCollection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">plotDict</span><span class="p">[</span><span class="n">plotName</span><span class="p">][</span><span class="s2">&quot;view&quot;</span><span class="p">],</span> <span class="n">pens</span><span class="o">.</span><span class="n">penList</span><span class="p">,</span> <span class="n">xColumn</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span>
+                                        <span class="n">yColumn</span><span class="o">=</span><span class="n">yColumnName</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">traceName</span><span class="p">,</span> <span class="n">xAxisUnit</span> <span class="o">=</span> <span class="n">xUnit</span><span class="p">,</span> <span class="n">xAxisLabel</span> <span class="o">=</span> <span class="n">xLabel</span><span class="p">,</span> <span class="n">windowName</span><span class="o">=</span><span class="n">plotName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">plotDict</span><span class="p">[</span><span class="n">plotName</span><span class="p">][</span><span class="s2">&quot;view&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">enableAutoRange</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">XAxis</span><span class="p">)</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span>
+            <span class="n">commentIntro</span> <span class="o">=</span> <span class="s2">&quot;Created by script </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">)</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">commentIntro</span> <span class="o">+</span> <span class="s2">&quot; -- &quot;</span> <span class="o">+</span> <span class="n">comment</span> <span class="k">if</span> <span class="n">comment</span> <span class="k">else</span> <span class="n">commentIntro</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">autoSave</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">filenamePattern</span> <span class="o">=</span> <span class="n">traceName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span> <span class="o">=</span> <span class="n">plottedTrace</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traceAlreadyCreated</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#Keep track of whether the trace has already been added</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Added trace </span><span class="si">{0}</span><span class="se">\n</span><span class="s2"> plot: </span><span class="si">{1}</span><span class="se">\n</span><span class="s2"> xUnit: </span><span class="si">{2}</span><span class="se">\n</span><span class="s2"> xLabel: </span><span class="si">{3}</span><span class="se">\n</span><span class="s2"> comment: </span><span class="si">{4}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">,</span> <span class="n">plotName</span><span class="p">,</span> <span class="n">xUnit</span><span class="p">,</span> <span class="n">xLabel</span><span class="p">,</span> <span class="n">comment</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onCloseTrace"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onCloseTrace">[docs]</a>    <span class="k">def</span> <span class="nf">onCloseTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">traceName</span><span class="p">):</span>
+        <span class="n">traceName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">traceName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Trace </span><span class="si">{0}</span><span class="s2"> does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plottedTrace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span> <span class="c1">#remove from the list of script traces</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;traceFinalized&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">registerMeasurement</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Trace </span><span class="si">{0}</span><span class="s2"> closed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="n">error</span><span class="p">,</span> <span class="n">message</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onFit"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onFit">[docs]</a>    <span class="k">def</span> <span class="nf">onFit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitName</span><span class="p">,</span> <span class="n">traceName</span><span class="p">):</span>
+        <span class="n">fitName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fitName</span><span class="p">)</span>
+        <span class="n">traceName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+        <span class="n">fitAnalysisIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">fitName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fitAnalysisIndex</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Fit &#39;</span><span class="si">{0}</span><span class="s2">&#39; does not exist.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fitName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">traceName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Trace &#39;</span><span class="si">{0}</span><span class="s2">&#39; does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plottedTrace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="o">.</span><span class="n">analysisNameComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">fitAnalysisIndex</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Fitting trace &#39;</span><span class="si">{0}</span><span class="s2">&#39; using fit &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">,</span> <span class="n">fitName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitWidget</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">parameterNames</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fitResults</span><span class="p">[</span><span class="n">parameter</span><span class="p">]</span> <span class="o">=</span> <span class="n">plottedTrace</span><span class="o">.</span><span class="n">fitFunction</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onPlotPoint"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPlotPoint">[docs]</a>    <span class="k">def</span> <span class="nf">onPlotPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">traceName</span><span class="p">,</span> <span class="n">plotStyle</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot point (x,y) to traceName&quot;&quot;&quot;</span>
+        <span class="n">traceName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+        <span class="n">error</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotList</span><span class="p">([</span><span class="n">x</span><span class="p">],</span> <span class="p">[</span><span class="n">y</span><span class="p">],</span> <span class="n">traceName</span><span class="p">,</span> <span class="n">plotStyle</span><span class="o">=</span><span class="n">plotStyle</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span> </div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onPlotList"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPlotList">[docs]</a>    <span class="k">def</span> <span class="nf">onPlotList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xList</span><span class="p">,</span> <span class="n">yList</span><span class="p">,</span> <span class="n">traceName</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">,</span> <span class="n">plotStyle</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot [x1, x2,...], [y1, y2,...] to traceName&quot;&quot;&quot;</span>
+        <span class="n">traceName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+        <span class="n">error</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotList</span><span class="p">(</span><span class="n">xList</span><span class="p">,</span> <span class="n">yList</span><span class="p">,</span> <span class="n">traceName</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">,</span> <span class="n">plotStyle</span><span class="o">=</span><span class="n">plotStyle</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ScriptHandler.plotList"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.plotList">[docs]</a>    <span class="k">def</span> <span class="nf">plotList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xList</span><span class="p">,</span> <span class="n">yList</span><span class="p">,</span> <span class="n">traceName</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">plotStyle</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot [x1, x2,...], [y1, y2,...] to traceName&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">plottedTrace</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span>
+            <span class="n">created</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceAlreadyCreated</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Trace </span><span class="si">{0}</span><span class="s2"> does not exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traceName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xList</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">yList</span><span class="p">)):</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;x and y lists are of unequal lengths&#39;</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">created</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+                    <span class="n">plottedTrace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">xList</span><span class="p">)</span>
+                    <span class="n">plottedTrace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">yList</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">plottedTrace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">xList</span>
+                    <span class="n">plottedTrace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">yList</span>
+                <span class="n">plottedTrace</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">plottedTrace</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xList</span><span class="p">)</span>
+                <span class="n">plottedTrace</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yList</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">addTrace</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">,</span> <span class="n">pen</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">plotStyle</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">expandNew</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">traceui</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">traceAlreadyCreated</span><span class="p">[</span><span class="n">traceName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">, </span><span class="si">{1}</span><span class="s1"> plotted to trace: </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">xList</span><span class="p">,</span> <span class="n">yList</span><span class="p">,</span> <span class="n">traceName</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onPushToNamedTrace"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPushToNamedTrace">[docs]</a>    <span class="k">def</span> <span class="nf">onPushToNamedTrace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topNode</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namedTraceList</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">topNode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">namedTraceui</span><span class="o">.</span><span class="n">updateExternally</span><span class="p">(</span><span class="n">topNode</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;pushed value </span><span class="si">{0}</span><span class="s1"> to named trace </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">topNode</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">child</span><span class="p">)</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onPauseScriptFromScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPauseScriptFromScript">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScriptFromScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">scriptingWindow</span><span class="o">.</span><span class="n">onPauseScript</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+    <span class="nd">@scriptCommand</span>
+<div class="viewcode-block" id="ScriptHandler.onStopScriptFromScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStopScriptFromScript">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScriptFromScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onStopScript</span><span class="p">()</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;script stopped&#39;</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onConsolePrintSignal"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onConsolePrintSignal">[docs]</a>    <span class="k">def</span> <span class="nf">onConsolePrintSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ScriptHandler.onStartScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStartScript">[docs]</a>    <span class="k">def</span> <span class="nf">onStartScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when start script button clicked. Starts the script and disables some aspects of the script GUI&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalVariablesRevertDict</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">stopped</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">exception</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">namedTraceList</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.onPauseScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPauseScript">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paused</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when pause script button clicked. Sets paused variable and wakes up script if unpaused.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="n">paused</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">paused</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">pauseWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ScriptHandler.onStopScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStopScript">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when stop script button is clicked. Sets stopped variable and wakes up all waitConditions.&quot;&quot;&quot;</span> 
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">stopped</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">paused</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">waitOnScan</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">repeat</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">dataReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">allDataReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">guiWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">pauseWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">dataWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">namedTraceui</span><span class="o">.</span><span class="n">saveAndUpdateFileList</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.onPauseScriptAndScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onPauseScriptAndScan">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScriptAndScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when pause script and scan button is clicked.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onPauseScript</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">actionPause</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ScriptHandler.onStopScriptAndScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onStopScriptAndScan">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScriptAndScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when stop script and scan button is clicked.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onStopScript</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">actionStop</span><span class="o">.</span><span class="n">trigger</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.onRepeat"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onRepeat">[docs]</a>    <span class="k">def</span> <span class="nf">onRepeat</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">repeat</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when repeat button is clicked. Set repeat variable.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">repeat</span> <span class="o">=</span> <span class="n">repeat</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.onSlow"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onSlow">[docs]</a>    <span class="k">def</span> <span class="nf">onSlow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slow</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when slow button is clicked. Set slow variable.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="n">slow</span></div>
+            
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onScanStateChanged"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onScanStateChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onScanStateChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when the scan state changes&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanStatus</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="s1">&#39;idle&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="s2">&quot;scan finished at </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())),</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;green&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanIsRunning</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">scanIsRunning</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onAnalysisResult"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onAnalysisResult">[docs]</a>    <span class="k">def</span> <span class="nf">onAnalysisResult</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allResults</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisResults</span> <span class="o">=</span> <span class="n">allResults</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">analysisWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onData"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onData">[docs]</a>    <span class="k">def</span> <span class="nf">onData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">dataReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">dataWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onAllData"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onAllData">[docs]</a>    <span class="k">def</span> <span class="nf">onAllData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allData</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMutexLocker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">mutex</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">allData</span> <span class="o">=</span> <span class="n">allData</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">allDataReady</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">allDataWait</span><span class="o">.</span><span class="n">wakeAll</span><span class="p">()</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptHandler.onFinished"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onFinished">[docs]</a>    <span class="k">def</span> <span class="nf">onFinished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">plottedTrace</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scriptTraces</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s2">&quot;traceFinalized&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+            <span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">registerMeasurement</span><span class="p">(</span><span class="n">plottedTrace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">namedTraceui</span><span class="o">.</span><span class="n">saveAndUpdateFileList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">namedTraceList</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onConsoleSignal"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onConsoleSignal">[docs]</a>    <span class="k">def</span> <span class="nf">onConsoleSignal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when script emits a console signal. Writes message to console.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptHandler.onException"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onException">[docs]</a>    <span class="k">def</span> <span class="nf">onException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when script emits exception signal. Highlights error.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">trace</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">scriptingWindow</span><span class="o">.</span><span class="n">markError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentLines</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+    
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>        
+<div class="viewcode-block" id="ScriptHandler.onLocation"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.onLocation">[docs]</a>    <span class="k">def</span> <span class="nf">onLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">locs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Mark where the script currently is&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentLines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">locs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentLines</span> <span class="o">=</span> <span class="p">[</span><span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">loc</span> <span class="ow">in</span> <span class="n">locs</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Executing </span><span class="si">{0}</span><span class="s2"> in </span><span class="si">{1}</span><span class="s2"> at line </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">loc</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">loc</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">loc</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1">#This should never execute</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;onLocation called while not executing script&quot;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">scriptingWindow</span><span class="o">.</span><span class="n">markLocation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentLines</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ScriptHandler.writeToConsole"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.writeToConsole">[docs]</a>    <span class="k">def</span> <span class="nf">writeToConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;write a message to the console.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">scriptingWindow</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptHandler.registerMeasurement"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptHandler.ScriptHandler.registerMeasurement">[docs]</a>    <span class="k">def</span> <span class="nf">registerMeasurement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plottedTrace</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;register a script created trace in the measurement log&quot;&quot;&quot;</span>
+        <span class="n">measurement</span> <span class="o">=</span> <span class="n">Measurement</span><span class="p">(</span><span class="n">scanType</span><span class="o">=</span> <span class="s1">&#39;Script&#39;</span><span class="p">,</span> <span class="n">scanName</span><span class="o">=</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">filenamePattern</span><span class="p">,</span>
+                                  <span class="n">scanParameter</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">scanTarget</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                  <span class="n">scanPP</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                  <span class="n">evaluation</span><span class="o">=</span><span class="s1">&#39;&lt;Script </span><span class="si">{0}</span><span class="s1">&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">),</span>
+                                  <span class="n">startDate</span><span class="o">=</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">description</span><span class="p">[</span><span class="s1">&#39;traceCreation&#39;</span><span class="p">],</span>
+                                  <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">filename</span><span class="o">=</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+                                  <span class="n">comment</span><span class="o">=</span><span class="n">plottedTrace</span><span class="o">.</span><span class="n">traceCollection</span><span class="o">.</span><span class="n">comment</span><span class="p">,</span>
+                                  <span class="n">longComment</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                  <span class="n">failedAnalysis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">measurementLog</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getSpace</span><span class="p">(</span><span class="s1">&#39;GlobalVariables&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">globalDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">measurement</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">space</span><span class="o">=</span><span class="n">space</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">measurement</span><span class="o">.</span><span class="n">plottedTraceList</span> <span class="o">=</span> <span class="p">[</span><span class="n">plottedTrace</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanExperiment</span><span class="o">.</span><span class="n">measurementLog</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">addMeasurement</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

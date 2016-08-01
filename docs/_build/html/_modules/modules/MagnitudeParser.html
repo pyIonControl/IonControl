@@ -1,0 +1,326 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.MagnitudeParser &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.MagnitudeParser</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.MagnitudeParser</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Parser for magnitude expressions. Can parse arithmetic expressions with values including standard si units.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">lru_cache</span>
+
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="k">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">CaselessLiteral</span><span class="p">,</span> <span class="n">Word</span><span class="p">,</span> <span class="n">Combine</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">nums</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">ParseException</span><span class="p">,</span> <span class="n">srange</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+
+<span class="n">point</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+<span class="n">e</span> <span class="o">=</span> <span class="n">CaselessLiteral</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">)</span>
+<span class="n">plus</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+<span class="n">minus</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+<span class="n">none</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span>
+<span class="n">nan</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+<span class="n">inf</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)</span>
+<span class="n">ninf</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;-inf&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="integerConversion"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.integerConversion">[docs]</a><span class="k">def</span> <span class="nf">integerConversion</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">toks</span><span class="p">):</span>
+    <span class="n">toks</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">toks</span></div>
+
+
+<div class="viewcode-block" id="hexConversion"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.hexConversion">[docs]</a><span class="k">def</span> <span class="nf">hexConversion</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">toks</span><span class="p">):</span>
+    <span class="n">toks</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">toks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">toks</span></div>
+
+
+<div class="viewcode-block" id="floatConversion"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.floatConversion">[docs]</a><span class="k">def</span> <span class="nf">floatConversion</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">toks</span><span class="p">):</span>
+    <span class="n">toks</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">toks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">toks</span></div>
+
+
+<span class="n">hexnum</span> <span class="o">=</span> <span class="p">(</span><span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;0x&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">srange</span><span class="p">(</span><span class="s2">&quot;[0-9a-fA-F]&quot;</span><span class="p">)))</span><span class="o">.</span><span class="n">setResultsName</span><span class="p">(</span><span class="s1">&#39;hex&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">hexConversion</span><span class="p">)</span>
+<span class="n">integer</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;+-&quot;</span> <span class="o">+</span> <span class="n">nums</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span><span class="o">.</span><span class="n">setResultsName</span><span class="p">(</span><span class="s1">&#39;integer&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">integerConversion</span><span class="p">)</span>
+<span class="n">dotNumber</span> <span class="o">=</span> <span class="n">Combine</span><span class="p">(</span><span class="n">Optional</span><span class="p">(</span><span class="n">plus</span> <span class="o">|</span> <span class="n">minus</span><span class="p">)</span> <span class="o">+</span> <span class="n">point</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">+</span>
+                    <span class="n">Optional</span><span class="p">(</span><span class="n">e</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;+-&quot;</span> <span class="o">+</span> <span class="n">nums</span><span class="p">,</span> <span class="n">nums</span><span class="p">)))</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">floatConversion</span><span class="p">)</span>
+<span class="n">numfnumber</span> <span class="o">=</span> <span class="n">Combine</span><span class="p">(</span><span class="n">Optional</span><span class="p">(</span><span class="n">plus</span> <span class="o">|</span> <span class="n">minus</span><span class="p">)</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="n">point</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">))</span> <span class="o">+</span>
+                     <span class="n">Optional</span><span class="p">(</span><span class="n">e</span> <span class="o">+</span> <span class="n">Word</span><span class="p">(</span><span class="s2">&quot;+-&quot;</span> <span class="o">+</span> <span class="n">nums</span><span class="p">,</span> <span class="n">nums</span><span class="p">)))</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="n">floatConversion</span><span class="p">)</span>
+<span class="n">fnumber</span> <span class="o">=</span> <span class="n">numfnumber</span> <span class="o">|</span> <span class="n">dotNumber</span>
+<span class="n">ident</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="p">,</span> <span class="n">alphas</span> <span class="o">+</span> <span class="n">nums</span> <span class="o">+</span> <span class="s2">&quot;_$&quot;</span><span class="p">)</span>
+
+<span class="n">valueexpr</span> <span class="o">=</span> <span class="p">(</span><span class="n">nan</span> <span class="o">|</span> <span class="n">ninf</span> <span class="o">|</span> <span class="n">inf</span> <span class="o">|</span> <span class="n">none</span> <span class="o">|</span> <span class="p">(</span><span class="n">fnumber</span> <span class="o">|</span> <span class="n">hexnum</span> <span class="o">|</span> <span class="n">integer</span><span class="p">)</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="n">ident</span><span class="p">))</span>
+<span class="n">precisionexpr</span> <span class="o">=</span> <span class="p">(</span><span class="n">Word</span><span class="p">(</span><span class="s2">&quot;+-&quot;</span> <span class="o">+</span> <span class="n">nums</span><span class="p">,</span> <span class="n">nums</span><span class="p">)</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="n">point</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span><span class="n">Word</span><span class="p">(</span><span class="n">nums</span><span class="p">,</span> <span class="n">nums</span><span class="p">))))</span>
+
+<span class="n">specialValues</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;None&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="s2">&quot;nan&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">),</span>
+                 <span class="s2">&quot;inf&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span>
+                 <span class="s2">&quot;-inf&quot;</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-inf&#39;</span><span class="p">)}</span>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="viewcode-block" id="parse"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.parse">[docs]</a><span class="k">def</span> <span class="nf">parse</span><span class="p">(</span> <span class="n">string</span> <span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">valueexpr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span> <span class="n">string</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">specialValues</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">specialValues</span><span class="p">[</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">precres</span> <span class="o">=</span> <span class="n">precisionexpr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span> <span class="n">string</span> <span class="p">)</span>
+        <span class="n">prec</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">precres</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">precres</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="n">retval</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># TODO: might need precision</span>
+    <span class="k">except</span> <span class="n">ParseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Error parsing &#39;</span><span class="si">{0}</span><span class="s2">&#39; using MagnitudeParser&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">string</span><span class="p">))</span>
+        <span class="k">raise</span>
+    <span class="k">return</span> <span class="n">retval</span></div>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="viewcode-block" id="parseDelta"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.parseDelta">[docs]</a><span class="k">def</span> <span class="nf">parseDelta</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">deltapos</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">string</span><span class="p">,</span> <span class="n">deltapos</span> <span class="o">=</span> <span class="n">positionawareTrim</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">deltapos</span><span class="p">)</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">valueexpr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="n">parseAll</span><span class="p">)</span>
+    <span class="n">precres</span> <span class="o">=</span> <span class="n">precisionexpr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="n">prec</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">precres</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">precres</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="n">decimalpos</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">precres</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">mydeltapos</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">precres</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+                     <span class="nb">min</span><span class="p">(</span><span class="n">deltapos</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">deltapos</span> <span class="o">&gt;</span> <span class="n">decimalpos</span> <span class="k">else</span> <span class="mi">0</span><span class="p">),</span> <span class="n">decimalpos</span> <span class="o">+</span> <span class="n">prec</span><span class="p">))</span>
+    <span class="n">unit</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">retval</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">unit</span><span class="p">)</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">decimalpos</span> <span class="o">-</span> <span class="n">mydeltapos</span>
+    <span class="k">return</span> <span class="n">retval</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="nb">pow</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">delta</span><span class="p">),</span> <span class="n">unit</span><span class="p">),</span> <span class="n">deltapos</span><span class="p">,</span> <span class="n">decimalpos</span><span class="p">,</span> <span class="n">prec</span></div>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="viewcode-block" id="isValueExpression"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.isValueExpression">[docs]</a><span class="k">def</span> <span class="nf">isValueExpression</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">valueexpr</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;hex&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">asDict</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+<div class="viewcode-block" id="isIdentifier"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.isIdentifier">[docs]</a><span class="k">def</span> <span class="nf">isIdentifier</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ident</span><span class="o">.</span><span class="n">parseString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">parseAll</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="positionawareTrim"><a class="viewcode-back" href="../../code/modules-doc.html#modules.MagnitudeParser.positionawareTrim">[docs]</a><span class="k">def</span> <span class="nf">positionawareTrim</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">position</span><span class="p">):</span>
+    <span class="n">oldlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="n">string</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span>
+    <span class="n">newlen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">string</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">oldlen</span> <span class="o">+</span> <span class="n">newlen</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">newlen</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">isValueExpression</span><span class="p">(</span><span class="s1">&#39;2kHz&#39;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
+<span class="c1">#     print positionawareTrim(&#39;   1234&#39;,10)</span>
+<span class="c1">#     for line in [&#39;12MHz&#39;, &#39;12.123456789 MHz&#39;,&#39;-200.234e3 us&#39;,&#39;   12.000 MHz&#39;,&#39;40&#39;]:</span>
+<span class="c1">#         try:</span>
+<span class="c1">#             print line, &quot;-&gt;&quot;</span>
+<span class="c1">#             for elem in parseDelta(line, 4):</span>
+<span class="c1">#                 print elem</span>
+<span class="c1">#             print</span>
+<span class="c1">#         except ParseException as e:</span>
+<span class="c1">#             print &quot;not a full match&quot;, e</span>
+<span class="c1">#      </span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,366 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scan.PushVariableTableModel &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scan.PushVariableTableModel</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scan.PushVariableTableModel</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">modules.firstNotNone</span> <span class="k">import</span> <span class="n">firstNotNone</span>
+
+
+<div class="viewcode-block" id="PushVariableTableModel"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel">[docs]</a><span class="k">class</span> <span class="nc">PushVariableTableModel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractTableModel</span><span class="p">):</span>
+    <span class="n">backgroundLookup</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">green</span><span class="p">)</span><span class="o">.</span><span class="n">lighter</span><span class="p">(</span><span class="mi">175</span><span class="p">),</span> <span class="mi">0</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">),</span> 
+                        <span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span><span class="o">.</span><span class="n">lighter</span><span class="p">(</span><span class="mi">175</span><span class="p">)}</span>   
+    <span class="n">pushChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>  
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> 
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractTableModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span> <span class="o">=</span> <span class="p">{</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">push</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">destinationName</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">variableName</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">definition</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>                           
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">minimum</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">maximum</span><span class="p">),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">destinationName</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">variableName</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">definition</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">firstNotNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">strMinimum</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">minimum</span><span class="p">)),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">firstNotNone</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">strMaximum</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">maximum</span><span class="p">)),</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundLookup</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">valueStatus</span><span class="p">],</span>  
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundLookup</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">hasStrMinimum</span><span class="p">],</span>  
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">backgroundLookup</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">hasStrMaximum</span><span class="p">]</span>  
+
+                            <span class="p">}</span>                           
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span> <span class="o">=</span>   <span class="p">{</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataDestinationName</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataVariableName</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataDefinition</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataMinimum</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataMaximum</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataStrMinimum</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UserRole</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataStrMaximum</span><span class="p">,</span>
+                                 <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataPush</span> <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+                         
+<div class="viewcode-block" id="PushVariableTableModel.localReplacementDict"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.localReplacementDict">[docs]</a>    <span class="k">def</span> <span class="nf">localReplacementDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span></div>
+                         
+<div class="viewcode-block" id="PushVariableTableModel.updateDestinations"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.updateDestinations">[docs]</a>    <span class="k">def</span> <span class="nf">updateDestinations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destinations</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span> <span class="o">=</span> <span class="n">destinations</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.choice"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.choice">[docs]</a>    <span class="k">def</span> <span class="nf">choice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">())</span><span class="o">.</span><span class="n">destinationName</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+                         
+<div class="viewcode-block" id="PushVariableTableModel.setDataPush"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataPush">[docs]</a>    <span class="k">def</span> <span class="nf">setDataPush</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">push</span> <span class="o">=</span> <span class="n">value</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.setDataVariableName"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataVariableName">[docs]</a>    <span class="k">def</span> <span class="nf">setDataVariableName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">variableName</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">renameAt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PushVariableTableModel.setDataDestinationName"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataDestinationName">[docs]</a>    <span class="k">def</span> <span class="nf">setDataDestinationName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">destinationName</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">renameAt</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PushVariableTableModel.setDataDefinition"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataDefinition">[docs]</a>    <span class="k">def</span> <span class="nf">setDataDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">replacementDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+            <span class="n">replacementDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">replacementDict</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.setDataMinimum"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataMinimum">[docs]</a>    <span class="k">def</span> <span class="nf">setDataMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">minimum</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.setDataMaximum"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataMaximum">[docs]</a>    <span class="k">def</span> <span class="nf">setDataMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">maximum</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+                         
+<div class="viewcode-block" id="PushVariableTableModel.setDataStrMinimum"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataStrMinimum">[docs]</a>    <span class="k">def</span> <span class="nf">setDataStrMinimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">strMinimum</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.setDataStrMaximum"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setDataStrMaximum">[docs]</a>    <span class="k">def</span> <span class="nf">setDataStrMaximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">strMaximum</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+                         
+<div class="viewcode-block" id="PushVariableTableModel.addVariable"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.addVariable">[docs]</a>    <span class="k">def</span> <span class="nf">addVariable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pushVariable</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pushVariable</span><span class="o">.</span><span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">[</span><span class="n">pushVariable</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pushVariable</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span></div>
+             
+<div class="viewcode-block" id="PushVariableTableModel.removeVariable"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.removeVariable">[docs]</a>    <span class="k">def</span> <span class="nf">removeVariable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">index</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">popAt</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span></div>
+        
+                         
+<div class="viewcode-block" id="PushVariableTableModel.rowCount"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span> 
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span> <span class="k">else</span> <span class="mi">0</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.columnCount"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span> 
+        <span class="k">return</span> <span class="mi">7</span></div>
+
+<div class="viewcode-block" id="PushVariableTableModel.update"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(),</span> <span class="mi">7</span><span class="p">)</span> <span class="p">)</span></div>
+ 
+<div class="viewcode-block" id="PushVariableTableModel.setPushVariables"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setPushVariables">[docs]</a>    <span class="k">def</span> <span class="nf">setPushVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pushVariables</span><span class="p">,</span> <span class="n">fitfunction</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginResetModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span> <span class="o">=</span> <span class="n">pushVariables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endResetModel</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.allDataChanged"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.allDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">allDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="PushVariableTableModel.fitDataChanged"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.fitDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">fitDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extraDict</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(),</span> <span class="mi">3</span><span class="p">))</span></div>
+ 
+<div class="viewcode-block" id="PushVariableTableModel.startDataChanged"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.startDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">startDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+ 
+<div class="viewcode-block" id="PushVariableTableModel.data"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span> 
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">role</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="kc">None</span><span class="p">)(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">())</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+        
+<div class="viewcode-block" id="PushVariableTableModel.setData"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">role</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="k">lambda</span> <span class="n">row</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">None</span><span class="p">)(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">(),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+<div class="viewcode-block" id="PushVariableTableModel.setValue"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PushVariableTableModel.flags"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span></div>
+
+    <span class="n">headerDataLookup</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Push&#39;</span><span class="p">,</span> <span class="s1">&#39;Destination&#39;</span><span class="p">,</span> <span class="s1">&#39;Variable&#39;</span><span class="p">,</span> <span class="s1">&#39;Definition&#39;</span><span class="p">,</span> <span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="s1">&#39;Min Accept&#39;</span><span class="p">,</span> <span class="s1">&#39;Max Accept&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="PushVariableTableModel.headerData"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerDataLookup</span><span class="p">[</span><span class="n">section</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="c1">#QtCore.QVariant()</span></div>
+    
+<div class="viewcode-block" id="PushVariableTableModel.saveConfig"><a class="viewcode-back" href="../../code/scan-doc.html#scan.PushVariableTableModel.PushVariableTableModel.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,504 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProjectConfig.Project &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>ProjectConfig.Project</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ProjectConfig.Project</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">__main__</span>
+<span class="kn">import</span> <span class="nn">sqlalchemy_utils</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">modules.iteratortools</span> <span class="k">import</span> <span class="n">path_iter_right</span>
+<span class="kn">from</span> <span class="nn">persist.DatabaseConnectionSettings</span> <span class="k">import</span> <span class="n">DatabaseConnectionSettings</span>
+<span class="kn">from</span> <span class="nn">.ProjectConfigUi</span> <span class="k">import</span> <span class="n">ProjectConfigUi</span>
+<span class="kn">from</span> <span class="nn">.ExptConfigUi</span> <span class="k">import</span> <span class="n">ExptConfigUi</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+
+<span class="n">uiPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/ProjectInfo.ui&#39;</span><span class="p">)</span>
+<span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uiPath</span><span class="p">)</span>
+
+<span class="n">currentProject</span><span class="o">=</span><span class="kc">None</span>
+
+
+<div class="viewcode-block" id="Project"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project">[docs]</a><span class="k">class</span> <span class="nc">Project</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;initialize a project by loading in the project config information&quot;&quot;&quot;</span>
+        <span class="n">scriptname</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">__main__</span><span class="o">.</span><span class="n">__file__</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mainConfigDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">))</span> <span class="c1">#IonControl/config directory</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;ProjectConfig.yml&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainConfigDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span> <span class="c1">#absolute path to config file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;baseDir&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;showGui&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">}</span>  <span class="c1"># default values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hardware&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s1">&#39;software&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s1">&#39;databaseConnection&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s1">&#39;showGui&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                           <span class="s1">&#39;useCustomDatabaseName&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>  <span class="c1"># default values</span>
+
+        <span class="c1">#Load in the project config information</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">yamldata</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span> <span class="o">=</span> <span class="n">yamldata</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Project config file </span><span class="si">{0}</span><span class="s1"> loaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">scanner</span><span class="o">.</span><span class="n">ScannerError</span><span class="p">:</span> <span class="c1">#leave defaults if the file is improperly formatted</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;YAML formatting error: unable to read in project config file </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">))</span>
+
+        <span class="c1">#If the baseDir doesn&#39;t exist or no project is specified, we have to use the GUI</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]:</span>
+            <span class="n">ui</span> <span class="o">=</span> <span class="n">ProjectConfigUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scriptname</span><span class="p">)</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="c1">#save information from GUI to file</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;GUI data saved to </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">))</span>
+
+        <span class="c1">#make project directories if they don&#39;t exist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiConfigDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span><span class="p">,</span> <span class="s1">&#39;.gui-config&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiConfigFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiConfigDir</span><span class="p">,</span> <span class="n">scriptname</span><span class="o">+</span><span class="s2">&quot;.config.db&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configDir</span><span class="p">,</span> <span class="n">scriptname</span> <span class="o">+</span> <span class="s1">&#39;_ExptConfig.yml&#39;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Directory </span><span class="si">{0}</span><span class="s1"> created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configDir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configDir</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Directory </span><span class="si">{0}</span><span class="s1"> created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configDir</span><span class="p">))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;File </span><span class="si">{0}</span><span class="s1"> created&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiConfigDir</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiConfigDir</span><span class="p">)</span>
+
+        <span class="c1">#Load in the experiment config information</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">yamldata</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                    <span class="c1">#check that it has the necessary keys</span>
+                    <span class="n">yamldata</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">]</span>
+                    <span class="n">yamldata</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]</span>
+                    <span class="n">yamldata</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span>
+                    <span class="n">yamldata</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">yamldata</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">guiName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">]:</span>
+                        <span class="k">for</span> <span class="n">objName</span> <span class="ow">in</span> <span class="n">yamldata</span><span class="p">[</span><span class="n">guiName</span><span class="p">]:</span>
+                            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">yamldata</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]:</span>
+                                <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="c1">#Switch &#39;None&#39; names to empty string</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Experiment config file </span><span class="si">{0}</span><span class="s1"> loaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+                <span class="k">except</span> <span class="n">yaml</span><span class="o">.</span><span class="n">scanner</span><span class="o">.</span><span class="n">ScannerError</span><span class="p">:</span> <span class="c1">#leave defaults if the file is improperly formatted</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;YAML formatting error: unable to read in experiment config file </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;YAML data is not a dictionary in experiment config file </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;YAML data is missing required element </span><span class="si">{0}</span><span class="s1"> in experiment config file </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+
+        <span class="c1">#if the GUI is not shown, check the database connection. If it fails, show the GUI</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;showGui&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dbConnection</span> <span class="o">=</span> <span class="n">DatabaseConnectionSettings</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">])</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">attemptDatabaseConnection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dbConnection</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]</span><span class="o">=</span><span class="kc">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateExptConfigVersion</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]:</span>
+            <span class="n">ui</span> <span class="o">=</span> <span class="n">ExptConfigUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scriptname</span><span class="p">)</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+            <span class="n">ui</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+            <span class="n">yamldata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">changeBlankNamesToNone</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="c1">#save information from GUI to file</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">yamldata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;GUI data saved to </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dbConnection</span> <span class="o">=</span> <span class="n">DatabaseConnectionSettings</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setGlobalProject</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">baseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hardware</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">software</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+<div class="viewcode-block" id="Project.setGlobalProject"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.setGlobalProject">[docs]</a>    <span class="k">def</span> <span class="nf">setGlobalProject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">global</span> <span class="n">currentProject</span>
+        <span class="n">currentProject</span><span class="o">=</span><span class="bp">self</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Project.attemptDatabaseConnection"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.attemptDatabaseConnection">[docs]</a>    <span class="k">def</span> <span class="nf">attemptDatabaseConnection</span><span class="p">(</span><span class="n">dbConn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Attempt to connect to the database&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="n">dbConn</span><span class="o">.</span><span class="n">connectionString</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="n">dbConn</span><span class="o">.</span><span class="n">echo</span><span class="p">)</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Database connection successful&quot;</span><span class="p">)</span>
+        <span class="c1"># except OperationalError as e:</span>
+        <span class="c1">#     if str(e.orig) == &quot;&quot;:</span>
+        <span class="c1">#         pass</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="s1">&#39;orig&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">orig</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;FATAL:  database &quot;</span><span class="si">{0}</span><span class="s1">&quot; does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dbConn</span><span class="o">.</span><span class="n">database</span><span class="p">)):</span>
+                <span class="c1"># connect to template and create database</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sqlalchemy_utils</span><span class="o">.</span><span class="n">functions</span><span class="o">.</span><span class="n">create_database</span><span class="p">(</span><span class="n">dbConn</span><span class="o">.</span><span class="n">connectionString</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="s1">&#39;template1&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Created database &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dbConn</span><span class="o">.</span><span class="n">database</span><span class="p">))</span>
+                    <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Creating database &#39;</span><span class="si">{0}</span><span class="s2">&#39; failed: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">dbConn</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Database connection failed - please check settings&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">success</span></div>
+
+<div class="viewcode-block" id="Project.updateExptConfigVersion"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.updateExptConfigVersion">[docs]</a>    <span class="k">def</span> <span class="nf">updateExptConfigVersion</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update config file to latest version&quot;&quot;&quot;</span>
+        <span class="n">version</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">version</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Updating experiment config file </span><span class="si">{0}</span><span class="s2"> from v1.0 to v2.0&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+            <span class="n">hardwareCopy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">])</span>
+            <span class="n">softwareCopy</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">hardwareCopy</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="s1">&#39;Opal Kelly FPGA: Pulser&#39;</span><span class="p">:</span> <span class="c1">#For Opal Kelly FPGAs, now one device with different names</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">][</span><span class="s1">&#39;Pulser&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="s1">&#39;Opal Kelly FPGA: DAC&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">][</span><span class="s1">&#39;DAC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="s1">&#39;Opal Kelly FPGA: 32 Channel PMT&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">][</span><span class="s1">&#39;32 Channel PMT&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="s1">&#39;NI DAC Chassis&#39;</span><span class="p">:</span> <span class="c1">#For NI DAC Chassis, name is now dict key rather than field</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">else</span><span class="p">:</span> <span class="c1">#For all other items, the default name key is set to an empty string</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">softwareCopy</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">2.0</span> <span class="c1">#A version number is now stored in the config file, to make things more future-proof</span>
+            <span class="n">yamldata</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">changeBlankNamesToNone</span><span class="p">()</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span> <span class="c1">#save updates to file</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">yamldata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;experiment config file </span><span class="si">{0}</span><span class="s1"> updated to v2.0&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Project.changeBlankNamesToNone"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.changeBlankNamesToNone">[docs]</a>    <span class="k">def</span> <span class="nf">changeBlankNamesToNone</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">yamldata</span><span class="o">=</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">guiName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">objName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">name</span><span class="o">==</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="c1">#yaml doesn&#39;t work nicely with empty string keys for dicts, so we switch them to &#39;None&#39; for saving only</span>
+                        <span class="n">yamldata</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="kc">None</span><span class="p">]</span><span class="o">=</span><span class="n">yamldata</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">yamldata</span></div>
+
+<div class="viewcode-block" id="Project.isEnabled"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.isEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">isEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine what objects named &#39;objName&#39; are enabled (if any)</span>
+<span class="sd">        Args:</span>
+<span class="sd">            guiName (str): &#39;hardware&#39; or &#39;software&#39;</span>
+<span class="sd">            objName (str): the name of the object in question</span>
+<span class="sd">        Returns:</span>
+<span class="sd">         dict of enabled objects &#39;objName&#39;&quot;&quot;&quot;</span>
+        <span class="n">objDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="n">enabledObjects</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span><span class="n">nameDict</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">nameDict</span> <span class="ow">in</span> <span class="n">objDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">nameDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">)}</span>
+        <span class="k">return</span> <span class="n">enabledObjects</span></div>
+
+<div class="viewcode-block" id="Project.fullName"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.fullName">[docs]</a>    <span class="k">def</span> <span class="nf">fullName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the full name to display associated with objName and name&quot;&quot;&quot;</span>
+        <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;: &#39;</span>
+        <span class="k">return</span> <span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">])</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="n">objName</span></div>
+
+<div class="viewcode-block" id="Project.fromFullName"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.fromFullName">[docs]</a>    <span class="k">def</span> <span class="nf">fromFullName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fullName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the objName,name associated with the given fullName&quot;&quot;&quot;</span>
+        <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;: &#39;</span>
+        <span class="k">return</span> <span class="n">fullName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">separator</span><span class="p">)</span> <span class="k">if</span> <span class="n">separator</span> <span class="ow">in</span> <span class="n">fullName</span> <span class="k">else</span> <span class="p">(</span><span class="n">fullName</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Project.findFile"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.Project.findFile">[docs]</a>    <span class="k">def</span> <span class="nf">findFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">filename</span>
+        <span class="n">project_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectDir</span>
+        <span class="n">leaf</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">path_iter_right</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">leaf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">component</span><span class="p">,</span> <span class="n">leaf</span><span class="p">)</span> <span class="k">if</span> <span class="n">leaf</span> <span class="k">else</span> <span class="n">component</span>
+            <span class="n">test_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">project_dir</span><span class="p">,</span> <span class="n">leaf</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">test_name</span><span class="p">):</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">test_name</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">filename</span></div></div>
+
+
+<div class="viewcode-block" id="ProjectInfoUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.ProjectInfoUi">[docs]</a><span class="k">class</span> <span class="nc">ProjectInfoUi</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for seeing project settings in the main GUI, and setting config GUIs to show on next program start&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ProjectInfoUi.setupUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.ProjectInfoUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;setup the dialog box ui&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectInfoUi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ProjectConfigTextEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ExptConfigTextEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Currently running project: &lt;b&gt;</span><span class="si">{0}</span><span class="s2">&lt;/b&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ProjectInfoUi.accept"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.ProjectInfoUi.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the config files based on the check boxes&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">showProjectGuiCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfig</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;showGui&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">showExptGuiCheckbox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;showGui&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ProjectException"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.ProjectException">[docs]</a><span class="k">class</span> <span class="nc">ProjectException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="getProject"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.Project.getProject">[docs]</a><span class="k">def</span> <span class="nf">getProject</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">currentProject</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ProjectException</span><span class="p">(</span><span class="s1">&#39;No project set&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">currentProject</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">Project</span><span class="p">()</span>
+    <span class="k">pass</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

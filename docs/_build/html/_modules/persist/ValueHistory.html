@@ -1,0 +1,363 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>persist.ValueHistory &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>persist.ValueHistory</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for persist.ValueHistory</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">,</span> <span class="n">Index</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="k">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">sessionmaker</span><span class="p">,</span> <span class="n">relationship</span><span class="p">,</span> <span class="n">backref</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="k">import</span> <span class="n">InvalidRequestError</span><span class="p">,</span> <span class="n">IntegrityError</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="k">import</span> <span class="n">OperationalError</span>
+
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">is_Q</span>
+<span class="kn">from</span> <span class="nn">persist.DatabaseConnectionSettings</span> <span class="k">import</span> <span class="n">DatabaseConnectionSettings</span>
+
+<span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
+    
+    
+<div class="viewcode-block" id="HistoryException"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.HistoryException">[docs]</a><span class="k">class</span> <span class="nc">HistoryException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="HistorySource"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.HistorySource">[docs]</a><span class="k">class</span> <span class="nc">HistorySource</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;history_source&quot;</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">primary_key</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">space</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+    <span class="n">__table_args__</span> <span class="o">=</span> <span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="s1">&#39;history_source_index&#39;</span><span class="p">,</span> <span class="s2">&quot;space&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="p">)</span>    </div>
+    
+<div class="viewcode-block" id="ValueHistoryEntry"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryEntry">[docs]</a><span class="k">class</span> <span class="nc">ValueHistoryEntry</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s2">&quot;history_value&quot;</span>
+    <span class="n">source_id</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">,</span> <span class="n">ForeignKey</span><span class="p">(</span><span class="s1">&#39;history_source.id&#39;</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+    <span class="n">source</span> <span class="o">=</span> <span class="n">relationship</span><span class="p">(</span> <span class="n">HistorySource</span><span class="p">,</span> <span class="n">backref</span><span class="o">=</span><span class="n">backref</span><span class="p">(</span><span class="s1">&#39;history&#39;</span><span class="p">,</span> <span class="n">uselist</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cascade</span><span class="o">=</span><span class="s1">&#39;delete,all&#39;</span><span class="p">))</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">,</span> <span class="n">nullable</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">top</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Float</span><span class="p">)</span>
+    <span class="n">unit</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">upd_date</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sourceObj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">upd_date</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">sourceObj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">upd_date</span> <span class="o">=</span> <span class="n">upd_date</span>
+        
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;&#39;</span><span class="si">{0}</span><span class="s2">.</span><span class="si">{1}</span><span class="s2">&#39; </span><span class="si">{2}</span><span class="s2"> </span><span class="si">{3}</span><span class="s2"> @ </span><span class="si">{4}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upd_date</span><span class="p">)</span></div>
+        
+    
+<div class="viewcode-block" id="ValueHistoryStore"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore">[docs]</a><span class="k">class</span> <span class="nc">ValueHistoryStore</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dbConnection</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_conn_str</span> <span class="o">=</span> <span class="n">dbConnection</span><span class="o">.</span><span class="n">connectionString</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_conn_str</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="n">dbConnection</span><span class="o">.</span><span class="n">echo</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">databaseAvailable</span> <span class="o">=</span> <span class="kc">False</span>
+
+<div class="viewcode-block" id="ValueHistoryStore.rename"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.rename">[docs]</a>    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">oldsourcename</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">oldsourcename</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HistoryException</span><span class="p">(</span><span class="s2">&quot;cannot rename </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2"> because </span><span class="si">{0}</span><span class="s2"> does not exist in database&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">oldsourcename</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HistoryException</span><span class="p">(</span><span class="s2">&quot;cannot rename </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2"> because </span><span class="si">{1}</span><span class="s2"> already exists in database&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">oldsourcename</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">))</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">HistorySource</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">HistorySource</span><span class="o">.</span><span class="n">space</span><span class="o">==</span><span class="n">space</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">HistorySource</span><span class="o">.</span><span class="n">name</span><span class="o">==</span><span class="n">oldsourcename</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">newsourcename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">[(</span><span class="n">space</span><span class="p">,</span> <span class="n">newsourcename</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="n">space</span><span class="p">,</span> <span class="n">oldsourcename</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.getSource"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.getSource">[docs]</a>    <span class="k">def</span> <span class="nf">getSource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">HistoryException</span><span class="p">(</span><span class="s1">&#39;Space or source cannot be None&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">[(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">s</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">HistorySource</span><span class="p">(</span> <span class="n">space</span><span class="o">=</span><span class="n">space</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">source</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span><span class="p">[(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">)]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">return</span> <span class="n">s</span></div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.refreshSourceDict"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.refreshSourceDict">[docs]</a>    <span class="k">def</span> <span class="nf">refreshSourceDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[((</span><span class="n">s</span><span class="o">.</span><span class="n">space</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">HistorySource</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()]</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourceDict</span>    </div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.getHistory"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.getHistory">[docs]</a>    <span class="k">def</span> <span class="nf">getHistory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">fromTime</span><span class="p">,</span> <span class="n">toTime</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">toTime</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">source</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">getSource</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">))</span><span class="o">.</span>\
+                                                  <span class="nb">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">upd_date</span><span class="o">&gt;</span><span class="n">fromTime</span><span class="p">)</span><span class="o">.</span>\
+                                                  <span class="nb">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">upd_date</span><span class="o">&lt;</span><span class="n">toTime</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">upd_date</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">source</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">getSource</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">))</span><span class="o">.</span>\
+                                                  <span class="nb">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">upd_date</span><span class="o">&gt;</span><span class="n">fromTime</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">upd_date</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.commit"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.commit">[docs]</a>    <span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">copyTo</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+<span class="c1">#        self.session = self.Session()</span>
+
+<div class="viewcode-block" id="ValueHistoryStore.open_session"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.open_session">[docs]</a>    <span class="k">def</span> <span class="nf">open_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__enter__</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.close_session"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.close_session">[docs]</a>    <span class="k">def</span> <span class="nf">close_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">databaseAvailable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>        </div>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">,</span> <span class="n">expire_on_commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">databaseAvailable</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">OperationalError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">databaseAvailable</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span>
+        
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exittype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="ValueHistoryStore.add"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">upd_date</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">databaseAvailable</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                    <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;{:~}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">bottom</span><span class="p">):</span>
+                        <span class="n">bottom</span> <span class="o">=</span> <span class="n">bottom</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">top</span><span class="p">):</span>
+                        <span class="n">top</span> <span class="o">=</span> <span class="n">top</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">space</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">source</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">paramObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSource</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                        <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;{:~}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">units</span><span class="p">)</span>
+                    <span class="n">elem</span> <span class="o">=</span> <span class="n">ValueHistoryEntry</span><span class="p">(</span><span class="n">paramObj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">upd_date</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+                    <span class="n">elem</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">if</span> <span class="n">bottom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">elem</span><span class="o">.</span><span class="n">bottom</span> <span class="o">=</span> <span class="n">bottom</span>
+                    <span class="k">if</span> <span class="n">top</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">elem</span><span class="o">.</span><span class="n">top</span> <span class="o">=</span> <span class="n">top</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">refreshSourceDict</span><span class="p">()</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span></div>
+                
+        
+<div class="viewcode-block" id="ValueHistoryStore.get"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">source</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">ValueHistoryEntry</span><span class="o">.</span><span class="n">source</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">getSource</span><span class="p">(</span><span class="n">space</span><span class="p">,</span> <span class="n">source</span><span class="p">)</span> <span class="p">)</span></div>
+                    
+<div class="viewcode-block" id="ValueHistoryStore.open"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">,</span> <span class="n">expire_on_commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="ValueHistoryStore.close"><a class="viewcode-back" href="../../code/persist-doc.html#persist.ValueHistory.ValueHistoryStore.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+        
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">datetime</span>
+    <span class="k">with</span> <span class="n">ValueHistoryStore</span><span class="p">(</span><span class="n">DatabaseConnectionSettings</span><span class="p">(</span><span class="n">user</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="s1">&#39;ioncontrol&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;yb171&#39;</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">))</span> <span class="k">as</span> <span class="n">d</span><span class="p">:</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;Peter&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;Peter&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;Peter&#39;</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;mm&#39;</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(),</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mi">15</span> <span class="p">)</span>
+        
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

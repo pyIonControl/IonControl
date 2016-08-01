@@ -1,0 +1,693 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scripting.ScriptingUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scripting.ScriptingUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scripting.ScriptingUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">PyQt5.Qsci</span> <span class="k">import</span> <span class="n">QsciScintilla</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">ProjectConfig.Project</span> <span class="k">import</span> <span class="n">getProject</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">BlockSignals</span>
+<span class="kn">from</span> <span class="nn">.Script</span> <span class="k">import</span> <span class="n">Script</span><span class="p">,</span> <span class="n">scriptFunctions</span><span class="p">,</span> <span class="n">scriptDocs</span>
+<span class="kn">from</span> <span class="nn">.ScriptHandler</span> <span class="k">import</span> <span class="n">ScriptHandler</span>
+<span class="kn">from</span> <span class="nn">pulseProgram.PulseProgramSourceEdit</span> <span class="k">import</span> <span class="n">PulseProgramSourceEdit</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">gui.UserFunctionsEditor</span> <span class="k">import</span> <span class="n">ensurePath</span><span class="p">,</span> <span class="n">genFileTree</span>
+
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/Scripting.ui&#39;</span><span class="p">)</span>
+<span class="n">ScriptingWidget</span><span class="p">,</span> <span class="n">ScriptingBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ScriptingUi"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi">[docs]</a><span class="k">class</span> <span class="nc">ScriptingUi</span><span class="p">(</span><span class="n">ScriptingWidget</span><span class="p">,</span> <span class="n">ScriptingBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ui for the scripting interface.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experimentUi</span><span class="p">):</span>
+        <span class="n">ScriptingWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">ScriptingBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">experimentUi</span><span class="o">.</span><span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span> <span class="o">=</span> <span class="n">experimentUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#dict of form {shortname: fullname}, where fullname has path and shortname doesn&#39;t</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span> <span class="o">=</span> <span class="n">Script</span><span class="p">()</span> <span class="c1">#encapsulates the script</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span> <span class="o">=</span> <span class="n">ScriptHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="p">,</span> <span class="n">experimentUi</span><span class="p">)</span> <span class="c1">#handles interface to the script</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revert</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initcode</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span><span class="o">.</span><span class="n">configDir</span><span class="o">+</span><span class="s1">&#39;/Scripts&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span><span class="p">):</span>
+            <span class="n">defaultScriptsDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;config/Scripts&#39;</span><span class="p">))</span> <span class="c1">#/IonControl/config/Scripts directory</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">defaultScriptsDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span><span class="p">)</span> <span class="c1">#Copy over all example scripts</span>
+
+
+<div class="viewcode-block" id="ScriptingUi.setupUi"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ScriptingUi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s1">&#39;Scripting&#39;</span>
+        
+        <span class="c1">#setup console</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consoleMaximumLines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.consoleMaximumLinesNew&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consoleEnable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.consoleEnable&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consoleClearButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onClearConsole</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linesSpinBox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onConsoleMaximumLinesChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linesSpinBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">consoleMaximumLines</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxEnableConsole</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableConsole</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxEnableConsole</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">consoleEnable</span> <span class="p">)</span>
+        
+        <span class="c1">#setup editor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span> <span class="o">=</span> <span class="n">PulseProgramSourceEdit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="p">[],</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="n">scriptFunctions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">markerDefine</span><span class="p">(</span><span class="n">QsciScintilla</span><span class="o">.</span><span class="n">Background</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span><span class="p">)</span> <span class="c1">#This is a marker that highlights the background</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setMarkerBackgroundColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mh">0xd0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xd0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">splitterVertical</span><span class="o">.</span><span class="n">insertWidget</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="p">)</span>
+        
+        <span class="c1">#setup documentation list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getDocs</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">docTreeWidget</span><span class="o">.</span><span class="n">setHeaderLabels</span><span class="p">([</span><span class="s1">&#39;Available Script Functions&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">funcDef</span><span class="p">,</span> <span class="n">funcDesc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">docDict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="n">itemDef</span>  <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">docTreeWidget</span><span class="p">,</span> <span class="p">[</span><span class="n">funcDef</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">docTreeWidget</span><span class="o">.</span><span class="n">addTopLevelItem</span><span class="p">(</span><span class="n">itemDef</span><span class="p">)</span>
+            <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">itemDef</span><span class="p">,</span> <span class="p">[</span><span class="n">funcDesc</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">docTreeWidget</span><span class="o">.</span><span class="n">setWordWrap</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1">#load file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.script.fullname&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        
+        <span class="c1">#setup filename combo box</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.recentFiles&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">v</span><span class="p">)}</span> <span class="c1">#removes files from dict if file paths no longer exist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="p">[</span><span class="n">shortname</span> <span class="k">for</span> <span class="n">shortname</span><span class="p">,</span> <span class="n">fullname</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="o">.</span><span class="n">items</span><span class="p">())</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullname</span><span class="p">)]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFilenameChange</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeCurrent</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveCurrent</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QRegExpValidator</span><span class="p">()</span> <span class="p">)</span> <span class="c1">#verifies that files typed into combo box can be used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateValidator</span><span class="p">()</span>
+
+        <span class="c1">#connect buttons</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.repeat&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeatButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">repeat</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeatButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRepeat</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">slow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.slow&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slowButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">slow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slowButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSlow</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.revert&#39;</span><span class="p">,</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revertButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">revert</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revertButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRevert</span> <span class="p">)</span>
+        <span class="c1">#File control actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpen</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoad</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionReset</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onReset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionNew</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onNew</span> <span class="p">)</span>
+        <span class="c1">#Script control actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStartScript</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onStartScript</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onPauseScript</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStopScript</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onStopScript</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScriptAndScan</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onPauseScriptAndScan</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStopScriptAndScan</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onStopScriptAndScan</span> <span class="p">)</span>
+        <span class="c1">#Script finished signal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">finished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFinished</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateTree</span><span class="p">()</span> <span class="c1">#populates file explorer tree widget</span>
+
+        <span class="c1">#Connect buttons for fileTreeWidget</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">itemDoubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onDoubleClick</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandTree</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Expand All&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseTree</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Collapse All&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandChild</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Expand Selected&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseChild</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="s2">&quot;Collapse Selected&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandTree</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpandOrCollapse</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseTree</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpandOrCollapse</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expandChild</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpandOrCollapse</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">collapseChild</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpandOrCollapse</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expandTree</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collapseTree</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expandChild</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collapseChild</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ActionsContextMenu</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="s2">&quot;:/other/icons/Terminal-icon.png&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Idle&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onStartScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onStartScript">[docs]</a>    <span class="k">def</span> <span class="nf">onStartScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start script button is clicked&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">isRunning</span><span class="p">():</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;script </span><span class="si">{0}</span><span class="s2"> started at </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onSave</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enableScriptChange</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statusLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Script running&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">revert</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedState</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveSettingsState</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedState</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onStartScript</span><span class="p">()</span></div>
+            
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+<div class="viewcode-block" id="ScriptingUi.onPauseScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onPauseScript">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScript</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paused</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pause script button is clicked&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Script is paused&quot;</span> <span class="k">if</span> <span class="n">paused</span> <span class="k">else</span> <span class="s2">&quot;Script is unpaused&quot;</span>
+        <span class="n">markerColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#c0c0ff&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">paused</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="mh">0xd0</span><span class="p">,</span> <span class="mh">0xff</span><span class="p">,</span> <span class="mh">0xd0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setMarkerBackgroundColor</span><span class="p">(</span><span class="n">markerColor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">paused</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onPauseScript</span><span class="p">(</span><span class="n">paused</span><span class="p">)</span></div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onStopScript"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onStopScript">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScript</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop script button is clicked&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeatButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onStopScript</span><span class="p">()</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onPauseScriptAndScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onPauseScriptAndScan">[docs]</a>    <span class="k">def</span> <span class="nf">onPauseScriptAndScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Pause script and scan button is clicked&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Script is paused&quot;</span>
+        <span class="n">markerColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#c0c0ff&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setMarkerBackgroundColor</span><span class="p">(</span><span class="n">markerColor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onPauseScriptAndScan</span><span class="p">()</span></div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onStopScriptAndScan"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onStopScriptAndScan">[docs]</a>    <span class="k">def</span> <span class="nf">onStopScriptAndScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop script and scan button is clicked&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">repeatButton</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onStopScriptAndScan</span><span class="p">()</span></div>
+        
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onFinished"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onFinished">[docs]</a>    <span class="k">def</span> <span class="nf">onFinished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Runs when script thread finishes. re-enables script GUI.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;Idle&quot;</span><span class="p">)</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;script </span><span class="si">{0}</span><span class="s2"> finished at </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">markerDeleteAll</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enableScriptChange</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">revert</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedState</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreSettingsState</span><span class="p">()</span></div>
+            
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onRepeat"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onRepeat">[docs]</a>    <span class="k">def</span> <span class="nf">onRepeat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Repeat button is clicked.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">repeat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repeatButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Repeat is on&quot;</span> <span class="k">if</span> <span class="n">repeat</span> <span class="k">else</span> <span class="s2">&quot;Repeat is off&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onRepeat</span><span class="p">(</span><span class="n">repeat</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onRevert"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onRevert">[docs]</a>    <span class="k">def</span> <span class="nf">onRevert</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Revert button is clicked.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">revert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revertButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Revert is on&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">revert</span> <span class="k">else</span> <span class="s2">&quot;Revert is off&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onSlow"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onSlow">[docs]</a>    <span class="k">def</span> <span class="nf">onSlow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Slow button is clicked.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">slow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slowButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Slow is on&quot;</span> <span class="k">if</span> <span class="n">slow</span> <span class="k">else</span> <span class="s2">&quot;Slow is off&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToConsole</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">onSlow</span><span class="p">(</span><span class="n">slow</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="ScriptingUi.onNew"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onNew">[docs]</a>    <span class="k">def</span> <span class="nf">onNew</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;New button is clicked. Pop up dialog asking for new name, and create file.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">shortname</span><span class="p">,</span> <span class="n">ok</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QInputDialog</span><span class="o">.</span><span class="n">getText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;New script name&#39;</span><span class="p">,</span> <span class="s1">&#39;Please enter a new script name: &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="n">shortname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">shortname</span><span class="p">)</span>
+            <span class="n">shortname</span> <span class="o">=</span> <span class="n">shortname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="c1">#Replace spaces with underscores</span>
+            <span class="n">shortname</span> <span class="o">=</span> <span class="n">shortname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#Take only what&#39;s before the &#39;.&#39;</span>
+            <span class="n">ensurePath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">shortname</span><span class="p">)</span>
+            <span class="n">shortname</span> <span class="o">+=</span> <span class="s1">&#39;.py&#39;</span>
+            <span class="n">fullname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">shortname</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullname</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">newFileText</span> <span class="o">=</span> <span class="s1">&#39;#&#39;</span> <span class="o">+</span> <span class="n">shortname</span> <span class="o">+</span> <span class="s1">&#39; created &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">newFileText</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Unable to create new file </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">shortname</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">onConsoleSignal</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+                    <span class="k">return</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">populateTree</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.enableScriptChange"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.enableScriptChange">[docs]</a>    <span class="k">def</span> <span class="nf">enableScriptChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Enable or disable any changes to script editor&quot;&quot;&quot;</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s2">&quot;#ffe4e4&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setCaretLineVisible</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setCaretLineBackgroundColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeCurrent</span><span class="o">.</span><span class="n">setDisabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionOpen</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSave</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionReset</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionNew</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStartScript</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScript</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStopScript</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionPauseScriptAndScan</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStopScriptAndScan</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="ow">not</span> <span class="n">enabled</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ScriptingUi.onFilenameChange"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onFilenameChange">[docs]</a>    <span class="k">def</span> <span class="nf">onFilenameChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortname</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A name is typed into the filename combo box.&quot;&quot;&quot;</span>
+        <span class="n">shortname</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">shortname</span><span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">shortname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">shortname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Use &quot;open&quot; or &quot;new&quot; commands to access a file not in the drop down menu&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fullname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">[</span><span class="n">shortname</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">fullname</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span><span class="o">!=</span><span class="n">fullname</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+                        <span class="n">w</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span> <span class="n">shortname</span> <span class="p">))</span></div>
+    
+<div class="viewcode-block" id="ScriptingUi.onLoad"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onLoad">[docs]</a>    <span class="k">def</span> <span class="nf">onLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The load button is clicked. Open file prompt for file.&quot;&quot;&quot;</span>
+        <span class="n">fullname</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Open Script&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultDir</span><span class="p">,</span> <span class="s1">&#39;Python scripts (*.py *.pyw)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fullname</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span></div>
+           
+<div class="viewcode-block" id="ScriptingUi.loadFile"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.loadFile">[docs]</a>    <span class="k">def</span> <span class="nf">loadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fullname</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load in a file.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fullname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span> <span class="o">=</span> <span class="n">fullname</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fullname</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">]</span> <span class="o">=</span> <span class="n">fullname</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateValidator</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">w</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">shortname</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> loaded&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initcode</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.confirmLoad"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.confirmLoad">[docs]</a>    <span class="k">def</span> <span class="nf">confirmLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;pop up window to confirm loss of unsaved changes when loading new file&quot;&quot;&quot;</span>
+        <span class="n">reply</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">question</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Message&#39;</span><span class="p">,</span>
+            <span class="s2">&quot;Are you sure you want to discard changes?&quot;</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span> <span class="o">|</span>
+            <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">No</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reply</span> <span class="o">==</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Yes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onExpandOrCollapse"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onExpandOrCollapse">[docs]</a>    <span class="k">def</span> <span class="nf">onExpandOrCollapse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expglobal</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;For expanding/collapsing file tree, expglobal=True will expand/collapse everything and False will</span>
+<span class="sd">           collapse/expand only selected nodes. expand=True will expand, False will collapse&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">expglobal</span><span class="p">:</span>
+            <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recurseExpand</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">expand</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+                    <span class="n">child</span><span class="o">.</span><span class="n">setExpanded</span><span class="p">(</span><span class="n">expand</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">recurseExpand</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">expand</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.recurseExpand"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.recurseExpand">[docs]</a>    <span class="k">def</span> <span class="nf">recurseExpand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">expand</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;recursively descends into tree structure below node to expand/collapse all subdirectories.</span>
+<span class="sd">           expand=True will expand, False will collapse.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">childind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">childCount</span><span class="p">()):</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">childind</span><span class="p">)</span><span class="o">.</span><span class="n">setExpanded</span><span class="p">(</span><span class="n">expand</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recurseExpand</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">childind</span><span class="p">),</span> <span class="n">expand</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onDoubleClick"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onDoubleClick">[docs]</a>    <span class="k">def</span> <span class="nf">onDoubleClick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;open a file that is double clicked in file tree&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">confirmLoad</span><span class="p">():</span>
+               <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.populateTree"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.populateTree">[docs]</a>    <span class="k">def</span> <span class="nf">populateTree</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;constructs the file tree viewer&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">setHeaderLabels</span><span class="p">([</span><span class="s1">&#39;Scripts&#39;</span><span class="p">])</span>
+        <span class="n">localpath</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span><span class="o">.</span><span class="n">configDir</span><span class="o">+</span><span class="s1">&#39;/Scripts/&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">genFileTree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileTreeWidget</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">(),</span> <span class="n">Path</span><span class="p">(</span><span class="n">localpath</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onReset"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onReset">[docs]</a>    <span class="k">def</span> <span class="nf">onReset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reset action. Reset file state saved on disk.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onRemoveCurrent"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onRemoveCurrent">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveCurrent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove current button is clicked. Remove file from combo box.&quot;&quot;&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateValidator</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onSave"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onSave">[docs]</a>    <span class="k">def</span> <span class="nf">onSave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save action. Save file to disk, and clear any highlighted errors.&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">toPlainText</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">clearHighlightError</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> saved&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span><span class="p">))</span></div>
+    
+<div class="viewcode-block" id="ScriptingUi.saveConfig"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save configuration.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.recentFiles&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.script.fullname&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">fullname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.revert&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">revert</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.slow&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">slow</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.repeat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">script</span><span class="o">.</span><span class="n">repeat</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.isVisible&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.ScriptingUi.pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.ScriptingUi.size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.splitterHorizontal&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitterHorizontal</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.splitterVertical&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">splitterVertical</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.consoleMaximumLinesNew&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">consoleMaximumLines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.consoleEnable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">consoleEnable</span></div>
+       
+<div class="viewcode-block" id="ScriptingUi.show"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.show">[docs]</a>    <span class="k">def</span> <span class="nf">show</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.ScriptingUi.pos&#39;</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.ScriptingUi.size&#39;</span><span class="p">)</span>
+        <span class="n">splitterHorizontalState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.splitterHorizontal&quot;</span><span class="p">)</span>
+        <span class="n">splitterVerticalState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.splitterVertical&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pos</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">splitterHorizontalState</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">splitterHorizontal</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">splitterHorizontalState</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">splitterVerticalState</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">splitterVertical</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">splitterVerticalState</span><span class="p">)</span>
+        <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onClose"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onClose">[docs]</a>    <span class="k">def</span> <span class="nf">onClose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="ScriptingUi.onClearConsole"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onClearConsole">[docs]</a>    <span class="k">def</span> <span class="nf">onClearConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onConsoleMaximumLinesChanged"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onConsoleMaximumLinesChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onConsoleMaximumLinesChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxlines</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consoleMaximumLines</span> <span class="o">=</span> <span class="n">maxlines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">document</span><span class="p">()</span><span class="o">.</span><span class="n">setMaximumBlockCount</span><span class="p">(</span><span class="n">maxlines</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.onEnableConsole"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.onEnableConsole">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">consoleEnable</span> <span class="o">=</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.markLocation"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.markLocation">[docs]</a>    <span class="k">def</span> <span class="nf">markLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;mark a specified location&quot;&quot;&quot;</span> 
+        <span class="k">if</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">markerDeleteAll</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">markerAdd</span><span class="p">(</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">ARROW_MARKER_NUM</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">markerAdd</span><span class="p">(</span><span class="n">line</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">currentLineMarkerNum</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.markError"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.markError">[docs]</a>    <span class="k">def</span> <span class="nf">markError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;mark error at specified lines, and show message&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">lines</span> <span class="o">!=</span> <span class="p">[]:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">highlightError</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.writeToConsole"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.writeToConsole">[docs]</a>    <span class="k">def</span> <span class="nf">writeToConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consoleEnable</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">movePosition</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCursor</span><span class="o">.</span><span class="n">End</span><span class="p">)</span>
+            <span class="n">textColor</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;red&#39;</span> <span class="k">if</span> <span class="n">error</span> <span class="k">else</span> <span class="s1">&#39;black&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">color</span><span class="o">==</span><span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">color</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">textColor</span> <span class="o">==</span> <span class="s1">&#39;black&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">insertPlainText</span><span class="p">(</span><span class="n">message</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">insertHtml</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;&lt;p&gt;&lt;font color=&#39;</span><span class="o">+</span><span class="n">textColor</span><span class="o">+</span><span class="s1">&#39;&gt;&#39;</span><span class="o">+</span><span class="n">message</span><span class="o">+</span><span class="s1">&#39;&lt;/font&gt;&lt;br&gt;&lt;/p&gt;&#39;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">setTextCursor</span><span class="p">(</span><span class="n">cursor</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">textEditConsole</span><span class="o">.</span><span class="n">ensureCursorVisible</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.getDocs"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.getDocs">[docs]</a>    <span class="k">def</span> <span class="nf">getDocs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Assemble the script function documentation into a dictionary&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">docDict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">scriptDocs</span><span class="p">:</span>
+            <span class="n">docsplit</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> 
+            <span class="n">defLine</span> <span class="o">=</span> <span class="n">docsplit</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">docsplit</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">docsplit</span><span class="p">]</span>
+            <span class="n">docsplit</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docsplit</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">docDict</span><span class="p">[</span><span class="n">defLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">docsplit</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.updateValidator"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.updateValidator">[docs]</a>    <span class="k">def</span> <span class="nf">updateValidator</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make the validator match the recentFiles list. Uses regExp \\b(f1|f2|f3...)\\b, where fn are filenames.&quot;&quot;&quot;</span>
+        <span class="n">regExp</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">b(&#39;</span>
+        <span class="k">for</span> <span class="n">shortname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">recentFiles</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">shortname</span><span class="p">:</span>
+                <span class="n">regExp</span> <span class="o">+=</span> <span class="n">shortname</span> <span class="o">+</span> <span class="s1">&#39;|&#39;</span>
+        <span class="n">regExp</span> <span class="o">=</span> <span class="n">regExp</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#drop last pipe symbol</span>
+        <span class="n">regExp</span> <span class="o">+=</span> <span class="s1">&#39;)</span><span class="se">\\</span><span class="s1">b&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenameComboBox</span><span class="o">.</span><span class="n">validator</span><span class="p">()</span><span class="o">.</span><span class="n">setRegExp</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRegExp</span><span class="p">(</span><span class="n">regExp</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.saveSettingsState"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.saveSettingsState">[docs]</a>    <span class="k">def</span> <span class="nf">saveSettingsState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save the state of the scan, evaluation, and analysis&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">originalState</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;scan&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">settingsName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;evaluation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluationControlWidget</span><span class="o">.</span><span class="n">settingsName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;analysis&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">currentAnalysisName</span></div>
+
+<div class="viewcode-block" id="ScriptingUi.restoreSettingsState"><a class="viewcode-back" href="../../code/scripting-doc.html#scripting.ScriptingUi.ScriptingUi.restoreSettingsState">[docs]</a>    <span class="k">def</span> <span class="nf">restoreSettingsState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Restore the settings to their original values&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptHandler</span><span class="o">.</span><span class="n">globalVariablesRevertDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">globalVariablesUi</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">update</span><span class="p">([(</span><span class="s1">&#39;Global&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">scanControlWidget</span><span class="o">.</span><span class="n">loadSetting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;scan&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">evaluationControlWidget</span><span class="o">.</span><span class="n">loadSetting</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;evaluation&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experimentUi</span><span class="o">.</span><span class="n">tabDict</span><span class="p">[</span><span class="s1">&#39;Scan&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">analysisControlWidget</span><span class="o">.</span><span class="n">onLoadAnalysisConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">originalState</span><span class="p">[</span><span class="s1">&#39;analysis&#39;</span><span class="p">])</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

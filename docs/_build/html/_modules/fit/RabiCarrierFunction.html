@@ -1,0 +1,350 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fit.RabiCarrierFunction &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>fit.RabiCarrierFunction</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for fit.RabiCarrierFunction</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">pi</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">exp</span><span class="p">,</span> <span class="n">dot</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="k">import</span> <span class="n">laguerre</span>
+
+<span class="kn">from</span> <span class="nn">.FitFunctionBase</span> <span class="k">import</span> <span class="n">ResultRecord</span>
+<span class="kn">from</span> <span class="nn">fit.FitFunctionBase</span> <span class="k">import</span> <span class="n">FitFunctionBase</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+
+
+<div class="viewcode-block" id="RabiCarrierFunction"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.RabiCarrierFunction">[docs]</a><span class="k">class</span> <span class="nc">RabiCarrierFunction</span><span class="p">(</span><span class="n">FitFunctionBase</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;RabiCarrier&quot;</span>
+    <span class="n">functionString</span> <span class="o">=</span>  <span class="s1">&#39;Explicit Carrier Rabi Transition with Lamb-Dicke approximation&#39;</span>
+    <span class="n">parameterNames</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;rabiFreq&#39;</span><span class="p">,</span> <span class="s1">&#39;mass&#39;</span><span class="p">,</span> <span class="s1">&#39;angle&#39;</span><span class="p">,</span> <span class="s1">&#39;trapFrequency&#39;</span><span class="p">,</span> <span class="s1">&#39;wavelength&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">FitFunctionBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">1.578</span><span class="p">,</span> <span class="mi">729</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mf">0.28</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mf">1.578</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">),</span> <span class="n">Q</span><span class="p">(</span><span class="mi">729</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterEnabled</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parametersConfidence</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">7</span>
+        <span class="c1"># constants</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;taufinal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;taufinal&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;scTimeInit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;scTimeInit&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;scIncrement&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;scIncrement&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;numberLoops&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;numberLoops&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eta&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="RabiCarrierFunction.update"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.RabiCarrierFunction.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">parameters</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_p</span>
+        <span class="n">secfreq</span> <span class="o">=</span> <span class="n">trapFrequency</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">wavelength</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">9</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+                     <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">hbar</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">secfreq</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">scTimeInit</span> <span class="o">=</span> <span class="n">Q</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">omega</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eta</span><span class="o">*</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n</span><span class="p">)),</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span>
+        <span class="n">taufinal</span> <span class="o">=</span> <span class="n">Q</span><span class="p">((</span><span class="mi">1</span> <span class="o">/</span> <span class="n">omega</span><span class="p">)</span> <span class="o">/</span> <span class="n">eta</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span>
+        <span class="n">nstart</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">n</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;taufinal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;taufinal&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">taufinal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;scTimeInit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;scTimeInit&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">scTimeInit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;scIncrement&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;scIncrement&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">(</span><span class="n">taufinal</span><span class="o">-</span><span class="n">scTimeInit</span><span class="p">)</span><span class="o">/</span><span class="n">nstart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;numberLoops&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;numberLoops&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">nstart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="s1">&#39;eta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ResultRecord</span><span class="p">(</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;eta&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">eta</span> <span class="p">)</span></div>
+                
+<div class="viewcode-block" id="RabiCarrierFunction.residuals"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.RabiCarrierFunction.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allFitParameters</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">secfreq</span> <span class="o">=</span> <span class="n">trapFrequency</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_p</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">wavelength</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">9</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+                     <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">hbar</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">secfreq</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">eta2</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="p">(</span> <span class="n">A</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+                <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">)))</span> <span class="p">))</span><span class="o">/</span><span class="n">sigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span><span class="o">-</span><span class="p">(</span> <span class="n">A</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+                <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">)))</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="RabiCarrierFunction.value"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.RabiCarrierFunction.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">p</span>
+        <span class="n">secfreq</span> <span class="o">=</span> <span class="n">trapFrequency</span><span class="o">*</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_p</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">wavelength</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">9</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+                     <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">hbar</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">secfreq</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">eta2</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span> <span class="n">A</span><span class="o">/</span><span class="mf">2.</span><span class="o">*</span><span class="p">(</span><span class="mf">1.</span><span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mf">1.</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mf">1.</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mf">1.</span><span class="p">))</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">sin</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mf">1.</span><span class="p">))</span><span class="o">**</span><span class="mi">2</span>
+                <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mf">1.</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">*</span><span class="n">eta2</span><span class="p">)))</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span></div></div>
+
+
+<div class="viewcode-block" id="getLaguerreTable"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.getLaguerreTable">[docs]</a><span class="k">def</span> <span class="nf">getLaguerreTable</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+    <span class="n">secfreq</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">trapFrequency</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span><span class="o">**</span><span class="mi">6</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">mass</span> <span class="o">*</span> <span class="n">constants</span><span class="o">.</span><span class="n">m_p</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="p">(</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">wavelength</span><span class="o">*</span><span class="mi">10</span><span class="o">**-</span><span class="mi">9</span><span class="p">))</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">*</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">)</span>
+                 <span class="o">*</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">hbar</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">m</span><span class="o">*</span><span class="mi">2</span><span class="o">*</span><span class="n">pi</span><span class="o">*</span><span class="n">secfreq</span><span class="p">))</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">laguerreTableInternal</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span></div>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<div class="viewcode-block" id="laguerreTableInternal"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.laguerreTableInternal">[docs]</a><span class="k">def</span> <span class="nf">laguerreTableInternal</span><span class="p">(</span><span class="n">eta</span><span class="p">):</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="n">eta2</span> <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">eta</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Calculating Laguerre Table for eta^2=</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">eta2</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">laguerreTable</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="n">laguerre</span><span class="p">(</span><span class="n">n</span><span class="p">)(</span><span class="n">eta2</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span> <span class="p">])</span>
+    <span class="k">return</span> <span class="n">laguerreTable</span></div>
+
+
+<span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<div class="viewcode-block" id="getPnTable"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.getPnTable">[docs]</a><span class="k">def</span> <span class="nf">getPnTable</span><span class="p">(</span><span class="n">beta</span><span class="p">):</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Calculating Probability Table for beta </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">pnTable</span> <span class="o">=</span> <span class="n">array</span><span class="p">([</span> <span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">beta</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">)])</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="mi">1</span><span class="o">-</span><span class="nb">sum</span><span class="p">(</span><span class="n">pnTable</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">pnTable</span></div>
+
+        
+<div class="viewcode-block" id="FullRabiCarrierFunction"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.FullRabiCarrierFunction">[docs]</a><span class="k">class</span> <span class="nc">FullRabiCarrierFunction</span><span class="p">(</span><span class="n">RabiCarrierFunction</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;FullRabiCarrier&quot;</span>
+    <span class="n">functionString</span> <span class="o">=</span>  <span class="s1">&#39;Numerical Carrier Rabi Transition without Lamb-Dicke approx&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FullRabiCarrierFunction</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="c1"># self.laguerreCacheEta = -1</span>
+        <span class="c1"># self.laguerreTable = None</span>
+        <span class="c1"># self.pnCacheBeta = -1</span>
+        <span class="c1"># self.pnTable = None</span>
+        
+    <span class="c1"># def __setstate__(self, state):</span>
+    <span class="c1">#     state.pop(&#39;laguerreCacheEta&#39;, None )</span>
+    <span class="c1">#     state.pop(&#39;laguerreTable&#39;, None)</span>
+    <span class="c1">#     state.pop(&#39;pnCacheBeta&#39;, None )</span>
+    <span class="c1">#     state.pop(&#39;pnTable&#39;, None)</span>
+    <span class="c1">#     super(self, FullRabiCarrierFunction).__setstate__(state)</span>
+
+<div class="viewcode-block" id="FullRabiCarrierFunction.residuals"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.FullRabiCarrierFunction.residuals">[docs]</a>    <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">allFitParameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">p</span><span class="p">)</span> <span class="c1">#@UnusedVariable</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">1.</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">pnTable</span> <span class="o">=</span> <span class="n">getPnTable</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">laguerreTable</span> <span class="o">=</span> <span class="n">getLaguerreTable</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">xn</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+                <span class="n">valueList</span> <span class="o">=</span> <span class="n">sin</span><span class="p">((</span><span class="n">omega</span> <span class="o">*</span> <span class="n">xn</span> <span class="p">)</span><span class="o">*</span> <span class="n">laguerreTable</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span> <span class="n">pnTable</span><span class="p">,</span> <span class="n">valueList</span> <span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">valueList</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">laguerreTable</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span> <span class="n">pnTable</span><span class="p">,</span> <span class="n">valueList</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">y</span><span class="o">-</span><span class="n">result</span><span class="p">)</span><span class="o">/</span><span class="n">sigma</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">y</span><span class="o">-</span><span class="n">result</span></div>
+        
+<div class="viewcode-block" id="FullRabiCarrierFunction.value"><a class="viewcode-back" href="../../code/fit-doc.html#fit.RabiCarrierFunction.FullRabiCarrierFunction.value">[docs]</a>    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">A</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">omega</span><span class="p">,</span> <span class="n">mass</span><span class="p">,</span> <span class="n">angle</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">p</span>  <span class="c1">#@UnusedVariable</span>
+        <span class="n">beta</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="mf">1.</span><span class="o">/</span><span class="n">n</span><span class="p">)</span>
+        <span class="n">pnTable</span> <span class="o">=</span> <span class="n">getPnTable</span><span class="p">(</span><span class="n">beta</span><span class="p">)</span>
+        <span class="n">laguerreTable</span> <span class="o">=</span> <span class="n">getLaguerreTable</span><span class="p">(</span><span class="n">mass</span><span class="p">,</span> <span class="n">trapFrequency</span><span class="p">,</span> <span class="n">wavelength</span><span class="p">,</span> <span class="n">angle</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;__iter__&#39;</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">xn</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+                <span class="n">valueList</span> <span class="o">=</span> <span class="n">sin</span><span class="p">((</span><span class="n">omega</span> <span class="o">*</span> <span class="n">xn</span> <span class="p">)</span><span class="o">*</span> <span class="n">laguerreTable</span> <span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span><span class="n">pnTable</span><span class="p">,</span> <span class="n">valueList</span> <span class="p">)</span>
+                <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">valueList</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">laguerreTable</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">A</span><span class="o">*</span><span class="n">dot</span><span class="p">(</span><span class="n">pnTable</span><span class="p">,</span> <span class="n">valueList</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div></div>
+                
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

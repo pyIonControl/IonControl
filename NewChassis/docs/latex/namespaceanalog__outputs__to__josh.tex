@@ -1,0 +1,55 @@
+\hypertarget{namespaceanalog__outputs__to__josh}{\section{analog\-\_\-outputs\-\_\-to\-\_\-josh Namespace Reference}
+\label{namespaceanalog__outputs__to__josh}\index{analog\-\_\-outputs\-\_\-to\-\_\-josh@{analog\-\_\-outputs\-\_\-to\-\_\-josh}}
+}
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto}{Ni\-Channels\-Proto}
+\item 
+class \hyperlink{classanalog__outputs__to__josh_1_1_voltage_output_channels_proto}{Voltage\-Output\-Channels\-Proto}
+\item 
+class \hyperlink{classanalog__outputs__to__josh_1_1_trap_fixed_voltage_set}{Trap\-Fixed\-Voltage\-Set}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespaceanalog__outputs__to__josh_a541f5b01acf40e869979a9803641a610}{def {\bfseries speed}}\label{namespaceanalog__outputs__to__josh_a541f5b01acf40e869979a9803641a610}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespaceanalog__outputs__to__josh_a34bd135fc53657b83a17cf23f1accfee}{tuple {\bfseries rng} range(4,15)}\label{namespaceanalog__outputs__to__josh_a34bd135fc53657b83a17cf23f1accfee}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__josh_a20e2440dbd6c66f0d2f7d3dfc451c9b2}{list {\bfseries devlist} \mbox{[}\char`\"{}P\-X\-I1\-Slot\char`\"{}+str(x)+\char`\"{}/ao0\-:7\char`\"{} for x in rng\mbox{]}}\label{namespaceanalog__outputs__to__josh_a20e2440dbd6c66f0d2f7d3dfc451c9b2}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__josh_ab9243288c04acb90aa9f53f7cf4f024c}{tuple {\bfseries driver} \hyperlink{classanalog__outputs__to__josh_1_1_trap_fixed_voltage_set}{Trap\-Fixed\-Voltage\-Set}(\char`\"{}P\-X\-I1\-Slot3/ao0\-:7\char`\"{}, driven = False)}\label{namespaceanalog__outputs__to__josh_ab9243288c04acb90aa9f53f7cf4f024c}
+
+\item 
+\hypertarget{namespaceanalog__outputs__to__josh_aaf1428ce34b237c8ddeea7326bbfa4ca}{list {\bfseries tasklist} \mbox{[}\hyperlink{classanalog__outputs__to__josh_1_1_trap_fixed_voltage_set}{Trap\-Fixed\-Voltage\-Set}(\char`\"{}P\-X\-I1\-Slot\char`\"{}+str(x)+\char`\"{}/ao0\-:7\char`\"{}) for x in rng\mbox{]}}\label{namespaceanalog__outputs__to__josh_aaf1428ce34b237c8ddeea7326bbfa4ca}
+
+\item 
+tuple \hyperlink{namespaceanalog__outputs__to__josh_ad465c78e048ca6ee6b2a92ca5479ec80}{t} timeit.\-Timer(\char`\"{}speed()\char`\"{}, \char`\"{}from \-\_\-\-\_\-main\-\_\-\-\_\- import speed\char`\"{})
+\begin{DoxyCompactList}\small\item\em print \mbox{[}numpy.\-linspace(y/10.,y/10. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}Created on Aug 2, 2012
+
+@author: Boyan Tabakov  
+
+based on    http://www.scipy.org/Cookbook/Data_Acquisition_with_NIDAQmx
+            http://stackoverflow.com/a/3788243\end{DoxyVerb}
+ 
+
+\subsection{Variable Documentation}
+\hypertarget{namespaceanalog__outputs__to__josh_ad465c78e048ca6ee6b2a92ca5479ec80}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh@{analog\-\_\-outputs\-\_\-to\-\_\-josh}!t@{t}}
+\index{t@{t}!analog_outputs_to_josh@{analog\-\_\-outputs\-\_\-to\-\_\-josh}}
+\subsubsection[{t}]{\setlength{\rightskip}{0pt plus 5cm}tuple analog\-\_\-outputs\-\_\-to\-\_\-josh.\-t timeit.\-Timer(\char`\"{}speed()\char`\"{}, \char`\"{}from \-\_\-\-\_\-main\-\_\-\-\_\- import speed\char`\"{})}}\label{namespaceanalog__outputs__to__josh_ad465c78e048ca6ee6b2a92ca5479ec80}
+
+
+print \mbox{[}numpy.\-linspace(y/10.,y/10. 
+
++0.07,8) for x in tasklist for y in rng if tasklist.\-index(x)==(y-\/4)\mbox{]} time.\-sleep(10) print \mbox{[}numpy.\-linspace(-\/y/10.,-\/y/10.-\/0.\-07,8) for x in tasklist for y in rng if tasklist.\-index(x)==(y-\/4)\mbox{]} time.\-sleep(10) 

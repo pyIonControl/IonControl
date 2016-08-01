@@ -1,0 +1,1874 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>pulser</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/pulser-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="pulser">
+<h1>pulser<a class="headerlink" href="#pulser" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pulser.Ad9910">
+<span id="ad9910"></span><h2>Ad9910<a class="headerlink" href="#module-pulser.Ad9910" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.Ad9910.Ad9910">
+<em class="property">class </em><code class="descname">Ad9910</code><span class="sig-paren">(</span><em>pulser</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.Ad9910.Ad9910.channels">
+<code class="descname">channels</code><em class="property"> = 2</em><a class="headerlink" href="#pulser.Ad9910.Ad9910.channels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.rawToMagnitude">
+<code class="descname">rawToMagnitude</code><span class="sig-paren">(</span><em>raw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.rawToMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.rawToMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><em>mask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.sendCommand">
+<code class="descname">sendCommand</code><span class="sig-paren">(</span><em>channel</em>, <em>cmd</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.sendCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setAmplitude">
+<code class="descname">setAmplitude</code><span class="sig-paren">(</span><em>channel</em>, <em>amplitude</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setCFR2register">
+<code class="descname">setCFR2register</code><span class="sig-paren">(</span><em>channel</em>, <em>rampEnable</em>, <em>rampDestination</em>, <em>noDwellHigh</em>, <em>noDwellLow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setCFR2register"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setCFR2register" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setFrequency">
+<code class="descname">setFrequency</code><span class="sig-paren">(</span><em>channel</em>, <em>frequency</em>, <em>even=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setFrequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setFrequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setFrequencyRaw">
+<code class="descname">setFrequencyRaw</code><span class="sig-paren">(</span><em>channel</em>, <em>intFrequency</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setFrequencyRaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setFrequencyRaw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setPhase">
+<code class="descname">setPhase</code><span class="sig-paren">(</span><em>channel</em>, <em>phase</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setPhase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setRampLimits">
+<code class="descname">setRampLimits</code><span class="sig-paren">(</span><em>channel</em>, <em>rampType</em>, <em>rampMin</em>, <em>rampMax</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setRampLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setRampLimits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setRampStep">
+<code class="descname">setRampStep</code><span class="sig-paren">(</span><em>channel</em>, <em>rampType</em>, <em>rampStepUp</em>, <em>rampStepDown</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setRampStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setRampStep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.setRampTimeStep">
+<code class="descname">setRampTimeStep</code><span class="sig-paren">(</span><em>channel</em>, <em>negSlopeRate</em>, <em>posSlopeRate</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.setRampTimeStep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.setRampTimeStep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9910.Ad9910.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>channelmask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.Ad9910.Ad9910Exception">
+<em class="property">exception </em><code class="descname">Ad9910Exception</code><a class="reference internal" href="../_modules/pulser/Ad9910.html#Ad9910Exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9910.Ad9910Exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.Ad9912">
+<span id="ad9912"></span><h2>Ad9912<a class="headerlink" href="#module-pulser.Ad9912" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.Ad9912.Ad9912">
+<em class="property">class </em><code class="descname">Ad9912</code><span class="sig-paren">(</span><em>pulser</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.Ad9912.Ad9912.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.flush" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.rawToMagnitude">
+<code class="descname">rawToMagnitude</code><span class="sig-paren">(</span><em>raw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.rawToMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.rawToMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><em>mask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.sendCommand">
+<code class="descname">sendCommand</code><span class="sig-paren">(</span><em>channel</em>, <em>cmd</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.sendCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.setAmplitude">
+<code class="descname">setAmplitude</code><span class="sig-paren">(</span><em>channel</em>, <em>amplitude</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.setAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.setAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.setFrequency">
+<code class="descname">setFrequency</code><span class="sig-paren">(</span><em>channel</em>, <em>frequency</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.setFrequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.setFrequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.setFrequencyRaw">
+<code class="descname">setFrequencyRaw</code><span class="sig-paren">(</span><em>channel</em>, <em>intFrequency</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.setFrequencyRaw"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.setFrequencyRaw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.setPhase">
+<code class="descname">setPhase</code><span class="sig-paren">(</span><em>channel</em>, <em>phase</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.setPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.setPhase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.setSquareEnabled">
+<code class="descname">setSquareEnabled</code><span class="sig-paren">(</span><em>channel</em>, <em>enable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.setSquareEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.setSquareEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.Ad9912.Ad9912.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>channelmask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.Ad9912.Ad9912Exception">
+<em class="property">exception </em><code class="descname">Ad9912Exception</code><a class="reference internal" href="../_modules/pulser/Ad9912.html#Ad9912Exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.Ad9912Exception" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.Ad9912.CombineWrites">
+<em class="property">class </em><code class="descname">CombineWrites</code><span class="sig-paren">(</span><em>ad9912</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/Ad9912.html#CombineWrites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.Ad9912.CombineWrites" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.bitfileHeader">
+<span id="bitfileheader"></span><h2>bitfileHeader<a class="headerlink" href="#module-pulser.bitfileHeader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.bitfileHeader.BitfileInfo">
+<em class="property">class </em><code class="descname">BitfileInfo</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/bitfileHeader.html#BitfileInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.bitfileHeader.BitfileInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.ChannelNameDict">
+<span id="channelnamedict"></span><h2>ChannelNameDict<a class="headerlink" href="#module-pulser.ChannelNameDict" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.ChannelNameDict.ChannelNameDict">
+<em class="property">class </em><code class="descname">ChannelNameDict</code><span class="sig-paren">(</span><em>CustomDict=None</em>, <em>DefaultDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ChannelNameDict.html#ChannelNameDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ChannelNameDict.ChannelNameDict" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.ChannelNameDict.ChannelNameDict.channel">
+<code class="descname">channel</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ChannelNameDict.html#ChannelNameDict.channel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ChannelNameDict.ChannelNameDict.channel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ChannelNameDict.ChannelNameDict.customDict">
+<code class="descname">customDict</code><a class="headerlink" href="#pulser.ChannelNameDict.ChannelNameDict.customDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ChannelNameDict.ChannelNameDict.defaultDict">
+<code class="descname">defaultDict</code><a class="headerlink" href="#pulser.ChannelNameDict.ChannelNameDict.defaultDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DAC">
+<span id="dac"></span><h2>DAC<a class="headerlink" href="#module-pulser.DAC" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DAC.CombineWrites">
+<em class="property">class </em><code class="descname">CombineWrites</code><span class="sig-paren">(</span><em>dac</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#CombineWrites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.CombineWrites" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.DAC.DAC">
+<em class="property">class </em><code class="descname">DAC</code><span class="sig-paren">(</span><em>pulser</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.DAC.DAC.flush">
+<code class="descname">flush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC.flush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC.flush" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DAC.DAC.rawToMagnitude">
+<code class="descname">rawToMagnitude</code><span class="sig-paren">(</span><em>raw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC.rawToMagnitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC.rawToMagnitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DAC.DAC.sendCommand">
+<code class="descname">sendCommand</code><span class="sig-paren">(</span><em>channel</em>, <em>cmd</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC.sendCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC.sendCommand" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DAC.DAC.setVoltage">
+<code class="descname">setVoltage</code><span class="sig-paren">(</span><em>channel</em>, <em>voltage</em>, <em>autoApply=False</em>, <em>applyAll=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC.setVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC.setVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DAC.DAC.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>channelmask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DAC.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DAC.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.DAC.DACChannelSetting">
+<em class="property">class </em><code class="descname">DACChannelSetting</code><span class="sig-paren">(</span><em>globalDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DAC.html#DACChannelSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DACChannelSetting" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x0000026662522EB8&gt;</em><a class="headerlink" href="#pulser.DAC.DACChannelSetting.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.globalDict">
+<code class="descname">globalDict</code><a class="headerlink" href="#pulser.DAC.DACChannelSetting.globalDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.onChange">
+<code class="descname">onChange</code><em class="property"> = &lt;SetterProperty at 0x00000266612AD0C8 for function at 0x00000266626E7730&gt;</em><a class="headerlink" href="#pulser.DAC.DACChannelSetting.onChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.outputVoltage">
+<code class="descname">outputVoltage</code><a class="headerlink" href="#pulser.DAC.DACChannelSetting.outputVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.voltage">
+<code class="descname">voltage</code><a class="headerlink" href="#pulser.DAC.DACChannelSetting.voltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DAC.DACChannelSetting.voltageText">
+<code class="descname">voltageText</code><a class="headerlink" href="#pulser.DAC.DACChannelSetting.voltageText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.DAC.DACException">
+<em class="property">exception </em><code class="descname">DACException</code><a class="reference internal" href="../_modules/pulser/DAC.html#DACException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DAC.DACException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DACController">
+<span id="daccontroller"></span><h2>DACController<a class="headerlink" href="#module-pulser.DACController" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DACController.DACController">
+<em class="property">class </em><code class="descname">DACController</code><a class="reference internal" href="../_modules/pulser/DACController.html#DACController"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="staticmethod">
+<dt id="pulser.DACController.DACController.boolToCode">
+<em class="property">static </em><code class="descname">boolToCode</code><span class="sig-paren">(</span><em>b</em>, <em>bit=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.boolToCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.boolToCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DACController.DACController.channelCount">
+<code class="descname">channelCount</code><em class="property"> = 112</em><a class="headerlink" href="#pulser.DACController.DACController.channelCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.readVoltage">
+<code class="descname">readVoltage</code><span class="sig-paren">(</span><em>address</em>, <em>line=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.readVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.readVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.shuttle">
+<code class="descname">shuttle</code><span class="sig-paren">(</span><em>lookupIndex</em>, <em>reverseEdge=False</em>, <em>immediateTrigger=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.shuttle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.shuttle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.shuttleDirect">
+<code class="descname">shuttleDirect</code><span class="sig-paren">(</span><em>startLine</em>, <em>beyondEndLine</em>, <em>idleCount=0</em>, <em>immediateTrigger=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.shuttleDirect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.shuttleDirect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="pulser.DACController.DACController.shuttleLookupCode">
+<em class="property">classmethod </em><code class="descname">shuttleLookupCode</code><span class="sig-paren">(</span><em>edge</em>, <em>channelCount</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.shuttleLookupCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.shuttleLookupCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.shuttlePath">
+<code class="descname">shuttlePath</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.shuttlePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.shuttlePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.toInteger">
+<code class="descname">toInteger</code><span class="sig-paren">(</span><em>iterable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.toInteger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.toInteger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.triggerShuttling">
+<code class="descname">triggerShuttling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.triggerShuttling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.triggerShuttling" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.verifyVoltages">
+<code class="descname">verifyVoltages</code><span class="sig-paren">(</span><em>address</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.verifyVoltages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.verifyVoltages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.writeShuttleLookup">
+<code class="descname">writeShuttleLookup</code><span class="sig-paren">(</span><em>shuttleEdges</em>, <em>startAddress=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.writeShuttleLookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.writeShuttleLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.writeVoltage">
+<code class="descname">writeVoltage</code><span class="sig-paren">(</span><em>address</em>, <em>line</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.writeVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.writeVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACController.DACController.writeVoltages">
+<code class="descname">writeVoltages</code><span class="sig-paren">(</span><em>address</em>, <em>lineList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACController.html#DACController.writeVoltages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACController.writeVoltages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.DACController.DACControllerException">
+<em class="property">exception </em><code class="descname">DACControllerException</code><a class="reference internal" href="../_modules/pulser/DACController.html#DACControllerException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACController.DACControllerException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DACTableModel">
+<span id="dactablemodel"></span><h2>DACTableModel<a class="headerlink" href="#module-pulser.DACTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DACTableModel.DACTableModel">
+<em class="property">class </em><code class="descname">DACTableModel</code><span class="sig-paren">(</span><em>dacChannels</em>, <em>globalDict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002666283E048&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DACTableModel.DACTableModel.enableChanged">
+<code class="descname">enableChanged</code><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.enableChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DACTableModel.DACTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['On', 'Name', 'Voltage', 'Write All']</em><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x00000266626D2F98&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setEnabled">
+<code class="descname">setEnabled</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setFieldText">
+<code class="descname">setFieldText</code><span class="sig-paren">(</span><em>fieldname</em>, <em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setFieldText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setFieldText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setName">
+<code class="descname">setName</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setResetAfterPP">
+<code class="descname">setResetAfterPP</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setResetAfterPP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setResetAfterPP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACTableModel.DACTableModel.setVoltage">
+<code class="descname">setVoltage</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACTableModel.html#DACTableModel.setVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.setVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DACTableModel.DACTableModel.voltageChanged">
+<code class="descname">voltageChanged</code><a class="headerlink" href="#pulser.DACTableModel.DACTableModel.voltageChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DACUi">
+<span id="dacui"></span><h2>DACUi<a class="headerlink" href="#module-pulser.DACUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DACUi.DACUi">
+<em class="property">class </em><code class="descname">DACUi</code><span class="sig-paren">(</span><em>pulser</em>, <em>config</em>, <em>configName</em>, <em>globalDict</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.DACUi.DACUi.onApply">
+<code class="descname">onApply</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onApply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onApply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onChange">
+<code class="descname">onChange</code><span class="sig-paren">(</span><em>index</em>, <em>name</em>, <em>value</em>, <em>string</em>, <em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onEnableChanged">
+<code class="descname">onEnableChanged</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onEnableChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onEnableChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onReset">
+<code class="descname">onReset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onReset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onReset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onVoltage">
+<code class="descname">onVoltage</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onVoltage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onVoltage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.onWriteAll">
+<code class="descname">onWriteAll</code><span class="sig-paren">(</span><em>writeUnchecked=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.onWriteAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.onWriteAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.persistCallback">
+<code class="descname">persistCallback</code><span class="sig-paren">(</span><em>source</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.persistCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.persistCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DACUi.DACUi.persistSpace">
+<code class="descname">persistSpace</code><em class="property"> = 'DAC'</em><a class="headerlink" href="#pulser.DACUi.DACUi.persistSpace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.setDisabled">
+<code class="descname">setDisabled</code><span class="sig-paren">(</span><em>disabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.setDisabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.setDisabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DACUi.DACUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#DACUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.DACUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pulser.DACUi.extendTo">
+<code class="descname">extendTo</code><span class="sig-paren">(</span><em>array</em>, <em>length</em>, <em>defaulttype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DACUi.html#extendTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DACUi.extendTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DDSTableModel">
+<span id="ddstablemodel"></span><h2>DDSTableModel<a class="headerlink" href="#module-pulser.DDSTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DDSTableModel.DDSTableModel">
+<em class="property">class </em><code class="descname">DDSTableModel</code><span class="sig-paren">(</span><em>ddsChannels</em>, <em>globalDict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.amplitudeChanged">
+<code class="descname">amplitudeChanged</code><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.amplitudeChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002666283E198&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.enableChanged">
+<code class="descname">enableChanged</code><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.enableChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.frequencyChanged">
+<code class="descname">frequencyChanged</code><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.frequencyChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['On', 'Name', 'Frequency', 'Phase', 'Amplitude', 'Square']</em><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.onShutterChanged">
+<code class="descname">onShutterChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.onShutterChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.onShutterChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.phaseChanged">
+<code class="descname">phaseChanged</code><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.phaseChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002666283E898&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setAmplitude">
+<code class="descname">setAmplitude</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setEnabled">
+<code class="descname">setEnabled</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setFieldText">
+<code class="descname">setFieldText</code><span class="sig-paren">(</span><em>fieldname</em>, <em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setFieldText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setFieldText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setFrequency">
+<code class="descname">setFrequency</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setFrequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setFrequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setName">
+<code class="descname">setName</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setPhase">
+<code class="descname">setPhase</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setPhase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setSquareEnabled">
+<code class="descname">setSquareEnabled</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setSquareEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setSquareEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSTableModel.DDSTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSTableModel.html#DDSTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSTableModel.DDSTableModel.squareChanged">
+<code class="descname">squareChanged</code><a class="headerlink" href="#pulser.DDSTableModel.DDSTableModel.squareChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.DDSUi">
+<span id="ddsui"></span><h2>DDSUi<a class="headerlink" href="#module-pulser.DDSUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.DDSUi.DDSChannelSettings">
+<em class="property">class </em><code class="descname">DDSChannelSettings</code><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSChannelSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSChannelSettings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.DDSUi.DDSChannelSettings.evaluateAmplitude">
+<code class="descname">evaluateAmplitude</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSChannelSettings.evaluateAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSChannelSettings.evaluateAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSChannelSettings.evaluateFrequency">
+<code class="descname">evaluateFrequency</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSChannelSettings.evaluateFrequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSChannelSettings.evaluateFrequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSChannelSettings.evaluatePhase">
+<code class="descname">evaluatePhase</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSChannelSettings.evaluatePhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSChannelSettings.evaluatePhase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.DDSUi.DDSChannelSettings.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x00000266629C5E10&gt;</em><a class="headerlink" href="#pulser.DDSUi.DDSChannelSettings.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.DDSUi.DDSUi">
+<em class="property">class </em><code class="descname">DDSUi</code><span class="sig-paren">(</span><em>pulser</em>, <em>config</em>, <em>configName='DDSUi'</em>, <em>globalDict={}</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.DDSUi.DDSUi.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onAmplitude">
+<code class="descname">onAmplitude</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onApply">
+<code class="descname">onApply</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onApply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onApply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onEnableChanged">
+<code class="descname">onEnableChanged</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onEnableChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onEnableChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onFrequency">
+<code class="descname">onFrequency</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onFrequency"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onFrequency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onPhase">
+<code class="descname">onPhase</code><span class="sig-paren">(</span><em>channel</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onPhase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onPhase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onReset">
+<code class="descname">onReset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onReset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onReset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onShutterChanged">
+<code class="descname">onShutterChanged</code><span class="sig-paren">(</span><em>shutterBitmask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onShutterChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onShutterChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onSquareChanged">
+<code class="descname">onSquareChanged</code><span class="sig-paren">(</span><em>channel</em>, <em>enable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onSquareChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onSquareChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.onWriteAll">
+<code class="descname">onWriteAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.onWriteAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.onWriteAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.persistCallback">
+<code class="descname">persistCallback</code><span class="sig-paren">(</span><em>source</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.persistCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.persistCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.setDisabled">
+<code class="descname">setDisabled</code><span class="sig-paren">(</span><em>disabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.setDisabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.setDisabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.DDSUi.DDSUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#DDSUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.DDSUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pulser.DDSUi.extendTo">
+<code class="descname">extendTo</code><span class="sig-paren">(</span><em>array</em>, <em>length</em>, <em>defaulttype</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/DDSUi.html#extendTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.DDSUi.extendTo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="ddsui9910">
+<h2>DDSUi9910<a class="headerlink" href="#ddsui9910" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-pulser.OKBase">
+<span id="okbase"></span><h2>OKBase<a class="headerlink" href="#module-pulser.OKBase" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.OKBase.DeviceDescription">
+<em class="property">class </em><code class="descname">DeviceDescription</code><a class="reference internal" href="../_modules/pulser/OKBase.html#DeviceDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.DeviceDescription" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="pulser.OKBase.FPGAException">
+<em class="property">exception </em><code class="descname">FPGAException</code><a class="reference internal" href="../_modules/pulser/OKBase.html#FPGAException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.FPGAException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.OKBase.OKBase">
+<em class="property">class </em><code class="descname">OKBase</code><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.OKBase.OKBase.SetWireInValue">
+<code class="descname">SetWireInValue</code><span class="sig-paren">(</span><em>address</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.SetWireInValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.SetWireInValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.getDeviceDescription">
+<code class="descname">getDeviceDescription</code><span class="sig-paren">(</span><em>xem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.getDeviceDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.getDeviceDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get informaion from an open device</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.hardwareConfigurationId">
+<code class="descname">hardwareConfigurationId</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.hardwareConfigurationId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.hardwareConfigurationId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.OKBase.OKBase.isOpen">
+<code class="descname">isOpen</code><a class="headerlink" href="#pulser.OKBase.OKBase.isOpen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.listBoards">
+<code class="descname">listBoards</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.listBoards"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.listBoards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.openByName">
+<code class="descname">openByName</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.openByName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.openByName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.openBySerial">
+<code class="descname">openBySerial</code><span class="sig-paren">(</span><em>serial</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.openBySerial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.openBySerial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.renameBoard">
+<code class="descname">renameBoard</code><span class="sig-paren">(</span><em>serial</em>, <em>newname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.renameBoard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.renameBoard" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.OKBase.OKBase.uploadBitfile">
+<code class="descname">uploadBitfile</code><span class="sig-paren">(</span><em>bitfile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#OKBase.uploadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.OKBase.uploadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pulser.OKBase.check">
+<code class="descname">check</code><span class="sig-paren">(</span><em>number</em>, <em>command</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/OKBase.html#check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.OKBase.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PMTReaderClient">
+<span id="pmtreaderclient"></span><h2>PMTReaderClient<a class="headerlink" href="#module-pulser.PMTReaderClient" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.PMTReaderClient.PMTReader">
+<em class="property">class </em><code class="descname">PMTReader</code><a class="reference internal" href="../_modules/pulser/PMTReaderClient.html#PMTReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderClient.PMTReader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PMTReaderClient.PMTReader.serverClass">
+<code class="descname">serverClass</code><a class="headerlink" href="#pulser.PMTReaderClient.PMTReader.serverClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">PMTReaderServer</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PMTReaderServer">
+<span id="pmtreaderserver"></span><h2>PMTReaderServer<a class="headerlink" href="#module-pulser.PMTReaderServer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.PMTReaderServer.DedicatedData">
+<em class="property">class </em><code class="descname">DedicatedData</code><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#DedicatedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.DedicatedData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PMTReaderServer.DedicatedData.analog">
+<code class="descname">analog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#DedicatedData.analog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.DedicatedData.analog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PMTReaderServer.DedicatedData.count">
+<code class="descname">count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#DedicatedData.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.DedicatedData.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PMTReaderServer.DedicatedData.integration">
+<code class="descname">integration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#DedicatedData.integration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.DedicatedData.integration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PMTReaderServer.PMTReaderServer">
+<em class="property">class </em><code class="descname">PMTReaderServer</code><span class="sig-paren">(</span><em>dataQueue=None</em>, <em>commandPipe=None</em>, <em>loggingQueue=None</em>, <em>sharedMemoryArray=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#PMTReaderServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.PMTReaderServer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PMTReaderServer.PMTReaderServer.dedicatedDataClass">
+<code class="descname">dedicatedDataClass</code><a class="headerlink" href="#pulser.PMTReaderServer.PMTReaderServer.dedicatedDataClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pulser.PMTReaderServer.DedicatedData" title="pulser.PMTReaderServer.DedicatedData"><code class="xref py py-class docutils literal"><span class="pre">DedicatedData</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PMTReaderServer.PMTReaderServer.readDataFifo">
+<code class="descname">readDataFifo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PMTReaderServer.html#PMTReaderServer.readDataFifo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PMTReaderServer.PMTReaderServer.readDataFifo" title="Permalink to this definition">¶</a></dt>
+<dd><p>run is responsible for reading the data back from the FPGA
+0x6nxxxxxx count result from channel n (0-15)
+0x7nxxxxxx count result from channel n+16 (16-31)</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PulserConfig">
+<span id="pulserconfig"></span><h2>PulserConfig<a class="headerlink" href="#module-pulser.PulserConfig" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.PulserConfig.DAADInfo">
+<em class="property">class </em><code class="descname">DAADInfo</code><span class="sig-paren">(</span><em>numChannels=0</em>, <em>encoding=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#DAADInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.DAADInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserConfig.DDSInfo">
+<em class="property">class </em><code class="descname">DDSInfo</code><span class="sig-paren">(</span><em>channel=0</em>, <em>shutter=None</em>, <em>chip='AD9912'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#DDSInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.DDSInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserConfig.ExtendedWireParameter">
+<em class="property">class </em><code class="descname">ExtendedWireParameter</code><a class="reference internal" href="../_modules/pulser/PulserConfig.html#ExtendedWireParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.ExtendedWireParameter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserConfig.PulserConfig">
+<em class="property">class </em><code class="descname">PulserConfig</code><a class="reference internal" href="../_modules/pulser/PulserConfig.html#PulserConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.PulserConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endADC">
+<code class="descname">endADC</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endADC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endADC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endCommandMemory">
+<code class="descname">endCommandMemory</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endCommandMemory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endCommandMemory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endDAC">
+<code class="descname">endDAC</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endDAC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endDAC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endDDSChannel">
+<code class="descname">endDDSChannel</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endDDSChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endDDSChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endDescription">
+<code class="descname">endDescription</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endDescription" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endParameter">
+<code class="descname">endParameter</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endParameter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endShutterbit">
+<code class="descname">endShutterbit</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endShutterbit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endShutterbit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.endStatusbit">
+<code class="descname">endStatusbit</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#endStatusbit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.endStatusbit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.getPulserConfiguration">
+<code class="descname">getPulserConfiguration</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#getPulserConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.getPulserConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserConfig.startPulseProgrammer">
+<code class="descname">startPulseProgrammer</code><span class="sig-paren">(</span><em>parent</em>, <em>elem</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserConfig.html#startPulseProgrammer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserConfig.startPulseProgrammer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PulserHardwareClient">
+<span id="pulserhardwareclient"></span><h2>PulserHardwareClient<a class="headerlink" href="#module-pulser.PulserHardwareClient" title="Permalink to this headline">¶</a></h2>
+<p>Encapsulation of the Pulse Programmer Hardware</p>
+<dl class="class">
+<dt id="pulser.PulserHardwareClient.LoggingReader">
+<em class="property">class </em><code class="descname">LoggingReader</code><span class="sig-paren">(</span><em>loggingQueue</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#LoggingReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.LoggingReader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserHardwareClient.LoggingReader.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#LoggingReader.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.LoggingReader.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserHardwareClient.PulserHardware">
+<em class="property">class </em><code class="descname">PulserHardware</code><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.adcMask">
+<code class="descname">adcMask</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.adcMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.bytearrayToWordList">
+<code class="descname">bytearrayToWordList</code><span class="sig-paren">(</span><em>barray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.bytearrayToWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.bytearrayToWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.counterMask">
+<code class="descname">counterMask</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.counterMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.dataAvailable">
+<code class="descname">dataAvailable</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.dataAvailable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.dedicatedDataAvailable">
+<code class="descname">dedicatedDataAvailable</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.dedicatedDataAvailable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.integrationTime">
+<code class="descname">integrationTime</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.integrationTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.logicAnalyzerDataAvailable">
+<code class="descname">logicAnalyzerDataAvailable</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.logicAnalyzerDataAvailable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.openModule">
+<code class="descname">openModule</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.openModule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.ppActiveChanged">
+<code class="descname">ppActiveChanged</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.ppActiveChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.ppReadRamWordList">
+<code class="descname">ppReadRamWordList</code><span class="sig-paren">(</span><em>wordlist</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.ppReadRamWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.ppReadRamWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.ppStart">
+<code class="descname">ppStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.ppStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.ppStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.ppStop">
+<code class="descname">ppStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.ppStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.ppStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.ppWriteRamWordList">
+<code class="descname">ppWriteRamWordList</code><span class="sig-paren">(</span><em>wordlist</em>, <em>address</em>, <em>check=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.ppWriteRamWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.ppWriteRamWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.serverClass">
+<code class="descname">serverClass</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.serverClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">PulserHardwareServer</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.setShutterBit">
+<code class="descname">setShutterBit</code><span class="sig-paren">(</span><em>bit</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.setShutterBit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.setShutterBit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.sharedMemorySize">
+<code class="descname">sharedMemorySize</code><em class="property"> = 262144</em><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.sharedMemorySize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.shutdown">
+<code class="descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.shutter">
+<code class="descname">shutter</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.shutter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.shutterChanged">
+<code class="descname">shutterChanged</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.shutterChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.sleepQueue">
+<code class="descname">sleepQueue</code><em class="property"> = &lt;queue.Queue object at 0x00000266625D0D30&gt;</em><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.sleepQueue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.timestep">
+<code class="descname">timestep</code><em class="property"> = &lt;Quantity(5, 'nanosecond')&gt;</em><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.timestep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareClient.PulserHardware.trigger">
+<code class="descname">trigger</code><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.PulserHardware.wordListToBytearray">
+<code class="descname">wordListToBytearray</code><span class="sig-paren">(</span><em>wordlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#PulserHardware.wordListToBytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.PulserHardware.wordListToBytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert list of words to binary bytearray</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserHardwareClient.QueueReader">
+<em class="property">class </em><code class="descname">QueueReader</code><span class="sig-paren">(</span><em>pulserHardware</em>, <em>dataQueue</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#QueueReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.QueueReader" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserHardwareClient.QueueReader.onLogicAnalyzerData">
+<code class="descname">onLogicAnalyzerData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#QueueReader.onLogicAnalyzerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.QueueReader.onLogicAnalyzerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.QueueReader.raise_">
+<code class="descname">raise_</code><span class="sig-paren">(</span><em>ex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#QueueReader.raise_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.QueueReader.raise_" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareClient.QueueReader.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#QueueReader.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.QueueReader.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserHardwareClient.check">
+<code class="descname">check</code><span class="sig-paren">(</span><em>number</em>, <em>command</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserHardwareClient.processReturn">
+<code class="descname">processReturn</code><span class="sig-paren">(</span><em>returnvalue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareClient.html#processReturn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareClient.processReturn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PulserHardwareServer">
+<span id="pulserhardwareserver"></span><h2>PulserHardwareServer<a class="headerlink" href="#module-pulser.PulserHardwareServer" title="Permalink to this headline">¶</a></h2>
+<p>Encapsulation of the Pulse Programmer Hardware</p>
+<dl class="class">
+<dt id="pulser.PulserHardwareServer.Data">
+<em class="property">class </em><code class="descname">Data</code><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PulserHardwareServer.Data.creationTime">
+<code class="descname">creationTime</code><a class="headerlink" href="#pulser.PulserHardwareServer.Data.creationTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.Data.dataString">
+<code class="descname">dataString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#Data.dataString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.Data.dataString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.Data.defaultTimestampZero">
+<code class="descname">defaultTimestampZero</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#Data.defaultTimestampZero"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.Data.defaultTimestampZero" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="pulser.PulserHardwareServer.Data.fromJson">
+<em class="property">static </em><code class="descname">fromJson</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#Data.fromJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.Data.fromJson" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.Data.timeinterval">
+<code class="descname">timeinterval</code><a class="headerlink" href="#pulser.PulserHardwareServer.Data.timeinterval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserHardwareServer.DedicatedData">
+<em class="property">class </em><code class="descname">DedicatedData</code><span class="sig-paren">(</span><em>timeTickOffset=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#DedicatedData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.DedicatedData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserHardwareServer.DedicatedData.analog">
+<code class="descname">analog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#DedicatedData.analog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.DedicatedData.analog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.DedicatedData.count">
+<code class="descname">count</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#DedicatedData.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.DedicatedData.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.DedicatedData.integration">
+<code class="descname">integration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#DedicatedData.integration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.DedicatedData.integration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.DedicatedData.timestamp">
+<code class="descname">timestamp</code><a class="headerlink" href="#pulser.PulserHardwareServer.DedicatedData.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.PulserHardwareServer.FinishException">
+<em class="property">exception </em><code class="descname">FinishException</code><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#FinishException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.FinishException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserHardwareServer.LogicAnalyzerData">
+<em class="property">class </em><code class="descname">LogicAnalyzerData</code><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#LogicAnalyzerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.LogicAnalyzerData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserHardwareServer.LogicAnalyzerData.dataToStr">
+<code class="descname">dataToStr</code><span class="sig-paren">(</span><em>l</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#LogicAnalyzerData.dataToStr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.LogicAnalyzerData.dataToStr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pulser.PulserHardwareServer.PulserHardwareException">
+<em class="property">exception </em><code class="descname">PulserHardwareException</code><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer">
+<em class="property">class </em><code class="descname">PulserHardwareServer</code><span class="sig-paren">(</span><em>dataQueue=None</em>, <em>commandPipe=None</em>, <em>loggingQueue=None</em>, <em>sharedMemoryArray=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.__getattr__">
+<code class="descname">__getattr__</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.__getattr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.__getattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>delegate not available procedures to xem</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.analyzingState">
+<code class="descname">analyzingState</code><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.analyzingState" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.bytearrayToWordList">
+<code class="descname">bytearrayToWordList</code><span class="sig-paren">(</span><em>barray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.bytearrayToWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.bytearrayToWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.clearOverrun">
+<code class="descname">clearOverrun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.clearOverrun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.clearOverrun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.dedicatedDataClass">
+<code class="descname">dedicatedDataClass</code><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.dedicatedDataClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#pulser.PulserHardwareServer.DedicatedData" title="pulser.PulserHardwareServer.DedicatedData"><code class="xref py py-class docutils literal"><span class="pre">DedicatedData</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.enableLogicAnalyzer">
+<code class="descname">enableLogicAnalyzer</code><span class="sig-paren">(</span><em>enable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.enableLogicAnalyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.enableLogicAnalyzer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.finish">
+<code class="descname">finish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.finish"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.finish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getAdcMask">
+<code class="descname">getAdcMask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getAdcMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getAdcMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getCounterMask">
+<code class="descname">getCounterMask</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getCounterMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getCounterMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getIntegrationTime">
+<code class="descname">getIntegrationTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getIntegrationTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getIntegrationTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getIntegrationTimeBinary">
+<code class="descname">getIntegrationTimeBinary</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getIntegrationTimeBinary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getIntegrationTimeBinary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getOpenModule">
+<code class="descname">getOpenModule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getOpenModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getOpenModule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getShutter">
+<code class="descname">getShutter</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getShutter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getShutter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.getTrigger">
+<code class="descname">getTrigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.getTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.getTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.integrationTimestep">
+<code class="descname">integrationTimestep</code><em class="property"> = &lt;Quantity(20, 'nanosecond')&gt;</em><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.integrationTimestep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.interruptRead">
+<code class="descname">interruptRead</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.interruptRead"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.interruptRead" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.logicAnalyzerClearOverrun">
+<code class="descname">logicAnalyzerClearOverrun</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.logicAnalyzerClearOverrun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.logicAnalyzerClearOverrun" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.logicAnalyzerTrigger">
+<code class="descname">logicAnalyzerTrigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.logicAnalyzerTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.logicAnalyzerTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.openBySerial">
+<code class="descname">openBySerial</code><span class="sig-paren">(</span><em>serial</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.openBySerial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.openBySerial" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppClearReadFifo">
+<code class="descname">ppClearReadFifo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppClearReadFifo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppClearReadFifo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppClearWriteFifo">
+<code class="descname">ppClearWriteFifo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppClearWriteFifo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppClearWriteFifo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppDownloadCode">
+<code class="descname">ppDownloadCode</code><span class="sig-paren">(</span><em>startaddress</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppDownloadCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppDownloadCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppDownloadData">
+<code class="descname">ppDownloadData</code><span class="sig-paren">(</span><em>startaddress</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppDownloadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppDownloadData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppFlushData">
+<code class="descname">ppFlushData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppFlushData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppFlushData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppInterrupt">
+<code class="descname">ppInterrupt</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppInterrupt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppInterrupt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a stop flag for the pulse program. The prepare_next_scan_point() function will then exit
+with exitrcode 0xfffe100000000000 to signal an interrupt</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppIsRunning">
+<code class="descname">ppIsRunning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppIsRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppIsRunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadData">
+<code class="descname">ppReadData</code><span class="sig-paren">(</span><em>minbytes=8</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadLog">
+<code class="descname">ppReadLog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadLog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadLogicAnalyzerData">
+<code class="descname">ppReadLogicAnalyzerData</code><span class="sig-paren">(</span><em>minbytes=8</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadLogicAnalyzerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadLogicAnalyzerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadRam">
+<code class="descname">ppReadRam</code><span class="sig-paren">(</span><em>data</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadRam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadRam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadRamWordList">
+<code class="descname">ppReadRamWordList</code><span class="sig-paren">(</span><em>wordlist</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadRamWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadRamWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReadRamWordListShared">
+<code class="descname">ppReadRamWordListShared</code><span class="sig-paren">(</span><em>length</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReadRamWordListShared"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReadRamWordListShared" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppReset">
+<code class="descname">ppReset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppReset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppReset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppStart">
+<code class="descname">ppStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppStop">
+<code class="descname">ppStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppUpload">
+<code class="descname">ppUpload</code><span class="sig-paren">(</span><em>xxx_todo_changeme</em>, <em>codestartaddress=0</em>, <em>datastartaddress=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppUpload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppUpload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppUploadCode">
+<code class="descname">ppUploadCode</code><span class="sig-paren">(</span><em>binarycode</em>, <em>startaddress=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppUploadCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppUploadCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppUploadData">
+<code class="descname">ppUploadData</code><span class="sig-paren">(</span><em>binarydata</em>, <em>startaddress=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppUploadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppUploadData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppWriteData">
+<code class="descname">ppWriteData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppWriteData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppWriteData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRam">
+<code class="descname">ppWriteRam</code><span class="sig-paren">(</span><em>data</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppWriteRam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRamWordList">
+<code class="descname">ppWriteRamWordList</code><span class="sig-paren">(</span><em>wordlist</em>, <em>address</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppWriteRamWordList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRamWordList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRamWordListShared">
+<code class="descname">ppWriteRamWordListShared</code><span class="sig-paren">(</span><em>length</em>, <em>address</em>, <em>check=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.ppWriteRamWordListShared"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.ppWriteRamWordListShared" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.pulserConfiguration">
+<code class="descname">pulserConfiguration</code><span class="sig-paren">(</span><em>configfile=None</em>, <em>hardwareId=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.pulserConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.pulserConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.quantum">
+<code class="descname">quantum</code><em class="property"> = 1048576</em><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.quantum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.readDataFifo">
+<code class="descname">readDataFifo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.readDataFifo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.readDataFifo" title="Permalink to this definition">¶</a></dt>
+<dd><p>run is responsible for reading the data back from the FPGA
+0xffffffffffffffff end of experiment marker
+0xfffexxxxxxxxxxxx exitcode marker
+0xfffd000000000000 timestamping overflow marker
+0xfffcxxxxxxxxxxxx scan parameter, followed by scanparameter value
+0xfffb00000000xxxx timing was not met, xxxx address of update command whose timing could not be met
+0x01ddnnxxxxxxxxxx count result from channel n id dd
+0x02ddnnxxxxxxxxxx timestamp result channel n id dd
+0x03ddnnxxxxxxxxxx timestamp gate start channel n id dd
+0x04nnxxxxxxxxxxxx other return
+0x05nnxxxxxxxxxxxx ADC return MSB 16 bits count, LSB 32 bits sum
+0x06ddxxxxxxxxxxxx
+0xeennxxxxxxxxxxxx dedicated result
+0x50nn00000000xxxx result n return Hi 16 bits, only being sent if xxxx is not identical to zero
+0x51nnxxxxxxxxxxxx result n return Low 48 bits, guaranteed to come first</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setAdcMask">
+<code class="descname">setAdcMask</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setAdcMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setAdcMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setCounterMask">
+<code class="descname">setCounterMask</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setCounterMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setCounterMask" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setExtendedWireIn">
+<code class="descname">setExtendedWireIn</code><span class="sig-paren">(</span><em>address</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setExtendedWireIn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setExtendedWireIn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setIntegrationTime">
+<code class="descname">setIntegrationTime</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setIntegrationTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setIntegrationTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setMultipleExtendedWireIn">
+<code class="descname">setMultipleExtendedWireIn</code><span class="sig-paren">(</span><em>items</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setMultipleExtendedWireIn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setMultipleExtendedWireIn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setShutter">
+<code class="descname">setShutter</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setShutter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setShutter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setShutterBit">
+<code class="descname">setShutterBit</code><span class="sig-paren">(</span><em>bit</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setShutterBit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setShutterBit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.setTrigger">
+<code class="descname">setTrigger</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.setTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.setTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.syncTime">
+<code class="descname">syncTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.syncTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.syncTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.timestep">
+<code class="descname">timestep</code><em class="property"> = &lt;Quantity(5, 'nanosecond')&gt;</em><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.timestep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.uploadBitfile">
+<code class="descname">uploadBitfile</code><span class="sig-paren">(</span><em>bitfile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.uploadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.uploadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserHardwareServer.PulserHardwareServer.wordListToBytearray">
+<code class="descname">wordListToBytearray</code><span class="sig-paren">(</span><em>wordlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#PulserHardwareServer.wordListToBytearray"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.PulserHardwareServer.wordListToBytearray" title="Permalink to this definition">¶</a></dt>
+<dd><p>convert list of words to binary bytearray</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserHardwareServer.sliceview">
+<code class="descname">sliceview</code><span class="sig-paren">(</span><em>view</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#sliceview"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.sliceview" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pulser.PulserHardwareServer.sliceview_remainder">
+<code class="descname">sliceview_remainder</code><span class="sig-paren">(</span><em>view</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserHardwareServer.html#sliceview_remainder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserHardwareServer.sliceview_remainder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pulser.PulserParameterUi">
+<span id="pulserparameterui"></span><h2>PulserParameterUi<a class="headerlink" href="#module-pulser.PulserParameterUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.PulserParameterUi.PulserParameter">
+<em class="property">class </em><code class="descname">PulserParameter</code><span class="sig-paren">(</span><em>name=None</em>, <em>address=0</em>, <em>string=None</em>, <em>onChange=None</em>, <em>bitmask=18446744073709551615</em>, <em>shift=0</em>, <em>encoding=None</em>, <em>globalDict=None</em>, <em>categories=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameter" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PulserParameterUi.PulserParameter.encodedValue">
+<code class="descname">encodedValue</code><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameter.encodedValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameter.setBits">
+<code class="descname">setBits</code><span class="sig-paren">(</span><em>inputMask</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameter.setBits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameter.setBits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserParameterUi.PulserParameterModel">
+<em class="property">class </em><code class="descname">PulserParameterModel</code><span class="sig-paren">(</span><em>parameterList</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.PulserParameterUi.PulserParameterModel.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x00000266624BB710&gt;</em><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterModel.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterModel.setStrValue">
+<code class="descname">setStrValue</code><span class="sig-paren">(</span><em>index</em>, <em>strValue</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterModel.setStrValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterModel.setStrValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.PulserParameterUi.PulserParameterUi">
+<em class="property">class </em><code class="descname">PulserParameterUi</code><span class="sig-paren">(</span><em>pulser</em>, <em>config</em>, <em>configName='PulserParameterUi'</em>, <em>globalDict=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterUi.onChange">
+<code class="descname">onChange</code><span class="sig-paren">(</span><em>index</em>, <em>name</em>, <em>value</em>, <em>string</em>, <em>origin</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterUi.onChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterUi.onChange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterUi.onWriteAll">
+<code class="descname">onWriteAll</code><span class="sig-paren">(</span><em>writeUnchecked=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterUi.onWriteAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterUi.onWriteAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.PulserParameterUi.PulserParameterUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/PulserParameterUi.html#PulserParameterUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.PulserParameterUi.PulserParameterUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.ShutterHardwareTableModel">
+<span id="shutterhardwaretablemodel"></span><h2>ShutterHardwareTableModel<a class="headerlink" href="#module-pulser.ShutterHardwareTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel">
+<em class="property">class </em><code class="descname">ShutterHardwareTableModel</code><span class="sig-paren">(</span><em>pulserHardware</em>, <em>outputname</em>, <em>data</em>, <em>size=32</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x0000026662D48B38&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.customColor">
+<code class="descname">customColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662D48E48&gt;</em><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.customColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.defaultColor">
+<code class="descname">defaultColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662D48D68&gt;</em><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.defaultColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.offColor">
+<code class="descname">offColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662D48EB8&gt;</em><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.offColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.onClicked">
+<code class="descname">onClicked</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.onClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.onClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.onColor">
+<code class="descname">onColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662AB4F98&gt;</em><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.onColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x0000026662D48CF8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.shutter">
+<code class="descname">shutter</code><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.shutter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.updateShutter">
+<code class="descname">updateShutter</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterHardwareTableModel.html#ShutterHardwareTableModel.updateShutter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterHardwareTableModel.ShutterHardwareTableModel.updateShutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>updates the display only,
+called by the hardware backend to indicate changes
+by other means than the gui</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pulser.ShutterUi">
+<span id="shutterui"></span><h2>ShutterUi<a class="headerlink" href="#module-pulser.ShutterUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pulser.ShutterUi.ShutterUi">
+<em class="property">class </em><code class="descname">ShutterUi</code><span class="sig-paren">(</span><em>pulserHardware</em>, <em>configName</em>, <em>outputname</em>, <em>config</em>, <em>dataContainer</em>, <em>size=32</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#ShutterUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.ShutterUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="pulser.ShutterUi.ShutterUi.offColor">
+<code class="descname">offColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662D95198&gt;</em><a class="headerlink" href="#pulser.ShutterUi.ShutterUi.offColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="pulser.ShutterUi.ShutterUi.onColor">
+<code class="descname">onColor</code><em class="property"> = &lt;PyQt5.QtGui.QColor object at 0x0000026662D95128&gt;</em><a class="headerlink" href="#pulser.ShutterUi.ShutterUi.onColor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterUi.ShutterUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#ShutterUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.ShutterUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterUi.ShutterUi.setDisabled">
+<code class="descname">setDisabled</code><span class="sig-paren">(</span><em>disabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#ShutterUi.setDisabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.ShutterUi.setDisabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterUi.ShutterUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em>, <em>dynupdate=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#ShutterUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.ShutterUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pulser.ShutterUi.TriggerUi">
+<em class="property">class </em><code class="descname">TriggerUi</code><span class="sig-paren">(</span><em>pulserHardware</em>, <em>configName</em>, <em>outputname</em>, <em>dataContainer</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#TriggerUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.TriggerUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pulser.ShutterUi.TriggerUi.onApply">
+<code class="descname">onApply</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#TriggerUi.onApply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.TriggerUi.onApply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pulser.ShutterUi.TriggerUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pulser/ShutterUi.html#TriggerUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pulser.ShutterUi.TriggerUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

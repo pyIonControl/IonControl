@@ -1,0 +1,325 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.DAC &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.DAC</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.DAC</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pulser.PulserHardwareClient</span> <span class="k">import</span> <span class="n">check</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">pulser.Encodings</span> <span class="k">import</span> <span class="n">encode</span><span class="p">,</span> <span class="n">decode</span>
+<span class="kn">from</span> <span class="nn">pulser.PulserConfig</span> <span class="k">import</span> <span class="n">DAADInfo</span>
+<span class="kn">from</span> <span class="nn">gui.ExpressionValue</span> <span class="k">import</span> <span class="n">ExpressionValue</span>
+<span class="kn">from</span> <span class="nn">modules.descriptor</span> <span class="k">import</span> <span class="n">SetterProperty</span>
+
+
+<div class="viewcode-block" id="DACException"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DACException">[docs]</a><span class="k">class</span> <span class="nc">DACException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="DACChannelSetting"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DACChannelSetting">[docs]</a><span class="k">class</span> <span class="nc">DACChannelSetting</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetAfterPP</span> <span class="o">=</span> <span class="kc">False</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;resetAfterPP&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_globalDict&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">dictcopy</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+        <span class="n">dictcopy</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_globalDict&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dictcopy</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">outputVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="k">else</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">globalDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span>
+    
+    <span class="nd">@globalDict</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">globalDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">voltage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">value</span>
+    
+    <span class="nd">@voltage</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">voltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">v</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">voltageText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">string</span>
+    
+    <span class="nd">@voltageText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">voltageText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+        
+    <span class="nd">@SetterProperty</span>
+    <span class="k">def</span> <span class="nf">onChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">onChange</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_voltage</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">onChange</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CombineWrites"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.CombineWrites">[docs]</a><span class="k">class</span> <span class="nc">CombineWrites</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dac</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span> <span class="o">=</span> <span class="n">dac</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">autoFlush</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dac</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exittype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DAC"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC">[docs]</a><span class="k">class</span> <span class="nc">DAC</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="n">pulser</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">pulserConfiguration</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numChannels</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">numChannels</span> <span class="k">if</span> <span class="n">config</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dacInfo</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">dac</span> <span class="k">if</span> <span class="n">config</span> <span class="k">else</span> <span class="n">DAADInfo</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># enable internal reference</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="c1"># enable internal reference works if done twice, don&#39;t ask me why</span>
+
+<div class="viewcode-block" id="DAC.rawToMagnitude"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC.rawToMagnitude">[docs]</a>    <span class="k">def</span> <span class="nf">rawToMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">decode</span><span class="p">(</span> <span class="n">raw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacInfo</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DAC.setVoltage"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC.setVoltage">[docs]</a>    <span class="k">def</span> <span class="nf">setVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">voltage</span><span class="p">,</span> <span class="n">autoApply</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">applyAll</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">intVoltage</span> <span class="o">=</span> <span class="n">encode</span><span class="p">(</span> <span class="n">voltage</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacInfo</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span>
+        <span class="n">code</span> <span class="o">=</span>  <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">applyAll</span> <span class="k">else</span> <span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">autoApply</span> <span class="k">else</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">intVoltage</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">intVoltage</span></div>
+
+<div class="viewcode-block" id="DAC.flush"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">setMultipleExtendedWireIn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DAC.sendCommand"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mh">0x12</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="mh">0x1e</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">14</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">channel</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span> <span class="o">|</span> <span class="p">(</span><span class="n">cmd</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">))])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoFlush</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div>
+            
+<div class="viewcode-block" id="DAC.update"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DAC.DAC.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channelmask</span><span class="p">):</span>
+        <span class="k">pass</span></div></div>
+        
+        
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">ad</span> <span class="o">=</span> <span class="n">DAC</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

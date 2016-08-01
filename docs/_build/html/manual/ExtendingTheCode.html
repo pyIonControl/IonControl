@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Extending the Code &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Instrument Logger User Manual" href="instrumentLoggerUi_manual.html"/>
+        <link rel="prev" title="Logic Analyzer" href="LogicAnalyzer.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Extending the Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#adding-hardware">Adding Hardware</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#external-parameters">External Parameters</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#voltage-controllers">Voltage Controllers</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#awgs">AWGs</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-evaluations">Adding Evaluations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#adding-fits">Adding Fits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Extending the Code</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/ExtendingTheCode.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="extending-the-code">
+<span id="extendingthecode"></span><h1>Extending the Code<a class="headerlink" href="#extending-the-code" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="adding-hardware">
+<h2>Adding Hardware<a class="headerlink" href="#adding-hardware" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="external-parameters">
+<h3>External Parameters<a class="headerlink" href="#external-parameters" title="Permalink to this headline">¶</a></h3>
+<p>Add new instruments in \IonControl\externalParameter\StandardExternalParameter.py. Each instrument is a class that inherits from ExternalParameterBase, and must specify its name and output channels (and associated unit). It must provide three methods: __init__, setValue, and close. It can also provide a getValue method if the instrument can report its value. For a simple example, see the class HP6632B.</p>
+<p>If the new instrument is part of an existing category of instruments (like a VISA instrument), then no change to the experiment configuration is necessary; just add your class under the &#8220;if visaEnabled&#8221; statement.</p>
+<p>If the new instrument is a new category which requires its own libraries/DLLs/etc., you will need to add this as an option in the experiment config file. To do that, do the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Open \IonControl\config\ExptConfigGuiTemplate.yml</li>
+<li>Add a new entry under hardware for your new instrument. Give it a description, and any necessary fields, in the same way that the other instruments are specified. Note that configuration options for specific instances of instrument can be specified in the params selection GUI. THe configuration options in the expt config file are more for the entire category of instrument, i.e. things like DLLs.</li>
+</ol>
+</div></blockquote>
+<p>These two steps will make your piece of hardware appear as an option in the experiment config GUI.</p>
+<blockquote>
+<div><ol class="arabic" start="3">
+<li><p class="first">In StandardExternalParameter.py, add a line of the form:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">yourInstrumentEnabled</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="s1">&#39;yourInstrument&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Create your class inside of an if statement &#8220;if yourInstrumentEnabled.&#8221; Read in any configuration data by looking in the project dictionary.</p>
+</li>
+</ol>
+</div></blockquote>
+<p>You should now be able to select your instrument from the Params Selection GUI.</p>
+</div>
+<div class="section" id="voltage-controllers">
+<h3>Voltage Controllers<a class="headerlink" href="#voltage-controllers" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="awgs">
+<h3>AWGs<a class="headerlink" href="#awgs" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="adding-evaluations">
+<h2>Adding Evaluations<a class="headerlink" href="#adding-evaluations" title="Permalink to this headline">¶</a></h2>
+<p>The evaluations are defined in \IonControl\scan\CountEvaluation.py, and listed in IonControlscanEvaluationAlgorithms.py. Each evaluation is a class which inherits from EvaluationBase, and is listed in EvaluationAlgorthms.py. An evaluation class must provide:</p>
+<blockquote>
+<div><ul>
+<li><p class="first">A name</p>
+</li>
+<li><p class="first">A tooltip</p>
+</li>
+<li><p class="first">Any settings that define the evaluation, and their type (defined in the method &#8220;children&#8221;)</p>
+</li>
+<li><p class="first">the method &#8220;evaluate&#8221; that takes in the data, and returns a 3-tuple:</p>
+<blockquote>
+<div><p>(evaluated value, (upper error bar size, lower error bar size), raw value)</p>
+<p>Raw value is typically the value not scaled by the number of experiments, i.e. if 100 experiments were performed and in 43 of them the ion is bright, the evaluated value would be 0.43 and the raw value would be 43.</p>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+<p>See ThresholdEvaluation for a relatively simple example.</p>
+</div>
+<div class="section" id="adding-fits">
+<h2>Adding Fits<a class="headerlink" href="#adding-fits" title="Permalink to this headline">¶</a></h2>
+<p>The fits are defined in \IonControl\fit\FitFunctions.py. Each fit is a class which inherits from FitFunctionBase. At a bare minimum, the fit must provide:</p>
+<blockquote>
+<div><ul class="simple">
+<li>a name</li>
+<li>a function string to display</li>
+<li>a list of parameters</li>
+<li>default values</li>
+<li>the method &#8220;functionEval&#8221; which defines how to evaluate the function.</li>
+</ul>
+</div></blockquote>
+<p>See SinSqGaussFit for a relatively simple example.</p>
+<p>Fits can also provide:</p>
+<blockquote>
+<div><ul class="simple">
+<li>an &#8216;update&#8217; method for updating other variables which are not fit variables</li>
+<li>a &#8216;smartStartValues&#8217; method for guessing good start values based on the data</li>
+</ul>
+</div></blockquote>
+<p>see the existing fit functions for more examples.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="instrumentLoggerUi_manual.html" class="btn btn-neutral float-right" title="Instrument Logger User Manual" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="LogicAnalyzer.html" class="btn btn-neutral" title="Logic Analyzer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

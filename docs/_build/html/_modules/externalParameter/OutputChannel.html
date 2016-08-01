@@ -1,0 +1,447 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>externalParameter.OutputChannel &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>externalParameter.OutputChannel</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for externalParameter.OutputChannel</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">externalParameter.useTracker</span> <span class="k">import</span> <span class="n">UseTracker</span>
+<span class="kn">from</span> <span class="nn">gui.ExpressionValue</span> <span class="k">import</span> <span class="n">ExpressionValue</span>
+<span class="kn">from</span> <span class="nn">.decimation</span> <span class="k">import</span> <span class="n">StaticDecimation</span>
+<span class="kn">from</span> <span class="nn">.persistence</span> <span class="k">import</span> <span class="n">DBPersist</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.parametertree</span> <span class="k">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">is_Q</span><span class="p">,</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">.InstrumentSettings</span> <span class="k">import</span> <span class="n">InstrumentSettings</span>
+
+<div class="viewcode-block" id="nextValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.nextValue">[docs]</a><span class="k">def</span> <span class="nf">nextValue</span><span class="p">(</span> <span class="n">current</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">stepsize</span><span class="p">,</span> <span class="n">jump</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">current</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">jump</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">target</span><span class="o">-</span><span class="n">current</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">stepsize</span> <span class="k">else</span> <span class="p">(</span><span class="n">current</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span> <span class="o">*</span> <span class="n">stepsize</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="OutputChannel"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel">[docs]</a><span class="k">class</span> <span class="nc">OutputChannel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QObject</span><span class="p">):</span>
+    <span class="n">persistSpace</span> <span class="o">=</span> <span class="s1">&#39;externalOutput&#39;</span>
+    <span class="n">valueChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">targetChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">useTracker</span> <span class="o">=</span> <span class="n">UseTracker</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">deviceName</span><span class="p">,</span> <span class="n">channelName</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">outputUnit</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="c1">#def __init__(self, device, deviceName, channelName, globalDict, settings=dict(), outputUnit=&#39;&#39;):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OutputChannel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deviceName</span> <span class="o">=</span> <span class="n">deviceName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channelName</span> <span class="o">=</span> <span class="n">channelName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span> <span class="o">=</span> <span class="n">ExpressionValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span> <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">InstrumentSettings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span> <span class="o">=</span> <span class="n">StaticDecimation</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">persistence</span> <span class="o">=</span> <span class="n">DBPersist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputUnit</span> <span class="o">=</span> <span class="n">outputUnit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">strValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onExpressionUpdate</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="OutputChannel.setDefaults"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.setDefaults">[docs]</a>    <span class="k">def</span> <span class="nf">setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputUnit</span><span class="p">))</span>  <span class="c1"># the current value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;persistDelay&#39;</span><span class="p">,</span><span class="n">Q</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">))</span>     <span class="c1"># delay for persistency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;strValue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>                          <span class="c1"># requested value as string (formula)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;targetValue&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputUnit</span><span class="p">)</span> <span class="p">)</span>  <span class="c1"># requested value as string (formula)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">_channelParams</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">()):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="OutputChannel.onExpressionUpdate"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.onExpressionUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">onExpressionUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">origin</span> <span class="o">==</span> <span class="s1">&#39;recalculate&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targetChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deviceName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelName</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviceName</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span>
+    
+<div class="viewcode-block" id="OutputChannel.setValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        go stepsize towards the value. This function returns True if the value is reached. Otherwise</span>
+<span class="sd">        it should return False. The user should call repeatedly until the intended value is reached</span>
+<span class="sd">        and True is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">targetValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">targetValue</span>
+        <span class="n">reportvalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">reportvalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="OutputChannel.persist"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.persist">[docs]</a>    <span class="k">def</span> <span class="nf">persist</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span><span class="o">.</span><span class="n">staticTime</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">persistDelay</span>
+        <span class="n">decimationName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="n">value</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">persistCallback</span><span class="p">,</span> <span class="n">decimationName</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="OutputChannel.persistCallback"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.persistCallback">[docs]</a>    <span class="k">def</span> <span class="nf">persistCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;{:~}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">value</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">persistence</span><span class="o">.</span><span class="n">persist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">persistSpace</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span></div>
+           
+<div class="viewcode-block" id="OutputChannel.saveValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.saveValue">[docs]</a>    <span class="k">def</span> <span class="nf">saveValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        save current value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span></div>
+
+<div class="viewcode-block" id="OutputChannel.restoreValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.restoreValue">[docs]</a>    <span class="k">def</span> <span class="nf">restoreValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        restore the value saved previously, this routine only goes stepsize towards this value</span>
+<span class="sd">        if the stored value is reached returns True, otherwise False. Needs to be called repeatedly</span>
+<span class="sd">        until it returns True in order to restore the saved value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">hasDependency</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">recalculate</span><span class="p">()</span>
+            <span class="n">arrived</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="n">arrived</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arrived</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">arrived</span></div>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">externalValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">getExternalValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputUnit</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">useExternalValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">useExternalValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasDependency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">hasDependency</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span>
+
+    <span class="nd">@targetValue</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">targetValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">requestval</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">requestval</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">string</span>
+
+    <span class="nd">@string</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">strValue</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">strValue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">string</span>
+
+    <span class="nd">@strValue</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">strValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">strValue</span> <span class="o">=</span> <span class="n">s</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">s</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># re-create the parameters each time to prevent a exception that says the signal is not connected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paramDef</span><span class="p">())</span>     
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span><span class="o">.</span><span class="n">sigTreeStateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UniqueConnection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span>                
+        
+<div class="viewcode-block" id="OutputChannel.paramDef"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.paramDef">[docs]</a>    <span class="k">def</span> <span class="nf">paramDef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return the parameter definition used by pyqtgraph parametertree to show the gui</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">myparams</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;persistDelay&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;magnitude&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">persistDelay</span> <span class="p">}]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">_channelParams</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">()):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">p</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+            <span class="n">myparams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">myparams</span></div>
+
+<div class="viewcode-block" id="OutputChannel.update"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.OutputChannel.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">changes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        update the parameter, called by the signal of pyqtgraph parametertree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">change</span><span class="o">==</span><span class="s1">&#39;value&#39;</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="n">data</span><span class="p">)</span>       </div></div>
+        
+<div class="viewcode-block" id="SlowAdjustOutputChannel"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel">[docs]</a><span class="k">class</span> <span class="nc">SlowAdjustOutputChannel</span><span class="p">(</span><span class="n">OutputChannel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">deviceName</span><span class="p">,</span> <span class="n">channelName</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">outputUnit</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SlowAdjustOutputChannel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">deviceName</span><span class="p">,</span> <span class="n">channelName</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">settings</span><span class="p">,</span> <span class="n">outputUnit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timerActive</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="SlowAdjustOutputChannel.setDefaults"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.setDefaults">[docs]</a>    <span class="k">def</span> <span class="nf">setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SlowAdjustOutputChannel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;delay&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">))</span>      <span class="c1"># s delay between subsequent updates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;jump&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>       <span class="c1"># if True go to the target value in one jump</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;stepsize&#39;</span><span class="p">,</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputUnit</span><span class="p">))</span>       <span class="c1"># if True go to the target value in one jump</span></div>
+        
+<div class="viewcode-block" id="SlowAdjustOutputChannel.paramDef"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.paramDef">[docs]</a>    <span class="k">def</span> <span class="nf">paramDef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SlowAdjustOutputChannel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">paramDef</span><span class="p">()</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">extend</span><span class="p">([{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;delay&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;magnitude&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">delay</span><span class="p">,</span> <span class="s1">&#39;tip&#39;</span><span class="p">:</span> <span class="s2">&quot;between steps&quot;</span><span class="p">},</span>
+                            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;jump&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">jump</span><span class="p">},</span>
+                            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;stepsize&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;magnitude&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">stepsize</span> <span class="p">}])</span>
+        <span class="k">return</span> <span class="n">param</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="SlowAdjustOutputChannel.encpasulate_value"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.encpasulate_value">[docs]</a>    <span class="k">def</span> <span class="nf">encpasulate_value</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">arg</span><span class="p">,</span> <span class="n">second</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">second</span>
+        <span class="k">return</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">second</span></div>
+
+<div class="viewcode-block" id="SlowAdjustOutputChannel.setValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        go stepsize towards the value. This function returns True if the value is reached. Otherwise</span>
+<span class="sd">        it should return False. The user should call repeatedly until the intended value is reached</span>
+<span class="sd">        and True is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">targetValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">targetValue</span>
+            <span class="n">newvalue</span><span class="p">,</span> <span class="n">arrived</span> <span class="o">=</span> <span class="n">nextValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">targetValue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">stepsize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">jump</span><span class="p">)</span>
+            <span class="n">reportvalue</span><span class="p">,</span> <span class="n">arrived</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encpasulate_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelName</span><span class="p">,</span> <span class="n">newvalue</span><span class="p">),</span> <span class="n">second</span><span class="o">=</span><span class="n">arrived</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">reportvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expressionValue</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">targetValue</span>  <span class="c1"># TODO: still unclear whether that makes sense</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arrived</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">persist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useTracker</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useTracker</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">arrived</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SlowAdjustOutputChannel.onExpressionUpdate"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.onExpressionUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">onExpressionUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">origin</span> <span class="o">==</span> <span class="s1">&#39;recalculate&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targetChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">useTracker</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">timerActive</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">timerActive</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">expressionUpdateBottomHalf</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SlowAdjustOutputChannel.expressionUpdateBottomHalf"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.OutputChannel.SlowAdjustOutputChannel.expressionUpdateBottomHalf">[docs]</a>    <span class="k">def</span> <span class="nf">expressionUpdateBottomHalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">targetValue</span><span class="p">):</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">delay</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;ms&#39;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">expressionUpdateBottomHalf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">useTracker</span><span class="o">.</span><span class="n">release</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">timerActive</span> <span class="o">=</span> <span class="kc">False</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

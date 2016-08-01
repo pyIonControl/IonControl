@@ -1,0 +1,204 @@
+\hypertarget{class_timing_1_1_timing}{\section{Timing.\-Timing Class Reference}
+\label{class_timing_1_1_timing}\index{Timing.\-Timing@{Timing.\-Timing}}
+}
+
+
+This class will generate perform the timing and synchronization required to synchronize all cards on the P\-X\-I backplane.  
+
+
+Inheritance diagram for Timing.\-Timing\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_timing_1_1_timing}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_timing_1_1_timing_ac67aaac1d30dc11a6924a06c099f4fa1}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_timing_1_1_timing}{Timing} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_timing_1_1_timing_a74750a56a2403b952fdd78e9d67f6b88}{init}
+\begin{DoxyCompactList}\small\item\em This function connects to the ni\-Sync device and starts to setup clock and trigger connections. \end{DoxyCompactList}\item 
+def \hyperlink{class_timing_1_1_timing_a464d13b21bd536d8332808cafb946725}{send\-Software\-Trigger}
+\begin{DoxyCompactList}\small\item\em This function will send a trigger to all devices when it is called. \end{DoxyCompactList}\item 
+def \hyperlink{class_timing_1_1_timing_a1d63d7de0f640dfac6b236a242d75d4d}{close}
+\begin{DoxyCompactList}\small\item\em This function will close the connection to the ni\-Sync device. \end{DoxyCompactList}\item 
+def \hyperlink{class_timing_1_1_timing_aa351ebd1126df7ce0711f2dd90f054be}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_timing_1_1_timing}{Timing} class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_timing_1_1_timing_ac6ffaf6ca94b488dba1c56a780b01cfb}{session}
+\begin{DoxyCompactList}\small\item\em This is the reference to the N\-I-\/\-Sync session. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_a8ce8605fb1b55c4a7a0db05c6b1a551c}{resource\-Name}
+\begin{DoxyCompactList}\small\item\em This the name of the N\-I-\/\-Sync resource that refers to the synchronization P\-X\-I card. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_aa54e754e141f10df585dbe3bf86729ef}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the N\-I-\/\-Sync session. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_a802c666b56edd255e17036d5317af75c}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the N\-I-\/\-Sync session has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_a645c0a6e372274c15036da2cdd81ce51}{sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the sample clock that gets distributed to all of the cards on a P\-X\-I Chassis. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_acb98ae4190c94c258c1f86060ab27a86}{divisor}
+\begin{DoxyCompactList}\small\item\em The dds is used to generate the sample clock. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_a6df1c9bf5ff79f8f93242f2f52d5c38a}{dds\-Freq}
+\begin{DoxyCompactList}\small\item\em This is the D\-D\-S frequency that is calculated from the sample rate and the divisor. \end{DoxyCompactList}\item 
+\hyperlink{class_timing_1_1_timing_a42cacaad767cfee65072c72471a5b3a6}{pxi\-Star\-Slots}
+\begin{DoxyCompactList}\small\item\em This is the number of pxi star slots available on the chassis. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate perform the timing and synchronization required to synchronize all cards on the P\-X\-I backplane. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_timing_1_1_timing_ac67aaac1d30dc11a6924a06c099f4fa1}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Timing.\-Timing.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_timing_1_1_timing_ac67aaac1d30dc11a6924a06c099f4fa1}
+
+
+This function is a constructor for the \hyperlink{class_timing_1_1_timing}{Timing} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_timing_1_1_timing_aa351ebd1126df7ce0711f2dd90f054be}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Timing.\-Timing.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_timing_1_1_timing_aa351ebd1126df7ce0711f2dd90f054be}
+
+
+This is the destructor for the \hyperlink{class_timing_1_1_timing}{Timing} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_timing_1_1_timing_a1d63d7de0f640dfac6b236a242d75d4d}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!close@{close}}
+\index{close@{close}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Timing.\-Timing.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_timing_1_1_timing_a1d63d7de0f640dfac6b236a242d75d4d}
+
+
+This function will close the connection to the ni\-Sync device. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_timing_1_1_timing_a74750a56a2403b952fdd78e9d67f6b88}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!init@{init}}
+\index{init@{init}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Timing.\-Timing.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{device\-Name}
+\end{DoxyParamCaption}
+)}}\label{class_timing_1_1_timing_a74750a56a2403b952fdd78e9d67f6b88}
+
+
+This function connects to the ni\-Sync device and starts to setup clock and trigger connections. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em device\-Name} & The name of the ni\-Sync device. This name can be found in Measurement and Automation Explorer. Example value\-: \char`\"{}\-P\-X\-I1\-Slot14\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_timing_1_1_timing_a464d13b21bd536d8332808cafb946725}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!send\-Software\-Trigger@{send\-Software\-Trigger}}
+\index{send\-Software\-Trigger@{send\-Software\-Trigger}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{send\-Software\-Trigger}]{\setlength{\rightskip}{0pt plus 5cm}def Timing.\-Timing.\-send\-Software\-Trigger (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_timing_1_1_timing_a464d13b21bd536d8332808cafb946725}
+
+
+This function will send a trigger to all devices when it is called. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_timing_1_1_timing_a6df1c9bf5ff79f8f93242f2f52d5c38a}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!dds\-Freq@{dds\-Freq}}
+\index{dds\-Freq@{dds\-Freq}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{dds\-Freq}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-dds\-Freq}}\label{class_timing_1_1_timing_a6df1c9bf5ff79f8f93242f2f52d5c38a}
+
+
+This is the D\-D\-S frequency that is calculated from the sample rate and the divisor. 
+
+The D\-D\-S frequency is the sample rate divided by the divisor. \hypertarget{class_timing_1_1_timing_acb98ae4190c94c258c1f86060ab27a86}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!divisor@{divisor}}
+\index{divisor@{divisor}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{divisor}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-divisor}}\label{class_timing_1_1_timing_acb98ae4190c94c258c1f86060ab27a86}
+
+
+The dds is used to generate the sample clock. 
+
+The lower the value of the divisor the more inaccurate the sample clock. This value is defualted to its maximum of 32. \hypertarget{class_timing_1_1_timing_a802c666b56edd255e17036d5317af75c}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!initialized@{initialized}}
+\index{initialized@{initialized}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-initialized}}\label{class_timing_1_1_timing_a802c666b56edd255e17036d5317af75c}
+
+
+This is a boolean that is true when the N\-I-\/\-Sync session has been initialized. 
+
+\hypertarget{class_timing_1_1_timing_a42cacaad767cfee65072c72471a5b3a6}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!pxi\-Star\-Slots@{pxi\-Star\-Slots}}
+\index{pxi\-Star\-Slots@{pxi\-Star\-Slots}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{pxi\-Star\-Slots}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-pxi\-Star\-Slots}}\label{class_timing_1_1_timing_a42cacaad767cfee65072c72471a5b3a6}
+
+
+This is the number of pxi star slots available on the chassis. 
+
+In order for the sample clock to be distributed to all cards, this value must be equal to or larger than the number of potential cards on the Chassis. \hypertarget{class_timing_1_1_timing_a8ce8605fb1b55c4a7a0db05c6b1a551c}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!resource\-Name@{resource\-Name}}
+\index{resource\-Name@{resource\-Name}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{resource\-Name}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-resource\-Name}}\label{class_timing_1_1_timing_a8ce8605fb1b55c4a7a0db05c6b1a551c}
+
+
+This the name of the N\-I-\/\-Sync resource that refers to the synchronization P\-X\-I card. 
+
+\hypertarget{class_timing_1_1_timing_a645c0a6e372274c15036da2cdd81ce51}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-sample\-Rate}}\label{class_timing_1_1_timing_a645c0a6e372274c15036da2cdd81ce51}
+
+
+This is the sample rate of the sample clock that gets distributed to all of the cards on a P\-X\-I Chassis. 
+
+\hypertarget{class_timing_1_1_timing_ac6ffaf6ca94b488dba1c56a780b01cfb}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!session@{session}}
+\index{session@{session}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{session}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-session}}\label{class_timing_1_1_timing_ac6ffaf6ca94b488dba1c56a780b01cfb}
+
+
+This is the reference to the N\-I-\/\-Sync session. 
+
+\hypertarget{class_timing_1_1_timing_aa54e754e141f10df585dbe3bf86729ef}{\index{Timing\-::\-Timing@{Timing\-::\-Timing}!status@{status}}
+\index{status@{status}!Timing::Timing@{Timing\-::\-Timing}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Timing.\-Timing.\-status}}\label{class_timing_1_1_timing_aa54e754e141f10df585dbe3bf86729ef}
+
+
+This is the status of the N\-I-\/\-Sync session. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Timing.\-py\end{DoxyCompactItemize}

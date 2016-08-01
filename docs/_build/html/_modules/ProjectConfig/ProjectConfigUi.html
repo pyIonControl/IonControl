@@ -1,0 +1,307 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProjectConfig.ProjectConfigUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>ProjectConfig.ProjectConfigUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ProjectConfig.ProjectConfigUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+
+<span class="n">uiPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/ProjectConfig.ui&#39;</span><span class="p">)</span>
+<span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uiPath</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+
+<div class="viewcode-block" id="ProjectConfigUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi">[docs]</a><span class="k">class</span> <span class="nc">ProjectConfigUi</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for selecting a project&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">scriptname</span><span class="p">):</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scriptname</span> <span class="o">=</span> <span class="n">scriptname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">projectConfig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurationFile</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ProjectConfigUi.setupUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;setup the dialog box ui&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ProjectConfigUi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span>
+            <span class="s2">&quot;This dialog box overwrites the configuration file </span><span class="si">{0}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">projectConfigFilename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBaseDir</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">populateProjectList</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">changeBaseDirectory</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onChangeBaseDirectory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onCreate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findConfigurationFile</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onFindConfigurationFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurationFileEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSetConfigurationFile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadFromDateTimeEdit</span><span class="o">.</span><span class="n">setDateTime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.setBaseDir"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.setBaseDir">[docs]</a>    <span class="k">def</span> <span class="nf">setBaseDir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a valid base directory&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">]):</span>
+            <span class="n">baseDir</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                                 <span class="s1">&#39;Please select a base directory for projects&#39;</span><span class="p">,</span>
+                                                                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+                                                                <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">baseDir</span><span class="p">):</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Valid base directory for projects must be specified for IonControl program to run&quot;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">baseDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseDirectoryEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.onCreate"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onCreate">[docs]</a>    <span class="k">def</span> <span class="nf">onCreate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new project folder&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProjectName</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">projectDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">],</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">configDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">projectDir</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">configDir</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">configDir</span><span class="p">)</span>
+            <span class="n">exptConfigFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">configDir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptname</span> <span class="o">+</span> <span class="s1">&#39;_ExptConfig.yml&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">exptConfigFilename</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">exptConfigFilename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">populateProjectList</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">newProjectName</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.populateProjectList"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.populateProjectList">[docs]</a>    <span class="k">def</span> <span class="nf">populateProjectList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">projects</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">],</span> <span class="n">name</span><span class="p">,</span> <span class="s1">&#39;config&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptname</span> <span class="o">+</span> <span class="s1">&#39;_ExptConfig.yml&#39;</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">projects</span><span class="p">)</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">findItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">setCurrentItem</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">projects</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">setCurrentRow</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.onChangeBaseDirectory"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onChangeBaseDirectory">[docs]</a>    <span class="k">def</span> <span class="nf">onChangeBaseDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">baseDir</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getExistingDirectory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">baseDir</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">baseDir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baseDirectoryEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">baseDir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">populateProjectList</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.onFindConfigurationFile"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onFindConfigurationFile">[docs]</a>    <span class="k">def</span> <span class="nf">onFindConfigurationFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurationFile</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="n">caption</span><span class="o">=</span><span class="s2">&quot;Configuration File&quot;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;baseDir&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurationFileEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configurationFile</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.onSetConfigurationFile"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onSetConfigurationFile">[docs]</a>    <span class="k">def</span> <span class="nf">onSetConfigurationFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configurationFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurationFileEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.accept"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">selectedProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projectList</span><span class="o">.</span><span class="n">currentItem</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">selectedProject</span><span class="p">:</span> <span class="c1">#something is selected</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">selectedProject</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;configurationFile&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurationFile</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">projectConfig</span><span class="p">[</span><span class="s1">&#39;loadFromDateTime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadFromDateTimeEdit</span><span class="o">.</span><span class="n">dateTime</span><span class="p">()</span><span class="o">.</span><span class="n">toPyDateTime</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadHistoricSettingCheck</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1">#if nothing is selected, equivalent to clicking cancel</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProjectConfigUi.reject"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ProjectConfigUi.ProjectConfigUi.reject">[docs]</a>    <span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Project must be selected for IonControl program to run&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

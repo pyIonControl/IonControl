@@ -1,0 +1,176 @@
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser}{\section{Chassis.\-git.\-file\-Parser.\-file\-Parser Class Reference}
+\label{class_chassis_8git_1_1file_parser_1_1file_parser}\index{Chassis.\-git.\-file\-Parser.\-file\-Parser@{Chassis.\-git.\-file\-Parser.\-file\-Parser}}
+}
+
+
+This class is the parent class of all file parsers.  
+
+
+Inheritance diagram for Chassis.\-git.\-file\-Parser.\-file\-Parser\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1file_parser_1_1file_parser}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_a1fae3a79d347d4177fc3abba9392d9da}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This funciton is the constructor of the \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser}{file\-Parser} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_a64f356fcf7cc208418aa695b69e9c7db}{open}
+\begin{DoxyCompactList}\small\item\em This function opens the file in the file\-Path argument. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_ae48469d273d44a27386a44ebf2ca0119}{get\-Num\-Lines}
+\begin{DoxyCompactList}\small\item\em This function will return the number of lines within the file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_addddca7b4ca27f76f80c37fe748717df}{close}
+\begin{DoxyCompactList}\small\item\em This function will close the file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_afed07b7aef64bcf14e3f5dfbfb8abdad}{file\-Obj}
+\begin{DoxyCompactList}\small\item\em The file object for the file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_a0fe55989374700f448b8b931665016b8}{comments}
+\begin{DoxyCompactList}\small\item\em The comments within the file as a list. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_abc3276e824252bca239dd8f225b94724}{meta}
+\begin{DoxyCompactList}\small\item\em The meta data of the file as a list. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_af6c4654848127445265b91e10393b302}{empty}
+\begin{DoxyCompactList}\small\item\em A boolean value that is true if the file is empty, and false otherwise. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_af91767a86e07d0ee859c2548d88c7bc7}{total\-Lines}
+\begin{DoxyCompactList}\small\item\em This is the total number of lines of data within the itf file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class is the parent class of all file parsers. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_a1fae3a79d347d4177fc3abba9392d9da}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-file\-Parser.\-file\-Parser.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Obj = {\ttfamily None}, }
+\item[{}]{file\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_a1fae3a79d347d4177fc3abba9392d9da}
+
+
+This funciton is the constructor of the \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser}{file\-Parser} class. 
+
+It creates class data and opens the file if the file\-Path argument is provided. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Obj} & The file object that gets returned by the file \hyperlink{class_chassis_8git_1_1file_parser_1_1file_parser_a64f356fcf7cc208418aa695b69e9c7db}{open()} function. \\
+\hline
+{\em file\-Path} & A string that represents the location of the file. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_addddca7b4ca27f76f80c37fe748717df}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!close@{close}}
+\index{close@{close}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-file\-Parser.\-file\-Parser.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_addddca7b4ca27f76f80c37fe748717df}
+
+
+This function will close the file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_ae48469d273d44a27386a44ebf2ca0119}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!get\-Num\-Lines@{get\-Num\-Lines}}
+\index{get\-Num\-Lines@{get\-Num\-Lines}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{get\-Num\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-file\-Parser.\-file\-Parser.\-get\-Num\-Lines (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_ae48469d273d44a27386a44ebf2ca0119}
+
+
+This function will return the number of lines within the file. 
+
+This function is equivalent to reading the total\-Lines variable within the class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_a64f356fcf7cc208418aa695b69e9c7db}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!open@{open}}
+\index{open@{open}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{open}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-file\-Parser.\-file\-Parser.\-open (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_a64f356fcf7cc208418aa695b69e9c7db}
+
+
+This function opens the file in the file\-Path argument. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Path} & This is the path to the file. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_a0fe55989374700f448b8b931665016b8}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!comments@{comments}}
+\index{comments@{comments}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{comments}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-file\-Parser.\-file\-Parser.\-comments}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_a0fe55989374700f448b8b931665016b8}
+
+
+The comments within the file as a list. 
+
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_af6c4654848127445265b91e10393b302}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!empty@{empty}}
+\index{empty@{empty}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{empty}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-file\-Parser.\-file\-Parser.\-empty}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_af6c4654848127445265b91e10393b302}
+
+
+A boolean value that is true if the file is empty, and false otherwise. 
+
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_afed07b7aef64bcf14e3f5dfbfb8abdad}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!file\-Obj@{file\-Obj}}
+\index{file\-Obj@{file\-Obj}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{file\-Obj}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-file\-Parser.\-file\-Parser.\-file\-Obj}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_afed07b7aef64bcf14e3f5dfbfb8abdad}
+
+
+The file object for the file. 
+
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_abc3276e824252bca239dd8f225b94724}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!meta@{meta}}
+\index{meta@{meta}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{meta}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-file\-Parser.\-file\-Parser.\-meta}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_abc3276e824252bca239dd8f225b94724}
+
+
+The meta data of the file as a list. 
+
+The dt variable is often within an itf file. The value of this variable will be a value within meta. 
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1file_parser_1_1file_parser_af91767a86e07d0ee859c2548d88c7bc7}{\index{Chassis.\-git\-::file\-Parser\-::file\-Parser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}!total\-Lines@{total\-Lines}}
+\index{total\-Lines@{total\-Lines}!Chassis.git::fileParser::fileParser@{Chassis.\-git\-::file\-Parser\-::file\-Parser}}
+\subsubsection[{total\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-file\-Parser.\-file\-Parser.\-total\-Lines\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1file_parser_1_1file_parser_af91767a86e07d0ee859c2548d88c7bc7}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getNumLines,
+2                doc = \textcolor{stringliteral}{"""The total number of lines in the file."""})
+\end{DoxyCode}
+
+
+This is the total number of lines of data within the itf file. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+file\-Parser.\-py\end{DoxyCompactItemize}

@@ -1,0 +1,386 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>externalParameter.ExternalParameterSelection &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>externalParameter.ExternalParameterSelection</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for externalParameter.ExternalParameterSelection</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">externalParameter.ExternalParameterTableModel</span> <span class="k">import</span> <span class="n">ExternalParameterTableModel</span>
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">from</span> <span class="nn">modules.Utility</span> <span class="k">import</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">uiModules.KeyboardFilter</span> <span class="k">import</span> <span class="n">KeyListFilter</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">updateComboBoxItems</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">uiModules.ComboBoxDelegate</span> <span class="k">import</span> <span class="n">ComboBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">.InstrumentSettings</span> <span class="k">import</span> <span class="n">InstrumentSettings</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/ExternalParameterSelection.ui&#39;</span><span class="p">)</span>
+<span class="n">SelectionForm</span><span class="p">,</span> <span class="n">SelectionBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">className</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">InstrumentSettings</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span></div>
+
+
+<div class="viewcode-block" id="SelectionUi"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi">[docs]</a><span class="k">class</span> <span class="nc">SelectionUi</span><span class="p">(</span><span class="n">SelectionForm</span><span class="p">,</span> <span class="n">SelectionBase</span><span class="p">):</span>
+    <span class="n">outputChannelsChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">inputChannelsChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">classdict</span><span class="p">,</span> <span class="n">instancename</span><span class="o">=</span><span class="s2">&quot;ExternalParameterSelection.ParametersSequence&quot;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">SelectionBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">SelectionForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instancename</span> <span class="o">=</span> <span class="n">instancename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instancename</span><span class="p">,</span> <span class="n">SequenceDict</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span> <span class="o">=</span> <span class="n">SequenceDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classdict</span> <span class="o">=</span> <span class="n">classdict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+    
+<div class="viewcode-block" id="SelectionUi.setupUi"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">SelectionForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">MainWindow</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span> <span class="o">=</span> <span class="n">ExternalParameterTableModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">classdict</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">enableChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDelegate</span> <span class="o">=</span> <span class="n">ComboBoxDelegate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">comboBoxDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>   
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">KeyListFilter</span><span class="p">(</span> <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageDown</span><span class="p">]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="o">.</span><span class="n">keyPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReorder</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classdict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">classComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getInstrumentSuggestions</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addParameterButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAddParameter</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeParameterButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveParameter</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refreshInstrumentComboBox</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getInstrumentSuggestions</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">enableInstrument</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> while enabling instrument </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">parameter</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>     
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">sortToMatch</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">emitSelectionChanged</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onActiveInstrumentChanged</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SelectionUi.outputChannels"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.outputChannels">[docs]</a>    <span class="k">def</span> <span class="nf">outputChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span> <span class="o">=</span>  <span class="nb">dict</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">outputChannelList</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span></div>
+        
+<div class="viewcode-block" id="SelectionUi.inputChannels"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.inputChannels">[docs]</a>    <span class="k">def</span> <span class="nf">inputChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inputChannels</span> <span class="o">=</span>  <span class="nb">dict</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">inputChannelList</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">values</span><span class="p">()]))</span>        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputChannels</span></div>
+        
+<div class="viewcode-block" id="SelectionUi.emitSelectionChanged"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.emitSelectionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">emitSelectionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputChannelsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputChannelsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputChannels</span><span class="p">()</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SelectionUi.getInstrumentSuggestions"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.getInstrumentSuggestions">[docs]</a>    <span class="k">def</span> <span class="nf">getInstrumentSuggestions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">className</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">className</span><span class="p">)</span> <span class="k">if</span> <span class="n">className</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">classComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="n">myclass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classdict</span><span class="p">[</span><span class="n">className</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">myclass</span><span class="p">,</span> <span class="s1">&#39;connectedInstruments&#39;</span><span class="p">):</span>
+            <span class="n">updateComboBoxItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instrumentComboBox</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">myclass</span><span class="o">.</span><span class="n">connectedInstruments</span><span class="p">()))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refreshInstrumentComboBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instrumentComboBox</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">refreshInstrumentComboBox</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SelectionUi.onReorder"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onReorder">[docs]</a>    <span class="k">def</span> <span class="nf">onReorder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageDown</span><span class="p">]:</span>
+            <span class="n">indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+            <span class="n">up</span> <span class="o">=</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span>
+            <span class="n">delta</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">up</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indexes</span> <span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="ow">not</span> <span class="n">up</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">moveRow</span><span class="p">(</span> <span class="n">rows</span><span class="p">,</span> <span class="n">up</span><span class="o">=</span><span class="n">up</span> <span class="p">):</span>
+                <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+                <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexes</span><span class="p">:</span>
+                    <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span><span class="o">+</span><span class="n">delta</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QItemSelectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">sortToMatch</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>               
+            <span class="bp">self</span><span class="o">.</span><span class="n">emitSelectionChanged</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SelectionUi.onEnableChanged"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onEnableChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enableInstrument</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> while enabling instrument </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>                    
+                <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">setParameterDict</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disableInstrument</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+                      
+<div class="viewcode-block" id="SelectionUi.onAddParameter"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onAddParameter">[docs]</a>    <span class="k">def</span> <span class="nf">onAddParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">()</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">instrument</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instrumentComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">className</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">setParameterDict</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>        </div>
+        
+<div class="viewcode-block" id="SelectionUi.onRemoveParameter"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onRemoveParameter">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span> <span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">enabled</span><span class="o">=</span><span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">disableInstrument</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">setParameterDict</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="p">)</span></div>
+            
+<div class="viewcode-block" id="SelectionUi.enableInstrument"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.enableInstrument">[docs]</a>    <span class="k">def</span> <span class="nf">enableInstrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classdict</span><span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">className</span><span class="p">](</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">instrument</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">sortToMatch</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>               
+            <span class="bp">self</span><span class="o">.</span><span class="n">emitSelectionChanged</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableModel</span><span class="o">.</span><span class="n">setParameterDict</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Enabled Instrument </span><span class="si">{0}</span><span class="s2"> as </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+            
+<div class="viewcode-block" id="SelectionUi.disableInstrument"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.disableInstrument">[docs]</a>    <span class="k">def</span> <span class="nf">disableInstrument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span> <span class="n">name</span> <span class="p">)</span>
+            <span class="n">instance</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">sortToMatch</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>               
+            <span class="bp">self</span><span class="o">.</span><span class="n">emitSelectionChanged</span><span class="p">()</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Disabled Instrument </span><span class="si">{0}</span><span class="s2"> as </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">parameter</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="SelectionUi.onActiveInstrumentChanged"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onActiveInstrumentChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onActiveInstrumentChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelIndex</span><span class="p">,</span> <span class="n">modelIndex2</span> <span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;activeInstrumentChanged </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">modelIndex</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">modelIndex</span><span class="o">.</span><span class="n">row</span><span class="p">())</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treeWidget</span><span class="o">.</span><span class="n">setParameters</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">modelIndex</span><span class="o">.</span><span class="n">row</span><span class="p">())</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">parameter</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="SelectionUi.saveConfig"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">instancename</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span></div>
+        
+<div class="viewcode-block" id="SelectionUi.onClose"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterSelection.SelectionUi.onClose">[docs]</a>    <span class="k">def</span> <span class="nf">onClose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">inst</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">enabledParametersObjects</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">inst</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">MainWindow</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">SelectionUi</span><span class="p">(</span><span class="nb">dict</span><span class="p">())</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

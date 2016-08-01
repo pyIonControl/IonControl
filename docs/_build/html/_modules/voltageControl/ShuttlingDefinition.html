@@ -1,0 +1,539 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>voltageControl.ShuttlingDefinition &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>voltageControl.ShuttlingDefinition</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for voltageControl.ShuttlingDefinition</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">operator</span> <span class="k">import</span> <span class="n">itemgetter</span>
+
+<span class="kn">from</span> <span class="nn">networkx</span> <span class="k">import</span> <span class="n">MultiGraph</span><span class="p">,</span> <span class="n">shortest_path</span>
+
+<span class="kn">from</span> <span class="nn">modules.pairs_iter</span> <span class="k">import</span> <span class="n">pairs_iter</span>
+<span class="kn">from</span> <span class="nn">modules.Observable</span> <span class="k">import</span> <span class="n">Observable</span>
+<span class="kn">from</span> <span class="nn">modules.firstNotNone</span> <span class="k">import</span> <span class="n">firstNotNone</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span> <span class="k">as</span> <span class="nn">ElementTree</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">uiModules.SoftStart</span> <span class="k">import</span> <span class="n">StartTypes</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">chain</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">linspace</span>
+
+
+<div class="viewcode-block" id="ShuttleEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttleEdge">[docs]</a><span class="k">class</span> <span class="nc">ShuttleEdge</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">stateFields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;startLine&#39;</span><span class="p">,</span> <span class="s1">&#39;stopLine&#39;</span><span class="p">,</span> <span class="s1">&#39;idleCount&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">,</span> <span class="s1">&#39;wait&#39;</span><span class="p">,</span> <span class="s1">&#39;startName&#39;</span><span class="p">,</span> <span class="s1">&#39;stopName&#39;</span><span class="p">,</span> <span class="s1">&#39;steps&#39;</span><span class="p">,</span> <span class="s1">&#39;_startType&#39;</span><span class="p">,</span> <span class="s1">&#39;_stopType&#39;</span><span class="p">,</span> <span class="s1">&#39;startLength&#39;</span><span class="p">,</span> <span class="s1">&#39;stopLength&#39;</span> <span class="p">]</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startName</span><span class="o">=</span><span class="s2">&quot;start&quot;</span><span class="p">,</span> <span class="n">stopName</span><span class="o">=</span><span class="s2">&quot;stop&quot;</span><span class="p">,</span> <span class="n">startLine</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">stopLine</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">idleCount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">soft_trigger</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span> <span class="o">=</span> <span class="n">startLine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopLine</span> <span class="o">=</span> <span class="n">stopLine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolStartLine</span> <span class="o">=</span> <span class="n">startLine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interpolStopLine</span> <span class="o">=</span> <span class="n">stopLine</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">idleCount</span> <span class="o">=</span> <span class="n">idleCount</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">direction</span> <span class="o">=</span> <span class="n">direction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wait</span> <span class="o">=</span> <span class="n">wait</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startName</span> <span class="o">=</span> <span class="n">startName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopName</span> <span class="o">=</span> <span class="n">stopName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startType</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopType</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startLength</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopLength</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_startType</span><span class="p">]()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_startType</span><span class="p">]()</span>
+
+<div class="viewcode-block" id="ShuttleEdge.toXmlElement"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttleEdge.toXmlElement">[docs]</a>    <span class="k">def</span> <span class="nf">toXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span> <span class="p">))</span>
+        <span class="n">myElement</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;ShuttleEdge&#39;</span><span class="p">,</span> <span class="n">mydict</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">myElement</span></div>
+    
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ShuttleEdge.fromXmlElement"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttleEdge.fromXmlElement">[docs]</a>    <span class="k">def</span> <span class="nf">fromXmlElement</span><span class="p">(</span> <span class="n">element</span> <span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">attrib</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="n">ShuttleEdge</span><span class="p">(</span> <span class="n">startName</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;startName&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">),</span>  <span class="n">stopName</span><span class="o">=</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stopName&#39;</span><span class="p">,</span> <span class="s2">&quot;stop&quot;</span><span class="p">),</span> <span class="n">startLine</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;startLine&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0&#39;</span><span class="p">)),</span> 
+                            <span class="n">stopLine</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stopLine&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0&#39;</span><span class="p">)),</span> <span class="n">idleCount</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;idleCount&#39;</span><span class="p">,</span> <span class="s1">&#39;0.0&#39;</span><span class="p">)),</span> <span class="n">direction</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;direction&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">)),</span> 
+                            <span class="n">wait</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;wait&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">)),</span> <span class="n">soft_trigger</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;softTrigger&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">))</span> <span class="p">)</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">_startType</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_startType&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">_stopType</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_stopType&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">startLength</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;startLength&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">stopLength</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span> <span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;stopLength&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;steps&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">))</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">startGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">_startType</span><span class="p">]()</span>
+        <span class="n">edge</span><span class="o">.</span><span class="n">stopGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">_startType</span><span class="p">]()</span>
+        <span class="k">return</span> <span class="n">edge</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">startType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startType</span>
+    
+    <span class="nd">@startType</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">startType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startType</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_startType</span><span class="p">]()</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stopType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopType</span>
+    
+    <span class="nd">@stopType</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stopType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopType</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopGenerator</span> <span class="o">=</span> <span class="n">StartTypes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopType</span><span class="p">]()</span>
+            
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timePerSample</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Q</span><span class="p">(</span><span class="mf">2.06</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">idleCount</span><span class="o">*</span><span class="n">Q</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="s1">&#39;us&#39;</span><span class="p">)</span>
+
+    <span class="nd">@property</span> 
+    <span class="k">def</span> <span class="nf">sampleCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopLine</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mf">1.0</span>
+
+    <span class="nd">@property</span> 
+    <span class="k">def</span> <span class="nf">totalSampleCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralSteps</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">effectiveStartLength</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">effectiveStopLength</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centralStartLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startLength</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startType</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleCount</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopLine</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startType</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centralStopLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleCount</span><span class="o">-</span><span class="mi">1</span><span class="o">-</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopLength</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopType</span> <span class="k">else</span> <span class="mi">0</span><span class="p">))</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleCount</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopLine</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopType</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopLine</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centralSteps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralStopLine</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralStartLine</span><span class="p">)</span><span class="o">*</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">steps</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">totalTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">totalSampleCount</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">timePerSample</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">effectiveStartLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">startGenerator</span><span class="o">.</span><span class="n">effectiveLength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startLength</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startGenerator</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">effectiveStopLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopGenerator</span><span class="o">.</span><span class="n">effectiveLength</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stopLength</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopGenerator</span> <span class="k">else</span> <span class="mi">0</span> 
+    
+<div class="viewcode-block" id="ShuttleEdge.iLines"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttleEdge.iLines">[docs]</a>    <span class="k">def</span> <span class="nf">iLines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">chain</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startGenerator</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">linspace</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralStartLine</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">centralStopLine</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">centralSteps</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopGenerator</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div></div>
+
+<div class="viewcode-block" id="ShuttlingGraphException"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraphException">[docs]</a><span class="k">class</span> <span class="nc">ShuttlingGraphException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ShuttlingGraph"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph">[docs]</a><span class="k">class</span> <span class="nc">ShuttlingGraph</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shuttlingEdges</span><span class="o">=</span><span class="nb">list</span><span class="p">()</span> <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ShuttlingGraph</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">shuttlingEdges</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionName</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionObservable</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        
+<div class="viewcode-block" id="ShuttlingGraph.initGraph"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.initGraph">[docs]</a>    <span class="k">def</span> <span class="nf">initGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span> <span class="o">=</span> <span class="n">MultiGraph</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">),</span> <span class="n">edge</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span>
+                                         <span class="n">weight</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span></div>
+
+<div class="viewcode-block" id="ShuttlingGraph.rgenerateNodeLookup"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.rgenerateNodeLookup">[docs]</a>    <span class="k">def</span> <span class="nf">rgenerateNodeLookup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hasChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span>
+    
+    <span class="nd">@hasChanged</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">hasChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="n">value</span>
+            
+<div class="viewcode-block" id="ShuttlingGraph.position"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.position">[docs]</a>    <span class="k">def</span> <span class="nf">position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">line</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setPosition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setPosition">[docs]</a>    <span class="k">def</span> <span class="nf">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="o">!=</span><span class="n">line</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span> <span class="o">=</span> <span class="n">line</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionObservable</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span> <span class="n">line</span><span class="o">=</span><span class="n">line</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">firstNotNone</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ShuttlingGraph.getMatchingPosition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.getMatchingPosition">[docs]</a>    <span class="k">def</span> <span class="nf">getMatchingPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">graph</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Try to match node name/position to the current settings in the provided ShuttlingGraph.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">graph</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span> <span class="c1"># no change</span>
+        <span class="c1"># Matching node name. Need to set the corresponding position</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span> <span class="o">==</span> <span class="n">graph</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">startLine</span>
+            <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span> <span class="o">==</span> <span class="n">graph</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span>
+        <span class="c1">#if graph.currentPosition:</span>
+        <span class="c1">#    return graph.currentPosition #just use the graph&#39;s position</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span></div>
+
+<div class="viewcode-block" id="ShuttlingGraph.addEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.addEdge">[docs]</a>    <span class="k">def</span> <span class="nf">addEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">),</span> <span class="n">edge</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="ShuttlingGraph.isValidEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.isValidEdge">[docs]</a>    <span class="k">def</span> <span class="nf">isValidEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">]</span> <span class="o">==</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">]</span> <span class="o">==</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="ShuttlingGraph.getValidEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.getValidEdge">[docs]</a>    <span class="k">def</span> <span class="nf">getValidEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="s2">&quot;Start_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">startName</span> <span class="o">=</span> <span class="s2">&quot;Start_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="s2">&quot;Stop_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">)):</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">stopName</span> <span class="o">=</span> <span class="s2">&quot;Stop_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">startLine</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">stopLine</span> <span class="o">=</span> <span class="n">startLine</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">ShuttleEdge</span><span class="p">(</span><span class="n">startName</span><span class="p">,</span> <span class="n">stopName</span><span class="p">,</span> <span class="n">startLine</span><span class="p">,</span> <span class="n">stopLine</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.removeEdge"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.removeEdge">[docs]</a>    <span class="k">def</span> <span class="nf">removeEdge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">edgeno</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rgenerateNodeLookup</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStartName"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStartName">[docs]</a>    <span class="k">def</span> <span class="nf">setStartName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">startName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">startName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">startName</span><span class="p">)</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span> <span class="o">!=</span> <span class="n">startName</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">)</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">startName</span> <span class="o">=</span> <span class="n">startName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">),</span> <span class="n">edge</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span>
+                                         <span class="n">weight</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rgenerateNodeLookup</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStopName"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStopName">[docs]</a>    <span class="k">def</span> <span class="nf">setStopName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">stopName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">stopName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">stopName</span><span class="p">)</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span> <span class="o">!=</span> <span class="n">stopName</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">degree</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">remove_node</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">)</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span> <span class="o">=</span> <span class="n">stopName</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">),</span> <span class="n">edge</span><span class="o">=</span><span class="n">edge</span><span class="p">,</span>
+                                         <span class="n">weight</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rgenerateNodeLookup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStartLine"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStartLine">[docs]</a>    <span class="k">def</span> <span class="nf">setStartLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">startLine</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">startLine</span> <span class="o">!=</span> <span class="n">edge</span><span class="o">.</span><span class="n">startLine</span> <span class="ow">and</span> <span class="p">(</span><span class="n">startLine</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">startLine</span><span class="p">]</span> <span class="o">==</span> <span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">startLine</span> <span class="o">=</span> <span class="n">startLine</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">edge</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">][</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">][</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rgenerateNodeLookup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>    
+        <span class="k">return</span> <span class="kc">False</span>  </div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStopLine"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStopLine">[docs]</a>    <span class="k">def</span> <span class="nf">setStopLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">stopLine</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">stopLine</span> <span class="o">!=</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span> <span class="ow">and</span> <span class="p">(</span><span class="n">stopLine</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="p">[</span><span class="n">stopLine</span><span class="p">]</span> <span class="o">==</span> <span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeLookup</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="p">)</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span> <span class="o">=</span> <span class="n">stopLine</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">edge</span><span class="p">[</span><span class="n">edge</span><span class="o">.</span><span class="n">startName</span><span class="p">][</span><span class="n">edge</span><span class="o">.</span><span class="n">stopName</span><span class="p">][</span><span class="nb">hash</span><span class="p">(</span><span class="n">edge</span><span class="p">)][</span><span class="s1">&#39;weight&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLine</span><span class="o">-</span><span class="n">edge</span><span class="o">.</span><span class="n">startLine</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rgenerateNodeLookup</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">graphChangedObservable</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>  
+        <span class="k">return</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setIdleCount"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setIdleCount">[docs]</a>    <span class="k">def</span> <span class="nf">setIdleCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">idleCount</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span><span class="o">.</span><span class="n">idleCount</span> <span class="o">=</span> <span class="n">idleCount</span>
+        <span class="k">return</span> <span class="kc">True</span>      </div>
+
+<div class="viewcode-block" id="ShuttlingGraph.setSteps"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setSteps">[docs]</a>    <span class="k">def</span> <span class="nf">setSteps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="n">steps</span>
+        <span class="k">return</span> <span class="kc">True</span>      </div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.shuttlePath"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.shuttlePath">[docs]</a>    <span class="k">def</span> <span class="nf">shuttlePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span> <span class="p">):</span>
+        <span class="n">fromName</span> <span class="o">=</span> <span class="n">firstNotNone</span><span class="p">(</span><span class="n">fromName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPositionName</span><span class="p">)</span>
+        <span class="n">fromName</span> <span class="o">=</span> <span class="n">fromName</span> <span class="k">if</span> <span class="n">fromName</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">position</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentPosition</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">fromName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ShuttlingGraphException</span><span class="p">(</span><span class="s2">&quot;Shuttling failed, origin &#39;</span><span class="si">{0}</span><span class="s2">&#39; is not a valid shuttling node&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fromName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">toName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ShuttlingGraphException</span><span class="p">(</span><span class="s2">&quot;Shuttling failed, target &#39;</span><span class="si">{0}</span><span class="s2">&#39; is not a valid shuttling node&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">toName</span><span class="p">))</span>
+        <span class="n">sp</span> <span class="o">=</span> <span class="n">shortest_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="p">,</span> <span class="n">fromName</span><span class="p">,</span> <span class="n">toName</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">pairs_iter</span><span class="p">(</span><span class="n">sp</span><span class="p">):</span>
+            <span class="n">edge</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">edge</span><span class="p">[</span><span class="n">a</span><span class="p">][</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="n">itemgetter</span><span class="p">(</span><span class="s1">&#39;weight&#39;</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;edge&#39;</span><span class="p">]</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">edge</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.nodes"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.nodes">[docs]</a>    <span class="k">def</span> <span class="nf">nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingGraph</span><span class="o">.</span><span class="n">nodes</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.toXmlElement"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.toXmlElement">[docs]</a>    <span class="k">def</span> <span class="nf">toXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)))</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;currentPosition&#39;</span><span class="p">,</span> <span class="s1">&#39;currentPositionName&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="p">)</span> <span class="p">)</span> 
+        <span class="n">myElement</span> <span class="o">=</span> <span class="n">ElementTree</span><span class="o">.</span><span class="n">SubElement</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="s2">&quot;ShuttlingGraph&quot;</span><span class="p">,</span> <span class="n">attrib</span><span class="o">=</span><span class="n">mydict</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">edge</span><span class="o">.</span><span class="n">toXmlElement</span><span class="p">(</span> <span class="n">myElement</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">myElement</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStartType"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStartType">[docs]</a>    <span class="k">def</span> <span class="nf">setStartType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span><span class="o">.</span><span class="n">startType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStopType"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStopType">[docs]</a>    <span class="k">def</span> <span class="nf">setStopType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">Type</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span><span class="o">.</span><span class="n">stopType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStartLength"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStartLength">[docs]</a>    <span class="k">def</span> <span class="nf">setStartLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">length</span><span class="o">!=</span><span class="n">edge</span><span class="o">.</span><span class="n">startLength</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">length</span><span class="o">+</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLength</span><span class="o">&lt;</span><span class="n">edge</span><span class="o">.</span><span class="n">sampleCount</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">edge</span><span class="o">.</span><span class="n">startLength</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="ShuttlingGraph.setStopLength"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.setStopLength">[docs]</a>    <span class="k">def</span> <span class="nf">setStopLength</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edgeno</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="n">edge</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">edgeno</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">length</span><span class="o">!=</span><span class="n">edge</span><span class="o">.</span><span class="n">stopLength</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge</span><span class="o">.</span><span class="n">startLength</span><span class="o">+</span><span class="n">length</span><span class="o">&lt;</span><span class="n">edge</span><span class="o">.</span><span class="n">sampleCount</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_hasChanged</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">edge</span><span class="o">.</span><span class="n">stopLength</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="ShuttlingGraph.fromXmlElement"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.ShuttlingDefinition.ShuttlingGraph.fromXmlElement">[docs]</a>    <span class="k">def</span> <span class="nf">fromXmlElement</span><span class="p">(</span> <span class="n">element</span> <span class="p">):</span>
+        <span class="n">edgeElementList</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s2">&quot;ShuttleEdge&quot;</span><span class="p">)</span>
+        <span class="n">edgeList</span> <span class="o">=</span> <span class="p">[</span> <span class="n">ShuttleEdge</span><span class="o">.</span><span class="n">fromXmlElement</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">edgeElementList</span> <span class="p">]</span>
+        <span class="k">return</span> <span class="n">ShuttlingGraph</span><span class="p">(</span><span class="n">edgeList</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,586 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AWG.AWGDevices &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>AWG.AWGDevices</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for AWG.AWGDevices</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Created on Jul 2, 2015</span>
+
+<span class="sd">@author: Geoffrey Ji</span>
+
+<span class="sd">AWG Devices are defined here. If a new AWG needs to be added,</span>
+<span class="sd">it must inherit AWGDeviceBase and implement:</span>
+
+<span class="sd">- __init__</span>
+<span class="sd">   to initialize whatever libraries it needs</span>
+
+<span class="sd">- open, program, trigger, and close</span>
+<span class="sd">   to interface with the AWG</span>
+
+<span class="sd">- deviceProperties</span>
+<span class="sd">   To specify fixed properties of the AWG device. Required keys:</span>
+
+<span class="sd">    - minSamples (int)</span>
+<span class="sd">       minimum number of samples to program</span>
+
+<span class="sd">    - maxSamples (int)</span>
+<span class="sd">       maximum number of samples to program</span>
+
+<span class="sd">    - sampleChunkSize (int)</span>
+<span class="sd">       number of samples must be a multiple of sampleChunkSize</span>
+
+<span class="sd">    - padValue (int)</span>
+<span class="sd">       the waveform will be padded with this number to make it a multiple of sampleChunkSize, or to make it the length of minSamples</span>
+
+<span class="sd">    - minAmplitude (int)</span>
+<span class="sd">       minimum amplitude value (raw)</span>
+
+<span class="sd">    - maxAmplitude (int)</span>
+<span class="sd">       maximum amplitude value (raw)</span>
+
+<span class="sd">    - numChannels (int)</span>
+<span class="sd">       Number of channels</span>
+
+<span class="sd">    - calibration (function)</span>
+<span class="sd">        function that returns raw amplitude number, given voltage</span>
+
+<span class="sd">    - calibrationInv (function)</span>
+<span class="sd">        function that returns voltage, given raw amplitude number</span>
+
+<span class="sd">- parameters</span>
+<span class="sd">   To define dynamic properties and actions of the AWG, which are shown in the GUI and can be modified in the program.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">socket</span>  <span class="c1"># for TCP communication</span>
+<span class="kn">import</span> <span class="nn">struct</span>  <span class="c1"># for TCP message formatting</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">ctypes</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">AWG.AWGSegmentModel</span> <span class="k">import</span> <span class="n">AWGSegmentNode</span>
+<span class="kn">from</span> <span class="nn">ProjectConfig.Project</span> <span class="k">import</span> <span class="n">getProject</span>
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="c1">#from modules.magnitude import new_mag</span>
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">from</span> <span class="nn">uiModules.ParameterTable</span> <span class="k">import</span> <span class="n">Parameter</span>
+
+
+<div class="viewcode-block" id="AWGDeviceBase"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase">[docs]</a><span class="k">class</span> <span class="nc">AWGDeviceBase</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;base class for AWG Devices&quot;&quot;&quot;</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;programOnScanStart&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;numChannels&#39;</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">channel</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">channelSettingsList</span><span class="p">):</span> <span class="c1">#create new channels if it&#39;s necessary</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">channelSettingsList</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;segmentDataRoot&#39;</span><span class="p">:</span><span class="n">AWGSegmentNode</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                                                          <span class="s1">&#39;segmentTreeState&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+                                                          <span class="s1">&#39;plotEnabled&#39;</span> <span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                                                          <span class="s1">&#39;plotStyle&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">plotStyles</span><span class="o">.</span><span class="n">lines</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span>
+        <span class="n">awgConfigDict</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hardware</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">sampleRateText</span> <span class="o">=</span> <span class="n">awgConfigDict</span><span class="p">[</span><span class="s1">&#39;sampleRate&#39;</span><span class="p">]</span>
+        <span class="n">sampleRate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">sampleRateText</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;sampleRate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sampleRate</span>
+        <span class="n">sample</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;sampleRate&#39;</span><span class="p">]</span>
+        <span class="c1">#new_mag(&#39;sample&#39;, sample)  # TODO: check whether the added samples = count / second in modules/quantity_units.txt</span>
+        <span class="c1">#new_mag(&#39;samples&#39;, sample)  # replaces this</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AWGDeviceBase.parameters"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.parameters">[docs]</a>    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the parameter definitions used by the parameterTable to show the gui&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">SequenceDict</span><span class="p">(</span>
+            <span class="p">[(</span> <span class="s1">&#39;Use Calibration&#39;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Use Calibration&#39;</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">)</span> <span class="p">),</span>
+             <span class="p">(</span> <span class="s1">&#39;Program on scan start&#39;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Program on scan start&#39;</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s1">&#39;programOnScanStart&#39;</span><span class="p">],</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;programOnScanStart&#39;</span><span class="p">)</span> <span class="p">),</span>
+             <span class="p">(</span> <span class="s1">&#39;Program now&#39;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Program now&#39;</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;program&#39;</span><span class="p">)</span> <span class="p">),</span>
+             <span class="p">(</span> <span class="s1">&#39;Trigger now&#39;</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Trigger now&#39;</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;trigger&#39;</span><span class="p">)</span> <span class="p">)]</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AWGDeviceBase.update"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the parameter, called by the parameterTable&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">dataType</span><span class="o">!=</span><span class="s1">&#39;action&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="n">parameter</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter</span><span class="o">.</span><span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">saveIfNecessary</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">parameter</span><span class="o">.</span><span class="n">key</span><span class="o">==</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">replot</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">value</span><span class="p">)()</span></div>
+
+    <span class="c1">#functions and attributes that must be defined by inheritors</span>
+<div class="viewcode-block" id="AWGDeviceBase.open"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;open&#39; method must be implemented by specific AWG device class&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="AWGDeviceBase.program"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.program">[docs]</a>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;program&#39; method must be implemented by specific AWG device class&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="AWGDeviceBase.trigger"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;trigger&#39; method must be implemented by specific AWG device class&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="AWGDeviceBase.close"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.AWGDeviceBase.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;close&#39; method must be implemented by specific AWG device class&quot;</span><span class="p">)</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">deviceProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;deviceProperties&#39; must be set by specific AWG device class&quot;</span><span class="p">)</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">displayName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;&#39;displayName&#39; must be set by specific AWG device class&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Lecroy1102"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102">[docs]</a><span class="k">class</span> <span class="nc">Lecroy1102</span><span class="p">(</span><span class="n">AWGDeviceBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for programming a Lecroy 1102 AWG&quot;&quot;&quot;</span>
+    <span class="n">displayName</span> <span class="o">=</span> <span class="s2">&quot;Lecroy 1102 AWG&quot;</span>
+    <span class="n">deviceProperties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">minSamples</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="c1">#minimum number of samples to program</span>
+        <span class="n">maxSamples</span> <span class="o">=</span> <span class="mi">2000000</span><span class="p">,</span> <span class="c1">#maximum number of samples to program</span>
+        <span class="n">sampleChunkSize</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#number of samples must be a multiple of sampleChunkSize</span>
+        <span class="n">padValue</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">#the waveform will be padded with this number to make it a multiple of sampleChunkSize, or to make it the length of minSamples</span>
+        <span class="n">minAmplitude</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">#minimum amplitude value (raw)</span>
+        <span class="n">maxAmplitude</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span> <span class="c1">#maximum amplitude value (raw)</span>
+        <span class="n">numChannels</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">#Number of channels</span>
+        <span class="n">calibration</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">voltage</span><span class="p">:</span> <span class="n">voltage</span><span class="p">,</span> <span class="c1">#function that returns raw amplitude number, given voltage</span>
+        <span class="n">calibrationInv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">raw</span><span class="p">:</span> <span class="n">raw</span> <span class="c1">#function that returns voltage, given raw amplitude number</span>
+
+        <span class="c1"># program project hardware properties specified in the .yml file</span>
+        <span class="c1">#   sampleRate = mg(244.258800, &#39;MHz&#39;), #rate at which the samples programmed are output by the AWG</span>
+        <span class="c1">#   external_clock_frequency = mg(81419600, &#39;Hz&#39;), #rate at which the AWG is clocked</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="Lecroy1102.parameters"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.parameters">[docs]</a>    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the parameter definition used by the ParameterTable to show the gui&quot;&quot;&quot;</span>
+        <span class="n">parameterDict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">Lecroy1102</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Open connection and configure&#39;</span>
+        <span class="n">parameterDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;open&#39;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Close connection&#39;</span>
+        <span class="n">parameterDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;action&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s1">&#39;close&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameterDict</span></div>
+
+<div class="viewcode-block" id="Lecroy1102.send"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command_string</span><span class="p">):</span>
+
+       		<span class="c1"># Send a well formatted message to the server.</span>
+            <span class="c1"># The server must be running, and this instance must already have called connect().</span>
+            <span class="c1"># Each message begins with MESG,</span>
+            <span class="c1"># followed by 4 bytes (a 32 bit unsigned long integer) that give the length of the rest of the message,</span>
+            <span class="c1"># followed by the rest of the message (command_string).</span>
+
+            <span class="c1"># find the length of the command_string</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">length</span><span class="o">&gt;=</span><span class="mi">4294967296</span><span class="p">:</span> <span class="c1">#2**32</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Lecroy AWG TCP message is too long, size = &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; bytes&#39;</span><span class="p">)</span>
+
+            <span class="c1"># format the message</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;MESG&#39;</span><span class="o">+</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;!L&quot;</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span><span class="o">+</span><span class="n">command_string</span>
+
+            <span class="c1"># send the message</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Lecroy1102.open"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c1"># set up TCP connection</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+
+            <span class="c1"># Open a connection to the TCP server.</span>
+            <span class="c1"># The server should already be running at the given IP address.</span>
+            <span class="c1"># The port numbers must agree between the client and server.</span>
+            <span class="n">IP_address_string</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hardware</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ipAddress&#39;</span><span class="p">]</span>
+            <span class="n">port_number</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hardware</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;port&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">IP_address_string</span><span class="p">,</span> <span class="n">port_number</span><span class="p">))</span>
+
+            <span class="c1"># message format:</span>
+            <span class="c1"># MESG</span>
+            <span class="c1"># 4 byte data length</span>
+            <span class="c1"># CONF</span>
+            <span class="c1"># command_string:</span>
+            <span class="c1">#   4 byte command name</span>
+            <span class="c1">#     4 byte command length</span>
+            <span class="c1">#     command data</span>
+            <span class="c1">#  repeat until done</span>
+
+            <span class="c1"># start with a blank command string</span>
+            <span class="n">command_string</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;CONF&#39;</span>
+
+            <span class="c1"># sample rate: 4 byte command + 8 byte double</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;rate&#39;</span>
+            <span class="n">sampleRate_Hz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;sampleRate&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;Hz&#39;</span><span class="p">)</span>
+            <span class="c1"># convert double to byte encoding, and append to message</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;!d&#39;</span><span class="p">,</span> <span class="n">sampleRate_Hz</span><span class="p">)</span>
+
+            <span class="c1"># external_clock_frequency: 4 byte command + 8 byte double</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">b</span><span class="s1">&#39;eclk&#39;</span>
+            <span class="n">external_clock_frequency_in</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hardware</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;extClockFrequency&#39;</span><span class="p">]</span>
+            <span class="n">external_clock_frequency</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="n">external_clock_frequency_in</span><span class="p">)</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;Hz&#39;</span><span class="p">)</span>
+            <span class="c1"># convert double to byte encoding, and append to message</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;!d&#39;</span><span class="p">,</span> <span class="n">external_clock_frequency</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Successfully opened </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Unable to open </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Lecroy1102.program"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.program">[docs]</a>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">channel_0_Points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>  <span class="c1"># this is a 1D numpy array</span>
+            <span class="n">channel_1_Points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>  <span class="c1"># this is a 1D numpy array</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;channel_0_Points.dtype:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">channel_0_Points</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;channel_1_Points.dtype:&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">channel_1_Points</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;writing </span><span class="si">{0}</span><span class="s2"> points to AWG channel 0&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel_0_Points</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;writing </span><span class="si">{0}</span><span class="s2"> points to AWG channel 1&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">channel_1_Points</span><span class="p">))</span> <span class="p">)</span>
+
+            <span class="c1"># send waveforms over TCP to Lecroy C# server</span>
+
+            <span class="n">command_string</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;UPDA&#39;</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;!L&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_0_Points</span><span class="p">))</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">channel_0_Points</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;&lt;f8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;!L&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channel_1_Points</span><span class="p">))</span>
+            <span class="n">command_string</span> <span class="o">+=</span> <span class="n">channel_1_Points</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;&lt;f8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">command_string</span><span class="p">)</span>
+
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.5</span><span class="p">)</span>  <span class="c1"># wait 1.5 second for AWG programming to complete</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> unavailable. Unable to program.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Lecroy1102.trigger"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="c1"># SEND COMMAND TO TRIGGER AWG</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;TRIG&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Triggered </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Lecroy1102.close"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.Lecroy1102.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="c1"># close the TCP connection to the AWG server</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Connection to </span><span class="si">{0}</span><span class="s2"> closed&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span></div></div>
+
+<div class="viewcode-block" id="ChaseDA12000"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000">[docs]</a><span class="k">class</span> <span class="nc">ChaseDA12000</span><span class="p">(</span><span class="n">AWGDeviceBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for programming a ChaseDA12000 AWG&quot;&quot;&quot;</span>
+    <span class="n">displayName</span> <span class="o">=</span> <span class="s2">&quot;Chase DA12000 AWG&quot;</span>
+    <span class="n">deviceProperties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">minSamples</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span> <span class="c1">#minimum number of samples to program</span>
+        <span class="n">maxSamples</span> <span class="o">=</span> <span class="mi">4000000</span><span class="p">,</span> <span class="c1">#maximum number of samples to program</span>
+        <span class="n">sampleChunkSize</span> <span class="o">=</span> <span class="mi">64</span><span class="p">,</span> <span class="c1">#number of samples must be a multiple of sampleCnunkSize</span>
+        <span class="n">padValue</span> <span class="o">=</span> <span class="mi">2047</span><span class="p">,</span> <span class="c1">#the waveform will be padded with this number to make it a multiple of sampleChunkSize, or to make it the length of minSamples</span>
+        <span class="n">minAmplitude</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">#minimum amplitude value (raw)</span>
+        <span class="n">maxAmplitude</span> <span class="o">=</span> <span class="mi">4095</span><span class="p">,</span> <span class="c1">#maximum amplitude value (raw)</span>
+        <span class="n">numChannels</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="c1">#Number of channels</span>
+        <span class="n">calibration</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">voltage</span><span class="p">:</span> <span class="mf">2047.</span> <span class="o">+</span> <span class="mf">3413.33</span><span class="o">*</span><span class="n">voltage</span><span class="p">,</span> <span class="c1">#function that returns raw amplitude number, given voltage</span>
+        <span class="n">calibrationInv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">raw</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.599707</span> <span class="o">+</span> <span class="mf">0.000292969</span><span class="o">*</span><span class="n">raw</span> <span class="c1">#function that returns voltage, given raw amplitude number</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="ChaseDA12000.SEGMENT"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.SEGMENT">[docs]</a>    <span class="k">class</span> <span class="nc">SEGMENT</span><span class="p">(</span><span class="n">Structure</span><span class="p">):</span>
+        <span class="n">_fields_</span> <span class="o">=</span> <span class="p">[(</span><span class="s2">&quot;SegmentNum&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;SegmentPtr&quot;</span><span class="p">,</span> <span class="n">POINTER</span><span class="p">(</span><span class="n">c_ulong</span><span class="p">)),</span>
+                    <span class="p">(</span><span class="s2">&quot;NumPoints&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;NumLoops&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;BeginPadVal &quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span> <span class="c1"># Not used</span>
+                    <span class="p">(</span><span class="s2">&quot;EndingPadVal&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span> <span class="c1"># Not used</span>
+                    <span class="p">(</span><span class="s2">&quot;TrigEn&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">),</span>
+                    <span class="p">(</span><span class="s2">&quot;NextSegNum&quot;</span><span class="p">,</span> <span class="n">c_ulong</span><span class="p">)]</span></div>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">isEnabled</span><span class="p">(</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dllName</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">hardware</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;DLL&#39;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lib</span> <span class="o">=</span> <span class="n">WinDLL</span><span class="p">(</span><span class="n">dllName</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> unavailable. Unable to open </span><span class="si">{1}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">,</span> <span class="n">dllName</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;continuous&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ChaseDA12000</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ChaseDA12000.parameters"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.parameters">[docs]</a>    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the parameter definition used by the ParameterTable to show the gui&quot;&quot;&quot;</span>
+        <span class="n">parameterDict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">ChaseDA12000</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Run continuously&#39;</span>
+        <span class="n">parameterDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                        <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span>
+                                        <span class="n">value</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">],</span>
+                                        <span class="n">tooltip</span><span class="o">=</span><span class="s2">&quot;Restart sequence at sequence end, continuously (no trigger)&quot;</span><span class="p">,</span>
+                                        <span class="n">key</span><span class="o">=</span><span class="s1">&#39;continuous&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">parameterDict</span></div>
+
+<div class="viewcode-block" id="ChaseDA12000.open"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">da12000_Open</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Unable to open </span><span class="si">{0}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">False</span></div>
+    
+<div class="viewcode-block" id="ChaseDA12000.program"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.program">[docs]</a>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="n">pts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">):</span>
+                <span class="n">calibration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;calibration&#39;</span><span class="p">]</span>
+                <span class="n">calibration</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="n">otypes</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">int</span><span class="p">])</span>
+                <span class="n">pts</span> <span class="o">=</span> <span class="n">calibration</span><span class="p">(</span><span class="n">pts</span><span class="p">)</span>
+            <span class="n">pts</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;writing &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; points to AWG&quot;</span><span class="p">)</span>
+            <span class="n">seg_pts</span> <span class="o">=</span> <span class="p">(</span><span class="n">c_ulong</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">))(</span><span class="o">*</span><span class="n">pts</span><span class="p">)</span>
+            <span class="n">seg0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">SEGMENT</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">seg_pts</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">pts</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">2048</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">seg</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SEGMENT</span><span class="o">*</span><span class="mi">1</span><span class="p">)(</span><span class="n">seg0</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">da12000_CreateSegments</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">seg</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">da12000_SetTriggerMode</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">]</span> <span class="k">else</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> unavailable. Unable to program.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">displayName</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ChaseDA12000.trigger"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">da12000_SetSoftTrigger</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ChaseDA12000.close"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.ChaseDA12000.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lib</span><span class="o">.</span><span class="n">da12000_Close</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="DummyAWG"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.DummyAWG">[docs]</a><span class="k">class</span> <span class="nc">DummyAWG</span><span class="p">(</span><span class="n">AWGDeviceBase</span><span class="p">):</span>
+    <span class="n">displayName</span> <span class="o">=</span> <span class="s2">&quot;Dummy AWG&quot;</span>
+    <span class="n">deviceProperties</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">minSamples</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="c1">#minimum number of samples to program</span>
+        <span class="n">maxSamples</span> <span class="o">=</span> <span class="mi">4000000</span><span class="p">,</span> <span class="c1">#maximum number of samples to program</span>
+        <span class="n">sampleChunkSize</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="c1">#number of samples must be a multiple of sampleCnunkSize</span>
+        <span class="n">padValue</span> <span class="o">=</span> <span class="mi">2047</span><span class="p">,</span> <span class="c1">#the waveform will be padded with this number ot make it a multiple of sampleChunkSize, or to make it the length of minSamples</span>
+        <span class="n">minAmplitude</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">#minimum amplitude value (raw)</span>
+        <span class="n">maxAmplitude</span> <span class="o">=</span> <span class="mi">4095</span><span class="p">,</span> <span class="c1">#maximum amplitude value (raw)</span>
+        <span class="n">numChannels</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>  <span class="c1">#Number of channels</span>
+        <span class="n">calibration</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">voltage</span><span class="p">:</span> <span class="mf">2047.</span> <span class="o">+</span> <span class="mf">3413.33</span><span class="o">*</span><span class="n">voltage</span><span class="p">,</span> <span class="c1">#function that returns raw amplitude number, given voltage</span>
+        <span class="n">calibrationInv</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">raw</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.599707</span> <span class="o">+</span> <span class="mf">0.000292969</span><span class="o">*</span><span class="n">raw</span> <span class="c1">#function that returns voltage, given raw amplitude number</span>
+    <span class="p">)</span>
+    
+<div class="viewcode-block" id="DummyAWG.open"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.DummyAWG.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span></div>
+<div class="viewcode-block" id="DummyAWG.close"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.DummyAWG.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="k">pass</span></div>
+<div class="viewcode-block" id="DummyAWG.trigger"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.DummyAWG.trigger">[docs]</a>    <span class="k">def</span> <span class="nf">trigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Dummy AWG Trigger signal&quot;</span><span class="p">)</span></div>
+<div class="viewcode-block" id="DummyAWG.program"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.DummyAWG.program">[docs]</a>    <span class="k">def</span> <span class="nf">program</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">pts0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+        <span class="n">pts1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waveforms</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceSettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCalibration&#39;</span><span class="p">):</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">deviceProperties</span><span class="p">[</span><span class="s1">&#39;calibration&#39;</span><span class="p">]</span>
+            <span class="n">calibration</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">calibration</span><span class="p">,</span> <span class="n">otypes</span><span class="o">=</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">int</span><span class="p">])</span>
+            <span class="n">pts0</span> <span class="o">=</span> <span class="n">calibration</span><span class="p">(</span><span class="n">pts0</span><span class="p">)</span>
+            <span class="n">pts1</span> <span class="o">=</span> <span class="n">calibration</span><span class="p">(</span><span class="n">pts1</span><span class="p">)</span>
+        <span class="n">pts0</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">pts1</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;points to write to AWG channel 0: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pts0</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;points to write to AWG channel 1: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pts1</span><span class="p">)))</span></div></div>
+
+<div class="viewcode-block" id="isAWGDevice"><a class="viewcode-back" href="../../code/AWG-doc.html#AWG.AWGDevices.isAWGDevice">[docs]</a><span class="k">def</span> <span class="nf">isAWGDevice</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Determine if obj is an AWG device.</span>
+<span class="sd">    returns True if obj inherits from AWGDeviceBase, but is not itself AWGDeviceBase&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">inheritance</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">AWGDeviceBase</span> <span class="ow">in</span> <span class="n">inheritance</span> <span class="ow">and</span> <span class="n">AWGDeviceBase</span><span class="o">!=</span><span class="n">inheritance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+<span class="c1">#Extract the AWG device classes</span>
+<span class="n">current_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">__name__</span><span class="p">]</span>
+<span class="n">AWGDeviceClasses</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">current_module</span><span class="p">,</span> <span class="n">isAWGDevice</span><span class="p">)</span>
+<span class="n">AWGDeviceDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">cls</span><span class="o">.</span><span class="n">displayName</span><span class="p">:</span><span class="n">clsName</span> <span class="k">for</span> <span class="n">clsName</span><span class="p">,</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">AWGDeviceClasses</span><span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

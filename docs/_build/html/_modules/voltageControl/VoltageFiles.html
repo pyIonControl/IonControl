@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>voltageControl.VoltageFiles &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>voltageControl.VoltageFiles</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for voltageControl.VoltageFiles</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">ProjectConfig.Project</span> <span class="k">import</span> <span class="n">getProject</span>
+<span class="kn">from</span> <span class="nn">modules.firstNotNone</span> <span class="k">import</span> <span class="n">firstNotNone</span>
+<span class="c1">#from modules.PyqtUtility import updateComboBoxItems</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">BlockSignals</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/VoltageFiles.ui&#39;</span><span class="p">)</span>
+<span class="n">VoltageFilesForm</span><span class="p">,</span> <span class="n">VoltageFilesBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Scan"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.Scan">[docs]</a><span class="k">class</span> <span class="nc">Scan</span><span class="p">:</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Files"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.Files">[docs]</a><span class="k">class</span> <span class="nc">Files</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappingFile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definitionFile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalFile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localFile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappingHistory</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definitionHistory</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalHistory</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localHistory</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="VoltageFiles"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles">[docs]</a><span class="k">class</span> <span class="nc">VoltageFiles</span><span class="p">(</span><span class="n">VoltageFilesForm</span><span class="p">,</span> <span class="n">VoltageFilesBase</span> <span class="p">):</span>
+    <span class="n">loadMapping</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">loadDefinition</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="n">loadGlobalAdjust</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">loadLocalAdjust</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">VoltageFilesForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">VoltageFilesBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s1">&#39;VoltageFiles.Files&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">,</span> <span class="n">Files</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">getProject</span><span class="p">()</span><span class="o">.</span><span class="n">configDir</span>
+
+<div class="viewcode-block" id="VoltageFiles.setupUi"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">VoltageFilesForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadMappingButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadMapping</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadDefinitionButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadDefinition</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadGlobal</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="s1">&#39;QString&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onMappingChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="s1">&#39;QString&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onDefinitionChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="s1">&#39;QString&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onGlobalChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadDefinition</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReloadDefinition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeDefinition</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveDefinition</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadMapping</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReloadMapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeMapping</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveMapping</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadGlobal</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReloadGlobal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeGlobal</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveGlobal</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VoltageFiles.onReloadDefinition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onReloadDefinition">[docs]</a>    <span class="k">def</span> <span class="nf">onReloadDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadDefinition</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionPath</span><span class="p">()</span> <span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onReloadDefinition </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onRemoveDefinition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onRemoveDefinition">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeComboUtility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onRemoveMapping </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onReloadMapping"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onReloadMapping">[docs]</a>    <span class="k">def</span> <span class="nf">onReloadMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadMapping</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onReloadMapping </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onRemoveMapping"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onRemoveMapping">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeComboUtility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onRemoveMapping </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">onReloadGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onReloadGlobal </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="VoltageFiles.onRemoveGlobal"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onRemoveGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeComboUtility</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="p">)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onRemoveGlobal </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.removeComboUtility"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.removeComboUtility">[docs]</a>    <span class="k">def</span> <span class="nf">removeComboUtility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">history</span><span class="p">,</span><span class="n">file</span><span class="p">,</span><span class="n">combo</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Utility used by onRemoveMapping/Definition/etc. to update the combo boxes and remove the entry from the file</span>
+<span class="sd">           history.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">v</span><span class="p">,</span><span class="n">k</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">history</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span><span class="n">history</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">history</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="c1">#updateComboBoxItems(self.definitionCombo, list(self.files.definitionHistory.keys()))</span>
+        <span class="c1"># Cannot use updateComboBox because it would display the first item in the list. We want</span>
+        <span class="c1"># the combo box to display a blank until the user switches the selection.</span>
+        <span class="c1"># TODO: incorporate this as an option into updateComboBox</span>
+        <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">combo</span><span class="p">):</span>
+            <span class="n">combo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">history</span><span class="p">:</span>
+                <span class="n">combo</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">history</span><span class="p">)</span>
+            <span class="n">combo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onReloadGlobal"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onReloadGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">onReloadGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onReloadGlobal </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.reloadAll"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.reloadAll">[docs]</a>    <span class="k">def</span> <span class="nf">reloadAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadMapping</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadDefinition</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionPath</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">localFile</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadLocalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">localFile</span><span class="p">)</span></div>
+            
+        
+<div class="viewcode-block" id="VoltageFiles.onMappingChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onMappingChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onMappingChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadMapping</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onMappingChanged </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageFiles.onDefinitionChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onDefinitionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onDefinitionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadDefinition</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionPath</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onDefinitionChanged </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageFiles.onGlobalChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onGlobalChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onGlobalChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span>  <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="p">[</span><span class="n">value</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;onGlobalChanged </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageFiles.onLocalChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onLocalChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onLocalChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onLoadMapping"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onLoadMapping">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadMapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;onLoadMapping&quot;</span> <span class="p">)</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open mapping file:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filedir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">filedir</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">mappingCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">mappingFile</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadMapping</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="VoltageFiles.onLoadDefinition"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onLoadDefinition">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open definition file:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadVoltageDef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.loadVoltageDef"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.loadVoltageDef">[docs]</a>    <span class="k">def</span> <span class="nf">loadVoltageDef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
+        <span class="c1"># Load the voltage definition given by path.</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filedir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">filedir</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">definitionCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadDefinition</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttlingDefinitionPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.shuttlingDefinitionPath"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.shuttlingDefinitionPath">[docs]</a>    <span class="k">def</span> <span class="nf">shuttlingDefinitionPath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">definitionpath</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">firstNotNone</span><span class="p">(</span> <span class="n">definitionpath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">definitionFile</span> <span class="p">)</span>
+        <span class="n">filedir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">basename</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="n">filedir</span><span class="p">,</span> <span class="n">basename</span><span class="o">+</span><span class="s2">&quot;_shuttling.xml&quot;</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="VoltageFiles.onLoadGlobal"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onLoadGlobal">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadGlobal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open global adjust file:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filedir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">filedir</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalCombo</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">globalFile</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadGlobalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageFiles.onLoadLocal"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.onLoadLocal">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadLocal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">path</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Open local adjust file:&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">!=</span><span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">filedir</span><span class="p">,</span> <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastDir</span> <span class="o">=</span> <span class="n">filedir</span>
+            <span class="k">if</span> <span class="n">filename</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">localHistory</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">localCombo</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">localHistory</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">localCombo</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">localCombo</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">localFile</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loadLocalAdjust</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageFiles.saveConfig"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageFiles.VoltageFiles.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span></div></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

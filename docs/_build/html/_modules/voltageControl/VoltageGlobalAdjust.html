@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>voltageControl.VoltageGlobalAdjust &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>voltageControl.VoltageGlobalAdjust</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for voltageControl.VoltageGlobalAdjust</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">from</span> <span class="nn">.VoltageGlobalAdjustTableModel</span> <span class="k">import</span> <span class="n">VoltageGlobalAdjustTableModel</span>   <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">uiModules.MagnitudeSpinBoxDelegate</span> <span class="k">import</span> <span class="n">MagnitudeSpinBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">externalParameter.VoltageOutputChannel</span> <span class="k">import</span> <span class="n">VoltageOutputChannel</span>
+<span class="kn">from</span> <span class="nn">_collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">modules.Observable</span> <span class="k">import</span> <span class="n">Observable</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/VoltageGlobalAdjust.ui&#39;</span><span class="p">)</span>
+<span class="n">VoltageGlobalAdjustForm</span><span class="p">,</span> <span class="n">VoltageGlobalAdjustBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gainCache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="s1">&#39;gainCache&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">()</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust">[docs]</a><span class="k">class</span> <span class="nc">VoltageGlobalAdjust</span><span class="p">(</span><span class="n">VoltageGlobalAdjustForm</span><span class="p">,</span> <span class="n">VoltageGlobalAdjustBase</span> <span class="p">):</span>
+    <span class="n">updateOutput</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="nb">object</span><span class="p">)</span>
+    <span class="n">outputChannelsChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span><span class="nb">object</span><span class="p">)</span>
+    <span class="n">_channelParams</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">VoltageGlobalAdjustForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">VoltageGlobalAdjustBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s1">&#39;VoltageGlobalAdjust.Settings&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">,</span> <span class="n">Settings</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span> <span class="o">=</span> <span class="n">SequenceDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myLabelList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">myBoxList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">historyCategory</span> <span class="o">=</span> <span class="s1">&#39;VoltageGlobalAdjust&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.cache&quot;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">displayValueObservable</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">Observable</span><span class="p">()</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="VoltageGlobalAdjust.setupUi"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">VoltageGlobalAdjustForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gainBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gainBox</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onGainChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableModel</span> <span class="o">=</span> <span class="n">VoltageGlobalAdjustTableModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">tableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setSortingEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>   <span class="c1"># triggers sorting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span>  <span class="n">MagnitudeSpinBoxDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VoltageGlobalAdjust.onGainChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.onGainChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onGainChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gain</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="n">gain</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span>        </div>
+        
+<div class="viewcode-block" id="VoltageGlobalAdjust.setupGlobalAdjust"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.setupGlobalAdjust">[docs]</a>    <span class="k">def</span> <span class="nf">setupGlobalAdjust</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">adjustDict</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gainCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gainCache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">adjustDict</span><span class="p">:</span>
+                        <span class="n">adjustDict</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span> <span class="o">=</span> <span class="n">adjustDict</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">adjust</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">adjust</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onValueChanged</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UniqueConnection</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableModel</span><span class="o">.</span><span class="n">setGlobalAdjust</span><span class="p">(</span> <span class="n">adjustDict</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputChannelsChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gainBox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span></div>
+        <span class="c1">#self.updateOutput.emit(self.globalAdjustDict, self.settings.gain)        </span>
+        
+<div class="viewcode-block" id="VoltageGlobalAdjust.onValueChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.onValueChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onValueChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">origin</span><span class="o">==</span><span class="s1">&#39;recalculate&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tableModel</span><span class="o">.</span><span class="n">valueRecalcualted</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">_value</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">updateOutput</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">gain</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.saveConfig"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">adjustHistoryName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="o">.</span><span class="n">values</span><span class="p">())]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s2">&quot;.cache&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjustCache</span></div>
+        
+<div class="viewcode-block" id="VoltageGlobalAdjust.setValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span> 
+        <span class="k">return</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="VoltageGlobalAdjust.getValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.getValue">[docs]</a>    <span class="k">def</span> <span class="nf">getValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">value</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.currentValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.currentValue">[docs]</a>    <span class="k">def</span> <span class="nf">currentValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">value</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.saveValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.saveValue">[docs]</a>    <span class="k">def</span> <span class="nf">saveValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">value</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.restoreValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.restoreValue">[docs]</a>    <span class="k">def</span> <span class="nf">restoreValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">savedValue</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.strValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.strValue">[docs]</a>    <span class="k">def</span> <span class="nf">strValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="n">adjust</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">adjust</span><span class="o">.</span><span class="n">string</span> <span class="k">if</span> <span class="n">adjust</span><span class="o">.</span><span class="n">hasDependency</span> <span class="k">else</span> <span class="kc">None</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.setStrValue"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.setStrValue">[docs]</a>    <span class="k">def</span> <span class="nf">setStrValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="VoltageGlobalAdjust.outputChannels"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageGlobalAdjust.VoltageGlobalAdjust.outputChannels">[docs]</a>    <span class="k">def</span> <span class="nf">outputChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span> <span class="p">(</span><span class="n">channelName</span><span class="p">,</span> <span class="n">VoltageOutputChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">channelName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="p">))</span> <span class="k">for</span> <span class="n">channelName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalAdjustDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span></div></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

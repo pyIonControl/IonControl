@@ -1,0 +1,38 @@
+# ##########################################################################
+#
+#  example for PulseProgramPlus input
+#
+const ResultChannel = 4
+
+# excitcodes
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xffffffffffffffff
+
+parameter dummy
+parameter mult1
+parameter mult2
+parameter delay
+parameter pulse_time
+shutter init_shutter
+masked_shutter my_shutter
+masked_shutter pulse_shutter
+masked_shutter pulse_shutter_2
+counter my_counter
+parameter experiments
+var currentexperiment
+parameter usePulses
+var result
+
+while not pipe_empty():
+    apply_next_scan_point()
+    currentexperiment = 0
+    while currentexperiment < experiments:
+        currentexperiment += 1
+        result = mult1 * mult2
+        result += currentexperiment
+        write_result( ResultChannel, result )
+        set_shutter( pulse_shutter )
+        update(pulse_time, pulse_mode=True)
+        update(pulse_time)
+
+exit( endLabel )

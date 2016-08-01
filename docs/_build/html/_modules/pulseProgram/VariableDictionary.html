@@ -1,0 +1,475 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram.VariableDictionary &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulseProgram.VariableDictionary</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulseProgram.VariableDictionary</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">networkx</span> <span class="k">import</span> <span class="n">DiGraph</span><span class="p">,</span> <span class="n">simple_cycles</span><span class="p">,</span> <span class="n">dfs_postorder_nodes</span><span class="p">,</span> <span class="n">dfs_preorder_nodes</span>
+
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+<div class="viewcode-block" id="CyclicDependencyException"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.CyclicDependencyException">[docs]</a><span class="k">class</span> <span class="nc">CyclicDependencyException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="VariableDictionaryView"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionaryView">[docs]</a><span class="k">class</span> <span class="nc">VariableDictionaryView</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;View on VariableDictionary that combines the local dictionary with the global dictionary</span>
+<span class="sd">    the returnvalue is the evaluated value for both dictionaries&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variableDictionary</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span> <span class="o">=</span> <span class="n">variableDictionary</span>
+        
+<div class="viewcode-block" id="VariableDictionaryView.__getitem__"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionaryView.__getitem__">[docs]</a>    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;if the key is in the local dictionary return the value, </span>
+<span class="sd">        if it is in the global dictionary return that value,</span>
+<span class="sd">        otherwise raise KeyError&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">enabled</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">value</span> <span class="o">*</span> <span class="mi">0</span>  <span class="c1"># get zero with the right unit</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="o">.</span><span class="n">globaldict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="o">.</span><span class="n">globaldict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="VariableDictionaryView.items"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionaryView.items">[docs]</a>    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">enabled</span> <span class="k">else</span> <span class="mi">0</span> <span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="o">.</span><span class="n">items</span><span class="p">())</span></div>
+    
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span> <span class="ow">or</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variableDictionary</span><span class="o">.</span><span class="n">globaldict</span>       </div>
+    
+ 
+<div class="viewcode-block" id="VariableDictionary"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary">[docs]</a><span class="k">class</span> <span class="nc">VariableDictionary</span><span class="p">(</span><span class="n">SequenceDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ordered Dictionary to hold variable values. It maintains a dependency graph</span>
+<span class="sd">    to check for cycles and to recalculate the necessary values when one of the fields is updated&quot;&quot;&quot;</span>   
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valueView</span> <span class="o">=</span> <span class="n">VariableDictionaryView</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span> <span class="o">=</span> <span class="n">DiGraph</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globaldict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VariableDictionary</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;globaldict&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">__reduce__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">theclass</span><span class="p">,</span> <span class="n">theitems</span><span class="p">,</span> <span class="n">inst_dict</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">VariableDictionary</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__reduce__</span><span class="p">()</span>
+        <span class="n">inst_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;globaldict&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">theclass</span><span class="p">,</span> <span class="n">theitems</span><span class="p">,</span> <span class="n">inst_dict</span>
+
+<div class="viewcode-block" id="VariableDictionary.setGlobaldict"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setGlobaldict">[docs]</a>    <span class="k">def</span> <span class="nf">setGlobaldict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globaldict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globaldict</span> <span class="o">=</span> <span class="n">globaldict</span> </div>
+                
+<div class="viewcode-block" id="VariableDictionary.calculateDependencies"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.calculateDependencies">[docs]</a>    <span class="k">def</span> <span class="nf">calculateDependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span> <span class="o">=</span> <span class="n">DiGraph</span><span class="p">()</span>   <span class="c1"># clear the old dependency graph in case parameters got removed</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;strvalue&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">dependencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">strvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueView</span><span class="p">,</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addDependencies</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="p">,</span> <span class="n">dependencies</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">ZeroDivisionError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">errstr</span> <span class="o">=</span> <span class="s2">&quot;Unable to evaluate the expression &#39;</span><span class="si">{0}</span><span class="s2">&#39; for variable &#39;</span><span class="si">{1}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">strvalue</span><span class="p">,</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="n">errstr</span> <span class="p">)</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="n">errstr</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recalculateAll</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="VariableDictionary.merge"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.merge">[docs]</a>    <span class="k">def</span> <span class="nf">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variabledict</span><span class="p">,</span> <span class="n">globaldict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">linkNewToParent</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="n">globaldict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">globaldict</span> <span class="o">=</span> <span class="n">globaldict</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">variabledict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variabledict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;address&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">or</span> <span class="n">overwrite</span><span class="p">):</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">linkNewToParent</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">useParentValue</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sortToMatch</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="n">variabledict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculateDependencies</span><span class="p">()</span></div>
+                
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">VariableDictionary</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;strvalue&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">strvalue</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)()</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">globaldict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">globaldict</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">dependencyGraph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span>
+        <span class="c1">#calculateDependencies()</span>
+        <span class="k">return</span> <span class="n">new</span>
+                
+<div class="viewcode-block" id="VariableDictionary.addDependencies"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.addDependencies">[docs]</a>    <span class="k">def</span> <span class="nf">addDependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">dependencies</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;add all the dependencies to name&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">dependency</span> <span class="ow">in</span> <span class="n">dependencies</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addEdgeNoCycle</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">dependency</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>        </div>
+                
+<div class="viewcode-block" id="VariableDictionary.addEdgeNoCycle"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.addEdgeNoCycle">[docs]</a>    <span class="k">def</span> <span class="nf">addEdgeNoCycle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">,</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;add the dependency to the graph, raise CyclicDependencyException in case of cyclic dependencies&quot;&quot;&quot;</span>
+        <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">)</span>
+        <span class="n">cycles</span> <span class="o">=</span> <span class="n">simple_cycles</span><span class="p">(</span> <span class="n">graph</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">cycle</span> <span class="ow">in</span> <span class="n">cycles</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CyclicDependencyException</span><span class="p">(</span><span class="n">cycle</span><span class="p">)</span></div>
+                
+<div class="viewcode-block" id="VariableDictionary.setStrValueIndex"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setStrValueIndex">[docs]</a>    <span class="k">def</span> <span class="nf">setStrValueIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">strvalue</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">keyAt</span><span class="p">(</span><span class="n">index</span><span class="p">),</span> <span class="n">strvalue</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VariableDictionary.setStrValue"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setStrValue">[docs]</a>    <span class="k">def</span> <span class="nf">setStrValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">strvalue</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the variable value with strvalue and recalculate as necessary&quot;&quot;&quot;</span>  
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">,</span> <span class="n">dependencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">strvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueView</span><span class="p">,</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>            <span class="c1"># make a copy of the graph. In case of cyclic dependencies we do not want o leave any changes</span>
+            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">in_edges</span><span class="p">([</span><span class="n">name</span><span class="p">])):</span>      <span class="c1"># remove all the inedges, dependencies from other variables might be gone</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="o">*</span><span class="n">edge</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addDependencies</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">dependencies</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="c1"># add all new dependencies</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strvalue</span> <span class="o">=</span> <span class="n">strvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span> <span class="o">=</span> <span class="n">graph</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">errstr</span> <span class="o">=</span> <span class="s2">&quot;Unable to evaluate the expression &#39;</span><span class="si">{0}</span><span class="s2">&#39; for variable &#39;</span><span class="si">{1}</span><span class="s2">&#39;.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">strvalue</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="n">errstr</span> <span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="n">errstr</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculateDependent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariableDictionary.setParentStrValue"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setParentStrValue">[docs]</a>    <span class="k">def</span> <span class="nf">setParentStrValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">strvalue</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span><span class="p">,</span> <span class="n">dependencies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">strvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueView</span><span class="p">,</span> <span class="n">listDependencies</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+            <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>            <span class="c1"># make a copy of the graph. In case of cyclic dependencies we do not want o leave any changes</span>
+            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">in_edges</span><span class="p">([</span><span class="n">name</span><span class="p">])):</span>      <span class="c1"># remove all the inedges, dependencies from other variables might be gone</span>
+                <span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="o">*</span><span class="n">edge</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addDependencies</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">dependencies</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="c1"># add all new dependencies</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">parentValue</span> <span class="o">=</span> <span class="n">result</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">parentStrvalue</span> <span class="o">=</span> <span class="n">strvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span> <span class="o">=</span> <span class="n">graph</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">errstr</span> <span class="o">=</span> <span class="s1">&#39;Unable to evaluate the expression </span><span class="se">\&#39;</span><span class="si">{0}</span><span class="se">\&#39;</span><span class="s1"> for variable </span><span class="se">\&#39;</span><span class="si">{1}</span><span class="se">\&#39;</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">strvalue</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="n">errstr</span> <span class="p">)</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="n">errstr</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculateDependent</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariableDictionary.setValue"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the variable value with value and recalculate as necessary.</span>
+<span class="sd">        This is done using existing dependencies.&quot;&quot;&quot;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strvalue</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculateDependent</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">returnResult</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="VariableDictionary.setParentValue"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setParentValue">[docs]</a>    <span class="k">def</span> <span class="nf">setParentValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;update the variable value with value and recalculate as necessary.</span>
+<span class="sd">        This is done using existing dependencies.&quot;&quot;&quot;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">parentValue</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">parentStrvalue</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculateDependent</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">returnResult</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariableDictionary.setEncodingIndex"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setEncodingIndex">[docs]</a>    <span class="k">def</span> <span class="nf">setEncodingIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">encoding</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">encoding</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">encoding</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VariableDictionary.setEnabledIndex"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.setEnabledIndex">[docs]</a>    <span class="k">def</span> <span class="nf">setEnabledIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">enabled</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="n">enabled</span></div>
+       
+<div class="viewcode-block" id="VariableDictionary.recalculateDependent"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.recalculateDependent">[docs]</a>    <span class="k">def</span> <span class="nf">recalculateDependent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">returnResult</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="o">.</span><span class="n">has_node</span><span class="p">(</span><span class="n">node</span><span class="p">):</span>
+            <span class="n">generator</span> <span class="o">=</span> <span class="n">dfs_preorder_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="nb">next</span><span class="p">(</span><span class="n">generator</span> <span class="p">)</span>   <span class="c1"># skip the first, that is us</span>
+            <span class="n">nodelist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">generator</span><span class="p">)</span>  <span class="c1"># make a list, we need it twice </span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">recalculateNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodelist</span> <span class="p">]</span>                
+            <span class="k">return</span> <span class="p">(</span><span class="n">nodelist</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="k">if</span> <span class="n">returnResult</span> <span class="k">else</span> <span class="n">nodelist</span>     <span class="c1"># return which ones were re-calculated, so gui can be updated </span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">list</span><span class="p">(),</span> <span class="nb">list</span><span class="p">())</span> <span class="k">if</span> <span class="n">returnResult</span> <span class="k">else</span> <span class="nb">list</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="VariableDictionary.recalculateNode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.recalculateNode">[docs]</a>    <span class="k">def</span> <span class="nf">recalculateNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;strvalue&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">strvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">valueView</span><span class="p">)</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">errstr</span> <span class="o">=</span> <span class="s1">&#39;Unable to evaluate the expression </span><span class="se">\&#39;</span><span class="si">{0}</span><span class="se">\&#39;</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">strvalue</span><span class="p">)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="n">errstr</span> <span class="p">)</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">strerror</span> <span class="o">=</span> <span class="n">errstr</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;variable </span><span class="si">{0}</span><span class="s2"> does not have strvalue. Value is </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+            
+<div class="viewcode-block" id="VariableDictionary.recalculateAll"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.recalculateAll">[docs]</a>    <span class="k">def</span> <span class="nf">recalculateAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyGraph</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">indegree</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">in_degree_iter</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">indegree</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">calcnode</span> <span class="ow">in</span> <span class="n">dfs_postorder_nodes</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">recalculateNode</span><span class="p">(</span><span class="n">calcnode</span><span class="p">)</span></div>
+                    
+<div class="viewcode-block" id="VariableDictionary.bareDictionaryCopy"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.VariableDictionary.VariableDictionary.bareDictionaryCopy">[docs]</a>    <span class="k">def</span> <span class="nf">bareDictionaryCopy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SequenceDict</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">variable</span><span class="p">:</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">strvalue</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">strvalue</span> <span class="o">=</span> <span class="n">strvalue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;parameter&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+     
+    <span class="n">globaldict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;G1&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;G2&#39;</span><span class="p">:</span> <span class="mi">8</span> <span class="p">}</span>
+     
+    <span class="n">vd</span> <span class="o">=</span> <span class="n">VariableDictionary</span><span class="p">(</span> <span class="p">{</span> <span class="s1">&#39;L1&#39;</span><span class="p">:</span> <span class="n">variable</span><span class="p">(</span><span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;G1*23+G2&#39;</span><span class="p">),</span> <span class="s1">&#39;L2&#39;</span><span class="p">:</span> <span class="n">variable</span><span class="p">(</span><span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;2*L1&#39;</span><span class="p">),</span> <span class="s1">&#39;L3&#39;</span><span class="p">:</span> <span class="n">variable</span><span class="p">(</span><span class="s1">&#39;L3&#39;</span><span class="p">,</span> <span class="s1">&#39;3*L2+L1&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">)</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setGlobaldict</span><span class="p">(</span> <span class="n">globaldict</span> <span class="p">)</span> 
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">vd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+     
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;17*pi&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;17*pi&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L3&#39;</span><span class="p">,</span> <span class="s1">&#39;17*pi&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L3&#39;</span><span class="p">,</span> <span class="s1">&#39;17*pi*L1+L2&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L1&#39;</span><span class="p">,</span> <span class="s1">&#39;12&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">)</span>
+     
+    <span class="nb">print</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">valueView</span><span class="p">[</span><span class="s1">&#39;L1&#39;</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    
+    <span class="n">vd2</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">vd</span><span class="p">)</span>
+    <span class="n">vd</span><span class="o">.</span><span class="n">setStrValue</span><span class="p">(</span><span class="s1">&#39;L2&#39;</span><span class="p">,</span> <span class="s1">&#39;7&#39;</span><span class="p">)</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">vd</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">vd2</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">vd</span><span class="p">[</span><span class="s1">&#39;L2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">vd2</span><span class="p">[</span><span class="s1">&#39;L2&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="kn">import</span> <span class="nn">pickle</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">vd</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;unpickled&#39;</span><span class="p">,</span> <span class="n">vc</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">vc</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+    
+  
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
