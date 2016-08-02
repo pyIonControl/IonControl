@@ -1,0 +1,1916 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gui &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>gui</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/gui-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="gui">
+<h1>gui<a class="headerlink" href="#gui" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-gui.AverageView">
+<span id="averageview"></span><h2>AverageView<a class="headerlink" href="#module-gui.AverageView" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.AverageView.AverageView">
+<em class="property">class </em><code class="descname">AverageView</code><span class="sig-paren">(</span><em>config</em>, <em>parentname</em>, <em>parent=None</em>, <em>zero=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageView.html#AverageView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageView.AverageView" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.AverageView.AverageView.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageView.html#AverageView.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageView.AverageView.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>add value to the mean and stddev or stderr</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageView.AverageView.onClear">
+<code class="descname">onClear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageView.html#AverageView.onClear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageView.AverageView.onClear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageView.AverageView.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageView.html#AverageView.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageView.AverageView.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageView.AverageView.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageView.html#AverageView.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageView.AverageView.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>&#8220;update the output</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.AverageViewTable">
+<span id="averageviewtable"></span><h2>AverageViewTable<a class="headerlink" href="#module-gui.AverageViewTable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.AverageViewTable.AverageViewTable">
+<em class="property">class </em><code class="descname">AverageViewTable</code><span class="sig-paren">(</span><em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.changeSize">
+<code class="descname">changeSize</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.changeSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.changeSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.onClear">
+<code class="descname">onClear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.onClear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.onClear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.setCountLabel">
+<code class="descname">setCountLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.setCountLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.setCountLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.setNames">
+<code class="descname">setNames</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.setNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.setNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTable.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTable.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTable.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.AverageViewTable.AverageViewTableModel">
+<em class="property">class </em><code class="descname">AverageViewTableModel</code><span class="sig-paren">(</span><em>stats</em>, <em>config</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>stats</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.changeSize">
+<code class="descname">changeSize</code><span class="sig-paren">(</span><em>amount</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.changeSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.changeSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.clear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.clear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C613C18&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.dataFont">
+<code class="descname">dataFont</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.dataFont"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.dataFont" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.AverageViewTable.AverageViewTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Current Value', 'Sample Mean', 'Standard error', 'Name']</em><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.resize">
+<code class="descname">resize</code><span class="sig-paren">(</span><em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.resize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.resize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C613BA8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.AverageViewTable.AverageViewTableModel.setNames">
+<code class="descname">setNames</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/AverageViewTable.html#AverageViewTableModel.setNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.AverageViewTableModel.setNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.AverageViewTable.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/gui/AverageViewTable.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.AverageViewTable.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gui.ExpressionValue">
+<span id="expressionvalue"></span><h2>ExpressionValue<a class="headerlink" href="#module-gui.ExpressionValue" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.ExpressionValue.ExpressionValue">
+<em class="property">class </em><code class="descname">ExpressionValue</code><span class="sig-paren">(</span><em>name=None</em>, <em>globalDict=None</em>, <em>value=&lt;Quantity(0</em>, <em>'dimensionless')&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ExpressionValue.html#ExpressionValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.data">
+<code class="descname">data</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C77EBA8&gt;</em><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.globalDict">
+<code class="descname">globalDict</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.globalDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.hasDependency">
+<code class="descname">hasDependency</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.hasDependency" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ExpressionValue.ExpressionValue.recalculate">
+<code class="descname">recalculate</code><span class="sig-paren">(</span><em>name=None</em>, <em>value=None</em>, <em>origin=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ExpressionValue.html#ExpressionValue.recalculate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.recalculate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.string">
+<code class="descname">string</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.string" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.value">
+<code class="descname">value</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ExpressionValue.ExpressionValue.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#gui.ExpressionValue.ExpressionValue.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="gui.ExpressionValue.ExpressionValueException">
+<em class="property">exception </em><code class="descname">ExpressionValueException</code><a class="reference internal" href="../_modules/gui/ExpressionValue.html#ExpressionValueException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ExpressionValue.ExpressionValueException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-gui.FPGASettings">
+<span id="fpgasettings"></span><h2>FPGASettings<a class="headerlink" href="#module-gui.FPGASettings" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.FPGASettings.FPGASettings">
+<em class="property">class </em><code class="descname">FPGASettings</code><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="gui.FPGASettings.FPGASettingsDialog">
+<em class="property">class </em><code class="descname">FPGASettingsDialog</code><span class="sig-paren">(</span><em>config</em>, <em>parent=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.accept" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.addEntry">
+<code class="descname">addEntry</code><span class="sig-paren">(</span><em>target</em>, <em>pulser</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.addEntry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.addEntry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.apply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.reject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.settings">
+<code class="descname">settings</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialog.show">
+<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialog.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialog.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.FPGASettings.FPGASettingsDialogConfig">
+<em class="property">class </em><code class="descname">FPGASettingsDialogConfig</code><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialogConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialogConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsDialogConfig.__setstate__">
+<code class="descname">__setstate__</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsDialogConfig.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsDialogConfig.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function ensures that the given fields are present in the class object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.FPGASettings.FPGASettingsWidget">
+<em class="property">class </em><code class="descname">FPGASettingsWidget</code><span class="sig-paren">(</span><em>pulser</em>, <em>config</em>, <em>target</em>, <em>parent=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.accept" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.initialize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onBoardRename">
+<code class="descname">onBoardRename</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onBoardRename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onBoardRename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onEnableChanged">
+<code class="descname">onEnableChanged</code><span class="sig-paren">(</span><em>enable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onEnableChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onEnableChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onIndexChanged">
+<code class="descname">onIndexChanged</code><span class="sig-paren">(</span><em>description</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onLoadBitfile">
+<code class="descname">onLoadBitfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onLoadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onLoadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.onUploadBitfile">
+<code class="descname">onUploadBitfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.onUploadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.onUploadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.resourcesAvailable">
+<code class="descname">resourcesAvailable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.resourcesAvailable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.resourcesAvailable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.scanInstruments">
+<code class="descname">scanInstruments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.scanInstruments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.scanInstruments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.FPGASettings.FPGASettingsWidget.showStatus">
+<code class="descname">showStatus</code><span class="sig-paren">(</span><em>isopen</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/FPGASettings.html#FPGASettingsWidget.showStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.FPGASettings.FPGASettingsWidget.showStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.MainWindowWidget">
+<span id="mainwindowwidget"></span><h2>MainWindowWidget<a class="headerlink" href="#module-gui.MainWindowWidget" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.MainWindowWidget.MainWindowWidget">
+<em class="property">class </em><code class="descname">MainWindowWidget</code><span class="sig-paren">(</span><em>toolBar=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.MainWindowWidget.MainWindowWidget.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget.activate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.MainWindowWidget.MainWindowWidget.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.MainWindowWidget.MainWindowWidget.onClose">
+<code class="descname">onClose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget.onClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget.onClose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.MainWindowWidget.MainWindowWidget.printTargets">
+<code class="descname">printTargets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget.printTargets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget.printTargets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.MainWindowWidget.MainWindowWidget.viewActions">
+<code class="descname">viewActions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/MainWindowWidget.html#MainWindowWidget.viewActions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.MainWindowWidget.MainWindowWidget.viewActions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="preferences">
+<h2>Preferences<a class="headerlink" href="#preferences" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="projectselection">
+<h2>ProjectSelection<a class="headerlink" href="#projectselection" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="projectselectionui">
+<h2>ProjectSelectionUi<a class="headerlink" href="#projectselectionui" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-gui.ScanExperiment">
+<span id="scanexperiment"></span><h2>ScanExperiment<a class="headerlink" href="#module-gui.ScanExperiment" title="Permalink to this headline">¶</a></h2>
+<p>Experiment code to scan a parameter that is controlled by the FPGA.</p>
+<p>The Pulse Program for each point od the scan, the Pulse Program receives the
+address and value of the scanned parameter on its pipe input. It is expected to
+echo those on the pipe output followed by the measurement results.
+It is expected to send an endlabel (0xffffffff) when finished.</p>
+<dl class="class">
+<dt id="gui.ScanExperiment.ScanExperiment">
+<em class="property">class </em><code class="descname">ScanExperiment</code><span class="sig-paren">(</span><em>settings</em>, <em>pulserHardware</em>, <em>globalVariablesUi</em>, <em>experimentName</em>, <em>toolBar=None</em>, <em>parent=None</em>, <em>measurementLog=None</em>, <em>callWhenDoneAdjusting=None</em>, <em>dbConnection=None</em>, <em>preferences=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.ClearStatusMessage">
+<code class="descname">ClearStatusMessage</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.ClearStatusMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.NeedsDDSRewrite">
+<code class="descname">NeedsDDSRewrite</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.NeedsDDSRewrite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.OpStates">
+<code class="descname">OpStates</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.OpStates" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.StatusMessage">
+<code class="descname">StatusMessage</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.StatusMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.activate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.addPlot">
+<code class="descname">addPlot</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.addPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.addPlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.addPushDestination">
+<code class="descname">addPushDestination</code><span class="sig-paren">(</span><em>name</em>, <em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.addPushDestination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.addPushDestination" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.allDataSignal">
+<code class="descname">allDataSignal</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.allDataSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.analysisConfigurationChanged">
+<code class="descname">analysisConfigurationChanged</code><em class="property"> = None</em><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.analysisConfigurationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.createPlotWindows">
+<code class="descname">createPlotWindows</code><span class="sig-paren">(</span><em>plotNames</em>, <em>axesType</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.createPlotWindows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.createPlotWindows" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.dataAnalysis">
+<code class="descname">dataAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.dataAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.dataAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.dataMiddlePart">
+<code class="descname">dataMiddlePart</code><span class="sig-paren">(</span><em>data</em>, <em>queuesize</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.dataMiddlePart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.dataMiddlePart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.evaluatedDataSignal">
+<code class="descname">evaluatedDataSignal</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.evaluatedDataSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.evaluationConfigurationChanged">
+<code class="descname">evaluationConfigurationChanged</code><em class="property"> = None</em><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.evaluationConfigurationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.experimentName">
+<code class="descname">experimentName</code><em class="property"> = 'Scan Sequence'</em><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.experimentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.finalizeData">
+<code class="descname">finalizeData</code><span class="sig-paren">(</span><em>reason='end of scan'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.finalizeData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.finalizeData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.finalizeStop">
+<code class="descname">finalizeStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.finalizeStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.finalizeStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onAddPlot">
+<code class="descname">onAddPlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onAddPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onAddPlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onClear">
+<code class="descname">onClear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onClear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onClear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onClose">
+<code class="descname">onClose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onClose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onContinue">
+<code class="descname">onContinue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onContinue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onContinue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onCopyHistogram">
+<code class="descname">onCopyHistogram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onCopyHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onCopyHistogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><em>data</em>, <em>queuesize</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by worker with new data
+queuesize is the size of waiting messages, dont&#8217;t do expensive unnecessary stuff if queue is deep</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onInterrupt">
+<code class="descname">onInterrupt</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onInterrupt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onInterrupt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onPause">
+<code class="descname">onPause</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onPause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onPause" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onPrint">
+<code class="descname">onPrint</code><span class="sig-paren">(</span><em>target</em>, <em>printer</em>, <em>pdfPrinter</em>, <em>preferences</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onPrint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onPrint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onRemovePlot">
+<code class="descname">onRemovePlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onRemovePlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onRemovePlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onRenamePlot">
+<code class="descname">onRenamePlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onRenamePlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onRenamePlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onResume">
+<code class="descname">onResume</code><span class="sig-paren">(</span><em>index=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onResume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onResume" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resume the stashed run given by index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onSaveHistogram">
+<code class="descname">onSaveHistogram</code><span class="sig-paren">(</span><em>filenameTemplate='Histogram.txt'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onSaveHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onSaveHistogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onStart">
+<code class="descname">onStart</code><span class="sig-paren">(</span><em>globalOverrides=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onStash">
+<code class="descname">onStash</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onStash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onStash" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the current run and stash all the variables.
+A stashed run can be interrupted by anythin and resumed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onStashBottomHalf">
+<code class="descname">onStashBottomHalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onStashBottomHalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onStashBottomHalf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.onStop">
+<code class="descname">onStop</code><span class="sig-paren">(</span><em>reason='stopped'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.onStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.onStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.plotsChanged">
+<code class="descname">plotsChanged</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.plotsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.ppStartSignal">
+<code class="descname">ppStartSignal</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.ppStartSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.ppStopSignal">
+<code class="descname">ppStopSignal</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.ppStopSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.printTargets">
+<code class="descname">printTargets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.printTargets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.printTargets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.processData">
+<code class="descname">processData</code><span class="sig-paren">(</span><em>data</em>, <em>queuesize</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.processData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.processData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.reAnalyze">
+<code class="descname">reAnalyze</code><span class="sig-paren">(</span><em>plottedTrace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.reAnalyze"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.reAnalyze" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.registerMeasurement">
+<code class="descname">registerMeasurement</code><span class="sig-paren">(</span><em>failedList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.registerMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.registerMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.resumeBottomHalf">
+<code class="descname">resumeBottomHalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.resumeBottomHalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.resumeBottomHalf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.resumeMiddlePart">
+<code class="descname">resumeMiddlePart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.resumeMiddlePart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.resumeMiddlePart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.scanConfigurationListChanged">
+<code class="descname">scanConfigurationListChanged</code><em class="property"> = None</em><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.scanConfigurationListChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.setPulseProgramUi">
+<code class="descname">setPulseProgramUi</code><span class="sig-paren">(</span><em>pulseProgramUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.setPulseProgramUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.setPulseProgramUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.setTimeLabel">
+<code class="descname">setTimeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.setTimeLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.setTimeLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.setupAsDockWidget">
+<code class="descname">setupAsDockWidget</code><span class="sig-paren">(</span><em>widget</em>, <em>name</em>, <em>area=2</em>, <em>stackAbove=None</em>, <em>stackBelow=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.setupAsDockWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.setupAsDockWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>MainWindow</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.showHistogram">
+<code class="descname">showHistogram</code><span class="sig-paren">(</span><em>data</em>, <em>evalList</em>, <em>evalAlgoList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.showHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.showHistogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.showTimestamps">
+<code class="descname">showTimestamps</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.showTimestamps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.showTimestamps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.startScan">
+<code class="descname">startScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.startScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.startScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.stashChanged">
+<code class="descname">stashChanged</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.stashChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.stashSize">
+<code class="descname">stashSize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.stashSize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.stashSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.state">
+<code class="descname">state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperiment.statusChanged">
+<code class="descname">statusChanged</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.statusChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.traceFilename">
+<code class="descname">traceFilename</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.traceFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.traceFilename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.updateMainGraph">
+<code class="descname">updateMainGraph</code><span class="sig-paren">(</span><em>x</em>, <em>evaluated</em>, <em>timeinterval</em>, <em>timeTickOffset</em>, <em>queuesize</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.updateMainGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.updateMainGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.updatePulseProgram">
+<code class="descname">updatePulseProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.updatePulseProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.updatePulseProgram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperiment.updateScanTarget">
+<code class="descname">updateScanTarget</code><span class="sig-paren">(</span><em>target</em>, <em>parameterdict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperiment.updateScanTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperiment.updateScanTarget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanExperiment.ScanExperimentContext">
+<em class="property">class </em><code class="descname">ScanExperimentContext</code><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperimentContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperimentContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class encapsulates all variables, settings and data of the scan.
+It is used in order to implement the ability to stash and resumea ScanExperiment</p>
+<dl class="attribute">
+<dt id="gui.ScanExperiment.ScanExperimentContext.key">
+<code class="descname">key</code><a class="headerlink" href="#gui.ScanExperiment.ScanExperimentContext.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperimentContext.overrideGlobals">
+<code class="descname">overrideGlobals</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperimentContext.overrideGlobals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperimentContext.overrideGlobals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanExperiment.ScanExperimentContext.revertGlobals">
+<code class="descname">revertGlobals</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanExperiment.html#ScanExperimentContext.revertGlobals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanExperiment.ScanExperimentContext.revertGlobals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.ScanGenerators">
+<span id="scangenerators"></span><h2>ScanGenerators<a class="headerlink" href="#module-gui.ScanGenerators" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.ScanGenerators.FreerunningGenerator">
+<em class="property">class </em><code class="descname">FreerunningGenerator</code><span class="sig-paren">(</span><em>scan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.appendData">
+<code class="descname">appendData</code><span class="sig-paren">(</span><em>traceList</em>, <em>x</em>, <em>evaluated</em>, <em>timeinterval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.appendData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.appendData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.dataNextCode">
+<code class="descname">dataNextCode</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.dataNextCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.dataNextCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.dataOnFinal">
+<code class="descname">dataOnFinal</code><span class="sig-paren">(</span><em>experiment</em>, <em>currentState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.dataOnFinal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.dataOnFinal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.expected">
+<code class="descname">expected</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.expected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.expected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanGenerators.FreerunningGenerator.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C426CC0&gt;</em><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>pulseProgramUi</em>, <em>maxUpdatesToWrite=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.prepare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.restartCode">
+<code class="descname">restartCode</code><span class="sig-paren">(</span><em>currentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.restartCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.restartCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.xRange">
+<code class="descname">xRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.xRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.xRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.FreerunningGenerator.xValue">
+<code class="descname">xValue</code><span class="sig-paren">(</span><em>index</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#FreerunningGenerator.xValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.FreerunningGenerator.xValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator">
+<em class="property">class </em><code class="descname">GateSequenceScanGenerator</code><span class="sig-paren">(</span><em>scan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.appendData">
+<code class="descname">appendData</code><span class="sig-paren">(</span><em>traceList</em>, <em>x</em>, <em>evaluated</em>, <em>timeinterval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.appendData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.appendData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.dataNextCode">
+<code class="descname">dataNextCode</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.dataNextCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.dataNextCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.dataOnFinal">
+<code class="descname">dataOnFinal</code><span class="sig-paren">(</span><em>experiment</em>, <em>currentState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.dataOnFinal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.dataOnFinal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.expected">
+<code class="descname">expected</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.expected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.expected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>pulseProgramUi</em>, <em>maxUpdatesToWrite=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.prepare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.restartCode">
+<code class="descname">restartCode</code><span class="sig-paren">(</span><em>currentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.restartCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.restartCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.xRange">
+<code class="descname">xRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.xRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.xRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.GateSequenceScanGenerator.xValue">
+<code class="descname">xValue</code><span class="sig-paren">(</span><em>index</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#GateSequenceScanGenerator.xValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.GateSequenceScanGenerator.xValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanGenerators.ParameterScanGenerator">
+<em class="property">class </em><code class="descname">ParameterScanGenerator</code><span class="sig-paren">(</span><em>scan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.appendData">
+<code class="descname">appendData</code><span class="sig-paren">(</span><em>traceList</em>, <em>x</em>, <em>evaluated</em>, <em>timeinterval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.appendData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.appendData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.dataNextCode">
+<code class="descname">dataNextCode</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.dataNextCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.dataNextCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.dataOnFinal">
+<code class="descname">dataOnFinal</code><span class="sig-paren">(</span><em>experiment</em>, <em>currentState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.dataOnFinal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.dataOnFinal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.expected">
+<code class="descname">expected</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.expected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.expected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C426F98&gt;</em><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>pulseProgramUi</em>, <em>maxUpdatesToWrite=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.prepare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.restartCode">
+<code class="descname">restartCode</code><span class="sig-paren">(</span><em>currentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.restartCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.restartCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.xRange">
+<code class="descname">xRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.xRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.xRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.ParameterScanGenerator.xValue">
+<code class="descname">xValue</code><span class="sig-paren">(</span><em>index</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#ParameterScanGenerator.xValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.ParameterScanGenerator.xValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator">
+<em class="property">class </em><code class="descname">StepInPlaceGenerator</code><span class="sig-paren">(</span><em>scan</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.appendData">
+<code class="descname">appendData</code><span class="sig-paren">(</span><em>traceList</em>, <em>x</em>, <em>evaluated</em>, <em>timeinterval</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.appendData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.appendData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.dataNextCode">
+<code class="descname">dataNextCode</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.dataNextCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.dataNextCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.dataOnFinal">
+<code class="descname">dataOnFinal</code><span class="sig-paren">(</span><em>experiment</em>, <em>currentState</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.dataOnFinal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.dataOnFinal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.expected">
+<code class="descname">expected</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.expected"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.expected" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.prepare">
+<code class="descname">prepare</code><span class="sig-paren">(</span><em>pulseProgramUi</em>, <em>maxUpdatesToWrite=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.prepare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.prepare" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.restartCode">
+<code class="descname">restartCode</code><span class="sig-paren">(</span><em>currentIndex</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.restartCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.restartCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.xRange">
+<code class="descname">xRange</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.xRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.xRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanGenerators.StepInPlaceGenerator.xValue">
+<code class="descname">xValue</code><span class="sig-paren">(</span><em>index</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanGenerators.html#StepInPlaceGenerator.xValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanGenerators.StepInPlaceGenerator.xValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.ScanMethods">
+<span id="scanmethods"></span><h2>ScanMethods<a class="headerlink" href="#module-gui.ScanMethods" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.ScanMethods.ExternalScanMethod">
+<em class="property">class </em><code class="descname">ExternalScanMethod</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.dataBottomHalf">
+<code class="descname">dataBottomHalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.dataBottomHalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.dataBottomHalf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanMethods.ExternalScanMethod.name">
+<code class="descname">name</code><em class="property"> = 'External'</em><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><em>data</em>, <em>queuesize</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.onData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.onStash">
+<code class="descname">onStash</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.onStash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.onStash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.onStop">
+<code class="descname">onStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.onStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.onStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.prepareNextPoint">
+<code class="descname">prepareNextPoint</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.prepareNextPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.prepareNextPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.resume">
+<code class="descname">resume</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.resume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.resume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.startBottomHalf">
+<code class="descname">startBottomHalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.startBottomHalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.startBottomHalf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.startScan">
+<code class="descname">startScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.startScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.startScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.stashMiddlePart">
+<code class="descname">stashMiddlePart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.stashMiddlePart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.stashMiddlePart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.ExternalScanMethod.stopBottomHalf">
+<code class="descname">stopBottomHalf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#ExternalScanMethod.stopBottomHalf"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ExternalScanMethod.stopBottomHalf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanMethods.GlobalScanMethod">
+<em class="property">class </em><code class="descname">GlobalScanMethod</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#GlobalScanMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.GlobalScanMethod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanMethods.GlobalScanMethod.name">
+<code class="descname">name</code><em class="property"> = 'Global'</em><a class="headerlink" href="#gui.ScanMethods.GlobalScanMethod.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanMethods.InternalScanMethod">
+<em class="property">class </em><code class="descname">InternalScanMethod</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanMethods.InternalScanMethod.name">
+<code class="descname">name</code><em class="property"> = 'Internal'</em><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><em>data</em>, <em>queuesize</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.onData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.onStash">
+<code class="descname">onStash</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.onStash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.onStash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.onStop">
+<code class="descname">onStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.onStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.onStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.prepareNextPoint">
+<code class="descname">prepareNextPoint</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.prepareNextPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.prepareNextPoint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.resume">
+<code class="descname">resume</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.resume"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.resume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanMethods.InternalScanMethod.startScan">
+<code class="descname">startScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#InternalScanMethod.startScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.InternalScanMethod.startScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="gui.ScanMethods.ScanException">
+<em class="property">exception </em><code class="descname">ScanException</code><a class="reference internal" href="../_modules/gui/ScanMethods.html#ScanException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ScanException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="exception">
+<dt id="gui.ScanMethods.ScanNotAvailableException">
+<em class="property">exception </em><code class="descname">ScanNotAvailableException</code><a class="reference internal" href="../_modules/gui/ScanMethods.html#ScanNotAvailableException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.ScanNotAvailableException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanMethods.VoltageLocalAdjustScanMethod">
+<em class="property">class </em><code class="descname">VoltageLocalAdjustScanMethod</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#VoltageLocalAdjustScanMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.VoltageLocalAdjustScanMethod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanMethods.VoltageLocalAdjustScanMethod.name">
+<code class="descname">name</code><em class="property"> = 'Voltage Local Adjust'</em><a class="headerlink" href="#gui.ScanMethods.VoltageLocalAdjustScanMethod.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.ScanMethods.VoltageScanMethod">
+<em class="property">class </em><code class="descname">VoltageScanMethod</code><span class="sig-paren">(</span><em>experiment</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanMethods.html#VoltageScanMethod"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanMethods.VoltageScanMethod" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanMethods.VoltageScanMethod.name">
+<code class="descname">name</code><em class="property"> = 'Voltage'</em><a class="headerlink" href="#gui.ScanMethods.VoltageScanMethod.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.ScanProgress">
+<span id="scanprogress"></span><h2>ScanProgress<a class="headerlink" href="#module-gui.ScanProgress" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.ScanProgress.ScanProgress">
+<em class="property">class </em><code class="descname">ScanProgress</code><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.ScanProgress.ScanProgress.OpStates">
+<code class="descname">OpStates</code><a class="headerlink" href="#gui.ScanProgress.ScanProgress.OpStates" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.__getattr__">
+<code class="descname">__getattr__</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.__getattr__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.__getattr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>generates the is_idle, is_running, ... attributes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.elapsedTime">
+<code class="descname">elapsedTime</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.elapsedTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.elapsedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.getData">
+<code class="descname">getData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.getData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.getData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.onData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.resumeRunning">
+<code class="descname">resumeRunning</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.resumeRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.resumeRunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setAnalysisLabel">
+<code class="descname">setAnalysisLabel</code><span class="sig-paren">(</span><em>scanName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setAnalysisLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setAnalysisLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setEvaluationLabel">
+<code class="descname">setEvaluationLabel</code><span class="sig-paren">(</span><em>scanName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setEvaluationLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setEvaluationLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setIdle">
+<code class="descname">setIdle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setIdle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setIdle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setInterrupted">
+<code class="descname">setInterrupted</code><span class="sig-paren">(</span><em>reason</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setInterrupted"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setInterrupted" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setPaused">
+<code class="descname">setPaused</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setPaused"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setPaused" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setRunning">
+<code class="descname">setRunning</code><span class="sig-paren">(</span><em>total</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setRunning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setScanLabel">
+<code class="descname">setScanLabel</code><span class="sig-paren">(</span><em>scanName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setScanLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setScanLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setStarting">
+<code class="descname">setStarting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setStarting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setStarting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setStashing">
+<code class="descname">setStashing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setStashing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setStashing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setStopping">
+<code class="descname">setStopping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setStopping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setStopping" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setTimeLabel">
+<code class="descname">setTimeLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setTimeLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setTimeLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.startTimer">
+<code class="descname">startTimer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.startTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.startTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.ScanProgress.ScanProgress.stateChanged">
+<code class="descname">stateChanged</code><a class="headerlink" href="#gui.ScanProgress.ScanProgress.stateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ScanProgress.ScanProgress.stopTimer">
+<code class="descname">stopTimer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ScanProgress.html#ScanProgress.stopTimer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ScanProgress.ScanProgress.stopTimer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.SettingsDialog">
+<span id="settingsdialog"></span><h2>SettingsDialog<a class="headerlink" href="#module-gui.SettingsDialog" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.SettingsDialog.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/gui/SettingsDialog.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.Settings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="gui.SettingsDialog.SettingsDialog">
+<em class="property">class </em><code class="descname">SettingsDialog</code><span class="sig-paren">(</span><em>pulser</em>, <em>config</em>, <em>parent=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.accept" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.apply">
+<code class="descname">apply</code><span class="sig-paren">(</span><em>button</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.apply" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.onBoardRename">
+<code class="descname">onBoardRename</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.onBoardRename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.onBoardRename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.onIndexChanged">
+<code class="descname">onIndexChanged</code><span class="sig-paren">(</span><em>description</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.onIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.onIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.onLoadBitfile">
+<code class="descname">onLoadBitfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.onLoadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.onLoadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.onUploadBitfile">
+<code class="descname">onUploadBitfile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.onUploadBitfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.onUploadBitfile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.reject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.scanInstruments">
+<code class="descname">scanInstruments</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.scanInstruments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.scanInstruments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialog.show">
+<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialog.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialog.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="gui.SettingsDialog.SettingsDialogConfig">
+<em class="property">class </em><code class="descname">SettingsDialogConfig</code><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialogConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialogConfig" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.SettingsDialog.SettingsDialogConfig.__setstate__">
+<code class="descname">__setstate__</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/SettingsDialog.html#SettingsDialogConfig.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.SettingsDialog.SettingsDialogConfig.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function ensures that the given fields are present in the class object</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.StashButton">
+<span id="stashbutton"></span><h2>StashButton<a class="headerlink" href="#module-gui.StashButton" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.StashButton.StashButtonControl">
+<em class="property">class </em><code class="descname">StashButtonControl</code><span class="sig-paren">(</span><em>button</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/StashButton.html#StashButtonControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.StashButton.StashButtonControl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.StashButton.StashButtonControl.onStashChanged">
+<code class="descname">onStashChanged</code><span class="sig-paren">(</span><em>stash</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/StashButton.html#StashButtonControl.onStashChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.StashButton.StashButtonControl.onStashChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.StashButton.StashButtonControl.onTrigger">
+<code class="descname">onTrigger</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/StashButton.html#StashButtonControl.onTrigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.StashButton.StashButtonControl.onTrigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.StashButton.StashButtonControl.resume">
+<code class="descname">resume</code><a class="headerlink" href="#gui.StashButton.StashButtonControl.resume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.testExperiment">
+<span id="testexperiment"></span><h2>testExperiment<a class="headerlink" href="#module-gui.testExperiment" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.testExperiment.test">
+<em class="property">class </em><code class="descname">test</code><span class="sig-paren">(</span><em>globalVariablesUi</em>, <em>parent=None</em>, <em>measurementLog=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="gui.testExperiment.test.ClearStatusMessage">
+<code class="descname">ClearStatusMessage</code><a class="headerlink" href="#gui.testExperiment.test.ClearStatusMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.testExperiment.test.StatusMessage">
+<code class="descname">StatusMessage</code><a class="headerlink" href="#gui.testExperiment.test.StatusMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.activate">
+<code class="descname">activate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.activate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.activate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.addPushDestination">
+<code class="descname">addPushDestination</code><span class="sig-paren">(</span><em>name</em>, <em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.addPushDestination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.addPushDestination" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.createAverageScan">
+<code class="descname">createAverageScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.createAverageScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.createAverageScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.deactivate">
+<code class="descname">deactivate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.deactivate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.deactivate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.testExperiment.test.experimentName">
+<code class="descname">experimentName</code><em class="property"> = 'Test Scan'</em><a class="headerlink" href="#gui.testExperiment.test.experimentName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onClear">
+<code class="descname">onClear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onClear"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onClear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onPause">
+<code class="descname">onPause</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onPause"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onPause" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onStart">
+<code class="descname">onStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.onStop">
+<code class="descname">onStop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.onStop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.onStop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.setGlobalVariablesUi">
+<code class="descname">setGlobalVariablesUi</code><span class="sig-paren">(</span><em>globalVariablesUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.setGlobalVariablesUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.setGlobalVariablesUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.setPulseProgramUi">
+<code class="descname">setPulseProgramUi</code><span class="sig-paren">(</span><em>pulseProgramUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.setPulseProgramUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.setPulseProgramUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>MainWindow</em>, <em>config</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.startScan">
+<code class="descname">startScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.startScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.startScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.testExperiment.test.traceFilename">
+<code class="descname">traceFilename</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/testExperiment.html#test.traceFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.testExperiment.test.traceFilename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="todolist">
+<h2>TodoList<a class="headerlink" href="#todolist" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-gui.TodoListSettingsTableModel">
+<span id="todolistsettingstablemodel"></span><h2>TodoListSettingsTableModel<a class="headerlink" href="#module-gui.TodoListSettingsTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel">
+<em class="property">class </em><code class="descname">TodoListSettingsTableModel</code><span class="sig-paren">(</span><em>settings</em>, <em>globalDict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.addSetting">
+<code class="descname">addSetting</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.addSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.addSetting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.choice">
+<code class="descname">choice</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.choice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665B8A8208&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.dropSetting">
+<code class="descname">dropSetting</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.dropSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.dropSetting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.edited">
+<code class="descname">edited</code><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.edited" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C4CA160&gt;</em><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.getVariableValue">
+<code class="descname">getVariableValue</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.getVariableValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.getVariableValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.getVariables">
+<code class="descname">getVariables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.getVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.getVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Name', 'Value']</em><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665B8A8198&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setDataName">
+<code class="descname">setDataName</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.setDataName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setDataName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setDataValue">
+<code class="descname">setDataValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.setDataValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setDataValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setSettings">
+<code class="descname">setSettings</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.setSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setSettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListSettingsTableModel.html#TodoListSettingsTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListSettingsTableModel.TodoListSettingsTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.TodoListTableModel">
+<span id="todolisttablemodel"></span><h2>TodoListTableModel<a class="headerlink" href="#module-gui.TodoListTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.TodoListTableModel.TodoListTableModel">
+<em class="property">class </em><code class="descname">TodoListTableModel</code><span class="sig-paren">(</span><em>todolist</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.addMeasurement">
+<code class="descname">addMeasurement</code><span class="sig-paren">(</span><em>todoListElement</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.addMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.addMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.choice">
+<code class="descname">choice</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.choice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F4F2F98&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.copy_rows">
+<code class="descname">copy_rows</code><span class="sig-paren">(</span><em>row_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.copy_rows"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.copy_rows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy a the rows given and append to the end of the TODO list.
+row_list :: [Int] List of rows to copy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.dropMeasurement">
+<code class="descname">dropMeasurement</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.dropMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.dropMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListTableModel.TodoListTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis']</em><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.moveRow">
+<code class="descname">moveRow</code><span class="sig-paren">(</span><em>rows</em>, <em>up=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.moveRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.moveRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F4F2F28&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setActiveRow">
+<code class="descname">setActiveRow</code><span class="sig-paren">(</span><em>row</em>, <em>running=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setActiveRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setActiveRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setEntryEnabled">
+<code class="descname">setEntryEnabled</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setEntryEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setEntryEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setString">
+<code class="descname">setString</code><span class="sig-paren">(</span><em>attr</em>, <em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setTodolist">
+<code class="descname">setTodolist</code><span class="sig-paren">(</span><em>todolist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setTodolist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setTodolist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTableModel.TodoListTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTableModel.html#TodoListTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListTableModel.TodoListTableModel.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#gui.TodoListTableModel.TodoListTableModel.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.TodoListTreeModel">
+<span id="todolisttreemodel"></span><h2>TodoListTreeModel<a class="headerlink" href="#module-gui.TodoListTreeModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel">
+<em class="property">class </em><code class="descname">TodoListTreeModel</code><span class="sig-paren">(</span><em>todolist</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.addMeasurement">
+<code class="descname">addMeasurement</code><span class="sig-paren">(</span><em>todoListElement</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.addMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.addMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F54D898&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.dropMeasurement">
+<code class="descname">dropMeasurement</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.dropMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.dropMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Scan', 'Measurement']</em><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.moveRow">
+<code class="descname">moveRow</code><span class="sig-paren">(</span><em>rows</em>, <em>up=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.moveRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.moveRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665F54D978&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.setActiveRow">
+<code class="descname">setActiveRow</code><span class="sig-paren">(</span><em>row</em>, <em>running=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/TodoListTreeModel.html#TodoListTreeModel.setActiveRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.setActiveRow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="gui.TodoListTreeModel.TodoListTreeModel.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#gui.TodoListTreeModel.TodoListTreeModel.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-gui.ValueHistoryUi">
+<span id="valuehistoryui"></span><h2>ValueHistoryUi<a class="headerlink" href="#module-gui.ValueHistoryUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="gui.ValueHistoryUi.Parameters">
+<em class="property">class </em><code class="descname">Parameters</code><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#Parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi">
+<em class="property">class </em><code class="descname">ValueHistoryUi</code><span class="sig-paren">(</span><em>config</em>, <em>dbConnection</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.doLoad">
+<code class="descname">doLoad</code><span class="sig-paren">(</span><em>space</em>, <em>parameter</em>, <em>fromTime</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.doLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.doLoad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onLoad">
+<code class="descname">onLoad</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onLoad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onNamedTimespan">
+<code class="descname">onNamedTimespan</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onNamedTimespan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onNamedTimespan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onRefresh">
+<code class="descname">onRefresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onRefresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onRefresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onSpaceChanged">
+<code class="descname">onSpaceChanged</code><span class="sig-paren">(</span><em>newSpace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onSpaceChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onSpaceChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onValueChangedDateTime">
+<code class="descname">onValueChangedDateTime</code><span class="sig-paren">(</span><em>param</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onValueChangedDateTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onValueChangedDateTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.onValueChangedString">
+<code class="descname">onValueChangedString</code><span class="sig-paren">(</span><em>param</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.onValueChangedString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.onValueChangedString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="gui.ValueHistoryUi.ValueHistoryUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>MainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/gui/ValueHistoryUi.html#ValueHistoryUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#gui.ValueHistoryUi.ValueHistoryUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

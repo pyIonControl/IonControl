@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.function_base &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.function_base</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.function_base</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;logspace&#39;</span><span class="p">,</span> <span class="s1">&#39;linspace&#39;</span><span class="p">]</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">_nx</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span>
+
+<div class="viewcode-block" id="linspace"><a class="viewcode-back" href="../../code/modules-doc.html#modules.function_base.linspace">[docs]</a><span class="k">def</span> <span class="nf">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retstep</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return evenly spaced numbers over a specified interval.</span>
+
+<span class="sd">    Returns `num` evenly spaced samples, calculated over the</span>
+<span class="sd">    interval [`start`, `stop` ].</span>
+
+<span class="sd">    The endpoint of the interval can optionally be excluded.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : scalar</span>
+<span class="sd">        The starting value of the sequence.</span>
+<span class="sd">    stop : scalar</span>
+<span class="sd">        The end value of the sequence, unless `endpoint` is set to False.</span>
+<span class="sd">        In that case, the sequence consists of all but the last of ``num + 1``</span>
+<span class="sd">        evenly spaced samples, so that `stop` is excluded.  Note that the step</span>
+<span class="sd">        size changes when `endpoint` is False.</span>
+<span class="sd">    num : int, optional</span>
+<span class="sd">        Number of samples to generate. Default is 50.</span>
+<span class="sd">    endpoint : bool, optional</span>
+<span class="sd">        If True, `stop` is the last sample. Otherwise, it is not included.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    retstep : bool, optional</span>
+<span class="sd">        If True, return (`samples`, `step`), where `step` is the spacing</span>
+<span class="sd">        between samples.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        There are `num` equally spaced samples in the closed interval</span>
+<span class="sd">        ``[start, stop]`` or the half-open interval ``[start, stop)``</span>
+<span class="sd">        (depending on whether `endpoint` is True or False).</span>
+<span class="sd">    step : float (only if `retstep` is True)</span>
+<span class="sd">        Size of spacing between samples.</span>
+
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    arange : Similar to `linspace`, but uses a step size (instead of the</span>
+<span class="sd">             number of samples).</span>
+<span class="sd">    logspace : Samples uniformly distributed in log space.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; np.linspace(2.0, 3.0, num=5)</span>
+<span class="sd">        array([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ])</span>
+<span class="sd">    &gt;&gt;&gt; np.linspace(2.0, 3.0, num=5, endpoint=False)</span>
+<span class="sd">        array([ 2. ,  2.2,  2.4,  2.6,  2.8])</span>
+<span class="sd">    &gt;&gt;&gt; np.linspace(2.0, 3.0, num=5, retstep=True)</span>
+<span class="sd">        (array([ 2.  ,  2.25,  2.5 ,  2.75,  3.  ]), 0.25)</span>
+
+<span class="sd">    Graphical illustration:</span>
+
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; N = 8</span>
+<span class="sd">    &gt;&gt;&gt; y = np.zeros(N)</span>
+<span class="sd">    &gt;&gt;&gt; x1 = np.linspace(0, 10, N, endpoint=True)</span>
+<span class="sd">    &gt;&gt;&gt; x2 = np.linspace(0, 10, N, endpoint=False)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x1, y, &#39;o&#39;)</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x2, y + 0.5, &#39;o&#39;)</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.ylim([-0.5, 1])</span>
+<span class="sd">    (-0.5, 1)</span>
+<span class="sd">    &gt;&gt;&gt; plt.show()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+
+    <span class="c1"># Convert float/complex array scalars to float, gh-3504 </span>
+    <span class="n">start</span> <span class="o">*=</span> <span class="mf">1.</span>
+    <span class="n">stop</span> <span class="o">*=</span> <span class="mf">1.</span>
+
+    <span class="k">if</span> <span class="n">num</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">array</span><span class="p">([],</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">endpoint</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">num</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">start</span><span class="p">)])</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">((</span><span class="n">num</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">_nx</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span> <span class="o">+</span> <span class="n">start</span>
+        <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">stop</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="p">(</span><span class="n">stop</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">_nx</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span> <span class="o">*</span> <span class="n">step</span> <span class="o">+</span> <span class="n">start</span>
+    <span class="k">if</span> <span class="n">retstep</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">step</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="logspace"><a class="viewcode-back" href="../../code/modules-doc.html#modules.function_base.logspace">[docs]</a><span class="k">def</span> <span class="nf">logspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span><span class="n">stop</span><span class="p">,</span><span class="n">num</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span><span class="n">endpoint</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">base</span><span class="o">=</span><span class="mf">10.0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return numbers spaced evenly on a log scale.</span>
+
+<span class="sd">    In linear space, the sequence starts at ``base ** start``</span>
+<span class="sd">    (`base` to the power of `start`) and ends with ``base ** stop``</span>
+<span class="sd">    (see `endpoint` below).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    start : float</span>
+<span class="sd">        ``base ** start`` is the starting value of the sequence.</span>
+<span class="sd">    stop : float</span>
+<span class="sd">        ``base ** stop`` is the final value of the sequence, unless `endpoint`</span>
+<span class="sd">        is False.  In that case, ``num + 1`` values are spaced over the</span>
+<span class="sd">        interval in log-space, of which all but the last (a sequence of</span>
+<span class="sd">        length ``num``) are returned.</span>
+<span class="sd">    num : integer, optional</span>
+<span class="sd">        Number of samples to generate.  Default is 50.</span>
+<span class="sd">    endpoint : boolean, optional</span>
+<span class="sd">        If true, `stop` is the last sample. Otherwise, it is not included.</span>
+<span class="sd">        Default is True.</span>
+<span class="sd">    base : float, optional</span>
+<span class="sd">        The base of the log space. The step size between the elements in</span>
+<span class="sd">        ``ln(samples) / ln(base)`` (or ``log_base(samples)``) is uniform.</span>
+<span class="sd">        Default is 10.0.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    samples : ndarray</span>
+<span class="sd">        `num` samples, equally spaced on a log scale.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    arange : Similar to linspace, with the step size specified instead of the</span>
+<span class="sd">             number of samples. Note that, when used with a float endpoint, the</span>
+<span class="sd">             endpoint may or may not be included.</span>
+<span class="sd">    linspace : Similar to logspace, but with the samples uniformly distributed</span>
+<span class="sd">               in linear space, instead of log space.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    Logspace is equivalent to the code</span>
+
+<span class="sd">    &gt;&gt;&gt; y = np.linspace(start, stop, num=num, endpoint=endpoint)</span>
+<span class="sd">    ... # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; power(base, y)</span>
+<span class="sd">    ... # doctest: +SKIP</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; np.logspace(2.0, 3.0, num=4)</span>
+<span class="sd">        array([  100.        ,   215.443469  ,   464.15888336,  1000.        ])</span>
+<span class="sd">    &gt;&gt;&gt; np.logspace(2.0, 3.0, num=4, endpoint=False)</span>
+<span class="sd">        array([ 100.        ,  177.827941  ,  316.22776602,  562.34132519])</span>
+<span class="sd">    &gt;&gt;&gt; np.logspace(2.0, 3.0, num=4, base=2.0)</span>
+<span class="sd">        array([ 4.        ,  5.0396842 ,  6.34960421,  8.        ])</span>
+
+<span class="sd">    Graphical illustration:</span>
+
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; N = 10</span>
+<span class="sd">    &gt;&gt;&gt; x1 = np.logspace(0.1, 1, N, endpoint=True)</span>
+<span class="sd">    &gt;&gt;&gt; x2 = np.logspace(0.1, 1, N, endpoint=False)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.zeros(N)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x1, y, &#39;o&#39;)</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x2, y + 0.5, &#39;o&#39;)</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.ylim([-0.5, 1])</span>
+<span class="sd">    (-0.5, 1)</span>
+<span class="sd">    &gt;&gt;&gt; plt.show()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="n">num</span><span class="p">,</span> <span class="n">endpoint</span><span class="o">=</span><span class="n">endpoint</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_nx</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

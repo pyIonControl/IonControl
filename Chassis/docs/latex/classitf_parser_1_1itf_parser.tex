@@ -1,0 +1,259 @@
+\hypertarget{classitf_parser_1_1itf_parser}{\section{itf\-Parser.\-itf\-Parser Class Reference}
+\label{classitf_parser_1_1itf_parser}\index{itf\-Parser.\-itf\-Parser@{itf\-Parser.\-itf\-Parser}}
+}
+
+
+This class will parse through an itf file.  
+
+
+Inheritance diagram for itf\-Parser.\-itf\-Parser\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{classitf_parser_1_1itf_parser}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a602ae721f43a6ab6e266adbd5832f7d2}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is the constructor of the \hyperlink{classitf_parser_1_1itf_parser}{itf\-Parser} class. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a3465ff6efcfb3fa67661b64f57460ab3}{readline}
+\begin{DoxyCompactList}\small\item\em This function will read a line from the itf file and returns the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a88b52051bda28ba4aa6d01e67df4eff8}{e\-Map\-Read\-Line}
+\begin{DoxyCompactList}\small\item\em This function reads a line from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a96e49b5e71fc80b9f11b69df0991098e}{readlines}
+\begin{DoxyCompactList}\small\item\em This function will read the number of lines specified by the num\-Lines argument and return the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_aea4cee95e30363dbe991d1a66a528675}{e\-Map\-Read\-Lines}
+\begin{DoxyCompactList}\small\item\em This function reads lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a70cd8c41822cacc0dfb3f9465849e981}{read}
+\begin{DoxyCompactList}\small\item\em This function will read all of the lines within the file and returns the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_ab702c464a6816e9874305b94cd78f862}{e\-Map\-Read}
+\begin{DoxyCompactList}\small\item\em This function reads all lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{classitf_parser_1_1itf_parser_a148fe1022d9ad5ff61276243c2112fa3}{appendline}
+\begin{DoxyCompactList}\small\item\em This function will append a line of data to the itf file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classitf_parser_1_1itf_parser_a3af398778ebdb14a94e1b0da2cc1c9cd}{table\-Header}
+\begin{DoxyCompactList}\small\item\em This is the names of the columns for the table header of the itf file. \end{DoxyCompactList}\item 
+\hyperlink{classitf_parser_1_1itf_parser_a48bb3ccf340622586bc45a2c003df40a}{e\-Map\-File\-Path}
+\begin{DoxyCompactList}\small\item\em This is the file patht to the electrode map file. \end{DoxyCompactList}\item 
+\hyperlink{classitf_parser_1_1itf_parser_ab7f889a0dc7be9cbecf57d072a9daf46}{comments}
+\begin{DoxyCompactList}\small\item\em The comments within the file as a list. \end{DoxyCompactList}\item 
+\hyperlink{classitf_parser_1_1itf_parser_ac67cf5edcc9d174a9f212ae6a55a651c}{meta}
+\begin{DoxyCompactList}\small\item\em The meta data of the file as a dictionary. \end{DoxyCompactList}\item 
+\hyperlink{classitf_parser_1_1itf_parser_a1a239520970f218dc3731c17ebed8815}{empty}
+\begin{DoxyCompactList}\small\item\em A boolean file that is true if the file is empty, and false otherwise. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+This class will parse through an itf file. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classitf_parser_1_1itf_parser_a602ae721f43a6ab6e266adbd5832f7d2}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Obj = {\ttfamily None}, }
+\item[{}]{file\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a602ae721f43a6ab6e266adbd5832f7d2}
+
+
+This function is the constructor of the \hyperlink{classitf_parser_1_1itf_parser}{itf\-Parser} class. 
+
+It initializes class attributes. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Obj} & A file object pointer for a file that has already been opened. \\
+\hline
+{\em file\-Path} & A path to the itf file that hasn't already been opened. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{classitf_parser_1_1itf_parser_a148fe1022d9ad5ff61276243c2112fa3}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!appendline@{appendline}}
+\index{appendline@{appendline}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{appendline}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-appendline (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a148fe1022d9ad5ff61276243c2112fa3}
+
+
+This function will append a line of data to the itf file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em data} & This will take mulitple data types. Supported types are numpy 1\-D float64, a list, and a dictionary. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_ab702c464a6816e9874305b94cd78f862}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!e\-Map\-Read@{e\-Map\-Read}}
+\index{e\-Map\-Read@{e\-Map\-Read}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-e\-Map\-Read (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_ab702c464a6816e9874305b94cd78f862}
+
+
+This function reads all lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_a88b52051bda28ba4aa6d01e67df4eff8}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!e\-Map\-Read\-Line@{e\-Map\-Read\-Line}}
+\index{e\-Map\-Read\-Line@{e\-Map\-Read\-Line}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read\-Line}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-e\-Map\-Read\-Line (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{line\-Num = {\ttfamily None}, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a88b52051bda28ba4aa6d01e67df4eff8}
+
+
+This function reads a line from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em line\-Num} & If this argument is provided then the line number refered to by this argument is returned. Otherwise the next line is returned. (This argument is zero-\/based. Meaning that passing a value of zero will return the first line in the file.) \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_aea4cee95e30363dbe991d1a66a528675}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!e\-Map\-Read\-Lines@{e\-Map\-Read\-Lines}}
+\index{e\-Map\-Read\-Lines@{e\-Map\-Read\-Lines}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-e\-Map\-Read\-Lines (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Lines, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_aea4cee95e30363dbe991d1a66a528675}
+
+
+This function reads lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Lines} & The number of lines to return from the itf file. \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_a70cd8c41822cacc0dfb3f9465849e981}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!read@{read}}
+\index{read@{read}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-read (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a70cd8c41822cacc0dfb3f9465849e981}
+
+
+This function will read all of the lines within the file and returns the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_a3465ff6efcfb3fa67661b64f57460ab3}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!readline@{readline}}
+\index{readline@{readline}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{readline}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-readline (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{line\-Num = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a3465ff6efcfb3fa67661b64f57460ab3}
+
+
+This function will read a line from the itf file and returns the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em line\-Num} & If this argument is provided then the line number refered to by this argument is returned. Otherwise the next line is returned. (This argument is zero-\/based. Meaning that passing a value of zero will return the first line in the file.) \\
+\hline
+\end{DoxyParams}
+\hypertarget{classitf_parser_1_1itf_parser_a96e49b5e71fc80b9f11b69df0991098e}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!readlines@{readlines}}
+\index{readlines@{readlines}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{readlines}]{\setlength{\rightskip}{0pt plus 5cm}def itf\-Parser.\-itf\-Parser.\-readlines (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Lines}
+\end{DoxyParamCaption}
+)}}\label{classitf_parser_1_1itf_parser_a96e49b5e71fc80b9f11b69df0991098e}
+
+
+This function will read the number of lines specified by the num\-Lines argument and return the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Lines} & The number of lines to pull from the file. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{classitf_parser_1_1itf_parser_ab7f889a0dc7be9cbecf57d072a9daf46}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!comments@{comments}}
+\index{comments@{comments}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{comments}]{\setlength{\rightskip}{0pt plus 5cm}itf\-Parser.\-itf\-Parser.\-comments}}\label{classitf_parser_1_1itf_parser_ab7f889a0dc7be9cbecf57d072a9daf46}
+
+
+The comments within the file as a list. 
+
+\hypertarget{classitf_parser_1_1itf_parser_a48bb3ccf340622586bc45a2c003df40a}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!e\-Map\-File\-Path@{e\-Map\-File\-Path}}
+\index{e\-Map\-File\-Path@{e\-Map\-File\-Path}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-File\-Path}]{\setlength{\rightskip}{0pt plus 5cm}itf\-Parser.\-itf\-Parser.\-e\-Map\-File\-Path}}\label{classitf_parser_1_1itf_parser_a48bb3ccf340622586bc45a2c003df40a}
+
+
+This is the file patht to the electrode map file. 
+
+If this variable is populated then this file path will be used when a \hyperlink{classitf_parser_1_1itf_parser_a88b52051bda28ba4aa6d01e67df4eff8}{e\-Map\-Read\-Line()} method is called. \hypertarget{classitf_parser_1_1itf_parser_a1a239520970f218dc3731c17ebed8815}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!empty@{empty}}
+\index{empty@{empty}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{empty}]{\setlength{\rightskip}{0pt plus 5cm}itf\-Parser.\-itf\-Parser.\-empty}}\label{classitf_parser_1_1itf_parser_a1a239520970f218dc3731c17ebed8815}
+
+
+A boolean file that is true if the file is empty, and false otherwise. 
+
+\hypertarget{classitf_parser_1_1itf_parser_ac67cf5edcc9d174a9f212ae6a55a651c}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!meta@{meta}}
+\index{meta@{meta}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{meta}]{\setlength{\rightskip}{0pt plus 5cm}itf\-Parser.\-itf\-Parser.\-meta}}\label{classitf_parser_1_1itf_parser_ac67cf5edcc9d174a9f212ae6a55a651c}
+
+
+The meta data of the file as a dictionary. 
+
+\hypertarget{classitf_parser_1_1itf_parser_a3af398778ebdb14a94e1b0da2cc1c9cd}{\index{itf\-Parser\-::itf\-Parser@{itf\-Parser\-::itf\-Parser}!table\-Header@{table\-Header}}
+\index{table\-Header@{table\-Header}!itfParser::itfParser@{itf\-Parser\-::itf\-Parser}}
+\subsubsection[{table\-Header}]{\setlength{\rightskip}{0pt plus 5cm}itf\-Parser.\-itf\-Parser.\-table\-Header}}\label{classitf_parser_1_1itf_parser_a3af398778ebdb14a94e1b0da2cc1c9cd}
+
+
+This is the names of the columns for the table header of the itf file. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+itf\-Parser.\-py\end{DoxyCompactItemize}

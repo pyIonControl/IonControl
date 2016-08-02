@@ -1,0 +1,717 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProjectConfig.ExptConfigUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>ProjectConfig.ExptConfigUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for ProjectConfig.ExptConfigUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">persist.DatabaseConnectionSettings</span> <span class="k">import</span> <span class="n">DatabaseConnectionSettings</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">BlockSignals</span><span class="p">,</span> <span class="n">textSize</span>
+<span class="kn">from</span> <span class="nn">uiModules.MagnitudeSpinBox</span> <span class="k">import</span> <span class="n">MagnitudeSpinBox</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="n">uiPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/ExptConfig.ui&#39;</span><span class="p">)</span>
+<span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uiPath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExptConfigUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi">[docs]</a><span class="k">class</span> <span class="nc">ExptConfigUi</span><span class="p">(</span><span class="n">Base</span><span class="p">,</span> <span class="n">Form</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for configuring an experiment&quot;&quot;&quot;</span>
+    <span class="n">updateRoles</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">scriptname</span><span class="p">):</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">exptConfig</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">scriptname</span> <span class="o">+</span> <span class="s1">&#39;_ExptConfigGuiTemplate.yml&#39;</span>  <span class="c1"># template for creating GUI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#key: tuple (guiName, objName, name). val: dict, &#39;widget&#39;: config widget, &#39;subwidgetList&#39;:list of config subwidgets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">roleDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#key: a role (i.e. voltages, pulser, etc.). val: a list of hardware that can fulfill that role</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplateFilename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">mainConfigDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiTemplateFilename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExptConfigUi.setupUi"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;setup the dialog box ui&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExptConfigUi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">infoLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span>
+            <span class="s1">&#39;Experiment configuration for project: &lt;b&gt;</span><span class="si">{0}</span><span class="s1">&lt;/b&gt;&lt;br&gt;&lt;br&gt;This dialog box overwrites the experiment configuration file:&lt;br&gt;</span><span class="si">{1}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">exptConfigFilename</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardwareComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softwareComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="n">databaseConnection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">userEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">,</span> <span class="s1">&#39;python&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">passwordEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hostEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;host&#39;</span><span class="p">,</span> <span class="s1">&#39;localhost&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">portEdit</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;port&#39;</span><span class="p">,</span> <span class="mi">5432</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">echoCheck</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">customDatabaseName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCustomDatabaseName&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCustomDatabase</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">customDatabaseName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCustomDatabase</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onCustomDatabaseNameChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onCustomDatabaseNameChanged</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCustomDatabaseName&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hardwareTabWidget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardwareComboBox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardwareTableWidget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardwareNameEdit</span><span class="p">)),</span>
+                                    <span class="p">(</span><span class="s1">&#39;software&#39;</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">softwareTabWidget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">softwareComboBox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">softwareTableWidget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">softwareNameEdit</span><span class="p">))))</span>
+        <span class="k">for</span> <span class="n">guiName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">objName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addObj</span><span class="p">(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addHardwareButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAdd</span><span class="p">,</span> <span class="s1">&#39;hardware&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeHardwareButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onRemove</span><span class="p">,</span> <span class="s1">&#39;hardware&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardwareTableWidget</span><span class="o">.</span><span class="n">currentCellChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSelect</span><span class="p">,</span> <span class="s1">&#39;hardware&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardwareTableWidget</span><span class="o">.</span><span class="n">itemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onItemChanged</span><span class="p">,</span> <span class="s1">&#39;hardware&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardwareTabWidget</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onTabWidgetChanged</span><span class="p">,</span> <span class="s1">&#39;hardware&#39;</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">addSoftwareButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onAdd</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeSoftwareButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onRemove</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softwareTableWidget</span><span class="o">.</span><span class="n">currentCellChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onSelect</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softwareTableWidget</span><span class="o">.</span><span class="n">itemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onItemChanged</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">softwareTabWidget</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onTabWidgetChanged</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;hardware&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span><span class="s1">&#39;software&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onCustomDatabaseNameChanged"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onCustomDatabaseNameChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onCustomDatabaseNameChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="n">checked</span> <span class="o">=</span> <span class="n">state</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;useCustomDatabaseName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">databaseEdit</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+        <span class="n">databaseConnection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">checked</span><span class="p">:</span>
+            <span class="n">databaseConnection</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">databaseEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">databaseConnection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;database&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()))</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.keyPressEvent"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.keyPressEvent">[docs]</a>    <span class="k">def</span> <span class="nf">keyPressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">()</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Enter</span> <span class="ow">or</span> <span class="n">ev</span><span class="o">.</span><span class="n">key</span><span class="p">()</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Return</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hardwareNameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">onAdd</span><span class="p">(</span><span class="s1">&#39;hardware&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">softwareNameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">onAdd</span><span class="p">(</span><span class="s1">&#39;software&#39;</span><span class="p">)</span>
+                <span class="k">return</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ExptConfigUi</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">keyPressEvent</span><span class="p">(</span><span class="n">ev</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">hardware</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A list of hardware tuples of the form (objName, name)&quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[(</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">rowCount</span><span class="p">())]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">software</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A list of software tuples of the form (objName, name)&quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="s1">&#39;software&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[(</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span> <span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">rowCount</span><span class="p">())]</span>
+
+<div class="viewcode-block" id="ExptConfigUi.addObj"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.addObj">[docs]</a>    <span class="k">def</span> <span class="nf">addObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add (objName, name) to the table widget, and add the appropriate tab to the tab widget.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            guiName (str): &#39;hardware&#39; or &#39;software&#39;</span>
+<span class="sd">            objName (str): The type of hardware or software</span>
+<span class="sd">            name (str): The name of the specific piece of hardware or software</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">objName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="n">guiName</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No GUI template entry for </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">objName</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2"> already exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">guiName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">elif</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;character &#39;:&#39; cannot be used in a name&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">templateDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="n">templateDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">templateDict</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tableWidget</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+                <span class="n">objItem</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">objName</span><span class="p">)</span>
+                <span class="n">objItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsUserCheckable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">)</span>
+                <span class="n">nameItem</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTableWidgetItem</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">nameItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">)</span>
+                <span class="n">newrow</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">insertRow</span><span class="p">(</span><span class="n">newrow</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">newrow</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">objItem</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setItem</span><span class="p">(</span><span class="n">newrow</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nameItem</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">objItem</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+                    <span class="n">nameItem</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">description</span><span class="p">)</span>
+                    <span class="n">enabled</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="n">checkState</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">enabled</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span>
+                    <span class="n">objItem</span><span class="o">.</span><span class="n">setCheckState</span><span class="p">(</span><span class="n">checkState</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setCurrentItem</span><span class="p">(</span><span class="n">objItem</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tabWidget</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+                <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getWidget</span><span class="p">(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                <span class="n">index</span><span class="o">=</span><span class="n">w</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">w</span><span class="o">.</span><span class="n">setTabToolTip</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.getWidget"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.getWidget">[docs]</a>    <span class="k">def</span> <span class="nf">getWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the config widget associated with the given objName.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            guiName (str): &#39;hardware&#39; or &#39;software&#39;</span>
+<span class="sd">            objName (str): The type of hardware or software</span>
+<span class="sd">            name (str): The name of the specific piece of hardware or software</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">templateDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">templateDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fields&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">templateDict</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">roles</span> <span class="o">=</span> <span class="n">templateDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;roles&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">templateDict</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;subwidgetList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">mainwidget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QWidget</span><span class="p">()</span>
+            <span class="n">layout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFormLayout</span><span class="p">(</span><span class="n">mainwidget</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">templateDict</span> <span class="ow">and</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">fieldtype</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">oldvalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="n">fieldname</span><span class="p">]</span>
+                    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                        <span class="n">oldvalue</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">subwidget</span><span class="o">=</span><span class="n">ConfigWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fieldtype</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">oldvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">mainwidget</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;subwidgetList&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">subwidget</span><span class="p">))</span>
+                    <span class="n">layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">fieldname</span><span class="p">,</span> <span class="n">subwidget</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s1">&#39;No configuration data for this selection&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mainwidget</span>
+        <span class="k">if</span> <span class="n">roles</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">roleDict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span> <span class="c1">#append fullName to list of roles, or create list with just fullName if it doesn&#39;t exist yet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">updateRoles</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onItemChanged"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onItemChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onItemChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A new name is typed in for a table entry&quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">row</span><span class="o">=</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">column</span><span class="o">=</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">column</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span><span class="p">[</span><span class="n">guiName</span><span class="p">]:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">oldName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">column</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span> <span class="c1">#This should always be true, since column 0 is not editable</span>
+            <span class="n">newName</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="n">objName</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">newName</span><span class="o">==</span><span class="n">oldName</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">((</span><span class="n">objName</span><span class="p">,</span> <span class="n">newName</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> already exists&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">newName</span><span class="p">))</span> <span class="p">)</span>
+                <span class="n">item</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">oldName</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="k">elif</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">newName</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;character &#39;:&#39; cannot be used in a name&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+            <span class="n">subDict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="o">.</span><span class="n">pop</span><span class="p">((</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">oldName</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">newName</span><span class="p">)]</span><span class="o">=</span><span class="n">subDict</span>
+            <span class="k">if</span> <span class="n">objName</span><span class="o">==</span><span class="s1">&#39;Opal Kelly FPGA&#39;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">subwidget</span> <span class="ow">in</span> <span class="n">subDict</span><span class="p">[</span><span class="s1">&#39;subwidgetList&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">fieldname</span><span class="o">==</span><span class="s1">&#39;device&#39;</span><span class="p">:</span>
+                        <span class="n">subwidget</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span>
+                        <span class="k">break</span>
+            <span class="n">oldFullName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">oldName</span><span class="p">)</span>
+            <span class="n">newFullName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">newName</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">newName</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tabWidget</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+                <span class="n">widget</span><span class="o">=</span><span class="n">subDict</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+                <span class="n">w</span><span class="o">.</span><span class="n">setTabText</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">newFullName</span><span class="p">)</span>
+            <span class="n">templateDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span>
+            <span class="n">roles</span> <span class="o">=</span> <span class="n">templateDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;roles&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">templateDict</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">roles</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">roleDict</span><span class="p">[</span><span class="n">role</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">oldFullName</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">roleDict</span><span class="p">[</span><span class="n">role</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newFullName</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">updateRoles</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onTabWidgetChanged"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onTabWidgetChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onTabWidgetChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Tab widget is clicked. Change the selection in the table widget.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            guiName (str): &#39;hardware&#39; or &#39;software&#39;</span>
+<span class="sd">            index (int): new selected index in tab widget</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">fullName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">tabText</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+        <span class="n">objName</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fromFullName</span><span class="p">(</span><span class="n">fullName</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tableWidget</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+            <span class="n">numRows</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numRows</span><span class="p">):</span>
+                <span class="n">objNameItem</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">nameItem</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">objNameItem</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">==</span><span class="n">objName</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameItem</span><span class="o">.</span><span class="n">text</span><span class="p">())</span><span class="o">==</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">w</span><span class="o">.</span><span class="n">setCurrentItem</span><span class="p">(</span><span class="n">objNameItem</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                    <span class="k">break</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onSelect"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onSelect">[docs]</a>    <span class="k">def</span> <span class="nf">onSelect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">,</span> <span class="n">currentRow</span><span class="p">,</span> <span class="n">currentColumn</span><span class="p">,</span> <span class="n">previousRow</span><span class="p">,</span> <span class="n">previousColumn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Table widget is clicked. Change the current tab on the tab widget.&quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">objName</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">currentRow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">currentRow</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tabWidget</span><span class="p">)</span> <span class="k">as</span> <span class="n">w</span><span class="p">:</span>
+            <span class="n">w</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentObj</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onAdd"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onAdd">[docs]</a>    <span class="k">def</span> <span class="nf">onAdd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add is clicked.&quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">objName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">comboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="n">nameEdit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addObj</span><span class="p">(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.onRemove"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.onRemove">[docs]</a>    <span class="k">def</span> <span class="nf">onRemove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">guiName</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove is clicked. Remove selection from the table widget and remove from the tab widget.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            guiName: &#39;hardware&#39; or &#39;software&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+        <span class="n">selectedItems</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
+        <span class="n">selectedRows</span> <span class="o">=</span> <span class="p">{</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">selectedItems</span><span class="p">}</span>
+        <span class="n">uniqueSelectedItems</span> <span class="o">=</span> <span class="p">[</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">selectedRows</span><span class="p">]</span>
+        <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tableWidget</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="n">tabWidget</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">uniqueSelectedItems</span><span class="p">:</span>
+                    <span class="n">row</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                    <span class="n">objName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="n">tableWidget</span><span class="o">.</span><span class="n">removeRow</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                    <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">tabWidget</span><span class="o">.</span><span class="n">indexOf</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+                    <span class="n">tabWidget</span><span class="o">.</span><span class="n">removeTab</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">templateDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiTemplate</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">]</span>
+                    <span class="n">roles</span> <span class="o">=</span> <span class="n">templateDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;roles&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">templateDict</span> <span class="k">else</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">roles</span><span class="p">:</span>
+                        <span class="n">fullName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">roleDict</span><span class="p">[</span><span class="n">role</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fullName</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">updateRoles</span><span class="o">.</span><span class="n">emit</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.accept"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.accept">[docs]</a>    <span class="k">def</span> <span class="nf">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Ok button is clicked. Checks database settings before proceeding.&quot;&quot;&quot;</span>
+        <span class="n">dbSettings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">userEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                      <span class="s1">&#39;password&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">passwordEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                      <span class="s1">&#39;database&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">databaseEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                      <span class="s1">&#39;host&#39;</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hostEdit</span><span class="o">.</span><span class="n">text</span><span class="p">()),</span>
+                      <span class="s1">&#39;port&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">portEdit</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span>
+                      <span class="s1">&#39;echo&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">echoCheck</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+                      <span class="p">}</span>
+        <span class="n">dbConn</span> <span class="o">=</span> <span class="n">DatabaseConnectionSettings</span><span class="p">(</span><span class="o">**</span><span class="n">dbSettings</span><span class="p">)</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">attemptDatabaseConnection</span><span class="p">(</span><span class="n">dbConn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">information</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Database error&#39;</span><span class="p">,</span> <span class="s1">&#39;Invalid database settings&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">guiName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="s1">&#39;software&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">tabWidget</span><span class="p">,</span> <span class="n">comboBox</span><span class="p">,</span> <span class="n">tableWidget</span><span class="p">,</span> <span class="n">nameEdit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">guiDict</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span>
+                <span class="n">numRows</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numRows</span><span class="p">):</span>
+                    <span class="n">objNameItem</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="n">objName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">objNameItem</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="n">nameItem</span> <span class="o">=</span> <span class="n">tableWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">nameItem</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+                    <span class="n">enabled</span> <span class="o">=</span> <span class="n">objNameItem</span><span class="o">.</span><span class="n">checkState</span><span class="p">()</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+                    <span class="n">subwidgetList</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="n">guiName</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)][</span><span class="s1">&#39;subwidgetList&#39;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">objName</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span> <span class="c1">#&#39;objName&#39; is a type of hardware or software</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span> <span class="c1">#&#39;name&#39; is a specific piece of hardware or software</span>
+                    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">subwidget</span> <span class="ow">in</span> <span class="n">subwidgetList</span><span class="p">:</span> <span class="c1">#&#39;field&#39; is the specific config field for &#39;name&#39;</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">subwidget</span><span class="o">.</span><span class="n">content</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="n">guiName</span><span class="p">][</span><span class="n">objName</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">enabled</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;databaseConnection&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbSettings</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;showGui&#39;</span><span class="p">]</span><span class="o">=</span><span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">2.0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exptConfig</span><span class="p">[</span><span class="s1">&#39;useCustomDatabaseName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxCustomDatabase</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">accept</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExptConfigUi.reject"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ExptConfigUi.reject">[docs]</a>    <span class="k">def</span> <span class="nf">reject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cancel or close is clicked. Shut down the program.&quot;&quot;&quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Experiment must be configured for IonControl program to run&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="ConfigWidget"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.ConfigWidget">[docs]</a><span class="k">class</span> <span class="nc">ConfigWidget</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for arbitrary config widget&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exptConfigUi</span><span class="p">,</span> <span class="n">fieldtype</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">oldvalue</span><span class="p">,</span> <span class="n">widgetDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates a widget of the specified fieldtype&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span> <span class="o">=</span> <span class="n">fieldtype</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oldvalue</span> <span class="o">=</span> <span class="n">oldvalue</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widgetCallLookup</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bool&#39;</span>      <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">,</span>
+                                 <span class="s1">&#39;float&#39;</span>     <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">,</span>
+                                 <span class="s1">&#39;magnitude&#39;</span> <span class="p">:</span> <span class="n">MagnitudeSpinBox</span><span class="p">,</span>
+                                 <span class="s1">&#39;int&#39;</span>       <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="p">,</span>
+                                 <span class="s1">&#39;role&#39;</span>      <span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">RoleWidget</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">exptConfigUi</span><span class="p">),</span>
+                                 <span class="s1">&#39;path&#39;</span>      <span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">PathWidget</span><span class="p">,</span><span class="n">exptConfigUi</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">baseDir</span><span class="p">),</span>
+                                 <span class="s1">&#39;str&#39;</span>       <span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">,</span>
+                                 <span class="s1">&#39;ok_fpga&#39;</span>   <span class="p">:</span> <span class="n">partial</span><span class="p">(</span><span class="n">OK_FPGA_Widget</span><span class="p">,</span> <span class="n">widgetDict</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">)}</span>
+
+        <span class="n">widgetCall</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetCallLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">widgetCall</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="s1">&#39;error: unknown type&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;QLabel {color: red;}&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widgetCall</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;int&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;float&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="o">-</span><span class="mi">999999999</span><span class="p">,</span> <span class="mi">999999999</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;float&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">widgetSetLookup</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;bool&#39;</span>      <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setChecked&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;float&#39;</span>     <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;magnitude&#39;</span> <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;int&#39;</span>       <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;role&#39;</span>      <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setToText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;path&#39;</span>      <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;str&#39;</span>       <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+                                <span class="s1">&#39;ok_fpga&#39;</span>   <span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setToText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)}</span>
+
+        <span class="k">if</span> <span class="n">oldvalue</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">widgetSetLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="p">)(</span><span class="n">oldvalue</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span>   <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;bool&#39;</span><span class="p">:</span>      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;float&#39;</span><span class="p">:</span>     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;magnitude&#39;</span><span class="p">:</span> <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">value</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;int&#39;</span><span class="p">:</span>       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;role&#39;</span><span class="p">:</span>      <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;path&#39;</span><span class="p">:</span>      <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span><span class="o">==</span><span class="s1">&#39;str&#39;</span><span class="p">:</span>       <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">fieldtype</span> <span class="o">==</span> <span class="s1">&#39;ok_fpga&#39;</span><span class="p">:</span>
+            <span class="n">newvalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">newvalue</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">oldvalue</span>  <span class="c1"># we don&#39;t want to forget the last valid device name</span></div>
+
+
+<div class="viewcode-block" id="PathWidget"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.PathWidget">[docs]</a><span class="k">class</span> <span class="nc">PathWidget</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Config widget for selecting files&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">baseDir</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PathWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openButton</span><span class="o">=</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+        <span class="n">pixmap</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="s2">&quot;:/openicon/icons/document-open-5.png&quot;</span><span class="p">)</span>
+        <span class="n">icon</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">openButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">openButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onOpen</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="o">=</span><span class="n">baseDir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="PathWidget.onOpen"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.PathWidget.onOpen">[docs]</a>    <span class="k">def</span> <span class="nf">onOpen</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">filename</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFileDialog</span><span class="o">.</span><span class="n">getOpenFileName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;Select File&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseDir</span><span class="p">,</span> <span class="s1">&#39;All files (*.*)&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PathWidget.setText"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.PathWidget.setText">[docs]</a>    <span class="k">def</span> <span class="nf">setText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">text</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="RoleWidget"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.RoleWidget">[docs]</a><span class="k">class</span> <span class="nc">RoleWidget</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Combo box for selecting what hardware to use for a specific software role&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="p">,</span><span class="n">exptConfigUi</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RoleWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfigUi</span> <span class="o">=</span> <span class="n">exptConfigUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onUpdate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exptConfigUi</span><span class="o">.</span><span class="n">updateRoles</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onUpdate</span><span class="p">)</span>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="RoleWidget.onUpdate"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.RoleWidget.onUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">onUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update the list of possible hardware to use for this role&quot;&quot;&quot;</span>
+        <span class="n">currentText</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">hardwareList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exptConfigUi</span><span class="o">.</span><span class="n">roleDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">hardwareList</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">hardwareList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">currentText</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="RoleWidget.setToText"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.RoleWidget.setToText">[docs]</a>    <span class="k">def</span> <span class="nf">setToText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set widget to particular text&quot;&quot;&quot;</span>
+        <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="OK_FPGA_Widget"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.OK_FPGA_Widget">[docs]</a><span class="k">class</span> <span class="nc">OK_FPGA_Widget</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Config widget for selecting an Opal Kelly FPGA&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgetDict</span><span class="p">,</span> <span class="n">objName</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">OK_FPGA_Widget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">pulser.OKBase</span> <span class="k">import</span> <span class="n">OKBase</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="n">OKBase</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span> <span class="o">=</span> <span class="n">widgetDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objName</span> <span class="o">=</span> <span class="n">objName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelLineEdit</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelLineEdit</span><span class="o">.</span><span class="n">setReadOnly</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelLineEdit</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">120</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Upload&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadButton</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Upload bitfile to FPGA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uploadButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onUpload</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;Scan&#39;</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s2">&quot;Scan for FPGAs&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onScan</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelLineEdit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uploadButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scanButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="o">=</span><span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FPGAlistModel</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QStringListModel</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">FPGAlistModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onChanged</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onScan</span><span class="p">()</span>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="OK_FPGA_Widget.onScan"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onScan">[docs]</a>    <span class="k">def</span> <span class="nf">onScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get list of FPGAs&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">currentText</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">listBoards</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Opal Kelly Devices found: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="o">.</span><span class="n">modelName</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;&#39;</span><span class="p">:</span><span class="s1">&#39;dummy&#39;</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FPGAlistModel</span><span class="o">.</span><span class="n">setStringList</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setToText</span><span class="p">(</span><span class="n">currentText</span><span class="p">)</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">()</span>
+<div class="viewcode-block" id="OK_FPGA_Widget.onUpload"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onUpload">[docs]</a>    <span class="k">def</span> <span class="nf">onUpload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;upload bitFile to FPGA&quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">subwidgets</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetDict</span><span class="p">[(</span><span class="s1">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">objName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)][</span><span class="s1">&#39;subwidgetList&#39;</span><span class="p">]</span>
+        <span class="n">FPGA_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="n">FPGA</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="p">[</span><span class="n">FPGA_name</span><span class="p">]</span>
+        <span class="n">bitFileFound</span><span class="o">=</span><span class="kc">False</span>
+        <span class="k">for</span> <span class="n">fieldName</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">subwidgets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fieldName</span><span class="o">==</span><span class="s1">&#39;bitFile&#39;</span><span class="p">:</span>
+                <span class="n">bitFileFound</span><span class="o">=</span><span class="kc">True</span>
+                <span class="n">bitFile</span><span class="o">=</span><span class="n">widget</span><span class="o">.</span><span class="n">content</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">bitFileFound</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No bitfile field found; unable to upload bitfile&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bitFile</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Invalid bitfile path&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">FPGA_name</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No FPGA selected&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">openBySerial</span><span class="p">(</span><span class="n">FPGA</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">uploadBitfile</span><span class="p">(</span><span class="n">bitFile</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Uploaded file </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2"> (model </span><span class="si">{2}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bitFile</span><span class="p">,</span> <span class="n">FPGA_name</span><span class="p">,</span> <span class="n">FPGA</span><span class="o">.</span><span class="n">modelName</span><span class="p">))</span></div>
+
+    <span class="nd">@QtCore</span><span class="o">.</span><span class="n">pyqtSlot</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+<div class="viewcode-block" id="OK_FPGA_Widget.onChanged"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;set modelLineEdit to display FPGA model name&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">modelName</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">OK_FPGA_Dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">modelName</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">modelName</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="OK_FPGA_Widget.setToText"><a class="viewcode-back" href="../../code/ProjectConfig-doc.html#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.setToText">[docs]</a>    <span class="k">def</span> <span class="nf">setToText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set widget to particular device id text&quot;&quot;&quot;</span>
+        <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentText</span><span class="o">=</span><span class="n">text</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span><span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifierComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

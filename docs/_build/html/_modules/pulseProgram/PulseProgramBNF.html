@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram.PulseProgramBNF &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulseProgram.PulseProgramBNF</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulseProgram.PulseProgramBNF</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+  
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pyparsing</span> <span class="k">import</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">LineEnd</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">alphanums</span><span class="p">,</span> <span class="n">alphas</span><span class="p">,</span> <span class="n">dblQuotedString</span><span class="p">,</span> <span class="n">Keyword</span><span class="p">,</span> <span class="n">Word</span><span class="p">,</span> <span class="n">Regex</span><span class="p">,</span> <span class="n">pythonStyleComment</span><span class="p">,</span> <span class="n">nums</span><span class="p">,</span> <span class="n">ZeroOrMore</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span><span class="p">,</span> <span class="n">is_Q</span>
+
+<span class="n">VAR</span> <span class="o">=</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;var&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span>
+<span class="n">CONST</span> <span class="o">=</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;const&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span>
+<span class="n">INSERT</span> <span class="o">=</span> <span class="n">Keyword</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span>
+
+<span class="n">COMMA</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span>
+<span class="n">COLON</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span>
+
+<span class="n">IDENTIFIER</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">alphanums</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<span class="n">NAME</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span><span class="n">alphas</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">alphanums</span><span class="o">+</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
+<span class="n">DECVALUE</span> <span class="o">=</span> <span class="n">Word</span><span class="p">(</span> <span class="n">nums</span> <span class="p">)</span>
+<span class="n">HEXVALUE</span> <span class="o">=</span> <span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;0x[0-9a-f]+&quot;</span><span class="p">)</span>
+<span class="n">VALUE</span> <span class="o">=</span> <span class="n">HEXVALUE</span> <span class="o">|</span> <span class="n">DECVALUE</span>
+  
+  
+<div class="viewcode-block" id="ppexception"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.ppexception">[docs]</a><span class="k">class</span> <span class="nc">ppexception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ppexception</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">line</span> <span class="o">=</span> <span class="n">line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">context</span> <span class="o">=</span> <span class="n">context</span></div>
+  
+<span class="c1"># Code definitions</span>
+<span class="n">OPS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;NOP&#39;</span>    <span class="p">:</span> <span class="mh">0x00</span><span class="p">,</span>
+       <span class="s1">&#39;DDSFRQ&#39;</span> <span class="p">:</span> <span class="mh">0x01</span><span class="p">,</span>
+       <span class="s1">&#39;DDSAMP&#39;</span> <span class="p">:</span> <span class="mh">0x02</span><span class="p">,</span>
+       <span class="s1">&#39;DDSPHS&#39;</span> <span class="p">:</span> <span class="mh">0x03</span><span class="p">,</span>
+       <span class="s1">&#39;DDSCHN&#39;</span> <span class="p">:</span> <span class="mh">0x04</span><span class="p">,</span>
+       <span class="s1">&#39;SHUTR&#39;</span>  <span class="p">:</span> <span class="mh">0x05</span><span class="p">,</span>
+       <span class="s1">&#39;COUNT&#39;</span>  <span class="p">:</span> <span class="mh">0x06</span><span class="p">,</span>
+       <span class="s1">&#39;DELAY&#39;</span>  <span class="p">:</span> <span class="mh">0x07</span><span class="p">,</span>
+       <span class="s1">&#39;LDWR&#39;</span>   <span class="p">:</span> <span class="mh">0x08</span><span class="p">,</span>
+       <span class="s1">&#39;LDWI&#39;</span>   <span class="p">:</span> <span class="mh">0x09</span><span class="p">,</span>
+       <span class="s1">&#39;STWR&#39;</span>   <span class="p">:</span> <span class="mh">0x0A</span><span class="p">,</span>
+       <span class="s1">&#39;STWI&#39;</span>   <span class="p">:</span> <span class="mh">0x0B</span><span class="p">,</span>
+       <span class="s1">&#39;LDINDF&#39;</span> <span class="p">:</span> <span class="mh">0x0C</span><span class="p">,</span>
+       <span class="s1">&#39;ANDW&#39;</span>   <span class="p">:</span> <span class="mh">0x0D</span><span class="p">,</span>
+       <span class="s1">&#39;ADDW&#39;</span>   <span class="p">:</span> <span class="mh">0x0E</span><span class="p">,</span>
+       <span class="s1">&#39;INC&#39;</span>    <span class="p">:</span> <span class="mh">0x0F</span><span class="p">,</span>
+       <span class="s1">&#39;DEC&#39;</span>    <span class="p">:</span> <span class="mh">0x10</span><span class="p">,</span>
+       <span class="s1">&#39;CLRW&#39;</span>   <span class="p">:</span> <span class="mh">0x11</span><span class="p">,</span>
+       <span class="s1">&#39;CMP&#39;</span>    <span class="p">:</span> <span class="mh">0x12</span><span class="p">,</span>
+       <span class="s1">&#39;JMP&#39;</span>    <span class="p">:</span> <span class="mh">0x13</span><span class="p">,</span>
+       <span class="s1">&#39;JMPZ&#39;</span>   <span class="p">:</span> <span class="mh">0x14</span><span class="p">,</span>
+       <span class="s1">&#39;JMPNZ&#39;</span>  <span class="p">:</span> <span class="mh">0x15</span><span class="p">,</span>
+       <span class="s1">&#39;DAC&#39;</span>    <span class="p">:</span> <span class="mh">0x17</span><span class="p">,</span>
+       <span class="s1">&#39;DACUP&#39;</span>  <span class="p">:</span> <span class="mh">0x18</span><span class="p">,</span>
+       <span class="s1">&#39;COUNT1&#39;</span>    <span class="p">:</span> <span class="mh">0x20</span><span class="p">,</span>
+       <span class="s1">&#39;COUNTBOTH&#39;</span> <span class="p">:</span> <span class="mh">0x21</span><span class="p">,</span>
+       <span class="s1">&#39;LDWR1&#39;</span>    <span class="p">:</span> <span class="mh">0x22</span><span class="p">,</span>
+       <span class="s1">&#39;STWR1&#39;</span>  <span class="p">:</span> <span class="mh">0x23</span><span class="p">,</span>
+       <span class="s1">&#39;CMP1&#39;</span>   <span class="p">:</span> <span class="mh">0x24</span><span class="p">,</span>
+       <span class="s1">&#39;JMPZ1&#39;</span>  <span class="p">:</span> <span class="mh">0x25</span><span class="p">,</span>
+       <span class="s1">&#39;JMPNZ1&#39;</span>    <span class="p">:</span> <span class="mh">0x26</span><span class="p">,</span>
+       <span class="s1">&#39;CLRW1&#39;</span>    <span class="p">:</span> <span class="mh">0x27</span><span class="p">,</span>
+       <span class="s1">&#39;SHUTRVAR&#39;</span><span class="p">:</span><span class="mh">0x28</span><span class="p">,</span>
+       <span class="s1">&#39;SHUTTERMASK&#39;</span> <span class="p">:</span> <span class="mh">0x30</span><span class="p">,</span>
+       <span class="s1">&#39;ASYNCSHUTTER&#39;</span> <span class="p">:</span> <span class="mh">0x31</span><span class="p">,</span>
+       <span class="s1">&#39;COUNTERMASK&#39;</span> <span class="p">:</span> <span class="mh">0x32</span><span class="p">,</span>
+       <span class="s1">&#39;TRIGGER&#39;</span> <span class="p">:</span> <span class="mh">0x33</span><span class="p">,</span>
+       <span class="s1">&#39;UPDATE&#39;</span> <span class="p">:</span> <span class="mh">0x34</span><span class="p">,</span>
+       <span class="s1">&#39;WAIT&#39;</span> <span class="p">:</span> <span class="mh">0x35</span><span class="p">,</span>
+       <span class="s1">&#39;DDSFRQFINE&#39;</span> <span class="p">:</span> <span class="mh">0x36</span><span class="p">,</span>
+       <span class="s1">&#39;LDCOUNT&#39;</span> <span class="p">:</span> <span class="mh">0x37</span><span class="p">,</span>
+       <span class="s1">&#39;WRITEPIPE&#39;</span> <span class="p">:</span> <span class="mh">0x38</span><span class="p">,</span>
+       <span class="s1">&#39;READPIPE&#39;</span> <span class="p">:</span> <span class="mh">0x39</span><span class="p">,</span>
+       <span class="s1">&#39;LDTDCCOUNT&#39;</span> <span class="p">:</span> <span class="mh">0x3a</span><span class="p">,</span>
+       <span class="s1">&#39;CMPEQUAL&#39;</span> <span class="p">:</span> <span class="mh">0x3b</span><span class="p">,</span>
+       <span class="s1">&#39;JMPCMP&#39;</span> <span class="p">:</span> <span class="mh">0x3c</span><span class="p">,</span>
+       <span class="s1">&#39;JMPNCMP&#39;</span><span class="p">:</span> <span class="mh">0x3d</span><span class="p">,</span>
+       <span class="s1">&#39;JMPPIPEAVAIL&#39;</span><span class="p">:</span> <span class="mh">0x3e</span><span class="p">,</span>
+       <span class="s1">&#39;JMPPIPEEMPTY&#39;</span><span class="p">:</span> <span class="mh">0x3f</span><span class="p">,</span>
+       <span class="s1">&#39;READPIPEINDF&#39;</span><span class="p">:</span> <span class="mh">0x40</span><span class="p">,</span>
+       <span class="s1">&#39;WRITEPIPEINDF&#39;</span><span class="p">:</span> <span class="mh">0x41</span><span class="p">,</span>
+       <span class="s1">&#39;SETRAMADDR&#39;</span><span class="p">:</span> <span class="mh">0x42</span><span class="p">,</span>
+       <span class="s1">&#39;RAMREADINDF&#39;</span> <span class="p">:</span> <span class="mh">0x43</span><span class="p">,</span>
+       <span class="s1">&#39;RAMREAD&#39;</span> <span class="p">:</span> <span class="mh">0x44</span><span class="p">,</span>
+       <span class="s1">&#39;JMPRAMVALID&#39;</span> <span class="p">:</span> <span class="mh">0x45</span><span class="p">,</span>
+       <span class="s1">&#39;JMPRAMINVALID&#39;</span> <span class="p">:</span> <span class="mh">0x46</span><span class="p">,</span>
+       <span class="s1">&#39;CMPGE&#39;</span> <span class="p">:</span> <span class="mh">0x47</span><span class="p">,</span>
+       <span class="s1">&#39;CMPLE&#39;</span> <span class="p">:</span> <span class="mh">0x48</span><span class="p">,</span> 
+       <span class="s1">&#39;CMPGREATER&#39;</span> <span class="p">:</span> <span class="mh">0x4a</span><span class="p">,</span>
+       <span class="s1">&#39;ORW&#39;</span> <span class="p">:</span> <span class="mh">0x4b</span><span class="p">,</span>
+       <span class="s1">&#39;UPDATEINDF&#39;</span> <span class="p">:</span> <span class="mh">0x4d</span><span class="p">,</span>
+       <span class="s1">&#39;WAITDDSWRITEDONE&#39;</span> <span class="p">:</span> <span class="mh">0x4e</span><span class="p">,</span>
+       <span class="s1">&#39;CMPLESS&#39;</span> <span class="p">:</span> <span class="mh">0x4f</span><span class="p">,</span>
+       <span class="s1">&#39;ASYNCINVSHUTTER&#39;</span> <span class="p">:</span> <span class="mh">0x50</span><span class="p">,</span>
+       <span class="s1">&#39;END&#39;</span>    <span class="p">:</span> <span class="mh">0xFF</span> <span class="p">}</span>
+
+<div class="viewcode-block" id="Dimensions"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.Dimensions">[docs]</a><span class="k">class</span> <span class="nc">Dimensions</span><span class="p">:</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">frequency</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">voltage</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">dimensionless</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Variable"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.Variable">[docs]</a><span class="k">class</span> <span class="nc">Variable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>        
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">d</span>
+        
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span></div>
+
+<span class="n">encodings</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;AD9912_FRQ&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="n">e9</span><span class="o">/</span><span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="mh">0xffffffff</span> <span class="p">),</span>
+              <span class="s1">&#39;AD9912_FRQFINE&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="n">e9</span><span class="o">/</span><span class="mi">2</span><span class="o">**</span><span class="mi">48</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">frequency</span><span class="p">,</span> <span class="mh">0xffff</span> <span class="p">),</span>
+              <span class="s1">&#39;AD9912_PHASE&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">360.</span><span class="o">/</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span> <span class="mh">0x3fff</span><span class="p">),</span>
+              <span class="s1">&#39;CURRENT&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">current</span><span class="p">,</span> <span class="mh">0xffffffff</span> <span class="p">),</span>
+              <span class="s1">&#39;VOLTAGE&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">voltage</span><span class="p">,</span> <span class="mh">0xffffffff</span> <span class="p">),</span>
+              <span class="s1">&#39;TIME&#39;</span> <span class="p">:</span> <span class="p">(</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="mh">0xffffffffffff</span> <span class="p">),</span>
+              <span class="kc">None</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span> <span class="mh">0xffffffff</span> <span class="p">),</span>
+              <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">dimensionless</span><span class="p">,</span> <span class="mh">0xffffffff</span> <span class="p">)</span> <span class="p">}</span>
+
+
+<div class="viewcode-block" id="variableValueDict"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.variableValueDict">[docs]</a><span class="k">def</span> <span class="nf">variableValueDict</span><span class="p">(</span> <span class="n">variabledict</span> <span class="p">):</span>
+    <span class="n">returndict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">variabledict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">returndict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span>
+    <span class="k">return</span> <span class="n">returndict</span></div>
+
+<div class="viewcode-block" id="PulseProgram"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram">[docs]</a><span class="k">class</span> <span class="nc">PulseProgram</span><span class="p">:</span>    
+    <span class="sd">&quot;&quot;&quot; Encapsulates a PulseProgrammer Program</span>
+<span class="sd">    loadSource( filename ) loads the contents of the file</span>
+<span class="sd">    The code is compiled in the following steps</span>
+<span class="sd">        parse()         generates self.code</span>
+<span class="sd">        toBytecode()    generates self.bytecode</span>
+<span class="sd">        toBinary()      generates self.binarycode</span>
+<span class="sd">    the procedure updateVariables( dictionary )  updates variable values in the bytecode</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>        <span class="c1"># keeps information on all variables to easily change them later</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">labeldict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>          <span class="c1"># keep information on all labels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span>             <span class="c1"># dictionary of source code files (stored as strings)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="p">[]</span>                   <span class="c1"># this is a list of lines</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span> <span class="o">=</span> <span class="p">[]</span>               <span class="c1"># list of op, argument tuples</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binarycode</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>    <span class="c1"># binarycode to be uploaded</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>          <span class="c1"># generate a reverse dictionary of variables of type exitcode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">constDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+        <span class="k">class</span> <span class="nc">Board</span><span class="p">:</span>
+            <span class="n">channelLimit</span> <span class="o">=</span> <span class="mi">1</span>    
+            <span class="n">halfClockLimit</span> <span class="o">=</span> <span class="mi">500000000</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adIndexList</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adBoards</span> <span class="o">=</span> <span class="p">[</span> <span class="n">Board</span><span class="p">()</span> <span class="p">]</span><span class="o">*</span><span class="mi">6</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mf">20.0</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initBNF</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="PulseProgram.initBNF"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.initBNF">[docs]</a>    <span class="k">def</span> <span class="nf">initBNF</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">constdecl</span> <span class="o">=</span> <span class="p">(</span><span class="n">CONST</span> <span class="o">+</span> <span class="n">NAME</span> <span class="o">+</span> <span class="n">VALUE</span><span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">const_action</span><span class="p">)</span>
+        <span class="n">vardecl</span> <span class="o">=</span> <span class="p">(</span><span class="n">VAR</span> <span class="o">+</span> <span class="n">NAME</span> <span class="o">+</span> <span class="n">VALUE</span> <span class="o">+</span> <span class="n">Optional</span><span class="p">(</span> <span class="n">COMMA</span> <span class="o">+</span> <span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;[^#</span><span class="se">\n</span><span class="s2">]*&quot;</span><span class="p">))</span> <span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_action</span><span class="p">)</span>
+        <span class="n">insertdecl</span> <span class="o">=</span> <span class="p">(</span><span class="n">INSERT</span> <span class="o">+</span> <span class="n">dblQuotedString</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span><span class="o">.</span><span class="n">suppress</span><span class="p">())</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">insert_action</span><span class="p">)</span>
+        
+        <span class="n">LABEL</span> <span class="o">=</span> <span class="n">IDENTIFIER</span> <span class="o">+</span> <span class="n">COLON</span>
+        <span class="n">COMMANDEXP</span> <span class="o">=</span> <span class="p">(</span><span class="n">IDENTIFIER</span><span class="o">.</span><span class="n">setWhitespaceChars</span><span class="p">(</span><span class="s2">&quot; </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="o">+</span> <span class="n">Regex</span><span class="p">(</span><span class="s2">&quot;[^#</span><span class="se">\n</span><span class="s2">]*&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">setWhitespaceChars</span><span class="p">(</span><span class="s2">&quot; </span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="n">LineEnd</span><span class="p">()</span><span class="o">.</span><span class="n">suppress</span><span class="p">()</span> <span class="p">)</span>
+        <span class="n">COMMAND</span> <span class="o">=</span> <span class="n">COMMANDEXP</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">command_action</span><span class="p">)</span>
+        <span class="n">LABELEDCOMMAND</span> <span class="o">=</span> <span class="p">(</span><span class="n">LABEL</span> <span class="o">+</span> <span class="n">COMMANDEXP</span> <span class="p">)</span><span class="o">.</span><span class="n">setParseAction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label_command_action</span><span class="p">)</span>
+        
+        
+        <span class="n">decl</span> <span class="o">=</span> <span class="n">constdecl</span> <span class="o">|</span> <span class="n">vardecl</span> <span class="o">|</span> <span class="n">insertdecl</span> <span class="o">|</span> <span class="n">LABELEDCOMMAND</span> <span class="o">|</span> <span class="n">COMMAND</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">ZeroOrMore</span><span class="p">(</span><span class="n">decl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">ignore</span><span class="p">(</span><span class="n">pythonStyleComment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulseProgram.const_action"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.const_action">[docs]</a>    <span class="k">def</span> <span class="nf">const_action</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">arg</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; add the const to the self.constDict dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">:</span><span class="si">{1}</span><span class="s2"> const </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span><span class="p">))</span>
+        <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">constDict</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Error parsing const in file &#39;</span><span class="si">{0}</span><span class="s2">&#39;: attempted to redefine&#39;</span><span class="si">{1}</span><span class="s2">&#39; to &#39;</span><span class="si">{2}</span><span class="s2">&#39; from &#39;</span><span class="si">{3}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">constDict</span><span class="p">[</span><span class="n">label</span><span class="p">])</span> <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;Redefining variable&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>    
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constDict</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.var_action"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.var_action">[docs]</a>    <span class="k">def</span> <span class="nf">var_action</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;var_action&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> 
+        <span class="sd">&quot;&quot;&quot; add a variable to the self.variablesdict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">:</span><span class="si">{1}</span><span class="s2"> Variable </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">()</span>
+        <span class="n">label</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="k">else</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span>
+        <span class="n">fields</span> <span class="o">+=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">))</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fields</span> <span class="p">]</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">encodings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;unknown encoding </span><span class="si">{0}</span><span class="s2"> in file &#39;</span><span class="si">{1}</span><span class="s2">&#39;:</span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span> <span class="s2">&quot;Evaluation error in file &#39;</span><span class="si">{0}</span><span class="s2">&#39; on line: &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Error in file &#39;</span><span class="si">%s</span><span class="s2">&#39;: attempted to reassign &#39;</span><span class="si">%s</span><span class="s2">&#39; to &#39;</span><span class="si">%s</span><span class="s2">&#39; (from prev. value of &#39;</span><span class="si">%s</span><span class="s2">&#39;) in a var statement.&quot;</span> <span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">[</span><span class="n">label</span><span class="p">])</span> <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;variable redifinition&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span> <span class="c1"># add the variable to the dictionary of definitions to prevent identifiers and variables from having the same name</span>
+                                        <span class="c1"># however, we do not want it replaced with a number but keep the name for the last stage of compilation</span>
+            <span class="k">pass</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span> <span class="n">label</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;exitcode&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span><span class="p">[</span><span class="n">data</span> <span class="o">&amp;</span> <span class="mh">0x0000ffff</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span></div>
+    
+<div class="viewcode-block" id="PulseProgram.command_action"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.command_action">[docs]</a>    <span class="k">def</span> <span class="nf">command_action</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;command_action&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">],</span> <span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> </div>
+        
+<div class="viewcode-block" id="PulseProgram.label_command_action"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.label_command_action">[docs]</a>    <span class="k">def</span> <span class="nf">label_command_action</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">arg</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;label_command_action&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">2</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> </div>
+     
+<div class="viewcode-block" id="PulseProgram.addLabel"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.addLabel">[docs]</a>    <span class="k">def</span> <span class="nf">addLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">labeldict</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">address</span></div>
+
+    
+<div class="viewcode-block" id="PulseProgram.insert_action"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.insert_action">[docs]</a>    <span class="k">def</span> <span class="nf">insert_action</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">loc</span><span class="p">,</span> <span class="n">arg</span> <span class="p">):</span>
+        <span class="n">oldfile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;insert_action&quot;</span><span class="p">,</span> <span class="n">lineno</span><span class="p">(</span><span class="n">loc</span><span class="p">,</span> <span class="n">text</span><span class="p">),</span> <span class="n">arg</span><span class="p">)</span>
+        <span class="n">myprogram</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span> <span class="o">=</span> <span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">myprogram</span><span class="o">.</span><span class="n">parseFile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span> <span class="o">=</span> <span class="n">oldfile</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+    
+<div class="viewcode-block" id="PulseProgram.assembleFile"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.assembleFile">[docs]</a>    <span class="k">def</span> <span class="nf">assembleFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">program</span><span class="o">.</span><span class="n">parseFile</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentFile</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="PulseProgram.setHardware"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.setHardware">[docs]</a>    <span class="k">def</span> <span class="nf">setHardware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adIndexList</span><span class="p">,</span> <span class="n">adBoards</span><span class="p">,</span> <span class="n">timestep</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adIndexList</span> <span class="o">=</span> <span class="n">adIndexList</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">adBoards</span> <span class="o">=</span> <span class="n">adBoards</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span> <span class="o">=</span> <span class="n">timestep</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="o">.</span><span class="n">has_dimension</span><span class="p">(</span><span class="s1">&#39;s&#39;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.saveSource"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.saveSource">[docs]</a>    <span class="k">def</span> <span class="nf">saveSource</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pp_dir</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>            </div>
+        
+<div class="viewcode-block" id="PulseProgram.loadSource"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.loadSource">[docs]</a>    <span class="k">def</span> <span class="nf">loadSource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pp_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Load the source pp_file</span>
+<span class="sd">        #include files are loaded recursively</span>
+<span class="sd">        all code lines are added to self.sourcelines</span>
+<span class="sd">        for each source file the contents are added to the dictionary self.source</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pp_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pp_filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">pp_file</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourcelines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insertSource</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pp_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compileCode</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PulseProgram.updateVariables"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.updateVariables">[docs]</a>    <span class="k">def</span> <span class="nf">updateVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variables</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; update the variable values in the bytecode</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">:</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">address</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">address</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;updateVariables </span><span class="si">{0}</span><span class="s2"> at address 0x</span><span class="si">{2:x}</span><span class="s2"> value </span><span class="si">{1}</span><span class="s2">, 0x</span><span class="si">{3:x}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">data</span><span class="p">))</span> <span class="p">)</span>
+                <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span><span class="p">[</span><span class="n">address</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span><span class="p">[</span><span class="n">address</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;variable </span><span class="si">{0}</span><span class="s2"> not found in dictionary.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.variables"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.variables">[docs]</a>    <span class="k">def</span> <span class="nf">variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mydict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">mydict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="p">})</span>
+        <span class="k">return</span> <span class="n">mydict</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.variable"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.variable">[docs]</a>    <span class="k">def</span> <span class="nf">variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variablename</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">variablename</span><span class="p">)</span><span class="o">.</span><span class="n">value</span></div>
+
+<div class="viewcode-block" id="PulseProgram.variableUpdateCode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.variableUpdateCode">[docs]</a>    <span class="k">def</span> <span class="nf">variableUpdateCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variablename</span><span class="p">,</span> <span class="n">value</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns the code to update the variable directly on the fpga</span>
+<span class="sd">        consists of variablelocation and variablevalue</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">variablename</span><span class="p">]</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;II&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">data</span><span class="p">)))</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.flattenList"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.flattenList">[docs]</a>    <span class="k">def</span> <span class="nf">flattenList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">l</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.variableScanCode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.variableScanCode">[docs]</a>    <span class="k">def</span> <span class="nf">variableScanCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">variablename</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">variablename</span><span class="p">]</span>
+        <span class="c1"># [item for sublist in l for item in sublist] idiom for flattening of list</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flattenList</span><span class="p">(</span> <span class="p">[</span> <span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">values</span> <span class="p">]</span> <span class="p">)</span></div>
+                   
+<div class="viewcode-block" id="PulseProgram.loadFromMemory"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.loadFromMemory">[docs]</a>    <span class="k">def</span> <span class="nf">loadFromMemory</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Similar to loadSource</span>
+<span class="sd">        only this routine loads from self.source</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sourcelines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insertSource</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pp_filename</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compileCode</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PulseProgram.toBinary"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.toBinary">[docs]</a>    <span class="k">def</span> <span class="nf">toBinary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; convert bytecode to binary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binarycode</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">wordno</span><span class="p">,</span> <span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2"> </span><span class="si">{3}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">hex</span><span class="p">(</span><span class="n">wordno</span><span class="p">),</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="p">)),</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">arg</span><span class="p">)),</span> <span class="nb">hex</span><span class="p">(</span><span class="nb">int</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">op</span><span class="p">)</span><span class="o">&lt;&lt;</span><span class="mi">24</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">arg</span><span class="p">)))</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">binarycode</span> <span class="o">+=</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">((</span><span class="n">op</span><span class="o">&lt;&lt;</span><span class="mi">24</span><span class="p">)</span> <span class="o">+</span> <span class="n">arg</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">binarycode</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.currentVariablesText"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.currentVariablesText">[docs]</a>    <span class="k">def</span> <span class="nf">currentVariablesText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">iter</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+           
+
+<span class="c1"># routines below here should not be needed by the user   </span>
+
+    <span class="n">insertPattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;#insert\s+([\w.-_]+)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">codelinePattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(#define|\s*[^#\s]+)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<div class="viewcode-block" id="PulseProgram.insertSource"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.insertSource">[docs]</a>    <span class="k">def</span> <span class="nf">insertSource</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pp_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; read a source file pp_file</span>
+<span class="sd">        calls itself recursively to for #insert</span>
+<span class="sd">        adds the contents of this file to the dictionary self.source</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pp_file</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pp_dir</span><span class="p">,</span> <span class="n">pp_file</span><span class="p">))</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">[</span><span class="n">pp_file</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">())</span>
+        <span class="n">sourcecode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">[</span><span class="n">pp_file</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sourcecode</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()):</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">insertPattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;inserting code from </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">insertSource</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">codelinePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sourcelines</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">text</span><span class="p">,</span> <span class="n">line</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">pp_file</span><span class="p">))</span></div>
+
+
+    <span class="n">labelPattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;(\w+):\s+([^#</span><span class="se">\n\r</span><span class="s1">]*)&#39;</span><span class="p">)</span>
+    <span class="n">opPattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;\s*(\w+)(?:\s+([^#</span><span class="se">\n\r</span><span class="s1">]*)){0,1}&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+    <span class="n">varPattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;var\s+(\w+)\s+([^#,</span><span class="se">\n\r</span><span class="s1">]+)(?:,([^#,</span><span class="se">\n\r</span><span class="s1">]+)){0,1}(?:,([^#,</span><span class="se">\n\r</span><span class="s1">]+)){0,1}(?:,([^#,</span><span class="se">\n\r</span><span class="s1">]+)){0,1}(?:#([^</span><span class="se">\n\r</span><span class="s1">]+)){0,1}&#39;</span><span class="p">)</span> <span class="c1">#</span>
+<div class="viewcode-block" id="PulseProgram.parse"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; parse the code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">()</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">defines</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">addr_offset</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="k">for</span> <span class="n">text</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">sourcename</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sourcelines</span><span class="p">:</span>    
+            <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varPattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">addVariable</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">definePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">addDefine</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># extract any JMP label, if present</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labelPattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                        <span class="n">label</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span> <span class="c1">#so the operation after &quot;:&quot; still gets parsed CWC 08162012</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#The label for non-jump label line is NONE CWC 08172012</span>
+            
+                    <span class="c1"># search OPS list for a match to the current line</span>
+                    <span class="n">m</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opPattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                        <span class="n">op</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                        <span class="n">op</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                        <span class="c1"># split and remove whitespace </span>
+                        <span class="n">arglist</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)]</span>
+                        <span class="c1">#substitute the defined variable directly with the corresponding value CWC 08172012</span>
+                        <span class="n">arglist</span> <span class="o">=</span> <span class="p">[</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">arglist</span> <span class="p">]</span> 
+                        <span class="c1">#check for dds commands so CHAN commands can be inserted</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">op</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DDS&#39;</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">board</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adIndexList</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">arglist</span><span class="p">[</span><span class="mi">0</span><span class="p">])][</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;DDS argument does not resolve to integer&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">arglist</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">chan</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adIndexList</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">arglist</span><span class="p">[</span><span class="mi">0</span><span class="p">])][</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adBoards</span><span class="p">[</span><span class="n">board</span><span class="p">]</span><span class="o">.</span><span class="n">channelLimit</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">):</span>
+                                <span class="c1">#boards with more than one channel require an extra channel selection command</span>
+                                <span class="n">chanData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adBoards</span><span class="p">[</span><span class="n">board</span><span class="p">]</span><span class="o">.</span><span class="n">addCMD</span><span class="p">(</span><span class="n">chan</span><span class="p">)</span>
+                                <span class="n">chanData</span> <span class="o">+=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">board</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span><span class="o">+</span><span class="n">addr_offset</span><span class="p">,</span> <span class="s1">&#39;DDSCHN&#39;</span><span class="p">,</span> <span class="n">chanData</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">))</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">arglist</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arglist</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="n">arglist</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">addLabel</span><span class="p">(</span> <span class="n">label</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">),</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span><span class="o">+</span><span class="n">addr_offset</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Error processing line </span><span class="si">{2}</span><span class="s2">: &#39;</span><span class="si">{0}</span><span class="s2">&#39; in file &#39;</span><span class="si">{1}</span><span class="s2">&#39; (unknown opcode?)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;Error processing line </span><span class="si">{2}</span><span class="s2">: &#39;</span><span class="si">{0}</span><span class="s2">&#39; in file &#39;</span><span class="si">{1}</span><span class="s2">&#39; (unknown opcode?)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">),</span>
+                                          <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">appendVariableCode</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span></div>
+
+                
+<div class="viewcode-block" id="PulseProgram.appendVariableCode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.appendVariableCode">[docs]</a>    <span class="k">def</span> <span class="nf">appendVariableCode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; append all variables to the instruction part of the code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">address</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">address</span><span class="p">,</span> <span class="s1">&#39;NOP&#39;</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">enabled</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">origin</span><span class="p">,</span> <span class="mi">0</span> <span class="p">))</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>        </div>
+
+<div class="viewcode-block" id="PulseProgram.addVariable"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.addVariable">[docs]</a>    <span class="k">def</span> <span class="nf">addVariable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; add a variable to the self.variablesdict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;Variable </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">(),</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">sourcename</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">Variable</span><span class="p">()</span>
+        <span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">groups</span><span class="p">()]</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">sourcename</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">encodings</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;unknown encoding </span><span class="si">{0}</span><span class="s2"> in file &#39;</span><span class="si">{1}</span><span class="s2">&#39;:</span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">),</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span> <span class="s2">&quot;Evaluation error in file &#39;</span><span class="si">{0}</span><span class="s2">&#39; on line: &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sourcename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">unit</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span> <span class="n">var</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">var</span><span class="o">.</span><span class="n">encoding</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="c1"># var.value.output_prec(0)   # without dimension the parameter has to be int. Thus, we do not want decimal places :)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Error in file &#39;</span><span class="si">%s</span><span class="s2">&#39;: attempted to reassign &#39;</span><span class="si">%s</span><span class="s2">&#39; to &#39;</span><span class="si">%s</span><span class="s2">&#39; (from prev. value of &#39;</span><span class="si">%s</span><span class="s2">&#39;) in a var statement.&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">sourcename</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">[</span><span class="n">label</span><span class="p">])</span> <span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;variable redifinition&quot;</span><span class="p">,</span> <span class="n">sourcename</span><span class="p">,</span> <span class="n">lineno</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">defines</span><span class="p">[</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span> <span class="c1"># add the variable to the dictionary of definitions to prevent identifiers and variables from having the same name</span>
+                                        <span class="c1"># however, we do not want it replaced with a number but keep the name for the last stage of compilation</span>
+            <span class="k">pass</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span> <span class="n">label</span><span class="p">:</span> <span class="n">var</span><span class="p">})</span>
+        <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;exitcode&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span><span class="p">[</span><span class="n">data</span> <span class="o">&amp;</span> <span class="mh">0x0000ffff</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span></div>
+
+    <span class="c1"># code is (address, operation, data, label or variablename, currentfile)</span>
+<div class="viewcode-block" id="PulseProgram.toBytecode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.toBytecode">[docs]</a>    <span class="k">def</span> <span class="nf">toBytecode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; generate bytecode from code</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Code ---&gt; ByteCode:&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>  <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="p">))</span> 
+            <span class="n">bytedata</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">OPS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;Unknown command </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> 
+            <span class="n">byteop</span> <span class="o">=</span> <span class="n">OPS</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="c1">#attempt to locate commands with constant data</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+                    <span class="c1">#found empty data</span>
+                    <span class="n">bytedata</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">)):</span>
+                    <span class="n">bytedata</span> <span class="o">=</span> <span class="n">data</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                    <span class="n">bytedata</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> <span class="c1"># now we are dealing with a variable and need its address</span>
+                    <span class="n">bytedata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">address</span> <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeldict</span><span class="p">[</span><span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span> <span class="c1"># list is what we have for DDS, will have 8bit channel and 16bit address</span>
+                    <span class="n">channel</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variabledict</span><span class="p">[</span><span class="n">data</span><span class="p">]</span><span class="o">.</span><span class="n">address</span>
+                    <span class="n">bytedata</span> <span class="o">=</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x0fff</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;Error assembling bytecode from file &#39;</span><span class="si">{0}</span><span class="s2">&#39;: Unknown variable: &#39;</span><span class="si">{1}</span><span class="s2">&#39;. </span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">raise</span> <span class="n">ppexception</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">: Unknown variable </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">data</span><span class="p">),</span> <span class="n">line</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">line</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">byteop</span><span class="p">,</span> <span class="n">bytedata</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;---&gt; </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">byteop</span><span class="p">),</span> <span class="nb">hex</span><span class="p">(</span><span class="n">bytedata</span><span class="p">))</span> <span class="p">)</span>
+    
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytecode</span> </div>
+
+
+<div class="viewcode-block" id="PulseProgram.convertParameter"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.convertParameter">[docs]</a>    <span class="k">def</span> <span class="nf">convertParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mag</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; convert a dimensioned parameter to the binary value</span>
+<span class="sd">        expected by the hardware. The conversion is determined by the variable encoding</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">mag</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">mag</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">==</span> <span class="n">Dimensions</span><span class="o">.</span><span class="n">time</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mag</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">encodings</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mag</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span> <span class="o">/</span> <span class="n">step</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">mask</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">encoding</span><span class="p">:</span>
+                <span class="n">step</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">encodings</span><span class="p">[</span><span class="n">encoding</span><span class="p">]</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">mag</span><span class="o">/</span><span class="n">step</span><span class="p">))</span> <span class="o">&amp;</span> <span class="n">mask</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">mag</span>
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="PulseProgram.compileCode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.compileCode">[docs]</a>    <span class="k">def</span> <span class="nf">compileCode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toBytecode</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PulseProgram.exitcode"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramBNF.PulseProgram.exitcode">[docs]</a>    <span class="k">def</span> <span class="nf">exitcode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span><span class="p">:</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exitcodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">var</span><span class="o">.</span><span class="n">comment</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">comment</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">var</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;Exitcode </span><span class="si">{0}</span><span class="s2"> Not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">code</span><span class="p">)</span></div></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">PulseProgram</span><span class="p">()</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">loadSource</span><span class="p">(</span><span class="s2">r&quot;prog\Ions\Bluetest.pp&quot;</span><span class="p">)</span>
+    <span class="c1">#pp.loadSource(r&quot;prog\single_pulse_exp_adiabatic.pp&quot;)</span>
+    
+        
+    <span class="n">pp</span><span class="o">.</span><span class="n">toBytecode</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;updateVariables&quot;</span><span class="p">)</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">updateVariables</span><span class="p">({</span><span class="s1">&#39;coolingFreq&#39;</span><span class="p">:</span> <span class="n">Q</span><span class="p">(</span><span class="mi">125</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">)})</span>
+    
+    <span class="k">for</span> <span class="n">op</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pp</span><span class="o">.</span><span class="n">bytecode</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">op</span><span class="p">),</span> <span class="nb">hex</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+        
+    <span class="n">pp</span><span class="o">.</span><span class="n">toBinary</span><span class="p">()</span>
+        
+<span class="c1">#    for var in pp.variabledict.items():</span>
+<span class="c1">#        print var</span>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

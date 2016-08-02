@@ -1,0 +1,331 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Projects" href="Projects.html"/>
+        <link rel="prev" title="User Manual" href="experimentUi_manual.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#concepts">Concepts</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interface">Interface</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#units">Units</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#spin-boxes">Spin boxes</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#global-variables">Global Variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#gui-reconfiguring">GUI reconfiguring</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#settings-menus">Settings Menus</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#data">Data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/Introduction.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction">
+<span id="id1"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p><strong>Note</strong>: Before you can run the program for the first time, you must install all the dependencies listed in <a class="reference internal" href="../installation.html#installation"><span class="std std-ref">Installation</span></a>.</p>
+<p>The main file to run the program is <strong>ExperimentUi.pyw</strong>. This program can be executed directly, or can be run from within an IDE.</p>
+<div class="section" id="concepts">
+<h2>Concepts<a class="headerlink" href="#concepts" title="Permalink to this headline">¶</a></h2>
+<p>The IonControl program is based around the following concepts, which will be explained in detail in this manual:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p class="first"><a class="reference internal" href="PulseProgram.html#pulseprogram"><span class="std std-ref">Pulse Program</span></a>. The pulse program is a &#8220;pythonic&#8221; text file which is executed by a microcontroller implemented on the FPGA. The pulse program controls:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The timing of all TTL outputs</li>
+<li>Counting on TTL inputs</li>
+<li>Monitoring of ADC inputs</li>
+<li>programming of DDSs</li>
+<li>programming of DACs</li>
+<li>behavior of FPGA PI loops</li>
+</ol>
+</div></blockquote>
+</li>
+</ol>
+<p>The pulse program can execute standard control structures, such as loops and conditionals, and can do simple math. It can also read data from on-board RAM.</p>
+<p>All of this is implemented in firmware (known as a <em>bitfile</em>) which is written to the FPGA. At the moment (10/14/2015), bitfiles have been produced for the following two FPGA modules:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Opal Kelly XEM6010-LX45</li>
+<li>Opal Kelly XEM6010-LX150</li>
+</ol>
+</div></blockquote>
+<p>Other FPGA modules could in principle be added at some point in the future.</p>
+<ol class="arabic" start="2">
+<li><p class="first"><a class="reference internal" href="Scans.html#scans"><span class="std std-ref">Scans</span></a>. One dimensional scans are controlled by three separate interfaces:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li>The <strong>scan</strong> interface allows a one-dimensional scan over any parameter defined in the pulse program, or any other instrument connected to the computer that is defined in the software. At each point in the scan, data is returned by the FPGA. The results of a scan are saved to a text file, and also registered in the <a class="reference internal" href="MeasurementLog.html#measurementlog"><span class="std std-ref">Measurement Log</span></a>.</li>
+<li>The <strong>evaluation</strong> interface determines how that data is plotted. An evaluation is a defined method for taking a set of data and reducing it to a single point for plotting, such as &#8220;mean&#8221; or &#8220;discriminator&#8221; or &#8220;parity.&#8221; As many evaluations as needed can be added. The plot windows are completely reconfigurable; you can add as many plot windows as necessary, and each evaluation can be directed to any plot window.</li>
+<li>The <strong>analysis</strong> interface determines how the data is fit at the conclusion of the scan. In addition, the analysis interface can push the results of a fit to a global variable, which can in turn be referenced by any part of the program. In this way, calibrations are straightforward.</li>
+</ol>
+</div></blockquote>
+</li>
+<li><p class="first"><a class="reference internal" href="DedicatedCounters.html#dedicatedcounters"><span class="std std-ref">Dedicated Counters</span></a>. The dedicated counters interface allows continuous monitoring of the counters, ADCs, and PI Loops controlled by the FPGA. It displays counts whether or not a scan is running, and is therefore useful for continuous monitoring. It also has an interface for automatic ion loading.</p>
+</li>
+<li><p class="first"><a class="reference internal" href="Scripting.html#scripting"><span class="std std-ref">Scripting</span></a>. The scripting interface allows for the creation of extremely complex, automated experiments. It executes Python scripts, but adds a number of commands which allow control over the experiment.</p>
+</li>
+</ol>
+</div></blockquote>
+</div>
+<div class="section" id="interface">
+<h2>Interface<a class="headerlink" href="#interface" title="Permalink to this headline">¶</a></h2>
+<p>A few general points about the interface:</p>
+<div class="section" id="units">
+<h3>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h3>
+<p>Almost all quantities referenced in the program have units. This is for the simple reason that real physical quantities have units, and using them avoids any ambiguity. (It also helps avoid spacecraft crashing into planets.) This means a few things:</p>
+<ul>
+<li><p class="first">quantities can be typed as 0.365 MHz or as 365 kHz or as 365000 Hz, they are all equivalent.</p>
+</li>
+<li><p class="first">in fields which allow mathematical expressions, units are respected &#8211; you could write something like:</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="mi">7</span> <span class="n">kHz</span> <span class="o">+</span> <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">100</span> <span class="n">us</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>which would equal 17 kHz. This can be useful for writing things like:</p>
+<blockquote>
+<div><div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ExpectedPhotonNumber</span> <span class="o">=</span> <span class="n">CoolingTime</span> <span class="o">*</span> <span class="n">ExpectedFluorescenceRate</span>
+</pre></div>
+</div>
+<p>Here CoolingTime likely has base unit seconds, ExpectedFluorescenceRate has base unit Hz, and ExpectedPhotonNumber is unitless, as expected. If CoolingTime changes, ExpectedPhotonNumber changes appropriately.</p>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="spin-boxes">
+<h3>Spin boxes<a class="headerlink" href="#spin-boxes" title="Permalink to this headline">¶</a></h3>
+<p>In most boxes that allow entering a number, the value can be changed by either typing in a number, or by using the up and down arrows. When using the up and down arrows, the digit to the left of the cursor will change.</p>
+</div>
+<div class="section" id="global-variables">
+<h3>Global Variables<a class="headerlink" href="#global-variables" title="Permalink to this headline">¶</a></h3>
+<p>Global variables can be used almost everywhere throughout the program. In many cases it is far more useful to reference something to a global, rather than giving it its own value. If the same value will appear in more than one place, you are always better off setting it to a global.</p>
+</div>
+<div class="section" id="gui-reconfiguring">
+<h3>GUI reconfiguring<a class="headerlink" href="#gui-reconfiguring" title="Permalink to this headline">¶</a></h3>
+<p>The GUI is highly reconfigurable. Plot windows and almost all control windows (known as &#8220;docks&#8221;) can be resized, rearranged, tabbed on top of each other, closed, or pulled out as a stand alone window. The GUI configuration is automatically saved to the database. This means that when you close the program and reopen it, the GUI appearance will stay the same. Closed docks can be re-opened via the &#8220;view&#8221; menu. In the main experiment GUI, they can also be re-opened by right clicking on a dock header bar.</p>
+</div>
+<div class="section" id="settings-menus">
+<h3>Settings Menus<a class="headerlink" href="#settings-menus" title="Permalink to this headline">¶</a></h3>
+<p>Many places in the program have <em>settings menus</em>, which are drop downs that allow you to save and recall all the settings associated with that particular interface. For example, the scan control settings menu allows you to load different scan settings. To make new saved settings, simply type a new name into a context menu and push enter. You can then edit the new settings.</p>
+</div>
+<div class="section" id="data">
+<h3>Data<a class="headerlink" href="#data" title="Permalink to this headline">¶</a></h3>
+<p>Whenever a scan is run, by default the data is saved to a text file in /&lt;YourProjectDir&gt;/&lt;Year&gt;/&lt;Month&gt;/&lt;Day&gt;/ (see <a class="reference internal" href="Projects.html#projects"><span class="std std-ref">Projects</span></a>). The saved file has an XML header with all the metadata about the scan (i.e., what all the settings were when this scan was run), followed by a table with all the data. The metadata element <em>ColumnSpec</em> (together with <em>TracePlottingList</em>) indicates what column is what in the data table.</p>
+<p>Information about all scans which have been performed on the project is stored in the database and accessed via the <a class="reference internal" href="MeasurementLog.html#measurementlog"><span class="std std-ref">Measurement Log</span></a>, which has an absolute path to the data filename. Therefore, it is important that you not delete or move data files, or the measurement log will not work properly (unless you directly change the database entry as well).</p>
+<p>This requirement may be removed at some future point by also storing the data itself in the database.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="Projects.html" class="btn btn-neutral float-right" title="Projects" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="experimentUi_manual.html" class="btn btn-neutral" title="User Manual" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

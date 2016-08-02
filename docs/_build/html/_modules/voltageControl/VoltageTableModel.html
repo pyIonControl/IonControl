@@ -1,0 +1,313 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>voltageControl.VoltageTableModel &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>voltageControl.VoltageTableModel</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for voltageControl.VoltageTableModel</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+
+<div class="viewcode-block" id="VoltageTableModel"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel">[docs]</a><span class="k">class</span> <span class="nc">VoltageTableModel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractTableModel</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">voltageBlender</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> 
+        <span class="sd">&quot;&quot;&quot; datain: a list where each item is a row</span>
+<span class="sd">        </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractTableModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">blender</span> <span class="o">=</span> <span class="n">voltageBlender</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#self.electrodes, self.aoNums, self.dsubNums, self.outputVoltage</span>
+        <span class="c1">#arrange the ones in the voltage file first and in the same order</span>
+        <span class="c1">#self.orderAsVoltageFile()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastLength</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltagesOutOfRange</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allVoltagesOkay</span> <span class="o">=</span> <span class="kc">False</span>
+        
+<div class="viewcode-block" id="VoltageTableModel.sort"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.sort">[docs]</a>    <span class="k">def</span> <span class="nf">sort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">order</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">column</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span> <span class="o">+</span><span class="mi">1</span> <span class="p">)</span><span class="o">%</span> <span class="mi">4</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orderAsVoltageFile</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span>
+                    <span class="n">d</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastElectrodeOrder</span><span class="o">==</span><span class="mi">3</span> <span class="k">else</span> <span class="kc">False</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="p">[</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">d</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">({</span> <span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">aoNums</span><span class="p">,</span> <span class="mi">3</span><span class="p">:[</span><span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">dsubNums</span><span class="p">]}[</span><span class="n">column</span><span class="p">])</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span> <span class="n">d</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span> <span class="k">if</span> <span class="n">order</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DescendingOrder</span> <span class="k">else</span> <span class="kc">False</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="p">[</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">0</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">d</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.electrodeIndex"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.electrodeIndex">[docs]</a>    <span class="k">def</span> <span class="nf">electrodeIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; for x=&#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">exc_info</span><span class="p">()[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">index</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.orderAsVoltageFile"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.orderAsVoltageFile">[docs]</a>    <span class="k">def</span> <span class="nf">orderAsVoltageFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">allindices</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">tableHeader</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">electrodeIndex</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">index</span> <span class="p">)</span>
+                <span class="n">allindices</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">included</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">allindices</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">included</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">index</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageTableModel.rowCount"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span> 
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.columnCount"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()):</span> 
+        <span class="k">return</span> <span class="mi">4</span></div>
+ 
+<div class="viewcode-block" id="VoltageTableModel.onDataChanged"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.onDataChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onDataChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;VoltageTableModel.onDataChanged </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2"> </span><span class="si">{3}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">y2</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">newLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newLength</span><span class="o">&gt;</span><span class="bp">self</span><span class="o">.</span><span class="n">lastLength</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastLength</span><span class="p">,</span> <span class="n">newLength</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastLength</span> <span class="o">=</span> <span class="n">newLength</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">newLength</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltagesOutOfRange</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span><span class="o">*</span><span class="n">newLength</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allVoltagesOkay</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">y1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">y2</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.onDataError"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.onDataError">[docs]</a>    <span class="k">def</span> <span class="nf">onDataError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boolarray</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">voltagesOutOfRange</span> <span class="o">=</span> <span class="n">boolarray</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allVoltagesOkay</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.displayToolTip"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.displayToolTip">[docs]</a>    <span class="k">def</span> <span class="nf">displayToolTip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;ToolTip&quot;</span></div>
+  
+<div class="viewcode-block" id="VoltageTableModel.data"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span> 
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">role</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">electrodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="mi">1</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]])</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">outputVoltage</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="mi">2</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">aoNums</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">aoNums</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="mi">3</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">dsubNums</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">blender</span><span class="o">.</span><span class="n">dsubNums</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">role</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundColorRole</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span>  <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allVoltagesOkay</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">),</span>
+                         <span class="mi">1</span><span class="p">:</span>  <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">red</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">voltagesOutOfRange</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">orderLookup</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]]</span> <span class="k">else</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">white</span><span class="p">)</span>
+                         <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">(),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+        
+<div class="viewcode-block" id="VoltageTableModel.headerData"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;Electrode&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;voltage&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="s2">&quot;ao channel&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="s2">&quot;dsub pin&quot;</span> <span class="p">}[</span><span class="n">section</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Vertical</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="n">section</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="c1">#QtCore.QVariant()</span></div>
+
+<div class="viewcode-block" id="VoltageTableModel.flags"><a class="viewcode-back" href="../../code/voltageControl-doc.html#voltageControl.VoltageTableModel.VoltageTableModel.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> </div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

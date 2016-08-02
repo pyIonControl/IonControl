@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.DACUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.DACUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.DACUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span>
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+
+<span class="kn">from</span> <span class="nn">externalParameter.persistence</span> <span class="k">import</span> <span class="n">DBPersist</span>
+<span class="kn">from</span> <span class="nn">externalParameter.decimation</span> <span class="k">import</span> <span class="n">StaticDecimation</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">is_Q</span><span class="p">,</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">.DACTableModel</span> <span class="k">import</span> <span class="n">DACTableModel</span>
+<span class="kn">from</span> <span class="nn">uiModules.MagnitudeSpinBoxDelegate</span> <span class="k">import</span> <span class="n">MagnitudeSpinBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">modules.GuiAppearance</span> <span class="k">import</span> <span class="n">restoreGuiState</span><span class="p">,</span> <span class="n">saveGuiState</span> 
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pulser.DAC</span> <span class="k">import</span> <span class="n">DACChannelSetting</span><span class="p">,</span> <span class="n">DAC</span><span class="p">,</span> <span class="n">CombineWrites</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/DDS.ui&#39;</span><span class="p">)</span>
+<span class="n">dacForm</span><span class="p">,</span> <span class="n">dacBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="extendTo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.extendTo">[docs]</a><span class="k">def</span> <span class="nf">extendTo</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">defaulttype</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">),</span> <span class="n">length</span> <span class="p">):</span>
+        <span class="n">array</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">defaulttype</span><span class="p">())</span></div>
+        
+<div class="viewcode-block" id="DACUi"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi">[docs]</a><span class="k">class</span> <span class="nc">DACUi</span><span class="p">(</span><span class="n">dacForm</span><span class="p">,</span> <span class="n">dacBase</span><span class="p">):</span>
+    <span class="n">persistSpace</span> <span class="o">=</span> <span class="s1">&#39;DAC&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulser</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">configName</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isSetup</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">dacBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="n">dacForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span> <span class="o">=</span> <span class="n">DAC</span><span class="p">(</span><span class="n">pulser</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channelsConfigName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">.dacExpressionChannels&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">configName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoApplyConfigName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">.autoApply&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">configName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guiStateConfigName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">.guiState&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">configName</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelsConfigName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">)</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">numChannels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span> <span class="o">=</span> <span class="p">[</span><span class="n">DACChannelSetting</span><span class="p">(</span><span class="n">globalDict</span><span class="o">=</span><span class="n">globalDict</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">numChannels</span><span class="p">)</span> <span class="p">]</span> 
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">):</span>
+            <span class="n">channel</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+            <span class="n">channel</span><span class="o">.</span><span class="n">onChange</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onChange</span><span class="p">,</span> <span class="n">index</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoApplyConfigName</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">StaticDecimation</span><span class="p">(</span><span class="n">Q</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">persistence</span> <span class="o">=</span> <span class="n">DBPersist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="n">pulser</span>
+        
+<div class="viewcode-block" id="DACUi.setupUi"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">dacForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span> <span class="o">=</span> <span class="n">DACTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span> <span class="o">=</span> <span class="n">MagnitudeSpinBoxDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">applyButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onApply</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resetButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReset</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeAllButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onWriteAll</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoApplyBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoApplyBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onStateChanged</span> <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onWriteAll</span><span class="p">(</span> <span class="n">writeUnchecked</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Ignored error while setting dac: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onApply</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span><span class="o">.</span><span class="n">voltageChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onVoltage</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span><span class="o">.</span><span class="n">enableChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onEnableChanged</span> <span class="p">)</span>
+        <span class="n">restoreGuiState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiStateConfigName</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isSetup</span> <span class="o">=</span> <span class="kc">True</span></div>
+            
+<div class="viewcode-block" id="DACUi.onEnableChanged"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onEnableChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onEnableChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">outputVoltage</span> <span class="p">)</span></div>
+            
+<div class="viewcode-block" id="DACUi.setDisabled"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.setDisabled">[docs]</a>    <span class="k">def</span> <span class="nf">setDisabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">disabled</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+            
+<div class="viewcode-block" id="DACUi.onStateChanged"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onStateChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onStateChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoApplyBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DACUi.onVoltage"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onVoltage">[docs]</a>    <span class="k">def</span> <span class="nf">onVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">,</span> <span class="n">autoApply</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation</span><span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">channel</span><span class="p">)]</span><span class="o">.</span><span class="n">decimate</span><span class="p">(</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">persistCallback</span><span class="p">,</span> <span class="s2">&quot;Voltage:</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">else</span> <span class="n">channel</span><span class="p">))</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="DACUi.persistCallback"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.persistCallback">[docs]</a>    <span class="k">def</span> <span class="nf">persistCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">is_Q</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+            <span class="n">value</span><span class="p">,</span> <span class="n">unit</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">m</span><span class="p">,</span> <span class="s2">&quot;{:~}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">persistence</span><span class="o">.</span><span class="n">persist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">persistSpace</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">minval</span><span class="p">,</span> <span class="n">maxval</span><span class="p">,</span> <span class="n">unit</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="DACUi.onWriteAll"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onWriteAll">[docs]</a>    <span class="k">def</span> <span class="nf">onWriteAll</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">writeUnchecked</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">CombineWrites</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="p">)</span> <span class="k">as</span> <span class="n">stream</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">settings</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">writeUnchecked</span> <span class="ow">or</span> <span class="n">settings</span><span class="o">.</span><span class="n">resetAfterPP</span><span class="p">:</span>
+                        <span class="n">stream</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">,</span> <span class="n">autoApply</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span><span class="p">,</span> <span class="n">applyAll</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DACUi.saveConfig"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">channelsConfigName</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">autoApplyConfigName</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoApply</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">guiStateConfigName</span><span class="p">]</span> <span class="o">=</span> <span class="n">saveGuiState</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="DACUi.onApply"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onApply">[docs]</a>    <span class="k">def</span> <span class="nf">onApply</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dacChannels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">outputVoltage</span><span class="p">,</span> <span class="n">autoApply</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">applyAll</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="DACUi.onReset"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onReset">[docs]</a>    <span class="k">def</span> <span class="nf">onReset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dac</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="mh">0xff</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="DACUi.onChange"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACUi.DACUi.onChange">[docs]</a>    <span class="k">def</span> <span class="nf">onChange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">string</span><span class="p">,</span> <span class="n">origin</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isSetup</span> <span class="ow">and</span> <span class="n">origin</span> <span class="o">!=</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span><span class="o">.</span><span class="n">setVoltage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dacTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span></div></div>
+
+             
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">persist</span> <span class="k">import</span> <span class="n">configshelve</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">configshelve</span><span class="o">.</span><span class="n">configshelve</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">config</span><span class="p">:</span>
+        <span class="n">ui</span> <span class="o">=</span> <span class="n">DACUi</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

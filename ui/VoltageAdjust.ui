@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>398</width>
+    <height>481</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="7" column="5" colspan="2">
+    <widget class="QSpinBox" name="repetitionBox">
+     <property name="toolTip">
+      <string>Number of repetitions</string>
+     </property>
+     <property name="maximum">
+      <number>250</number>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="7">
+    <widget class="QToolButton" name="shuttlingRouteButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="Experiment.qrc">
+       <normaloff>:/kde/icons/media-playback-start-7.png</normaloff>:/kde/icons/media-playback-start-7.png</iconset>
+     </property>
+     <property name="autoRaise">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0" colspan="8">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="triggerButton">
+       <property name="text">
+        <string>Trigger</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uploadDataButton">
+       <property name="text">
+        <string>Upload data</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="uploadEdgesButton">
+       <property name="text">
+        <string>Upload Edges</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="lineLabel">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
+     </property>
+     <property name="text">
+      <string>Line</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>Shuttling</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="7">
+    <widget class="QToolButton" name="removeEdgeButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="Experiment.qrc">
+       <normaloff>:/openicon/icons/edit_remove.png</normaloff>:/openicon/icons/edit_remove.png</iconset>
+     </property>
+     <property name="autoRaise">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="6">
+    <widget class="QToolButton" name="addEdgeButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="Experiment.qrc">
+       <normaloff>:/openicon/icons/edit-add.png</normaloff>:/openicon/icons/edit-add.png</iconset>
+     </property>
+     <property name="autoRaise">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Current Position</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0" colspan="8">
+    <widget class="QTableView" name="edgeTableView"/>
+   </item>
+   <item row="5" column="3" colspan="5">
+    <widget class="QLabel" name="currentPositionLabel">
+     <property name="text">
+      <string>Current Position</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="3" colspan="5">
+    <widget class="QComboBox" name="destinationComboBox"/>
+   </item>
+   <item row="6" column="0" colspan="3">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>Shuttle To</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>Shuttling route</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3" colspan="2">
+    <widget class="QLineEdit" name="shuttlingRouteEdit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>2</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>Use '-' for transition ', ' for jump.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Global Gain</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Line Gain</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="6">
+    <widget class="ExpressionSpinBox" name="globalGainBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>OutputVoltage = GlobalGain * ( SolutionLine * LineGain + AdjustVoltage ))</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2" colspan="6">
+    <widget class="ExpressionSpinBox" name="lineGainBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>OutputVoltage = GlobalGain * ( SolutionLine * LineGain + AdjustVoltage ))</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" colspan="3">
+    <widget class="ExpressionSpinBox" name="lineBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>1</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="toolTip">
+      <string>OutputVoltage = GlobalGain * ( SolutionLine * LineGain + AdjustVoltage ))</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5" colspan="3">
+    <widget class="QLineEdit" name="currentLineDisplay">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+     <property name="clearButtonEnabled">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ExpressionSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>uiModules.ExpressionSpinBox</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>lineGainBox</tabstop>
+  <tabstop>globalGainBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="Experiment.qrc"/>
+ </resources>
+ <connections/>
+</ui>

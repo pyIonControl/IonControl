@@ -1,0 +1,396 @@
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis}{\section{Waveform\-Chassis.\-Waveform\-Chassis Class Reference}
+\label{class_waveform_chassis_1_1_waveform_chassis}\index{Waveform\-Chassis.\-Waveform\-Chassis@{Waveform\-Chassis.\-Waveform\-Chassis}}
+}
+
+
+This class contains a list of Waveform\-Generator objects and a Timing object.  
+
+
+Inheritance diagram for Waveform\-Chassis.\-Waveform\-Chassis\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_waveform_chassis_1_1_waveform_chassis}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a5b9740879596dbe1422d47dacfaf5f6a}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_acd9ab0cb2573d71efcdbf86fb731a95c}{init}
+\begin{DoxyCompactList}\small\item\em Initializes the waveform chassis based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a81d7ac137a7779ca0dd6ef8492c6030a}{init\-From\-File}
+\begin{DoxyCompactList}\small\item\em This function will initialize the waveform chassis based on the configuration file specified by the file\-Path parameter. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a6fee2bcdaeebeda998be000c1892516e}{get\-Num\-Ao\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the total number of A\-O channels configured. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_aa22034c8b518ce28bdf7bcf9f26925ec}{get\-Num\-Do\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the total number of A\-O channels configured. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a744d35788b29af622f30aa20bb2510b0}{create\-Ao\-Sine\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of sine waves -\/ one for each channel configured by the init function. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a8c1f18f988b85405c9897d502c57454c}{create\-Do\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1d array of random U8s for writing to the buffer of digital output channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a42bdd67d68a729ad072aaf83de646dd8}{write\-Ao\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function will write data into the buffer of the analog outputs that are a part of the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a08080ba281bb601f6db05ce47863b81b}{write\-Do\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function will write data into the buffer of the digital outputs that are a part of the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a324ff64c0087456811dfea0abeb1a3b6}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a3b82fba6c96c90d70efc9b3eb031f869}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog and digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a96f52784b946d309f98866433d0b2b67}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_acd992cff6a8139f97bdb8e4c9a083b03}{write\-Start\-Stop}
+\begin{DoxyCompactList}\small\item\em This function will perform the write, start, wait\-Until\-Done, and stop functions wrapped in one funciton. \end{DoxyCompactList}\item 
+def \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a878b267f7ee8b1146c3f0137f18fda00}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a3893045e5a6a259762feb0ee2f313648}{timing}
+\begin{DoxyCompactList}\small\item\em This is a Timing object created using the Timing class. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a18dae1f29299d1dbd02b06e0f2b5270c}{use\-Timing}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} is configured to use Timing. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a9b7abe44035b7e5077bfe7363221d66f}{gens}
+\begin{DoxyCompactList}\small\item\em This is a list of Waveform\-Generator objects created using the Waveform\-Generator class. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_ab15b973ee2283c67e5178280245fe585}{sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This is the sample rate of all the Analog and Digital outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_aec121d179ad4d3bbc2da3a2469dd2dfa}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of channels configured for the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a87be64310be9b7775c6915cbdfa7a2af}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for all generators. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_ab1d1e2c6f2742589ae187a6d12c26565}{loops}
+\begin{DoxyCompactList}\small\item\em The number of times to iterate over a Finite number of samples. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_af6dd8a668436712fc2cc9dab2fc8ef6f}{trigger\-Type}
+\begin{DoxyCompactList}\small\item\em The trigger type for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a5914d44a4e532bed3845206318dd8407}{clk\-Source}
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal for every Waveform\-Generator configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+\hyperlink{class_waveform_chassis_1_1_waveform_chassis_a73f6eace1feef22a221d458a3809c338}{start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal for every Waveform\-Generator configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class contains a list of Waveform\-Generator objects and a Timing object. 
+
+It is intended to represent a chasis with a Ni\-Sync Card and a number of P\-X\-I-\/6733s. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a5b9740879596dbe1422d47dacfaf5f6a}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a5b9740879596dbe1422d47dacfaf5f6a}
+
+
+This function is a constructor for the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a878b267f7ee8b1146c3f0137f18fda00}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!close@{close}}
+\index{close@{close}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a878b267f7ee8b1146c3f0137f18fda00}
+
+
+This function will close connection to the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a744d35788b29af622f30aa20bb2510b0}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!create\-Ao\-Sine\-Buffer@{create\-Ao\-Sine\-Buffer}}
+\index{create\-Ao\-Sine\-Buffer@{create\-Ao\-Sine\-Buffer}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{create\-Ao\-Sine\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-create\-Ao\-Sine\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a744d35788b29af622f30aa20bb2510b0}
+
+
+This function returns a 1\-D numpy array of sine waves -\/ one for each channel configured by the init function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a8c1f18f988b85405c9897d502c57454c}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!create\-Do\-Test\-Buffer@{create\-Do\-Test\-Buffer}}
+\index{create\-Do\-Test\-Buffer@{create\-Do\-Test\-Buffer}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{create\-Do\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-create\-Do\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a8c1f18f988b85405c9897d502c57454c}
+
+
+This function returns a 1d array of random U8s for writing to the buffer of digital output channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a6fee2bcdaeebeda998be000c1892516e}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!get\-Num\-Ao\-Channels@{get\-Num\-Ao\-Channels}}
+\index{get\-Num\-Ao\-Channels@{get\-Num\-Ao\-Channels}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{get\-Num\-Ao\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-get\-Num\-Ao\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a6fee2bcdaeebeda998be000c1892516e}
+
+
+This function returns the total number of A\-O channels configured. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_aa22034c8b518ce28bdf7bcf9f26925ec}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!get\-Num\-Do\-Channels@{get\-Num\-Do\-Channels}}
+\index{get\-Num\-Do\-Channels@{get\-Num\-Do\-Channels}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{get\-Num\-Do\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-get\-Num\-Do\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_aa22034c8b518ce28bdf7bcf9f26925ec}
+
+
+This function returns the total number of A\-O channels configured. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_acd9ab0cb2573d71efcdbf86fb731a95c}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!init@{init}}
+\index{init@{init}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Devs\-And\-Chnls, }
+\item[{}]{do\-Devs\-And\-Chnls = {\ttfamily None}, }
+\item[{}]{sync\-Device = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_acd9ab0cb2573d71efcdbf86fb731a95c}
+
+
+Initializes the waveform chassis based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em ao\-Devs\-And\-Chnls} & This is a list of strings representing the devices and analog output channels. \\
+\hline
+{\em do\-Devs\-And\-Chnls} & This is a list of strings representing the divices and digital output channels. \\
+\hline
+{\em sync\-Device} & This is the device name for the N\-I Sync card. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a81d7ac137a7779ca0dd6ef8492c6030a}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!init\-From\-File@{init\-From\-File}}
+\index{init\-From\-File@{init\-From\-File}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{init\-From\-File}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-init\-From\-File (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a81d7ac137a7779ca0dd6ef8492c6030a}
+
+
+This function will initialize the waveform chassis based on the configuration file specified by the file\-Path parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer \\
+\hline
+{\em file\-Path} & The file path to the configuration file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a324ff64c0087456811dfea0abeb1a3b6}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!start@{start}}
+\index{start@{start}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a324ff64c0087456811dfea0abeb1a3b6}
+
+
+This function starts the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a96f52784b946d309f98866433d0b2b67}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!stop@{stop}}
+\index{stop@{stop}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a96f52784b946d309f98866433d0b2b67}
+
+
+This function stops the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a3b82fba6c96c90d70efc9b3eb031f869}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a3b82fba6c96c90d70efc9b3eb031f869}
+
+
+This functions waits for the analog and digital output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a42bdd67d68a729ad072aaf83de646dd8}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!write\-Ao\-Buffer@{write\-Ao\-Buffer}}
+\index{write\-Ao\-Buffer@{write\-Ao\-Buffer}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{write\-Ao\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-write\-Ao\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a42bdd67d68a729ad072aaf83de646dd8}
+
+
+This function will write data into the buffer of the analog outputs that are a part of the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a08080ba281bb601f6db05ce47863b81b}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!write\-Do\-Buffer@{write\-Do\-Buffer}}
+\index{write\-Do\-Buffer@{write\-Do\-Buffer}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{write\-Do\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-write\-Do\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_a08080ba281bb601f6db05ce47863b81b}
+
+
+This function will write data into the buffer of the digital outputs that are a part of the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_acd992cff6a8139f97bdb8e4c9a083b03}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!write\-Start\-Stop@{write\-Start\-Stop}}
+\index{write\-Start\-Stop@{write\-Start\-Stop}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{write\-Start\-Stop}]{\setlength{\rightskip}{0pt plus 5cm}def Waveform\-Chassis.\-Waveform\-Chassis.\-write\-Start\-Stop (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Data, }
+\item[{}]{do\-Data = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_waveform_chassis_1_1_waveform_chassis_acd992cff6a8139f97bdb8e4c9a083b03}
+
+
+This function will perform the write, start, wait\-Until\-Done, and stop functions wrapped in one funciton. 
+
+This funciton is no complete and may not exist in a later release!!! 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_waveform_chassis_1_1_waveform_chassis_a5914d44a4e532bed3845206318dd8407}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-clk\-Source}}\label{class_waveform_chassis_1_1_waveform_chassis_a5914d44a4e532bed3845206318dd8407}
+
+
+This is the sample clock source terminal for every Waveform\-Generator configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+It is defaulted to \char`\"{}\-P\-X\-I\-\_\-\-Star.\char`\"{} \hypertarget{class_waveform_chassis_1_1_waveform_chassis_a9b7abe44035b7e5077bfe7363221d66f}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!gens@{gens}}
+\index{gens@{gens}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{gens}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-gens}}\label{class_waveform_chassis_1_1_waveform_chassis_a9b7abe44035b7e5077bfe7363221d66f}
+
+
+This is a list of Waveform\-Generator objects created using the Waveform\-Generator class. 
+
+It is a list of P\-X\-I6733 cards configured for the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_ab1d1e2c6f2742589ae187a6d12c26565}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!loops@{loops}}
+\index{loops@{loops}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-loops}}\label{class_waveform_chassis_1_1_waveform_chassis_ab1d1e2c6f2742589ae187a6d12c26565}
+
+
+The number of times to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_a87be64310be9b7775c6915cbdfa7a2af}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!mode@{mode}}
+\index{mode@{mode}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-mode}}\label{class_waveform_chassis_1_1_waveform_chassis_a87be64310be9b7775c6915cbdfa7a2af}
+
+
+This is the mode of operation for all generators. 
+
+There are currently three modes available. Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_waveform_chassis_1_1_waveform_chassis_a96f52784b946d309f98866433d0b2b67}{stop()} method is called. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_ab15b973ee2283c67e5178280245fe585}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-sample\-Rate}}\label{class_waveform_chassis_1_1_waveform_chassis_ab15b973ee2283c67e5178280245fe585}
+
+
+This is the sample rate of all the Analog and Digital outputs. 
+
+The sample rate must be the same for all devices configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_aec121d179ad4d3bbc2da3a2469dd2dfa}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-samples\-Per\-Channel}}\label{class_waveform_chassis_1_1_waveform_chassis_aec121d179ad4d3bbc2da3a2469dd2dfa}
+
+
+This is the number of channels configured for the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+The samples per channel must be the same for all devices configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_a73f6eace1feef22a221d458a3809c338}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-start\-Trigger\-Source}}\label{class_waveform_chassis_1_1_waveform_chassis_a73f6eace1feef22a221d458a3809c338}
+
+
+This is the start trigger source terminal for every Waveform\-Generator configured in the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+It is defaulted to \char`\"{}\-P\-X\-I\-\_\-\-Trig1\char`\"{} \hypertarget{class_waveform_chassis_1_1_waveform_chassis_a3893045e5a6a259762feb0ee2f313648}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!timing@{timing}}
+\index{timing@{timing}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{timing}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-timing}}\label{class_waveform_chassis_1_1_waveform_chassis_a3893045e5a6a259762feb0ee2f313648}
+
+
+This is a Timing object created using the Timing class. 
+
+It is used to synchronize all of the P\-X\-I cards. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_af6dd8a668436712fc2cc9dab2fc8ef6f}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-trigger\-Type}}\label{class_waveform_chassis_1_1_waveform_chassis_af6dd8a668436712fc2cc9dab2fc8ef6f}
+
+
+The trigger type for the analog outputs. 
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. \hypertarget{class_waveform_chassis_1_1_waveform_chassis_a18dae1f29299d1dbd02b06e0f2b5270c}{\index{Waveform\-Chassis\-::\-Waveform\-Chassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}!use\-Timing@{use\-Timing}}
+\index{use\-Timing@{use\-Timing}!WaveformChassis::WaveformChassis@{Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{use\-Timing}]{\setlength{\rightskip}{0pt plus 5cm}Waveform\-Chassis.\-Waveform\-Chassis.\-use\-Timing}}\label{class_waveform_chassis_1_1_waveform_chassis_a18dae1f29299d1dbd02b06e0f2b5270c}
+
+
+This is a boolean value that will be true if the \hyperlink{class_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} is configured to use Timing. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Waveform\-Chassis.\-py\end{DoxyCompactItemize}

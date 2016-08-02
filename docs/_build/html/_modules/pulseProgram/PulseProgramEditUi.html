@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulseProgram.PulseProgramEditUi &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulseProgram.PulseProgramEditUi</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulseProgram.PulseProgramEditUi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">.QPPPEditor</span> <span class="k">import</span> <span class="n">QPPPEditor</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_fromUtf8</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">fromUtf8</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_fromUtf8</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">_encoding</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">UnicodeUTF8</span>
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">disambig</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">disambig</span><span class="p">,</span> <span class="n">_encoding</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_translate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">disambig</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">disambig</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Ui_Form"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramEditUi.Ui_Form">[docs]</a><span class="k">class</span> <span class="nc">Ui_Form</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Ui_Form.setupUi"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramEditUi.Ui_Form.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Form</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="p">[],</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">))</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">605</span><span class="p">,</span> <span class="mi">423</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;verticalLayout&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span> <span class="o">=</span> <span class="n">QPPPEditor</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="n">extraKeywords1</span><span class="o">=</span><span class="n">extraKeywords1</span><span class="p">,</span> <span class="n">extraKeywords2</span><span class="o">=</span><span class="n">extraKeywords2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;textEdit&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textEdit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;QWidget {background: #ff8080; }&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;errorDisplay&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;horizontalLayout_5&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+        <span class="n">icon</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;:/openicon/icons/edit-delete-6.png&quot;</span><span class="p">)),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;closeErrorButton&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorLabel</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorLabel</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;errorLabel&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorLabel</span><span class="p">)</span>
+        <span class="n">spacerItem</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_5</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">spacerItem</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">errorDisplay</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">setFrameShape</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">setFrameShadow</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findWidgetFrame&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">setSpacing</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;horizontalLayout_4&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="n">icon1</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+        <span class="n">icon1</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;:/openicon/icons/window-close.png&quot;</span><span class="p">)),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">22</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findCloseButton&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findLineEdit</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findLineEdit</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findLineEdit&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findLineEdit</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="n">icon2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+        <span class="n">icon2</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;:/openicon/icons/go-down-7.png&quot;</span><span class="p">)),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextBesideIcon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findNextButton&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QToolButton</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">22</span><span class="p">))</span>
+        <span class="n">icon3</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">()</span>
+        <span class="n">icon3</span><span class="o">.</span><span class="n">addPixmap</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;:/openicon/icons/go-up-7.png&quot;</span><span class="p">)),</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Normal</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="o">.</span><span class="n">Off</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">icon3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextBesideIcon</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setAutoRaise</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findPreviousButton&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findMatchCaseCheckBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findMatchCaseCheckBox</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findMatchCaseCheckBox&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findMatchCaseCheckBox</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWholeWordsCheckBox</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QCheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWholeWordsCheckBox</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;findWholeWordsCheckBox&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWholeWordsCheckBox</span><span class="p">)</span>
+        <span class="n">spacerItem1</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSpacerItem</span><span class="p">(</span><span class="mi">31</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout_4</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">spacerItem1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verticalLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;actionFind&quot;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span><span class="o">.</span><span class="n">setObjectName</span><span class="p">(</span><span class="n">_fromUtf8</span><span class="p">(</span><span class="s2">&quot;actionFindNext&quot;</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">retranslateUi</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">showFindDialog</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">click</span><span class="p">)</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QMetaObject</span><span class="o">.</span><span class="n">connectSlotsByName</span><span class="p">(</span><span class="n">Form</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Ui_Form.showFindDialog"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramEditUi.Ui_Form.showFindDialog">[docs]</a>    <span class="k">def</span> <span class="nf">showFindDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWidgetFrame</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findLineEdit</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShortcutFocusReason</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Ui_Form.retranslateUi"><a class="viewcode-back" href="../../code/pulseProgram-doc.html#pulseProgram.PulseProgramEditUi.Ui_Form.retranslateUi">[docs]</a>    <span class="k">def</span> <span class="nf">retranslateUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Form</span><span class="p">):</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">closeErrorButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">errorLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;TextLabel&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findCloseButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;...&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Find:&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findNextButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Next&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findPreviousButton</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Previous&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findMatchCaseCheckBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Match case&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findWholeWordsCheckBox</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Whole words&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;find&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFind</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Ctrl+F&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;findNext&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionFindNext</span><span class="o">.</span><span class="n">setShortcut</span><span class="p">(</span><span class="n">_translate</span><span class="p">(</span><span class="s2">&quot;Form&quot;</span><span class="p">,</span> <span class="s2">&quot;Ctrl+G&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">))</span></div></div>
+
+
+<span class="kn">import</span> <span class="nn">Experiment_rc</span> <span class="c1">#@UnusedImport</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

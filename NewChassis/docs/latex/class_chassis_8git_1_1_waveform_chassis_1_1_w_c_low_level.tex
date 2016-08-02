@@ -1,0 +1,409 @@
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}{\section{Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level Class Reference}
+\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}\index{Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level@{Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level}}
+}
+
+
+This class contains a list of Waveform\-Generator objects and a Timing object.  
+
+
+Inheritance diagram for Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6f0482973d7a6e6633cbf59cfb19eb1e}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}{W\-C\-Low\-Level} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae45db5514a77606b640824f9664173c3}{init}
+\begin{DoxyCompactList}\small\item\em Initializes the waveform chassis based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa8d0b1d9776158685f729497935f8e42}{init\-From\-File}
+\begin{DoxyCompactList}\small\item\em This function will initialize the waveform chassis based on the configuration file specified by the file\-Path parameter. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6e342cb07451502c8175cb22659c565f}{get\-Num\-Ao\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the total number of A\-O channels configured. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7af297e40c59043b9b74825a1afda31c}{get\-Num\-Do\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the total number of A\-O channels configured. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ade62a9bbdeeb0d64da9c9302beb83013}{create\-Ao\-Sine\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of sine waves -\/ one for each channel configured by the init function. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a65c28e1cc37d95535adf4ce05b0793e6}{create\-Do\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1d array of random U8s for writing to the buffer of digital output channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a22ecf149d1c36906d461170b861f86a6}{write\-Ao\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function will write data into the buffer of the analog outputs that are a part of the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae3f5f2856ecf80dc017d7e40e1694335}{write\-Do\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function will write data into the buffer of the digital outputs that are a part of the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ab094a3cd2ac6272c8b839581e630a300}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a460295e33b50119f12d21c0b4c7c425a}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog and digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0f23609abb797d0bed574fcb92f70e2d}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog and digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_abf6ce0d8a2409b2cc20f332b9c4c0ce8}{write\-Start\-Stop}
+\begin{DoxyCompactList}\small\item\em This function will perform the write, start, wait\-Until\-Done, and stop functions wrapped in one funciton. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adf63f261233c5cdea70dc4a076d37597}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7e79ab2a3987e1f62ddba2cb94613af9}{timing}
+\begin{DoxyCompactList}\small\item\em This is a Timing object created using the Timing class. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adaf5c01accf94bdd2863537359418a0a}{use\-Timing}
+\begin{DoxyCompactList}\small\item\em This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} is configured to use Timing. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a424889fed4e03e248c5c9e08a5b6cc4e}{gens}
+\begin{DoxyCompactList}\small\item\em This is a list of Waveform\-Generator objects created using the Waveform\-Generator class. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aacffb88ec6de041d0b2e59218bfd32e9}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for all generators. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0c7c0fc6eb769656a19f3fd65b179a00}{loops}
+\begin{DoxyCompactList}\small\item\em The number of times to iterate over a Finite number of samples. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa54d2b2708f1f4e3793e3ca4918c8859}{trigger\-Type}
+\begin{DoxyCompactList}\small\item\em The trigger type for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_af735d3b85e227e79f23d71376feded5c}{clk\-Source}
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal for every Waveform\-Generator configured in the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a54b88f1ab4328002a5c8745ec2cc8dec}{start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal for every Waveform\-Generator configured in the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a2e51aaf146b179b250af6b8c1374e9d2}{{\bfseries sampels\-Per\-Channel}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a2e51aaf146b179b250af6b8c1374e9d2}
+
+\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+{\bfseries samples\-Per\-Channel}
+\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_af48cd936b9ade9129495569c6c92a56f}{{\bfseries sample\-Rate} property(\-\_\-get\-Sample\-Rate, \-\_\-set\-Sample\-Rate)}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_af48cd936b9ade9129495569c6c92a56f}
+
+\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_afd1e6c5023de1afc7b6dcad30782e938}{ao\-Buff} property(\-\_\-get\-Ao\-Buff)
+\begin{DoxyCompactList}\small\item\em This is the data stored on the analog output buffer. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class contains a list of Waveform\-Generator objects and a Timing object. 
+
+It is intended to represent a chasis with a Ni\-Sync Card and a number of P\-X\-I-\/6733s. It contains low level functions for the Wavefrom Chassis class. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6f0482973d7a6e6633cbf59cfb19eb1e}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6f0482973d7a6e6633cbf59cfb19eb1e}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}{W\-C\-Low\-Level} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adf63f261233c5cdea70dc4a076d37597}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!close@{close}}
+\index{close@{close}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adf63f261233c5cdea70dc4a076d37597}
+
+
+This function will close connection to the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ade62a9bbdeeb0d64da9c9302beb83013}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!create\-Ao\-Sine\-Buffer@{create\-Ao\-Sine\-Buffer}}
+\index{create\-Ao\-Sine\-Buffer@{create\-Ao\-Sine\-Buffer}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{create\-Ao\-Sine\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-create\-Ao\-Sine\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ade62a9bbdeeb0d64da9c9302beb83013}
+
+
+This function returns a 1\-D numpy array of sine waves -\/ one for each channel configured by the init function. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a65c28e1cc37d95535adf4ce05b0793e6}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!create\-Do\-Test\-Buffer@{create\-Do\-Test\-Buffer}}
+\index{create\-Do\-Test\-Buffer@{create\-Do\-Test\-Buffer}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{create\-Do\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-create\-Do\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a65c28e1cc37d95535adf4ce05b0793e6}
+
+
+This function returns a 1d array of random U8s for writing to the buffer of digital output channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6e342cb07451502c8175cb22659c565f}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!get\-Num\-Ao\-Channels@{get\-Num\-Ao\-Channels}}
+\index{get\-Num\-Ao\-Channels@{get\-Num\-Ao\-Channels}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{get\-Num\-Ao\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-get\-Num\-Ao\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a6e342cb07451502c8175cb22659c565f}
+
+
+This function returns the total number of A\-O channels configured. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7af297e40c59043b9b74825a1afda31c}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!get\-Num\-Do\-Channels@{get\-Num\-Do\-Channels}}
+\index{get\-Num\-Do\-Channels@{get\-Num\-Do\-Channels}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{get\-Num\-Do\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-get\-Num\-Do\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7af297e40c59043b9b74825a1afda31c}
+
+
+This function returns the total number of A\-O channels configured. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae45db5514a77606b640824f9664173c3}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!init@{init}}
+\index{init@{init}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Devs\-And\-Chnls, }
+\item[{}]{do\-Devs\-And\-Chnls = {\ttfamily None}, }
+\item[{}]{sync\-Device = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae45db5514a77606b640824f9664173c3}
+
+
+Initializes the waveform chassis based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em ao\-Devs\-And\-Chnls} & This is a list of strings representing the devices and analog output channels. \\
+\hline
+{\em do\-Devs\-And\-Chnls} & This is a list of strings representing the divices and digital output channels. \\
+\hline
+{\em sync\-Device} & This is the device name for the N\-I Sync card. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa8d0b1d9776158685f729497935f8e42}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!init\-From\-File@{init\-From\-File}}
+\index{init\-From\-File@{init\-From\-File}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{init\-From\-File}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-init\-From\-File (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Path}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa8d0b1d9776158685f729497935f8e42}
+
+
+This function will initialize the waveform chassis based on the configuration file specified by the file\-Path parameter. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer \\
+\hline
+{\em file\-Path} & The file path to the configuration file. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ab094a3cd2ac6272c8b839581e630a300}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!start@{start}}
+\index{start@{start}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ab094a3cd2ac6272c8b839581e630a300}
+
+
+This function starts the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0f23609abb797d0bed574fcb92f70e2d}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!stop@{stop}}
+\index{stop@{stop}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0f23609abb797d0bed574fcb92f70e2d}
+
+
+This function stops the analog and digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a460295e33b50119f12d21c0b4c7c425a}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a460295e33b50119f12d21c0b4c7c425a}
+
+
+This functions waits for the analog and digital output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a22ecf149d1c36906d461170b861f86a6}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!write\-Ao\-Buffer@{write\-Ao\-Buffer}}
+\index{write\-Ao\-Buffer@{write\-Ao\-Buffer}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{write\-Ao\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-write\-Ao\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a22ecf149d1c36906d461170b861f86a6}
+
+
+This function will write data into the buffer of the analog outputs that are a part of the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae3f5f2856ecf80dc017d7e40e1694335}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!write\-Do\-Buffer@{write\-Do\-Buffer}}
+\index{write\-Do\-Buffer@{write\-Do\-Buffer}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{write\-Do\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-write\-Do\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_ae3f5f2856ecf80dc017d7e40e1694335}
+
+
+This function will write data into the buffer of the digital outputs that are a part of the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians data for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_abf6ce0d8a2409b2cc20f332b9c4c0ce8}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!write\-Start\-Stop@{write\-Start\-Stop}}
+\index{write\-Start\-Stop@{write\-Start\-Stop}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{write\-Start\-Stop}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-write\-Start\-Stop (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Data, }
+\item[{}]{do\-Data = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_abf6ce0d8a2409b2cc20f332b9c4c0ce8}
+
+
+This function will perform the write, start, wait\-Until\-Done, and stop functions wrapped in one funciton. 
+
+This funciton is no complete and may not exist in a later release!!! 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_af735d3b85e227e79f23d71376feded5c}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-clk\-Source}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_af735d3b85e227e79f23d71376feded5c}
+
+
+This is the sample clock source terminal for every Waveform\-Generator configured in the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+It is defaulted to \char`\"{}\-P\-X\-I\-\_\-\-Star.\char`\"{} \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a424889fed4e03e248c5c9e08a5b6cc4e}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!gens@{gens}}
+\index{gens@{gens}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{gens}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-gens}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a424889fed4e03e248c5c9e08a5b6cc4e}
+
+
+This is a list of Waveform\-Generator objects created using the Waveform\-Generator class. 
+
+It is a list of P\-X\-I6733 cards configured for the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0c7c0fc6eb769656a19f3fd65b179a00}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!loops@{loops}}
+\index{loops@{loops}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-loops}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0c7c0fc6eb769656a19f3fd65b179a00}
+
+
+The number of times to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aacffb88ec6de041d0b2e59218bfd32e9}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!mode@{mode}}
+\index{mode@{mode}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-mode}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aacffb88ec6de041d0b2e59218bfd32e9}
+
+
+This is the mode of operation for all generators. 
+
+There are currently three modes available. Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a0f23609abb797d0bed574fcb92f70e2d}{stop()} method is called. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a54b88f1ab4328002a5c8745ec2cc8dec}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-start\-Trigger\-Source}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a54b88f1ab4328002a5c8745ec2cc8dec}
+
+
+This is the start trigger source terminal for every Waveform\-Generator configured in the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis}. 
+
+It is defaulted to \char`\"{}\-P\-X\-I\-\_\-\-Trig1\char`\"{} \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7e79ab2a3987e1f62ddba2cb94613af9}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!timing@{timing}}
+\index{timing@{timing}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{timing}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-timing}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a7e79ab2a3987e1f62ddba2cb94613af9}
+
+
+This is a Timing object created using the Timing class. 
+
+It is used to synchronize all of the P\-X\-I cards. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa54d2b2708f1f4e3793e3ca4918c8859}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-trigger\-Type}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_aa54d2b2708f1f4e3793e3ca4918c8859}
+
+
+The trigger type for the analog outputs. 
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adaf5c01accf94bdd2863537359418a0a}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!use\-Timing@{use\-Timing}}
+\index{use\-Timing@{use\-Timing}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{use\-Timing}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-use\-Timing}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_adaf5c01accf94bdd2863537359418a0a}
+
+
+This is a boolean value that will be true if the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} is configured to use Timing. 
+
+
+
+\subsection{Property Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_afd1e6c5023de1afc7b6dcad30782e938}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!ao\-Buff@{ao\-Buff}}
+\index{ao\-Buff@{ao\-Buff}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{ao\-Buff}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-ao\-Buff property(\-\_\-get\-Ao\-Buff)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_afd1e6c5023de1afc7b6dcad30782e938}
+
+
+This is the data stored on the analog output buffer. 
+
+This property contains the data that was last stored on the buffer. It does not query the device for what is on the buffer, so you must write to the buffer for the data to be returned accurately. \hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a48df627ebe6ffef971efbcff9ff9aa6f}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!Chassis.git::WaveformChassis::WCLowLevel@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-W\-C\-Low\-Level}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-W\-C\-Low\-Level.\-samples\-Per\-Channel\hspace{0.3cm}{\ttfamily [static]}}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level_a48df627ebe6ffef971efbcff9ff9aa6f}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(\_getSamplesPerChannel,
+2             \_setSamplesPerChannel)
+\end{DoxyCode}
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Waveform\-Chassis.\-py\end{DoxyCompactItemize}

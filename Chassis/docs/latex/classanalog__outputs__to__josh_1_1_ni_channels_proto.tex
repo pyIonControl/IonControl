@@ -1,0 +1,130 @@
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto}{\section{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto Class Reference}
+\label{classanalog__outputs__to__josh_1_1_ni_channels_proto}\index{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto}}
+}
+Inheritance diagram for analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4.000000cm]{classanalog__outputs__to__josh_1_1_ni_channels_proto}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_adae63984eacc158b84063cc3a4a565d4}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa0b36977b20b3a1366969ff2b861dfe0}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_aac7fc09c6b9ae9eca29445be92a58bc3}{run}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa22c9a0180714cfb7e77fa6da7c321da}{start}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_ad91d6aa1c960ae15253c59efdd81d5a2}{stop}
+\item 
+def \hyperlink{classanalog__outputs__to__josh_1_1_ni_channels_proto_a0e7e45dad2adf3f85f0e9001147edd01}{clear}
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_acd2c962ee27b320ff58f70be70a86237}{{\bfseries ni}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_acd2c962ee27b320ff58f70be70a86237}
+
+\item 
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_ae99600042abe3b2d53f3741ca2e9f1c2}{{\bfseries channel\-Names}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_ae99600042abe3b2d53f3741ca2e9f1c2}
+
+\item 
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_ac3908670d600783f8d885c9514e33829}{{\bfseries task\-Handle}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_ac3908670d600783f8d885c9514e33829}
+
+\item 
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_a5bd4f82a0bef11101dd51874a0e787a9}{{\bfseries nidll}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_a5bd4f82a0bef11101dd51874a0e787a9}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+\begin{DoxyVerb}TODO: can't write less then 2 samples?
+The Number of Samples Per Channel determines how many samples are pulled from the hardware buffer to the software buffer.
+It is recommended that the number of samples be 1/10th the rate specified on the DAQmx Timing VI.
+For example, if the rate input on the DAQmx is 1000 (Hz), then the number of samples per channel should be no more than 100.
+This is to ensure there are not buffer overwrite or underwrite errors.  Refer to KnowledgeBase 4EPF28F9: Why Do I Get Error
+-200279 from my DAQmx Read VI or Property Node?
+base class, threading is not used 
+\end{DoxyVerb}
+ 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_adae63984eacc158b84063cc3a4a565d4}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{channel\-Names, }
+\item[{}]{task\-Handle = {\ttfamily None}, }
+\item[{}]{nidll = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_adae63984eacc158b84063cc3a4a565d4}
+\begin{DoxyVerb}TODO: can't write less then 2 samples?
+The Number of Samples Per Channel determines how many samples are pulled from the hardware buffer to the software buffer.
+It is recommended that the number of samples be 1/10th the rate specified on the DAQmx Timing VI.
+For example, if the rate input on the DAQmx is 1000 (Hz), then the number of samples per channel should be no more than 100.
+This is to ensure there are not buffer overwrite or underwrite errors.  Refer to KnowledgeBase 4EPF28F9: Why Do I Get Error
+-200279 from my DAQmx Read VI or Property Node?
+base class, threading is not used 
+\end{DoxyVerb}
+\begin{DoxyVerb}'
+constructor:
+channels to be written to
+NI task handle
+NI dll
+\end{DoxyVerb}
+ \hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa0b36977b20b3a1366969ff2b861dfe0}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa0b36977b20b3a1366969ff2b861dfe0}
+\begin{DoxyVerb}destructor
+\end{DoxyVerb}
+ 
+
+\subsection{Member Function Documentation}
+\hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_a0e7e45dad2adf3f85f0e9001147edd01}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!clear@{clear}}
+\index{clear@{clear}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-clear (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_a0e7e45dad2adf3f85f0e9001147edd01}
+\begin{DoxyVerb}clear task
+\end{DoxyVerb}
+ \hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_aac7fc09c6b9ae9eca29445be92a58bc3}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!run@{run}}
+\index{run@{run}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{run}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-run (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_aac7fc09c6b9ae9eca29445be92a58bc3}
+\begin{DoxyVerb}thread runs this first
+\end{DoxyVerb}
+ \hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa22c9a0180714cfb7e77fa6da7c321da}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!start@{start}}
+\index{start@{start}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_aa22c9a0180714cfb7e77fa6da7c321da}
+\begin{DoxyVerb}start task
+\end{DoxyVerb}
+ \hypertarget{classanalog__outputs__to__josh_1_1_ni_channels_proto_ad91d6aa1c960ae15253c59efdd81d5a2}{\index{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}!stop@{stop}}
+\index{stop@{stop}!analog_outputs_to_josh::NiChannelsProto@{analog\-\_\-outputs\-\_\-to\-\_\-josh\-::\-Ni\-Channels\-Proto}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def analog\-\_\-outputs\-\_\-to\-\_\-josh.\-Ni\-Channels\-Proto.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{classanalog__outputs__to__josh_1_1_ni_channels_proto_ad91d6aa1c960ae15253c59efdd81d5a2}
+\begin{DoxyVerb}stop task
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+analog\-\_\-outputs\-\_\-to\-\_\-josh.\-py\end{DoxyCompactItemize}

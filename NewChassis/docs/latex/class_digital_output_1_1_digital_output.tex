@@ -1,0 +1,455 @@
+\hypertarget{class_digital_output_1_1_digital_output}{\section{Digital\-Output.\-Digital\-Output Class Reference}
+\label{class_digital_output_1_1_digital_output}\index{Digital\-Output.\-Digital\-Output@{Digital\-Output.\-Digital\-Output}}
+}
+
+
+This class will generate digital outputs using py\-D\-A\-Qmx.  
+
+
+Inheritance diagram for Digital\-Output.\-Digital\-Output\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_digital_output_1_1_digital_output}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a0c8ab0946897540122502804d4b1a0eb}{get\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function returns the sample rate configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a96ff9f9cb2f61ec977e9c6df2b525499}{set\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function sets the sample rate in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_aeef526fd09b2d6cc25c034a01bf16b0e}{get\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function returns the samples per channel configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a7866f0194c502d7d99130513aafddb51}{set\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function sets the samples per channel in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_ac1122c27d8cacd4f4d7f3068d0613635}{get\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function returns the sample clock source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a467edd75df46b381036ce37ca665e047}{set\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the sample clock source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a481e24aa22a2a7d516dd79e3460eb8dd}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_digital_output_1_1_digital_output}{Digital\-Output} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a35dd7e77a58e88f8cc0d02aaede8d6b0}{init}
+\begin{DoxyCompactList}\small\item\em Initialize the digital outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_aa888e91f47efed1049fd310373bd4fc9}{create\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a random 1\-D numpy array of samples for writing the buffer of digital output channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a0f143fe8af789b6623c3c9f4428c8514}{get\-Num\-Lines}
+\begin{DoxyCompactList}\small\item\em This function returns the number of digital lines configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a30a645662a4b0baa31990ed244cd91cc}{get\-Num\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the number of digital channels configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a74440e738ee87a0b70a8388acba28c11}{write\-To\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_aff1c266b07a91eb42a96f4d394405d6b}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a6a179ee4c172d0c99d20267d34437ad1}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the digital output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a7f5784b1fdea30aaddc1d608357accf1}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the digital output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a5385404bf2191f7f6b23a30041599bab}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the digital ouput device and channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_digital_output_1_1_digital_output_a4aea66b269b7202475ace284a26b87be}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_digital_output_1_1_digital_output}{Digital\-Output} Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_digital_output_1_1_digital_output_ad4c856a2b8d101078add570f1a5843a3}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the D\-A\-Qmx task. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_a2aeeacbf158f4acfdcb0461327396d98}{task\-Ref}
+\begin{DoxyCompactList}\small\item\em The D\-A\-Qmx task reference. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_af5c9fe7d592b5bcbd98ce90afc678fdc}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the D\-A\-Qmx task has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_a68b531bfedc4aa2fd7e54c24d2b9758e}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for the digital outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_a352162e0da3e40979267c4263b726ead}{loops}
+\begin{DoxyCompactList}\small\item\em The number of time to iterate over a Finite number of samples. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_digital_output_1_1_digital_output_a3c7b4cb824baa168977ef85dbbc4d1d5}{sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the digital output. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_a8de6ce12b96449fe3546d29d67bf1308}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of samples per channel that will be generated in Finite mode. \end{DoxyCompactList}\item 
+\hyperlink{class_digital_output_1_1_digital_output_ac666f33f58ca6f93d9aaeb93f917e81c}{clk\-Source}
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate digital outputs using py\-D\-A\-Qmx. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_digital_output_1_1_digital_output_a481e24aa22a2a7d516dd79e3460eb8dd}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a481e24aa22a2a7d516dd79e3460eb8dd}
+
+
+This function is a constructor for the \hyperlink{class_digital_output_1_1_digital_output}{Digital\-Output} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+\begin{DoxyParams}{Parameters}
+{\em self} & This object pointer \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a4aea66b269b7202475ace284a26b87be}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a4aea66b269b7202475ace284a26b87be}
+
+
+This is the destructor for the \hyperlink{class_digital_output_1_1_digital_output}{Digital\-Output} Class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_digital_output_1_1_digital_output_a5385404bf2191f7f6b23a30041599bab}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!close@{close}}
+\index{close@{close}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a5385404bf2191f7f6b23a30041599bab}
+
+
+This function will close connection to the digital ouput device and channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \begin{DoxyVerb}\end{DoxyVerb}
+ \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_aa888e91f47efed1049fd310373bd4fc9}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!create\-Test\-Buffer@{create\-Test\-Buffer}}
+\index{create\-Test\-Buffer@{create\-Test\-Buffer}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{create\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-create\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_aa888e91f47efed1049fd310373bd4fc9}
+
+
+This function returns a random 1\-D numpy array of samples for writing the buffer of digital output channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The objet pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_ac1122c27d8cacd4f4d7f3068d0613635}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!get\-Clk\-Source@{get\-Clk\-Source}}
+\index{get\-Clk\-Source@{get\-Clk\-Source}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-get\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_ac1122c27d8cacd4f4d7f3068d0613635}
+
+
+This function returns the sample clock source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a30a645662a4b0baa31990ed244cd91cc}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!get\-Num\-Channels@{get\-Num\-Channels}}
+\index{get\-Num\-Channels@{get\-Num\-Channels}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-get\-Num\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a30a645662a4b0baa31990ed244cd91cc}
+
+
+This function returns the number of digital channels configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a0f143fe8af789b6623c3c9f4428c8514}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!get\-Num\-Lines@{get\-Num\-Lines}}
+\index{get\-Num\-Lines@{get\-Num\-Lines}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Num\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-get\-Num\-Lines (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a0f143fe8af789b6623c3c9f4428c8514}
+
+
+This function returns the number of digital lines configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a0c8ab0946897540122502804d4b1a0eb}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!get\-Sample\-Rate@{get\-Sample\-Rate}}
+\index{get\-Sample\-Rate@{get\-Sample\-Rate}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-get\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a0c8ab0946897540122502804d4b1a0eb}
+
+
+This function returns the sample rate configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_aeef526fd09b2d6cc25c034a01bf16b0e}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}}
+\index{get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{get\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-get\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_aeef526fd09b2d6cc25c034a01bf16b0e}
+
+
+This function returns the samples per channel configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a35dd7e77a58e88f8cc0d02aaede8d6b0}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!init@{init}}
+\index{init@{init}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{physical\-Channel}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a35dd7e77a58e88f8cc0d02aaede8d6b0}
+
+
+Initialize the digital outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em physical\-Channel} & A string representing the device and digital output channels. Example value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a467edd75df46b381036ce37ca665e047}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!set\-Clk\-Source@{set\-Clk\-Source}}
+\index{set\-Clk\-Source@{set\-Clk\-Source}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-set\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a467edd75df46b381036ce37ca665e047}
+
+
+This function sets the sample clock source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the clock source. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a96ff9f9cb2f61ec977e9c6df2b525499}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!set\-Sample\-Rate@{set\-Sample\-Rate}}
+\index{set\-Sample\-Rate@{set\-Sample\-Rate}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-set\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a96ff9f9cb2f61ec977e9c6df2b525499}
+
+
+This function sets the sample rate in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the sample rate. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a7866f0194c502d7d99130513aafddb51}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}}
+\index{set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{set\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-set\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a7866f0194c502d7d99130513aafddb51}
+
+
+This function sets the samples per channel in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the samples per channel. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_aff1c266b07a91eb42a96f4d394405d6b}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!start@{start}}
+\index{start@{start}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_aff1c266b07a91eb42a96f4d394405d6b}
+
+
+This function starts the digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a7f5784b1fdea30aaddc1d608357accf1}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!stop@{stop}}
+\index{stop@{stop}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a7f5784b1fdea30aaddc1d608357accf1}
+
+
+This function stops the digital output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a6a179ee4c172d0c99d20267d34437ad1}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a6a179ee4c172d0c99d20267d34437ad1}
+
+
+This functions waits for the digital output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_digital_output_1_1_digital_output_a74440e738ee87a0b70a8388acba28c11}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!write\-To\-Buffer@{write\-To\-Buffer}}
+\index{write\-To\-Buffer@{write\-To\-Buffer}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{write\-To\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Digital\-Output.\-Digital\-Output.\-write\-To\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_digital_output_1_1_digital_output_a74440e738ee87a0b70a8388acba28c11}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 8-\/bit unsigned integer array that contians samples for each digital channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_digital_output_1_1_digital_output_af5c9fe7d592b5bcbd98ce90afc678fdc}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!initialized@{initialized}}
+\index{initialized@{initialized}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-initialized}}\label{class_digital_output_1_1_digital_output_af5c9fe7d592b5bcbd98ce90afc678fdc}
+
+
+This is a boolean that is true when the D\-A\-Qmx task has been initialized. 
+
+\hypertarget{class_digital_output_1_1_digital_output_a352162e0da3e40979267c4263b726ead}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!loops@{loops}}
+\index{loops@{loops}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-loops}}\label{class_digital_output_1_1_digital_output_a352162e0da3e40979267c4263b726ead}
+
+
+The number of time to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of digital samples will be looped. The default is allways 1. \hypertarget{class_digital_output_1_1_digital_output_a68b531bfedc4aa2fd7e54c24d2b9758e}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!mode@{mode}}
+\index{mode@{mode}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-mode}}\label{class_digital_output_1_1_digital_output_a68b531bfedc4aa2fd7e54c24d2b9758e}
+
+
+This is the mode of operation for the digital outputs. 
+
+There are currently three modes available. Static mode is where one static digital sample is set with no need for a sample clock. Finite mode is where a finite number of digital samples will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_digital_output_1_1_digital_output_a7f5784b1fdea30aaddc1d608357accf1}{stop()} method is called. \hypertarget{class_digital_output_1_1_digital_output_ad4c856a2b8d101078add570f1a5843a3}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!status@{status}}
+\index{status@{status}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-status}}\label{class_digital_output_1_1_digital_output_ad4c856a2b8d101078add570f1a5843a3}
+
+
+This is the status of the D\-A\-Qmx task. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. \hypertarget{class_digital_output_1_1_digital_output_a2aeeacbf158f4acfdcb0461327396d98}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!task\-Ref@{task\-Ref}}
+\index{task\-Ref@{task\-Ref}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{task\-Ref}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-task\-Ref}}\label{class_digital_output_1_1_digital_output_a2aeeacbf158f4acfdcb0461327396d98}
+
+
+The D\-A\-Qmx task reference. 
+
+
+
+\subsection{Property Documentation}
+\hypertarget{class_digital_output_1_1_digital_output_ac666f33f58ca6f93d9aaeb93f917e81c}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-clk\-Source\hspace{0.3cm}{\ttfamily [static]}}}\label{class_digital_output_1_1_digital_output_ac666f33f58ca6f93d9aaeb93f917e81c}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getClkSource, setClkSource, \_delClkSource,
+2     \textcolor{stringliteral}{"""The clock source for the digital outputsample clock."""})
+\end{DoxyCode}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_digital_output_1_1_digital_output_a3c7b4cb824baa168977ef85dbbc4d1d5}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-sample\-Rate\hspace{0.3cm}{\ttfamily [static]}}}\label{class_digital_output_1_1_digital_output_a3c7b4cb824baa168977ef85dbbc4d1d5}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSampleRate, setSampleRate, \_delSampleRate, doc=
+2                              \textcolor{stringliteral}{"""The sample rate of the digital output."""})
+\end{DoxyCode}
+
+
+This is the sample rate of the digital output. 
+
+\hypertarget{class_digital_output_1_1_digital_output_a8de6ce12b96449fe3546d29d67bf1308}{\index{Digital\-Output\-::\-Digital\-Output@{Digital\-Output\-::\-Digital\-Output}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!DigitalOutput::DigitalOutput@{Digital\-Output\-::\-Digital\-Output}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Digital\-Output.\-Digital\-Output.\-samples\-Per\-Channel\hspace{0.3cm}{\ttfamily [static]}}}\label{class_digital_output_1_1_digital_output_a8de6ce12b96449fe3546d29d67bf1308}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSamplesPerChannel, setSamplesPerChannel,
+2             \_delSamplesPerChannel,
+3             \textcolor{stringliteral}{"""The samples per channel of the digital output."""})
+\end{DoxyCode}
+
+
+This is the number of samples per channel that will be generated in Finite mode. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Digital\-Output.\-py\end{DoxyCompactItemize}

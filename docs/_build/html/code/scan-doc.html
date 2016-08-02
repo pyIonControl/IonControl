@@ -1,0 +1,1755 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scan &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>scan</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/scan-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="scan">
+<h1>scan<a class="headerlink" href="#scan" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-scan.AbszisseType">
+<span id="abszissetype"></span><h2>AbszisseType<a class="headerlink" href="#module-scan.AbszisseType" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.AbszisseType.AbszisseType">
+<em class="property">class </em><code class="descname">AbszisseType</code><a class="reference internal" href="../_modules/scan/AbszisseType.html#AbszisseType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AbszisseType.AbszisseType" title="Permalink to this definition">¶</a></dt>
+<dd><p>An enumeration.</p>
+<dl class="attribute">
+<dt id="scan.AbszisseType.AbszisseType.columnName">
+<code class="descname">columnName</code><a class="headerlink" href="#scan.AbszisseType.AbszisseType.columnName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AbszisseType.AbszisseType.first">
+<code class="descname">first</code><em class="property"> = &lt;AbszisseType.first: 'first'&gt;</em><a class="headerlink" href="#scan.AbszisseType.AbszisseType.first" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AbszisseType.AbszisseType.last">
+<code class="descname">last</code><em class="property"> = &lt;AbszisseType.last: 'last'&gt;</em><a class="headerlink" href="#scan.AbszisseType.AbszisseType.last" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AbszisseType.AbszisseType.time">
+<code class="descname">time</code><em class="property"> = &lt;AbszisseType.time: 'time'&gt;</em><a class="headerlink" href="#scan.AbszisseType.AbszisseType.time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AbszisseType.AbszisseType.x">
+<code class="descname">x</code><em class="property"> = &lt;AbszisseType.x: 'x'&gt;</em><a class="headerlink" href="#scan.AbszisseType.AbszisseType.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.AnalysisControl">
+<span id="analysiscontrol"></span><h2>AnalysisControl<a class="headerlink" href="#module-scan.AnalysisControl" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.AnalysisControl.AnalysisControl">
+<em class="property">class </em><code class="descname">AnalysisControl</code><span class="sig-paren">(</span><em>config</em>, <em>globalDict</em>, <em>parentname</em>, <em>evaluationNames</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.addPushDestination">
+<code class="descname">addPushDestination</code><span class="sig-paren">(</span><em>name</em>, <em>destination</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.addPushDestination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.addPushDestination" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisControl.AnalysisControl.analysisConfigurationChanged">
+<code class="descname">analysisConfigurationChanged</code><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.analysisConfigurationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisControl.AnalysisControl.analysisResultSignal">
+<code class="descname">analysisResultSignal</code><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.analysisResultSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.analyze">
+<code class="descname">analyze</code><span class="sig-paren">(</span><em>plottedTraceDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.analyze"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.analyze" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.autoSave">
+<code class="descname">autoSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.autoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.autoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisControl.AnalysisControl.currentAnalysisChanged">
+<code class="descname">currentAnalysisChanged</code><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.currentAnalysisChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>evaluation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.fit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.fitAll">
+<code class="descname">fitAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.fitAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.fitAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onActiveAnalysisChanged">
+<code class="descname">onActiveAnalysisChanged</code><span class="sig-paren">(</span><em>selected</em>, <em>deselected=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onActiveAnalysisChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onActiveAnalysisChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onAddAnalysis">
+<code class="descname">onAddAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onAddAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onAddAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onAddPushVariable">
+<code class="descname">onAddPushVariable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onAddPushVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onAddPushVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onAutoSave">
+<code class="descname">onAutoSave</code><span class="sig-paren">(</span><em>checked</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onAutoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onAutoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onConfigurationEditingFinished">
+<code class="descname">onConfigurationEditingFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onConfigurationEditingFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onConfigurationEditingFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onExtractFit">
+<code class="descname">onExtractFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onExtractFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onExtractFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onFit">
+<code class="descname">onFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onFitAll">
+<code class="descname">onFitAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onFitAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onFitAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onFitToStart">
+<code class="descname">onFitToStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onFitToStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onFitToStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onFitfunctionChanged">
+<code class="descname">onFitfunctionChanged</code><span class="sig-paren">(</span><em>row</em>, <em>newfitname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onFitfunctionChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onFitfunctionChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap out the fitfunction on the current analysis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onLoadAnalysisConfiguration">
+<code class="descname">onLoadAnalysisConfiguration</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onLoadAnalysisConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onLoadAnalysisConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onLoadFitFunction">
+<code class="descname">onLoadFitFunction</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onLoadFitFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onLoadFitFunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onPlot">
+<code class="descname">onPlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onPlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onPush">
+<code class="descname">onPush</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onPush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onPush" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onReload">
+<code class="descname">onReload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onReload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onReload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onRemoveAnalysis">
+<code class="descname">onRemoveAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onRemoveAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onRemoveAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onRemoveAnalysisConfiguration">
+<code class="descname">onRemoveAnalysisConfiguration</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onRemoveAnalysisConfiguration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onRemoveAnalysisConfiguration" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onRemoveFit">
+<code class="descname">onRemoveFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onRemoveFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onRemoveFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onRemovePushVariable">
+<code class="descname">onRemovePushVariable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onRemovePushVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onRemovePushVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onSmartToStart">
+<code class="descname">onSmartToStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onSmartToStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onSmartToStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onUseErrorBars">
+<code class="descname">onUseErrorBars</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onUseErrorBars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onUseErrorBars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.onUseSmartStart">
+<code class="descname">onUseSmartStart</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.onUseSmartStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.onUseSmartStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.push">
+<code class="descname">push</code><span class="sig-paren">(</span><em>evaluation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.push"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.push" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.pushAll">
+<code class="descname">pushAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.pushAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.pushAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.pushVariables">
+<code class="descname">pushVariables</code><span class="sig-paren">(</span><em>pushVariables</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.pushVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.pushVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.saveable">
+<code class="descname">saveable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.saveable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.saveable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.setAnalysisDefinition">
+<code class="descname">setAnalysisDefinition</code><span class="sig-paren">(</span><em>analysisDef</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.setAnalysisDefinition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.setAnalysisDefinition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.setButtonEnabledState">
+<code class="descname">setButtonEnabledState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.setButtonEnabledState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.setButtonEnabledState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.setFitfunction">
+<code class="descname">setFitfunction</code><span class="sig-paren">(</span><em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.setFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.setFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.setPlottedTraceDict">
+<code class="descname">setPlottedTraceDict</code><span class="sig-paren">(</span><em>plottedTraceDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.setPlottedTraceDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.setPlottedTraceDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisControl.updatePushVariables">
+<code class="descname">updatePushVariables</code><span class="sig-paren">(</span><em>extraDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControl.updatePushVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControl.updatePushVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.AnalysisControl.AnalysisControlParameters">
+<em class="property">class </em><code class="descname">AnalysisControlParameters</code><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisControlParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisControlParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="scan.AnalysisControl.AnalysisDefinitionElement">
+<em class="property">class </em><code class="descname">AnalysisDefinitionElement</code><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisDefinitionElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisDefinitionElement" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.AnalysisControl.AnalysisDefinitionElement.pushVariableValues">
+<code class="descname">pushVariableValues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisDefinitionElement.pushVariableValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisDefinitionElement.pushVariableValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>get all push variable values that are within the bounds, no re-evaluation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisControl.AnalysisDefinitionElement.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['name', 'enabled', 'evaluation', 'fitfunctionName', 'pushVariables', 'fitfunction', 'fitfunctionCache']</em><a class="headerlink" href="#scan.AnalysisControl.AnalysisDefinitionElement.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisControl.AnalysisDefinitionElement.updatePushVariables">
+<code class="descname">updatePushVariables</code><span class="sig-paren">(</span><em>replacements</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisControl.html#AnalysisDefinitionElement.updatePushVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisControl.AnalysisDefinitionElement.updatePushVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.AnalysisTableModel">
+<span id="analysistablemodel"></span><h2>AnalysisTableModel<a class="headerlink" href="#module-scan.AnalysisTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel">
+<em class="property">class </em><code class="descname">AnalysisTableModel</code><span class="sig-paren">(</span><em>analysisDefinition</em>, <em>config</em>, <em>globalDict</em>, <em>evaluationNames</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.addAnalysis">
+<code class="descname">addAnalysis</code><span class="sig-paren">(</span><em>analysis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.addAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.addAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.analysisChanged">
+<code class="descname">analysisChanged</code><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.analysisChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.backgroundLookup">
+<code class="descname">backgroundLookup</code><em class="property"> = {False: &lt;PyQt5.QtGui.QColor object at 0x000002665C42BC88&gt;, True: &lt;PyQt5.QtGui.QColor object at 0x000002665C42BCF8&gt;}</em><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.backgroundLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.choice">
+<code class="descname">choice</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.choice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C42BD68&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.fitfunctionChanged">
+<code class="descname">fitfunctionChanged</code><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.fitfunctionChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Enable', 'Name', 'Evaluation', 'Fit function']</em><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.removeAnalysis">
+<code class="descname">removeAnalysis</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.removeAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.removeAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C42B128&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setAnalysisDefinition">
+<code class="descname">setAnalysisDefinition</code><span class="sig-paren">(</span><em>analysisDefinition</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setAnalysisDefinition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setAnalysisDefinition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setEnabled">
+<code class="descname">setEnabled</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setEvaluation">
+<code class="descname">setEvaluation</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setFitfunction">
+<code class="descname">setFitfunction</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setName">
+<code class="descname">setName</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.AnalysisTableModel.AnalysisTableModel.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/AnalysisTableModel.html#AnalysisTableModel.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.AnalysisTableModel.AnalysisTableModel.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="countevaluation">
+<h2>CountEvaluation<a class="headerlink" href="#countevaluation" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-scan.DatabasePushDestination">
+<span id="databasepushdestination"></span><h2>DatabasePushDestination<a class="headerlink" href="#module-scan.DatabasePushDestination" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.DatabasePushDestination.DatabasePushDestination">
+<em class="property">class </em><code class="descname">DatabasePushDestination</code><span class="sig-paren">(</span><em>space</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/DatabasePushDestination.html#DatabasePushDestination"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.DatabasePushDestination.DatabasePushDestination" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.DatabasePushDestination.DatabasePushDestination.keys">
+<code class="descname">keys</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/DatabasePushDestination.html#DatabasePushDestination.keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.DatabasePushDestination.DatabasePushDestination.keys" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.DatabasePushDestination.DatabasePushDestination.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>pushlist</em>, <em>upd_time=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/DatabasePushDestination.html#DatabasePushDestination.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.DatabasePushDestination.DatabasePushDestination.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="evaluationalgorithms">
+<h2>EvaluationAlgorithms<a class="headerlink" href="#evaluationalgorithms" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-scan.EvaluationBase">
+<span id="evaluationbase"></span><h2>EvaluationBase<a class="headerlink" href="#module-scan.EvaluationBase" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.EvaluationBase.EvaluationBase">
+<em class="property">class </em><code class="descname">EvaluationBase</code><span class="sig-paren">(</span><em>globalDict=None</em>, <em>settings=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.EvaluationBase.EvaluationBase.hasChannel">
+<code class="descname">hasChannel</code><em class="property"> = True</em><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.hasChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.histogram">
+<code class="descname">histogram</code><span class="sig-paren">(</span><em>data</em>, <em>evaluation</em>, <em>histogramBins=50</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.histogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.histogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the parameter definitions used by the parameterTable</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.setDefault">
+<code class="descname">setDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.setDefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.setDefault" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.setSettings">
+<code class="descname">setSettings</code><span class="sig-paren">(</span><em>settings</em>, <em>settingsName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.setSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.setSettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.setSettingsName">
+<code class="descname">setSettingsName</code><span class="sig-paren">(</span><em>settingsName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.setSettingsName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.setSettingsName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationBase.EvaluationBase.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationBase.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationBase.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the parameter changed in the parameterTable</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="scan.EvaluationBase.EvaluationException">
+<em class="property">exception </em><code class="descname">EvaluationException</code><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="scan.EvaluationBase.EvaluationMeta">
+<em class="property">class </em><code class="descname">EvaluationMeta</code><a class="reference internal" href="../_modules/scan/EvaluationBase.html#EvaluationMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationBase.EvaluationMeta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-scan.EvaluationControl">
+<span id="evaluationcontrol"></span><h2>EvaluationControl<a class="headerlink" href="#module-scan.EvaluationControl" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.EvaluationControl.Evaluation">
+<em class="property">class </em><code class="descname">Evaluation</code><a class="reference internal" href="../_modules/scan/EvaluationControl.html#Evaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.Evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.EvaluationControl.Evaluation.__setstate__">
+<code class="descname">__setstate__</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#Evaluation.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.Evaluation.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function ensures that the given fields are present in the class object
+after unpickling. Only new class attributes need to be added here.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.Evaluation.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['histogramBins', 'integrateHistogram', 'enableTimestamps', 'binwidth', 'roiStart', 'roiWidth', 'integrateTimestamps', 'timestampsChannel', 'saveRawData', 'evalList', 'counterChannel']</em><a class="headerlink" href="#scan.EvaluationControl.Evaluation.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.EvaluationControl.EvaluationControl">
+<em class="property">class </em><code class="descname">EvaluationControl</code><span class="sig-paren">(</span><em>config</em>, <em>globalDict</em>, <em>parentname</em>, <em>plotnames=None</em>, <em>parent=None</em>, <em>analysisNames=None</em>, <em>counterNames=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.addEvaluation">
+<code class="descname">addEvaluation</code><span class="sig-paren">(</span><em>evaluation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.addEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.addEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.checkSettingsSavable">
+<code class="descname">checkSettingsSavable</code><span class="sig-paren">(</span><em>savable=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.checkSettingsSavable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.checkSettingsSavable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationControl.currentEvaluationChanged">
+<code class="descname">currentEvaluationChanged</code><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.currentEvaluationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.editEvaluationTable">
+<code class="descname">editEvaluationTable</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.editEvaluationTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.editEvaluationTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>globalName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationControl.evaluationConfigurationChanged">
+<code class="descname">evaluationConfigurationChanged</code><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.evaluationConfigurationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.evaluationNames">
+<code class="descname">evaluationNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.evaluationNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.evaluationNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.getEvaluation">
+<code class="descname">getEvaluation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.getEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.getEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationControl.integrationMode">
+<code class="descname">integrationMode</code><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.integrationMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.loadSetting">
+<code class="descname">loadSetting</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.loadSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.loadSetting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationControl.logger">
+<code class="descname">logger</code><em class="property"> = &lt;logging.Logger object at 0x000002665C6F5F60&gt;</em><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onActiveEvalChanged">
+<code class="descname">onActiveEvalChanged</code><span class="sig-paren">(</span><em>modelIndex</em>, <em>modelIndex2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onActiveEvalChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onActiveEvalChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onAddEvaluation">
+<code class="descname">onAddEvaluation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onAddEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onAddEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onAlgorithmNameChanged">
+<code class="descname">onAlgorithmNameChanged</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onAlgorithmNameChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onAlgorithmNameChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onAlgorithmValueChanged">
+<code class="descname">onAlgorithmValueChanged</code><span class="sig-paren">(</span><em>algo</em>, <em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onAlgorithmValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onAlgorithmValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onAutoSave">
+<code class="descname">onAutoSave</code><span class="sig-paren">(</span><em>checked</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onAutoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onAutoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onBareValueChanged">
+<code class="descname">onBareValueChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onBareValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onBareValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onHistogramBinsChanged">
+<code class="descname">onHistogramBinsChanged</code><span class="sig-paren">(</span><em>bins</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onHistogramBinsChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onHistogramBinsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onIntegrateHistogramClicked">
+<code class="descname">onIntegrateHistogramClicked</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onIntegrateHistogramClicked"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onIntegrateHistogramClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onIntegrationChanged">
+<code class="descname">onIntegrationChanged</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onIntegrationChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onIntegrationChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onLoad">
+<code class="descname">onLoad</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onLoad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onReload">
+<code class="descname">onReload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onReload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onReload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onRemove">
+<code class="descname">onRemove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onRemove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onRemove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onRemoveEvaluation">
+<code class="descname">onRemoveEvaluation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onRemoveEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onRemoveEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.onValueChanged">
+<code class="descname">onValueChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.onValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.onValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.removeEvaluation">
+<code class="descname">removeEvaluation</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.removeEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.removeEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.setAnalysisNames">
+<code class="descname">setAnalysisNames</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.setAnalysisNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.setAnalysisNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.setSettings">
+<code class="descname">setSettings</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.setSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.setSettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationControl.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControl.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControl.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.EvaluationControl.EvaluationControlParameters">
+<em class="property">class </em><code class="descname">EvaluationControlParameters</code><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationControlParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationControlParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="scan.EvaluationControl.EvaluationDefinition">
+<em class="property">class </em><code class="descname">EvaluationDefinition</code><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationDefinition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationDefinition" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationDefinition.AbszisseType">
+<code class="descname">AbszisseType</code><a class="headerlink" href="#scan.EvaluationControl.EvaluationDefinition.AbszisseType" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationDefinition.channelKey">
+<code class="descname">channelKey</code><a class="headerlink" href="#scan.EvaluationControl.EvaluationDefinition.channelKey" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationControl.EvaluationDefinition.getChannelData">
+<code class="descname">getChannelData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationControl.html#EvaluationDefinition.getChannelData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationControl.EvaluationDefinition.getChannelData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationControl.EvaluationDefinition.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['counterId', 'type', 'counter', 'evaluation', 'settings', 'settingsCache', 'name', 'plotname', 'showHistogram', 'analysis', 'abszisse']</em><a class="headerlink" href="#scan.EvaluationControl.EvaluationDefinition.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.EvaluationTableModel">
+<span id="evaluationtablemodel"></span><h2>EvaluationTableModel<a class="headerlink" href="#module-scan.EvaluationTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel">
+<em class="property">class </em><code class="descname">EvaluationTableModel</code><span class="sig-paren">(</span><em>updateSaveStatus</em>, <em>plotnames=None</em>, <em>evalList=None</em>, <em>parent=None</em>, <em>analysisNames=None</em>, <em>counterNames=None</em>, <em>globalDict={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.choice">
+<code class="descname">choice</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.choice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C403048&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.counterName">
+<code class="descname">counterName</code><span class="sig-paren">(</span><em>e</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.counterName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.counterName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.dataChanged">
+<code class="descname">dataChanged</code><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.dataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.getAnalysisNames">
+<code class="descname">getAnalysisNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.getAnalysisNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.getAnalysisNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.getPlotnames">
+<code class="descname">getPlotnames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.getPlotnames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.getPlotnames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.hasChannel">
+<em class="property">static </em><code class="descname">hasChannel</code><span class="sig-paren">(</span><em>evaluation</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.hasChannel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.hasChannel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Type', 'Id', 'Channel', 'Evaluation', 'Name', 'Hist', 'Plot', 'Abszisse']</em><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C6399E8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setAbszisse">
+<code class="descname">setAbszisse</code><span class="sig-paren">(</span><em>index</em>, <em>abszisse</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setAbszisse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setAbszisse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setAlgorithm">
+<code class="descname">setAlgorithm</code><span class="sig-paren">(</span><em>index</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setAnalysisNames">
+<code class="descname">setAnalysisNames</code><span class="sig-paren">(</span><em>names</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setAnalysisNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setAnalysisNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setCounter">
+<code class="descname">setCounter</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setCounter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setCounter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setCounterId">
+<code class="descname">setCounterId</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setCounterId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setCounterId" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setDataName">
+<code class="descname">setDataName</code><span class="sig-paren">(</span><em>index</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setDataName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setDataName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setEvalList">
+<code class="descname">setEvalList</code><span class="sig-paren">(</span><em>evalList</em>, <em>evalAlgorithmList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setEvalList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setEvalList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setPlotName">
+<code class="descname">setPlotName</code><span class="sig-paren">(</span><em>index</em>, <em>plotname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setPlotName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setPlotName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setShowHistogram">
+<code class="descname">setShowHistogram</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setShowHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setShowHistogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setType">
+<code class="descname">setType</code><span class="sig-paren">(</span><em>index</em>, <em>t</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.EvaluationTableModel.EvaluationTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/EvaluationTableModel.html#EvaluationTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.EvaluationTableModel.EvaluationTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.FitHistogramsEvaluation">
+<span id="fithistogramsevaluation"></span><h2>FitHistogramsEvaluation<a class="headerlink" href="#module-scan.FitHistogramsEvaluation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation">
+<em class="property">class </em><code class="descname">FitHistogramEvaluation</code><span class="sig-paren">(</span><em>globalDict=None</em>, <em>settings=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluation which fits histograms to two ion data to determine populations in zero, one, and two bright.
+Runs in five different modes:
+Zero: Will return the population in 00
+One: Will return the population in 01 + 10
+Two: Will return the population in 11
+Parity: Will return the value of P_00 + P_11 - (P_01 + P_10)
+Residuals: Will return the goodness of histogram fit</p>
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>data</em>, <em>evaluation</em>, <em>expected=None</em>, <em>ppDict=None</em>, <em>globalDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.histogram">
+<code class="descname">histogram</code><span class="sig-paren">(</span><em>data</em>, <em>counter=0</em>, <em>histogramBins=50</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.histogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.histogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.leastsq">
+<code class="descname">leastsq</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters=None</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.leastsq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.leastsq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.loadReferenceData">
+<code class="descname">loadReferenceData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.loadReferenceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.loadReferenceData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.modes">
+<code class="descname">modes</code><em class="property"> = ['Zero', 'One', 'Two', 'Parity', 'Residuals']</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.modes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.name">
+<code class="descname">name</code><em class="property"> = 'FitHistogram'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.normalizeHistogram">
+<code class="descname">normalizeHistogram</code><span class="sig-paren">(</span><em>hist</em>, <em>longOutput=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.normalizeHistogram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.normalizeHistogram" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.setDefault">
+<code class="descname">setDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.setDefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.setDefault" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.tooltip">
+<code class="descname">tooltip</code><em class="property"> = 'Fit measured histograms to data'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.tooltip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.FitHistogramEvaluation.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#FitHistogramEvaluation.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.FitHistogramEvaluation.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction">
+<em class="property">class </em><code class="descname">HistogramFitFunction</code><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#HistogramFitFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#HistogramFitFunction.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.functionString">
+<code class="descname">functionString</code><em class="property"> = 'p0*H(0)+p1*H(1)+p2*H(2)'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.name">
+<code class="descname">name</code><em class="property"> = 'HistogramApproximation'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#HistogramFitFunction.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.toXmlElement">
+<code class="descname">toXmlElement</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#HistogramFitFunction.toXmlElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.toXmlElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.HistogramFitFunction.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#HistogramFitFunction.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.HistogramFitFunction.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation">
+<em class="property">class </em><code class="descname">TwoIonFidelityEvaluation</code><span class="sig-paren">(</span><em>globalDict=None</em>, <em>settings=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#TwoIonFidelityEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.ExpectedLookup">
+<code class="descname">ExpectedLookup</code><em class="property"> = {'424': [0.25, 0.5, 0.25], '100': [1.0, 0.0, 0.0], '202': [0.5, 0.0, 0.5], '001': [0.0, 0.0, 1.0]}</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.ExpectedLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>data</em>, <em>evaluation</em>, <em>expected=None</em>, <em>ppDict=None</em>, <em>globalDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#TwoIonFidelityEvaluation.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.modes">
+<code class="descname">modes</code><em class="property"> = ['Zero', 'One', 'Two', 'All']</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.modes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.name">
+<code class="descname">name</code><em class="property"> = 'TwoIonFidelity'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#TwoIonFidelityEvaluation.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.setDefault">
+<code class="descname">setDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/FitHistogramsEvaluation.html#TwoIonFidelityEvaluation.setDefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.setDefault" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.tooltip">
+<code class="descname">tooltip</code><em class="property"> = 'Above threshold is bright'</em><a class="headerlink" href="#scan.FitHistogramsEvaluation.TwoIonFidelityEvaluation.tooltip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.PushVariable">
+<span id="pushvariable"></span><h2>PushVariable<a class="headerlink" href="#module-scan.PushVariable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.PushVariable.PushVariable">
+<em class="property">class </em><code class="descname">PushVariable</code><a class="reference internal" href="../_modules/scan/PushVariable.html#PushVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariable.PushVariable" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.XMLTagName">
+<code class="descname">XMLTagName</code><em class="property"> = 'PushVariable'</em><a class="headerlink" href="#scan.PushVariable.PushVariable.XMLTagName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariable.PushVariable.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>variables={}</em>, <em>useFloat=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariable.html#PushVariable.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariable.PushVariable.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariable.PushVariable.exportXml">
+<code class="descname">exportXml</code><span class="sig-paren">(</span><em>element</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariable.html#PushVariable.exportXml"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariable.PushVariable.exportXml" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C4264E0&gt;</em><a class="headerlink" href="#scan.PushVariable.PushVariable.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="scan.PushVariable.PushVariable.fromXmlElement">
+<em class="property">static </em><code class="descname">fromXmlElement</code><span class="sig-paren">(</span><em>element</em>, <em>flat=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariable.html#PushVariable.fromXmlElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariable.PushVariable.fromXmlElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.hasStrMaximum">
+<code class="descname">hasStrMaximum</code><a class="headerlink" href="#scan.PushVariable.PushVariable.hasStrMaximum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.hasStrMinimum">
+<code class="descname">hasStrMinimum</code><a class="headerlink" href="#scan.PushVariable.PushVariable.hasStrMinimum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.key">
+<code class="descname">key</code><a class="headerlink" href="#scan.PushVariable.PushVariable.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariable.PushVariable.pushRecord">
+<code class="descname">pushRecord</code><span class="sig-paren">(</span><em>variables=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariable.html#PushVariable.pushRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariable.PushVariable.pushRecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['push', 'definition', 'destinationName', 'variableName', 'value', 'minimum', 'maximum', 'strMinimum', 'strMaximum', 'valueValid', 'minValid', 'maxValid']</em><a class="headerlink" href="#scan.PushVariable.PushVariable.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariable.PushVariable.valueStatus">
+<code class="descname">valueStatus</code><a class="headerlink" href="#scan.PushVariable.PushVariable.valueStatus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.PushVariableTableModel">
+<span id="pushvariabletablemodel"></span><h2>PushVariableTableModel<a class="headerlink" href="#module-scan.PushVariableTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel">
+<em class="property">class </em><code class="descname">PushVariableTableModel</code><span class="sig-paren">(</span><em>config</em>, <em>globalDict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.addVariable">
+<code class="descname">addVariable</code><span class="sig-paren">(</span><em>pushVariable</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.addVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.addVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.allDataChanged">
+<code class="descname">allDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.allDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.allDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.backgroundLookup">
+<code class="descname">backgroundLookup</code><em class="property"> = {0: &lt;PyQt5.QtGui.QColor object at 0x000002665C42BF28&gt;, 1: &lt;PyQt5.QtGui.QColor object at 0x000002665C42BF98&gt;, -1: &lt;PyQt5.QtGui.QColor object at 0x000002665C4BD0B8&gt;}</em><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.backgroundLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.choice">
+<code class="descname">choice</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.choice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.choice" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C4BD128&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.fitDataChanged">
+<code class="descname">fitDataChanged</code><span class="sig-paren">(</span><em>extraDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.fitDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.fitDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Push', 'Destination', 'Variable', 'Definition', 'Value', 'Min Accept', 'Max Accept']</em><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.localReplacementDict">
+<code class="descname">localReplacementDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.localReplacementDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.localReplacementDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.pushChanged">
+<code class="descname">pushChanged</code><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.pushChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.removeVariable">
+<code class="descname">removeVariable</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.removeVariable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.removeVariable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C4BD048&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataDefinition">
+<code class="descname">setDataDefinition</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataDefinition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataDefinition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataDestinationName">
+<code class="descname">setDataDestinationName</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataDestinationName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataDestinationName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataMaximum">
+<code class="descname">setDataMaximum</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataMaximum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataMaximum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataMinimum">
+<code class="descname">setDataMinimum</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataMinimum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataMinimum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataPush">
+<code class="descname">setDataPush</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataPush"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataPush" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataStrMaximum">
+<code class="descname">setDataStrMaximum</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataStrMaximum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataStrMaximum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataStrMinimum">
+<code class="descname">setDataStrMinimum</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataStrMinimum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataStrMinimum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setDataVariableName">
+<code class="descname">setDataVariableName</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setDataVariableName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setDataVariableName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setPushVariables">
+<code class="descname">setPushVariables</code><span class="sig-paren">(</span><em>pushVariables</em>, <em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setPushVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setPushVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.startDataChanged">
+<code class="descname">startDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.startDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.startDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.PushVariableTableModel.PushVariableTableModel.updateDestinations">
+<code class="descname">updateDestinations</code><span class="sig-paren">(</span><em>destinations</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/PushVariableTableModel.html#PushVariableTableModel.updateDestinations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.PushVariableTableModel.PushVariableTableModel.updateDestinations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scan.ScanControl">
+<span id="scancontrol"></span><h2>ScanControl<a class="headerlink" href="#module-scan.ScanControl" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.ScanControl.Scan">
+<em class="property">class </em><code class="descname">Scan</code><a class="reference internal" href="../_modules/scan/ScanControl.html#Scan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.Scan" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.ScanControl.Scan.ScanMode">
+<code class="descname">ScanMode</code><a class="headerlink" href="#scan.ScanControl.Scan.ScanMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.Scan.ScanType">
+<code class="descname">ScanType</code><a class="headerlink" href="#scan.ScanControl.Scan.ScanType" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.Scan.__setstate__">
+<code class="descname">__setstate__</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#Scan.__setstate__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.Scan.__setstate__" title="Permalink to this definition">¶</a></dt>
+<dd><p>this function ensures that the given fields are present in the class object
+after unpickling. Only new class attributes need to be added here.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.Scan.description">
+<code class="descname">description</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#Scan.description"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.Scan.description" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.Scan.documentationList">
+<code class="descname">documentationList</code><em class="property"> = ['scanParameter', 'scanTarget', 'scantype', 'scanMode', 'xUnit', 'xExpression', 'loadPP', 'loadPPName', 'parallelInternalScanParameter']</em><a class="headerlink" href="#scan.ScanControl.Scan.documentationList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.Scan.documentationString">
+<code class="descname">documentationString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#Scan.documentationString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.Scan.documentationString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.Scan.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>globalDictionary</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#Scan.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.Scan.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.Scan.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['scanParameter', 'scanTarget', 'scantype', 'scanMode', 'filename', 'histogramFilename', 'autoSave', 'histogramSave', 'xUnit', 'xExpression', 'loadPP', 'loadPPName', 'gateSequenceSettings', 'scanSegmentList', 'saveRawData', 'rawFilename', 'maxPoints', 'parallelInternalScanParameter']</em><a class="headerlink" href="#scan.ScanControl.Scan.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.ScanControl.ScanControl">
+<em class="property">class </em><code class="descname">ScanControl</code><span class="sig-paren">(</span><em>config</em>, <em>globalVariablesUi</em>, <em>parentname</em>, <em>plotnames=None</em>, <em>parent=None</em>, <em>analysisNames=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="scan.ScanControl.ScanControl.ScanModes">
+<code class="descname">ScanModes</code><a class="headerlink" href="#scan.ScanControl.ScanControl.ScanModes" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.checkSettingsSavable">
+<code class="descname">checkSettingsSavable</code><span class="sig-paren">(</span><em>savable=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.checkSettingsSavable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.checkSettingsSavable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.ScanControl.currentScanChanged">
+<code class="descname">currentScanChanged</code><a class="headerlink" href="#scan.ScanControl.ScanControl.currentScanChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.doChangeScanTarget">
+<code class="descname">doChangeScanTarget</code><span class="sig-paren">(</span><em>name</em>, <em>scanParameter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.doChangeScanTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.doChangeScanTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the scan target as part of loading a parameter set,
+we know the ScanParameter to select and want it either selected or added as red item</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.documentationString">
+<code class="descname">documentationString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.documentationString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.documentationString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.editEvaluationTable">
+<code class="descname">editEvaluationTable</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.editEvaluationTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.editEvaluationTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.getScan">
+<code class="descname">getScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.getScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.getScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.ScanControl.integrationMode">
+<code class="descname">integrationMode</code><a class="headerlink" href="#scan.ScanControl.ScanControl.integrationMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.loadSetting">
+<code class="descname">loadSetting</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.loadSetting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.loadSetting" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.ScanControl.logger">
+<code class="descname">logger</code><em class="property"> = &lt;logging.Logger object at 0x000002665C6D57F0&gt;</em><a class="headerlink" href="#scan.ScanControl.ScanControl.logger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onAddScanSegment">
+<code class="descname">onAddScanSegment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onAddScanSegment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onAddScanSegment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onAutoSave">
+<code class="descname">onAutoSave</code><span class="sig-paren">(</span><em>checked</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onAutoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onAutoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onBareValueChanged">
+<code class="descname">onBareValueChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onBareValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onBareValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onChangeScanTarget">
+<code class="descname">onChangeScanTarget</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onChangeScanTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onChangeScanTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>called on currentIndexChanged[QString] signal of ComboBox</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onCurrentIndexChanged">
+<code class="descname">onCurrentIndexChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onCurrentIndexChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onCurrentIndexChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onCurrentParallelScanChanged">
+<code class="descname">onCurrentParallelScanChanged</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onCurrentParallelScanChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onCurrentParallelScanChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onCurrentTextChanged">
+<code class="descname">onCurrentTextChanged</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onCurrentTextChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onCurrentTextChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onDefaultFilename">
+<code class="descname">onDefaultFilename</code><span class="sig-paren">(</span><em>checked=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onDefaultFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onDefaultFilename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onDefaultHdf5Type">
+<code class="descname">onDefaultHdf5Type</code><span class="sig-paren">(</span><em>checked</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onDefaultHdf5Type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onDefaultHdf5Type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onEditingFinished">
+<code class="descname">onEditingFinished</code><span class="sig-paren">(</span><em>edit</em>, <em>attribute</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onEditingFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onEditingFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onIntValueChanged">
+<code class="descname">onIntValueChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onIntValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onIntValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onLoad">
+<code class="descname">onLoad</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onLoad" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onLoadPP">
+<code class="descname">onLoadPP</code><span class="sig-paren">(</span><em>ppname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onLoadPP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onLoadPP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onMaxPointsChanged">
+<code class="descname">onMaxPointsChanged</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onMaxPointsChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onMaxPointsChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onModeChanged">
+<code class="descname">onModeChanged</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onModeChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onModeChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onRecentPPFilesChanged">
+<code class="descname">onRecentPPFilesChanged</code><span class="sig-paren">(</span><em>namelist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onRecentPPFilesChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onRecentPPFilesChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onReload">
+<code class="descname">onReload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onReload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onReload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onRemove">
+<code class="descname">onRemove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onRemove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onRemove" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onRemoveScanSegment">
+<code class="descname">onRemoveScanSegment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onRemoveScanSegment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onRemoveScanSegment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onStateChanged">
+<code class="descname">onStateChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.onValueChanged">
+<code class="descname">onValueChanged</code><span class="sig-paren">(</span><em>attribute</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.onValueChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.onValueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanControl.ScanControl.scanConfigurationListChanged">
+<code class="descname">scanConfigurationListChanged</code><a class="headerlink" href="#scan.ScanControl.ScanControl.scanConfigurationListChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.setPulseProgramUi">
+<code class="descname">setPulseProgramUi</code><span class="sig-paren">(</span><em>pulseProgramUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.setPulseProgramUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.setPulseProgramUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.setSettings">
+<code class="descname">setSettings</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.setSettings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.setSettings" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.setVariables">
+<code class="descname">setVariables</code><span class="sig-paren">(</span><em>variabledict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.setVariables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.setVariables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanControl.ScanControl.updateScanTarget">
+<code class="descname">updateScanTarget</code><span class="sig-paren">(</span><em>target</em>, <em>scannames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControl.updateScanTarget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControl.updateScanTarget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="scan.ScanControl.ScanControlParameters">
+<em class="property">class </em><code class="descname">ScanControlParameters</code><a class="reference internal" href="../_modules/scan/ScanControl.html#ScanControlParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanControl.ScanControlParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-scan.ScanList">
+<span id="scanlist"></span><h2>ScanList<a class="headerlink" href="#module-scan.ScanList" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="scan.ScanList.centerOut">
+<code class="descname">centerOut</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scanSelect</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#centerOut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.centerOut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.downUpDown">
+<code class="descname">downUpDown</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scanSelect</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#downUpDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.downUpDown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.scanList">
+<code class="descname">scanList</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scantype=0</em>, <em>scanSelect=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#scanList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.scanList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.scanspace">
+<code class="descname">scanspace</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scanSelect=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#scanspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.scanspace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.shuffle">
+<code class="descname">shuffle</code><span class="sig-paren">(</span><em>mylist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#shuffle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.shuffle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.shuffled">
+<code class="descname">shuffled</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scanSelect</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#shuffled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.shuffled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scan.ScanList.upDownUp">
+<code class="descname">upDownUp</code><span class="sig-paren">(</span><em>start</em>, <em>stop</em>, <em>steps</em>, <em>scanSelect</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanList.html#upDownUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanList.upDownUp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-scan.ScanSegmentTableModel">
+<span id="scansegmenttablemodel"></span><h2>ScanSegmentTableModel<a class="headerlink" href="#module-scan.ScanSegmentTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel">
+<em class="property">class </em><code class="descname">ScanSegmentTableModel</code><span class="sig-paren">(</span><em>updateSaveStatus</em>, <em>globalVariables</em>, <em>scanSegments=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C6397B8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.dataChanged">
+<code class="descname">dataChanged</code><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.dataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Start', 'Stop', 'Center', 'Span', 'steps', 'stepsize']</em><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C639748&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.setField">
+<code class="descname">setField</code><span class="sig-paren">(</span><em>fieldname</em>, <em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.setField"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.setField" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.setFieldText">
+<code class="descname">setFieldText</code><span class="sig-paren">(</span><em>fieldname</em>, <em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.setFieldText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.setFieldText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.setScanList">
+<code class="descname">setScanList</code><span class="sig-paren">(</span><em>scanlist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.setScanList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.setScanList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scan.ScanSegmentTableModel.ScanSegmentTableModel.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scan/ScanSegmentTableModel.html#ScanSegmentTableModel.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scan.ScanSegmentTableModel.ScanSegmentTableModel.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

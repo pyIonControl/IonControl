@@ -1,0 +1,525 @@
+\hypertarget{class_analog_output_1_1_analog_output}{\section{Analog\-Output.\-Analog\-Output Class Reference}
+\label{class_analog_output_1_1_analog_output}\index{Analog\-Output.\-Analog\-Output@{Analog\-Output.\-Analog\-Output}}
+}
+
+
+This class will generate analog outputs using py\-D\-A\-Qmx.  
+
+
+Inheritance diagram for Analog\-Output.\-Analog\-Output\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_analog_output_1_1_analog_output}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_analog_output_1_1_analog_output_ad28820600816961e92acc55b7e87d8a3}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_analog_output_1_1_analog_output}{Analog\-Output} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_ac2ebaea4a20d5a754b7758a322dcd317}{init}
+\begin{DoxyCompactList}\small\item\em Initializes the analog outputs based on the object's configuration. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a35ddeee69fe87b9956ba34a6a074e0ba}{get\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function returns the samples per channel configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a090644cc9f7eb89e773c8e290c39e7fc}{set\-Samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This function sets the samples per channel in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a82c8ed528235961775dd386c7fab6587}{get\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function returns the sample clock source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a888663bef5a41818e2dadca65c56f4fc}{set\-Clk\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the sample clock source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_adcb04886fe1b222cbbf4ec8ab3c01153}{get\-Start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This function return the start trigger source configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a9dacc2895d366a28732d480fd632ad80}{set\-Start\-Trigger\-Source}
+\begin{DoxyCompactList}\small\item\em This function sets the start trigger source in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_af833d97ef4cb7cc53ac7eba7e69eb1ad}{get\-Num\-Channels}
+\begin{DoxyCompactList}\small\item\em This function returns the number of channels configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a19e38c3a77a064c52db37c48099684ce}{get\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This function returns the sample rate configured in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a20285eba22830949eb40ce15270655dd}{set\-Sample\-Rate}
+\begin{DoxyCompactList}\small\item\em This funciton sets the sample rate in the D\-A\-Qmx Task. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_ae3fae0e7f57f4576cb2b3746c0873f50}{create\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of samples with random voltages. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_aacf14b2f94fad32a659d1bd04b88ffd6}{create\-Sine\-Test\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function returns a 1\-D numpy array of sine waves. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_abd580af62942a68e3a453f8cfe499acb}{write\-To\-Buffer}
+\begin{DoxyCompactList}\small\item\em This function writes the specified values into the buffer. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a81a248ecf2eb72256cb58979e752e712}{start}
+\begin{DoxyCompactList}\small\item\em This function starts the analog output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_aa88017f59be11baa9c4284e9a7b39bbe}{wait\-Until\-Done}
+\begin{DoxyCompactList}\small\item\em This functions waits for the analog output generation to complete. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_ae8b99d08fc29d3ff472824430ebd4067}{stop}
+\begin{DoxyCompactList}\small\item\em This function stops the analog output generation. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a483e645ff5fc84cd5f9cf4b146d9af0e}{close}
+\begin{DoxyCompactList}\small\item\em This function will close connection to the analog ouput device and channels. \end{DoxyCompactList}\item 
+def \hyperlink{class_analog_output_1_1_analog_output_a09b8b0f6cb839a7f00d45129340e5bea}{\-\_\-\-\_\-del\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This is the destructor for the \hyperlink{class_analog_output_1_1_analog_output}{Analog\-Output} Class. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_analog_output_1_1_analog_output_a9244a764a26db3ca994e95f2e64f650f}{task\-Ref}
+\begin{DoxyCompactList}\small\item\em The D\-A\-Qmx task reference. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_aff699a66c410a728e70631b2e5e621a2}{initialized}
+\begin{DoxyCompactList}\small\item\em This is a boolean that is true when the D\-A\-Qmx task has been initialized. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a021dd1434ccfaaa5a876ebde88609cb1}{status}
+\begin{DoxyCompactList}\small\item\em This is the status of the D\-A\-Qmx task. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a7f2d56d4169a65eb67d1f5d3f2c5c87a}{start\-Trigger\-Sync\-Card}
+\begin{DoxyCompactList}\small\item\em This is the start trigger terminal of the N\-I-\/\-Sync card. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_aac2f3b8aa6e295ee91e3671c57c68e47}{mode}
+\begin{DoxyCompactList}\small\item\em This is the mode of operation for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a760ab1469dad131efc3a61354dd59db3}{trigger\-Type}
+\begin{DoxyCompactList}\small\item\em The trigger type for the analog outputs. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a6ef94f02074244f9f6c513fd25208b46}{loops}
+\begin{DoxyCompactList}\small\item\em The number of times to iterate over a Finite number of samples. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a00b63231e0b6b1fcd479b140616eb573}{est\-Acq\-Time}
+\begin{DoxyCompactList}\small\item\em The estimated time to generate the samples for a Finite generation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_analog_output_1_1_analog_output_a3b52a2dd204f53dd5e5573011c1399e8}{samples\-Per\-Channel}
+\begin{DoxyCompactList}\small\item\em This is the number of samples per channel that will be generated in Finite mode. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_ab35cc7e572968599d8f2fc4df8e3d7e2}{clk\-Source} property(\hyperlink{class_analog_output_1_1_analog_output_a82c8ed528235961775dd386c7fab6587}{get\-Clk\-Source}, \hyperlink{class_analog_output_1_1_analog_output_a888663bef5a41818e2dadca65c56f4fc}{set\-Clk\-Source}, \-\_\-del\-Clk\-Source)
+\begin{DoxyCompactList}\small\item\em This is the sample clock source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a6fb285ae88ea470ec5a99f9163e36c88}{start\-Trigger\-Source} property(\hyperlink{class_analog_output_1_1_analog_output_adcb04886fe1b222cbbf4ec8ab3c01153}{get\-Start\-Trigger\-Source}, \hyperlink{class_analog_output_1_1_analog_output_a9dacc2895d366a28732d480fd632ad80}{set\-Start\-Trigger\-Source}, \-\_\-del\-Start\-Trigger\-Source)
+\begin{DoxyCompactList}\small\item\em This is the start trigger source terminal. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a0ca884b5b69a1e37758b6ea74f5e2b6f}{num\-Channels} property(\hyperlink{class_analog_output_1_1_analog_output_af833d97ef4cb7cc53ac7eba7e69eb1ad}{get\-Num\-Channels})
+\begin{DoxyCompactList}\small\item\em This is the number of channels configured in the task. \end{DoxyCompactList}\item 
+\hyperlink{class_analog_output_1_1_analog_output_a493b9db1346a6d9cceae925ad85a3fef}{sample\-Rate} property(\hyperlink{class_analog_output_1_1_analog_output_a19e38c3a77a064c52db37c48099684ce}{get\-Sample\-Rate}, \hyperlink{class_analog_output_1_1_analog_output_a20285eba22830949eb40ce15270655dd}{set\-Sample\-Rate}, \-\_\-del\-Sample\-Rate)
+\begin{DoxyCompactList}\small\item\em This is the sample rate of the analog output. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will generate analog outputs using py\-D\-A\-Qmx. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_analog_output_1_1_analog_output_ad28820600816961e92acc55b7e87d8a3}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_ad28820600816961e92acc55b7e87d8a3}
+
+
+This function is a constructor for the \hyperlink{class_analog_output_1_1_analog_output}{Analog\-Output} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. \hypertarget{class_analog_output_1_1_analog_output_a09b8b0f6cb839a7f00d45129340e5bea}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-del\-\_\-\-\_\-@{\-\_\-\-\_\-del\-\_\-\-\_\-}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{\-\_\-\-\_\-del\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-\_\-\-\_\-del\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a09b8b0f6cb839a7f00d45129340e5bea}
+
+
+This is the destructor for the \hyperlink{class_analog_output_1_1_analog_output}{Analog\-Output} Class. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_analog_output_1_1_analog_output_a483e645ff5fc84cd5f9cf4b146d9af0e}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!close@{close}}
+\index{close@{close}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a483e645ff5fc84cd5f9cf4b146d9af0e}
+
+
+This function will close connection to the analog ouput device and channels. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_aacf14b2f94fad32a659d1bd04b88ffd6}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!create\-Sine\-Test\-Buffer@{create\-Sine\-Test\-Buffer}}
+\index{create\-Sine\-Test\-Buffer@{create\-Sine\-Test\-Buffer}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{create\-Sine\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-create\-Sine\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_aacf14b2f94fad32a659d1bd04b88ffd6}
+
+
+This function returns a 1\-D numpy array of sine waves. 
+
+The returned value is intended to be used to write samples to the buffer with the \hyperlink{class_analog_output_1_1_analog_output_abd580af62942a68e3a453f8cfe499acb}{write\-To\-Buffer()} method. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_ae3fae0e7f57f4576cb2b3746c0873f50}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!create\-Test\-Buffer@{create\-Test\-Buffer}}
+\index{create\-Test\-Buffer@{create\-Test\-Buffer}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{create\-Test\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-create\-Test\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Channels = {\ttfamily 0}}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_ae3fae0e7f57f4576cb2b3746c0873f50}
+
+
+This function returns a 1\-D numpy array of samples with random voltages. 
+
+The returned value is intended to be used to write samples to the buffer with the \hyperlink{class_analog_output_1_1_analog_output_abd580af62942a68e3a453f8cfe499acb}{write\-To\-Buffer()} method. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Channels} & The number of channels to generate. If this parameter is not provided, Then the function will generate the number of channels configured in the analog output task. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a82c8ed528235961775dd386c7fab6587}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!get\-Clk\-Source@{get\-Clk\-Source}}
+\index{get\-Clk\-Source@{get\-Clk\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-get\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a82c8ed528235961775dd386c7fab6587}
+
+
+This function returns the sample clock source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_af833d97ef4cb7cc53ac7eba7e69eb1ad}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!get\-Num\-Channels@{get\-Num\-Channels}}
+\index{get\-Num\-Channels@{get\-Num\-Channels}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-get\-Num\-Channels (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_af833d97ef4cb7cc53ac7eba7e69eb1ad}
+
+
+This function returns the number of channels configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a19e38c3a77a064c52db37c48099684ce}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!get\-Sample\-Rate@{get\-Sample\-Rate}}
+\index{get\-Sample\-Rate@{get\-Sample\-Rate}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-get\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a19e38c3a77a064c52db37c48099684ce}
+
+
+This function returns the sample rate configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a35ddeee69fe87b9956ba34a6a074e0ba}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}}
+\index{get\-Samples\-Per\-Channel@{get\-Samples\-Per\-Channel}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-get\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a35ddeee69fe87b9956ba34a6a074e0ba}
+
+
+This function returns the samples per channel configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_adcb04886fe1b222cbbf4ec8ab3c01153}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!get\-Start\-Trigger\-Source@{get\-Start\-Trigger\-Source}}
+\index{get\-Start\-Trigger\-Source@{get\-Start\-Trigger\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{get\-Start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-get\-Start\-Trigger\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_adcb04886fe1b222cbbf4ec8ab3c01153}
+
+
+This function return the start trigger source configured in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_ac2ebaea4a20d5a754b7758a322dcd317}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!init@{init}}
+\index{init@{init}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-init (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{physical\-Channel}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_ac2ebaea4a20d5a754b7758a322dcd317}
+
+
+Initializes the analog outputs based on the object's configuration. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em physical\-Channel} & A string representing the device and analog output channels. Example Value\-: \char`\"{}\-P\-X\-I1\-Slot3/ao0\-:7\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a888663bef5a41818e2dadca65c56f4fc}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!set\-Clk\-Source@{set\-Clk\-Source}}
+\index{set\-Clk\-Source@{set\-Clk\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-set\-Clk\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a888663bef5a41818e2dadca65c56f4fc}
+
+
+This function sets the sample clock source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The string value for the clock source terminal. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a20285eba22830949eb40ce15270655dd}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!set\-Sample\-Rate@{set\-Sample\-Rate}}
+\index{set\-Sample\-Rate@{set\-Sample\-Rate}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-set\-Sample\-Rate (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a20285eba22830949eb40ce15270655dd}
+
+
+This funciton sets the sample rate in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value of the sample rate. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a090644cc9f7eb89e773c8e290c39e7fc}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}}
+\index{set\-Samples\-Per\-Channel@{set\-Samples\-Per\-Channel}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-set\-Samples\-Per\-Channel (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a090644cc9f7eb89e773c8e290c39e7fc}
+
+
+This function sets the samples per channel in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The value to set the samples per channel. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a9dacc2895d366a28732d480fd632ad80}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!set\-Start\-Trigger\-Source@{set\-Start\-Trigger\-Source}}
+\index{set\-Start\-Trigger\-Source@{set\-Start\-Trigger\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{set\-Start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-set\-Start\-Trigger\-Source (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{value}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a9dacc2895d366a28732d480fd632ad80}
+
+
+This function sets the start trigger source in the D\-A\-Qmx Task. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em value} & The string vaue of the start trigger source. Example value\-: \char`\"{}\textbackslash{}\-P\-X\-I1\-Slot3\textbackslash{}\-P\-F\-I0\char`\"{} \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_a81a248ecf2eb72256cb58979e752e712}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!start@{start}}
+\index{start@{start}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-start (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_a81a248ecf2eb72256cb58979e752e712}
+
+
+This function starts the analog output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_ae8b99d08fc29d3ff472824430ebd4067}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!stop@{stop}}
+\index{stop@{stop}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{stop}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-stop (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_ae8b99d08fc29d3ff472824430ebd4067}
+
+
+This function stops the analog output generation. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_aa88017f59be11baa9c4284e9a7b39bbe}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!wait\-Until\-Done@{wait\-Until\-Done}}
+\index{wait\-Until\-Done@{wait\-Until\-Done}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{wait\-Until\-Done}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-wait\-Until\-Done (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_aa88017f59be11baa9c4284e9a7b39bbe}
+
+
+This functions waits for the analog output generation to complete. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_analog_output_1_1_analog_output_abd580af62942a68e3a453f8cfe499acb}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!write\-To\-Buffer@{write\-To\-Buffer}}
+\index{write\-To\-Buffer@{write\-To\-Buffer}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{write\-To\-Buffer}]{\setlength{\rightskip}{0pt plus 5cm}def Analog\-Output.\-Analog\-Output.\-write\-To\-Buffer (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_analog_output_1_1_analog_output_abd580af62942a68e3a453f8cfe499acb}
+
+
+This function writes the specified values into the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em data} & This is a 1\-D 64-\/bit floating point numpy array that contians data for each channel. Channels are non-\/interleaved (channel1 n-\/samples then channel2 n-\/samples). \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_analog_output_1_1_analog_output_a00b63231e0b6b1fcd479b140616eb573}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!est\-Acq\-Time@{est\-Acq\-Time}}
+\index{est\-Acq\-Time@{est\-Acq\-Time}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{est\-Acq\-Time}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-est\-Acq\-Time}}\label{class_analog_output_1_1_analog_output_a00b63231e0b6b1fcd479b140616eb573}
+
+
+The estimated time to generate the samples for a Finite generation. 
+
+Once the input buffer of the analog input is configured, the amount of time it takes to generate the voltages in the buffer can be estimated. This is a function of the sample rate and the number of samples per channel. (This attribute is for internal use only. This attribute may not return an accurate value.) \hypertarget{class_analog_output_1_1_analog_output_aff699a66c410a728e70631b2e5e621a2}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!initialized@{initialized}}
+\index{initialized@{initialized}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{initialized}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-initialized}}\label{class_analog_output_1_1_analog_output_aff699a66c410a728e70631b2e5e621a2}
+
+
+This is a boolean that is true when the D\-A\-Qmx task has been initialized. 
+
+\hypertarget{class_analog_output_1_1_analog_output_a6ef94f02074244f9f6c513fd25208b46}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!loops@{loops}}
+\index{loops@{loops}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{loops}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-loops}}\label{class_analog_output_1_1_analog_output_a6ef94f02074244f9f6c513fd25208b46}
+
+
+The number of times to iterate over a Finite number of samples. 
+
+This value is only useful in the \char`\"{}\-Finite\char`\"{} mode. It is the number of times that a sequence of voltages will be looped. The default is allways 1. \hypertarget{class_analog_output_1_1_analog_output_aac2f3b8aa6e295ee91e3671c57c68e47}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!mode@{mode}}
+\index{mode@{mode}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-mode}}\label{class_analog_output_1_1_analog_output_aac2f3b8aa6e295ee91e3671c57c68e47}
+
+
+This is the mode of operation for the analog outputs. 
+
+There are currently three modes available. Static mode is where one static voltage is set with no need for a sample clock. Finite mode is where a finite number of voltages will be set at a sample clock rate. Continuous mode is where a sequence of voltages are generated at a sample rate and then repeated until the \hyperlink{class_analog_output_1_1_analog_output_ae8b99d08fc29d3ff472824430ebd4067}{stop()} method is called. \hypertarget{class_analog_output_1_1_analog_output_a7f2d56d4169a65eb67d1f5d3f2c5c87a}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!start\-Trigger\-Sync\-Card@{start\-Trigger\-Sync\-Card}}
+\index{start\-Trigger\-Sync\-Card@{start\-Trigger\-Sync\-Card}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start\-Trigger\-Sync\-Card}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-start\-Trigger\-Sync\-Card}}\label{class_analog_output_1_1_analog_output_a7f2d56d4169a65eb67d1f5d3f2c5c87a}
+
+
+This is the start trigger terminal of the N\-I-\/\-Sync card. 
+
+Setting this value will make sure that the start trigger will be propogated through the P\-X\-I backplane. If there is no sync card needed leave the value default. \hypertarget{class_analog_output_1_1_analog_output_a021dd1434ccfaaa5a876ebde88609cb1}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!status@{status}}
+\index{status@{status}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{status}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-status}}\label{class_analog_output_1_1_analog_output_a021dd1434ccfaaa5a876ebde88609cb1}
+
+
+This is the status of the D\-A\-Qmx task. 
+
+A value greater than 0 means that an error has occurred. When the status is greater than 0 an error should be reported by the class. \hypertarget{class_analog_output_1_1_analog_output_a9244a764a26db3ca994e95f2e64f650f}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!task\-Ref@{task\-Ref}}
+\index{task\-Ref@{task\-Ref}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{task\-Ref}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-task\-Ref}}\label{class_analog_output_1_1_analog_output_a9244a764a26db3ca994e95f2e64f650f}
+
+
+The D\-A\-Qmx task reference. 
+
+\hypertarget{class_analog_output_1_1_analog_output_a760ab1469dad131efc3a61354dd59db3}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!trigger\-Type@{trigger\-Type}}
+\index{trigger\-Type@{trigger\-Type}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{trigger\-Type}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-trigger\-Type}}\label{class_analog_output_1_1_analog_output_a760ab1469dad131efc3a61354dd59db3}
+
+
+The trigger type for the analog outputs. 
+
+There are currently two trigger types -\/ \char`\"{}\-Software\char`\"{} and \char`\"{}\-Hardware.\char`\"{} The \char`\"{}\-Software\char`\"{} mode means that analog output channels are not syncronized. While \char`\"{}\-Hardware\char`\"{} means that analog output channels are syncronized to a start trigger. The start\-Trigger\-Souce attribute must be configured appropriately. 
+
+\subsection{Property Documentation}
+\hypertarget{class_analog_output_1_1_analog_output_ab35cc7e572968599d8f2fc4df8e3d7e2}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!clk\-Source@{clk\-Source}}
+\index{clk\-Source@{clk\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{clk\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-clk\-Source property({\bf get\-Clk\-Source}, {\bf set\-Clk\-Source}, \-\_\-del\-Clk\-Source)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_analog_output_1_1_analog_output_ab35cc7e572968599d8f2fc4df8e3d7e2}
+
+
+This is the sample clock source terminal. 
+
+It can be set to an internal clock or external clock such as a P\-F\-I line i.\-e. \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I15.\char`\"{} \hypertarget{class_analog_output_1_1_analog_output_a0ca884b5b69a1e37758b6ea74f5e2b6f}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!num\-Channels@{num\-Channels}}
+\index{num\-Channels@{num\-Channels}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{num\-Channels}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-num\-Channels property({\bf get\-Num\-Channels})\hspace{0.3cm}{\ttfamily [static]}}}\label{class_analog_output_1_1_analog_output_a0ca884b5b69a1e37758b6ea74f5e2b6f}
+
+
+This is the number of channels configured in the task. 
+
+\hypertarget{class_analog_output_1_1_analog_output_a493b9db1346a6d9cceae925ad85a3fef}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!sample\-Rate@{sample\-Rate}}
+\index{sample\-Rate@{sample\-Rate}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{sample\-Rate}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-sample\-Rate property({\bf get\-Sample\-Rate}, {\bf set\-Sample\-Rate}, \-\_\-del\-Sample\-Rate)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_analog_output_1_1_analog_output_a493b9db1346a6d9cceae925ad85a3fef}
+
+
+This is the sample rate of the analog output. 
+
+\hypertarget{class_analog_output_1_1_analog_output_a3b52a2dd204f53dd5e5573011c1399e8}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!samples\-Per\-Channel@{samples\-Per\-Channel}}
+\index{samples\-Per\-Channel@{samples\-Per\-Channel}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{samples\-Per\-Channel}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-samples\-Per\-Channel\hspace{0.3cm}{\ttfamily [static]}}}\label{class_analog_output_1_1_analog_output_a3b52a2dd204f53dd5e5573011c1399e8}
+{\bfseries Initial value\-:}
+\begin{DoxyCode}
+1 property(getSamplesPerChannel, setSamplesPerChannel,
+2             \_delSamplesPerChannel)
+\end{DoxyCode}
+
+
+This is the number of samples per channel that will be generated in Finite mode. 
+
+\hypertarget{class_analog_output_1_1_analog_output_a6fb285ae88ea470ec5a99f9163e36c88}{\index{Analog\-Output\-::\-Analog\-Output@{Analog\-Output\-::\-Analog\-Output}!start\-Trigger\-Source@{start\-Trigger\-Source}}
+\index{start\-Trigger\-Source@{start\-Trigger\-Source}!AnalogOutput::AnalogOutput@{Analog\-Output\-::\-Analog\-Output}}
+\subsubsection[{start\-Trigger\-Source}]{\setlength{\rightskip}{0pt plus 5cm}Analog\-Output.\-Analog\-Output.\-start\-Trigger\-Source property({\bf get\-Start\-Trigger\-Source}, {\bf set\-Start\-Trigger\-Source}, \-\_\-del\-Start\-Trigger\-Source)\hspace{0.3cm}{\ttfamily [static]}}}\label{class_analog_output_1_1_analog_output_a6fb285ae88ea470ec5a99f9163e36c88}
+
+
+This is the start trigger source terminal. 
+
+The software ignores this value when the trigger\-Type is set to \char`\"{}\-Software\char`\"{}. Otherwise when the trigger\-Type is \char`\"{}\-Hardware,\char`\"{} this terminal is used to start analog generation. Example Value\-: \char`\"{}/\-P\-X\-I1\-Slot3/\-P\-F\-I0\char`\"{} 
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Analog\-Output.\-py\end{DoxyCompactItemize}

@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scan.ScanList &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scan.ScanList</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scan.ScanList</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">modules.concatenate_iter</span> <span class="k">import</span> <span class="n">interleave_iter</span>
+
+<span class="n">ScanType</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">enum</span><span class="p">(</span><span class="s1">&#39;LinearUp&#39;</span><span class="p">,</span> <span class="s1">&#39;LinearDown&#39;</span><span class="p">,</span> <span class="s1">&#39;Randomized&#39;</span><span class="p">,</span> <span class="s1">&#39;CenterOut&#39;</span><span class="p">,</span> <span class="s1">&#39;LinearUpDown&#39;</span><span class="p">,</span> <span class="s1">&#39;LinearDownUp&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="shuffle"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.shuffle">[docs]</a><span class="k">def</span> <span class="nf">shuffle</span><span class="p">(</span> <span class="n">mylist</span> <span class="p">):</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">mylist</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mylist</span></div>
+    
+    
+<div class="viewcode-block" id="scanspace"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.scanspace">[docs]</a><span class="k">def</span> <span class="nf">scanspace</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">scanSelect</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mysteps</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span> <span class="k">if</span> <span class="n">stop</span><span class="o">&gt;</span><span class="n">start</span> <span class="k">else</span> <span class="o">-</span><span class="nb">abs</span><span class="p">(</span><span class="n">steps</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="o">+</span><span class="n">mysteps</span><span class="o">//</span><span class="mi">2</span><span class="p">,</span> <span class="n">mysteps</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="shuffled"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.shuffled">[docs]</a><span class="k">def</span> <span class="nf">shuffled</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">shuffle</span><span class="p">(</span><span class="n">scanspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">))</span></div>
+       
+<div class="viewcode-block" id="centerOut"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.centerOut">[docs]</a><span class="k">def</span> <span class="nf">centerOut</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">):</span>
+    <span class="n">full</span> <span class="o">=</span> <span class="n">scanspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">)</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">full</span><span class="p">)</span><span class="o">//</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span> <span class="n">interleave_iter</span><span class="p">(</span><span class="n">full</span><span class="p">[</span><span class="n">center</span><span class="p">:],</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">full</span><span class="p">[:</span><span class="n">center</span><span class="p">]))</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="upDownUp"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.upDownUp">[docs]</a><span class="k">def</span> <span class="nf">upDownUp</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">scanspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span> <span class="n">scanspace</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">)</span> <span class="p">))</span></div>
+    
+<div class="viewcode-block" id="downUpDown"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.downUpDown">[docs]</a><span class="k">def</span> <span class="nf">downUpDown</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span> <span class="p">(</span><span class="n">scanspace</span><span class="p">(</span><span class="n">stop</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span> <span class="n">scanspace</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">)</span> <span class="p">))</span>    </div>
+
+<div class="viewcode-block" id="scanList"><a class="viewcode-back" href="../../code/scan-doc.html#scan.ScanList.scanList">[docs]</a><span class="k">def</span> <span class="nf">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scantype</span><span class="o">=</span><span class="n">ScanType</span><span class="o">.</span><span class="n">LinearUp</span><span class="p">,</span> <span class="n">scanSelect</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span> 
+    <span class="k">return</span> <span class="p">{</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearUp</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">scanspace</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearDown</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">scanspace</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="n">ScanType</span><span class="o">.</span><span class="n">Randomized</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">shuffled</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="n">ScanType</span><span class="o">.</span><span class="n">CenterOut</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">centerOut</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearUpDown</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">upDownUp</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearDownUp</span><span class="p">:</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">downUpDown</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">),</span>
+             <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scantype</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">scanspace</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">scanSelect</span> <span class="p">))()</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">12642</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">)</span>
+    <span class="n">stop</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">12652</span><span class="p">,</span> <span class="s1">&#39;MHz&#39;</span><span class="p">)</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">stepsmag</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="s1">&#39;kHz&#39;</span><span class="p">)</span>
+    
+    <span class="n">l</span> <span class="o">=</span> <span class="n">scanList</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;expected: [10 9 8 7 6 5 4 3 2 1 0] obtained&quot;</span><span class="p">,</span> <span class="n">l</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">stepsmag</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearDown</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">Randomized</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">,</span> <span class="n">stepsmag</span><span class="p">,</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">LinearUp</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    
+    <span class="nb">print</span><span class="p">(</span><span class="n">shuffle</span><span class="p">(</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">())</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">scanList</span><span class="p">(</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">Q</span><span class="p">(</span><span class="mi">360</span><span class="p">),</span> <span class="n">Q</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CenterOut&#39;</span><span class="p">,</span> <span class="n">scanList</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">CenterOut</span> <span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;CenterOut&#39;</span><span class="p">,</span> <span class="n">scanList</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="n">ScanType</span><span class="o">.</span><span class="n">CenterOut</span> <span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

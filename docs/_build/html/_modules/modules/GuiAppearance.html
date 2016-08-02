@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.GuiAppearance &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.GuiAppearance</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.GuiAppearance</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">uiModules.TableViewExtended</span> <span class="k">import</span> <span class="n">TableViewExtended</span>
+
+<div class="viewcode-block" id="saveColumnWidth"><a class="viewcode-back" href="../../code/modules-doc.html#modules.GuiAppearance.saveColumnWidth">[docs]</a><span class="k">def</span> <span class="nf">saveColumnWidth</span><span class="p">(</span> <span class="n">tableView</span> <span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">tableView</span><span class="o">.</span><span class="n">columnWidth</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tableView</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">columnCount</span><span class="p">())]</span></div>
+
+<div class="viewcode-block" id="restoreColumnWidth"><a class="viewcode-back" href="../../code/modules-doc.html#modules.GuiAppearance.restoreColumnWidth">[docs]</a><span class="k">def</span> <span class="nf">restoreColumnWidth</span><span class="p">(</span> <span class="n">tableView</span><span class="p">,</span> <span class="n">widthData</span><span class="p">,</span> <span class="n">autoscaleOnNone</span><span class="o">=</span><span class="kc">True</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">widthData</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">widthData</span><span class="p">)</span><span class="o">==</span><span class="n">tableView</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">columnCount</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">column</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">tableView</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">columnCount</span><span class="p">())),</span> <span class="n">widthData</span> <span class="p">):</span>
+            <span class="n">tableView</span><span class="o">.</span><span class="n">setColumnWidth</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span></div>
+     
+     
+
+<span class="n">appearanceHelpers</span> <span class="o">=</span> <span class="p">{</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSplitter</span><span class="p">:</span> <span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSplitter</span><span class="o">.</span><span class="n">saveState</span><span class="p">,</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QSplitter</span><span class="o">.</span><span class="n">restoreState</span><span class="p">),</span>
+                      <span class="n">TableViewExtended</span><span class="p">:</span> <span class="p">(</span><span class="n">saveColumnWidth</span><span class="p">,</span> <span class="n">restoreColumnWidth</span><span class="p">),</span>
+                      <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTableView</span><span class="p">:</span> <span class="p">(</span><span class="n">saveColumnWidth</span><span class="p">,</span> <span class="n">restoreColumnWidth</span><span class="p">)}</span>
+
+<span class="n">ClassAttributeCache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+     
+<div class="viewcode-block" id="saveGuiState"><a class="viewcode-back" href="../../code/modules-doc.html#modules.GuiAppearance.saveGuiState">[docs]</a><span class="k">def</span> <span class="nf">saveGuiState</span><span class="p">(</span> <span class="n">obj</span> <span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">in</span> <span class="n">ClassAttributeCache</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ClassAttributeCache</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">]:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">appearanceHelpers</span><span class="p">[</span><span class="n">attr</span><span class="o">.</span><span class="n">__class__</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="n">attr</span><span class="p">)</span>            
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">attrlist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">in</span> <span class="n">appearanceHelpers</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">appearanceHelpers</span><span class="p">[</span><span class="n">attr</span><span class="o">.</span><span class="n">__class__</span><span class="p">][</span><span class="mi">0</span><span class="p">](</span><span class="n">attr</span><span class="p">)</span>
+                <span class="n">attrlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">ClassAttributeCache</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">]</span> <span class="o">=</span> <span class="n">attrlist</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+            
+<div class="viewcode-block" id="restoreGuiState"><a class="viewcode-back" href="../../code/modules-doc.html#modules.GuiAppearance.restoreGuiState">[docs]</a><span class="k">def</span> <span class="nf">restoreGuiState</span><span class="p">(</span> <span class="n">obj</span><span class="p">,</span> <span class="n">data</span> <span class="p">):</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span> <span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span> <span class="n">obj</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="s1">&#39;__class__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">attr</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">in</span> <span class="n">appearanceHelpers</span><span class="p">:</span>
+                    <span class="n">appearanceHelpers</span><span class="p">[</span><span class="n">attr</span><span class="o">.</span><span class="n">__class__</span><span class="p">][</span><span class="mi">1</span><span class="p">](</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

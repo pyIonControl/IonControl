@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Global Variables</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <property name="fieldGrowthPolicy">
+      <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Category</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="newNameEdit"/>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="categoriesListComboBox">
+       <property name="toolTip">
+        <string>Separate subcategories by dots (a.b.c)</string>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QToolButton" name="expandAllButton">
+       <property name="toolTip">
+        <string>expand all categories</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/other/icons/expand-all.png</normaloff>:/other/icons/expand-all.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="collapseAllButton">
+       <property name="toolTip">
+        <string>collapse all categories</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/other/icons/collapse-all.png</normaloff>:/other/icons/collapse-all.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="showGridButton">
+       <property name="toolTip">
+        <string>show grid</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/other/icons/gray-grid.png</normaloff>:/other/icons/gray-grid.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="addButton">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/edit-add.png</normaloff>:/openicon/icons/edit-add.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="dropButton">
+       <property name="toolTip">
+        <string>remove selected global(s)</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/edit-delete-6.png</normaloff>:/openicon/icons/edit-delete-6.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="CategoryTreeView" name="view">
+     <property name="styleSheet">
+      <string notr="true">QTreeView:item:selected:active {
+		background:qlineargradient(spread:repeat, x1:1, y1:1, x2:1, y2:0, stop:0.227273 rgba(200, 225, 255, 255), stop:1 rgba(255, 255, 255, 255));
+		color: black;
+		border: 1px solid;
+		border-color: rgb(98, 150, 214);
+	} 
+QTreeView:item:selected:!active {
+		background:qlineargradient(spread:repeat, x1:1, y1:1, x2:1, y2:0, stop:0.227273 rgba(200, 225, 255, 255), stop:1 rgba(255, 255, 255, 255));
+		color: black;
+		border: 1px solid;
+		border-color: rgb(98, 150, 214);
+	} 
+QTreeView:item:selected:disabled {
+		background:qlineargradient(spread:repeat, x1:1, y1:1, x2:1, y2:0, stop:0.227273 rgba(200, 225, 255, 255), stop:1 rgba(255, 255, 255, 255));
+		color: black;
+		border: 1px solid;
+		border-color: rgb(98, 150, 214);
+	} 
+QTreeView:item:selected:!disabled {
+		background:qlineargradient(spread:repeat, x1:1, y1:1, x2:1, y2:0, stop:0.227273 rgba(200, 225, 255, 255), stop:1 rgba(255, 255, 255, 255));
+		color: black;
+		border: 1px solid;
+		border-color: rgb(98, 150, 214);
+	}
+</string>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+     <property name="selectionBehavior">
+      <enum>QAbstractItemView::SelectItems</enum>
+     </property>
+     <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CategoryTreeView</class>
+   <extends>QTreeView</extends>
+   <header>uiModules.CategoryTree</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="Experiment.qrc"/>
+ </resources>
+ <connections/>
+</ui>

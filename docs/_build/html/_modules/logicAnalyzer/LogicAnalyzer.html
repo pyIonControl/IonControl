@@ -1,0 +1,553 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>logicAnalyzer.LogicAnalyzer &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>logicAnalyzer.LogicAnalyzer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for logicAnalyzer.LogicAnalyzer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">_functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.PlotCurveItem</span> <span class="k">import</span> <span class="n">PlotCurveItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.TextItem</span> <span class="k">import</span> <span class="n">TextItem</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.graphicsItems.ViewBox</span> <span class="k">import</span> <span class="n">ViewBox</span>
+
+<span class="kn">from</span> <span class="nn">logicAnalyzer.LogicAnalyzerSignalTableModel</span> <span class="k">import</span> <span class="n">LogicAnalyzerSignalTableModel</span>
+<span class="kn">from</span> <span class="nn">logicAnalyzer.LogicAnalyzerTraceTableModel</span> <span class="k">import</span> <span class="n">LogicAnalyzerTraceTableModel</span>
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">dictutil</span>
+<span class="kn">from</span> <span class="nn">modules.AttributeComparisonEquality</span> <span class="k">import</span> <span class="n">AttributeComparisonEquality</span>
+<span class="kn">from</span> <span class="nn">modules.GuiAppearance</span> <span class="k">import</span> <span class="n">restoreGuiState</span><span class="p">,</span> <span class="n">saveGuiState</span>
+<span class="kn">from</span> <span class="nn">modules.Utility</span> <span class="k">import</span> <span class="n">flatten</span><span class="p">,</span> <span class="n">unique</span>
+<span class="kn">from</span> <span class="nn">modules.concatenate_iter</span> <span class="k">import</span> <span class="n">concatenate_iter</span>
+<span class="kn">from</span> <span class="nn">modules.enum</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">trace.pens</span> <span class="k">import</span> <span class="n">penList</span>
+<span class="kn">from</span> <span class="nn">uiModules.RotatedHeaderView</span> <span class="k">import</span> <span class="n">RotatedHeaderView</span>
+
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/LogicAnalyzer.ui&#39;</span><span class="p">)</span>
+<span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="n">AttributeComparisonEquality</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numChannels</span> <span class="o">=</span> <span class="mi">64</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numTriggerChannels</span> <span class="o">=</span> <span class="mi">7</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numAuxChannels</span> <span class="o">=</span> <span class="mi">10</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numGateChannels</span> <span class="o">=</span> <span class="mi">32</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">height</span> <span class="o">=</span> <span class="mf">0.75</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scaling</span> <span class="o">=</span> <span class="mf">0.000020</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">triggerWidth</span> <span class="o">=</span> <span class="mf">0.0001</span>   <span class="c1"># only rising edge counts</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span></div>
+
+<div class="viewcode-block" id="bitEvaluate"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.bitEvaluate">[docs]</a><span class="k">def</span> <span class="nf">bitEvaluate</span><span class="p">(</span><span class="n">numChannels</span><span class="p">,</span> <span class="n">thisval</span><span class="p">,</span> <span class="n">lastval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">channelOffset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">trigger</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">offValue</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">trigger</span> <span class="k">else</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">if</span> <span class="n">lastval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">bit</span><span class="o">+</span><span class="n">channelOffset</span><span class="p">,</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">thisval</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">bit</span><span class="p">)</span> <span class="k">else</span> <span class="n">offValue</span><span class="p">)</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numChannels</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">bit</span><span class="o">+</span><span class="n">channelOffset</span><span class="p">,</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">thisval</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">bit</span><span class="p">)</span><span class="o">==</span><span class="n">lastval</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">bit</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">thisval</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">bit</span><span class="p">)</span> <span class="k">else</span> <span class="n">offValue</span><span class="p">)</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numChannels</span><span class="p">)]</span></div>
+   
+
+<div class="viewcode-block" id="LogicAnalyzer"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer">[docs]</a><span class="k">class</span> <span class="nc">LogicAnalyzer</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="n">Base</span> <span class="p">):</span>
+    <span class="n">OpStates</span> <span class="o">=</span> <span class="n">enum</span><span class="p">(</span><span class="s1">&#39;stopped&#39;</span><span class="p">,</span> <span class="s1">&#39;running&#39;</span><span class="p">,</span> <span class="s1">&#39;single&#39;</span><span class="p">,</span> <span class="s1">&#39;idle&#39;</span><span class="p">)</span> <span class="c1">#added idle in response to exception</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">config</span><span class="p">,</span><span class="n">pulserHardware</span><span class="p">,</span><span class="n">channelNameData</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span> <span class="o">=</span> <span class="n">pulserHardware</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span> <span class="c1">#self.config.get( &quot;LogicAnalyzerSettings&quot;, Settings() )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">logicAnalyzerDataAvailable</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onData</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yTrigger</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAuxData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yGateData</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">channelNameData</span> <span class="o">=</span> <span class="n">channelNameData</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastEnabledChannels</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicData</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="LogicAnalyzer.setupUi"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">Form</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionRun</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRun</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionStop</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onStop</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actionSingle</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSingle</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphicsLayout</span><span class="o">.</span><span class="n">_graphicsView</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span> <span class="o">=</span> <span class="n">LogicAnalyzerSignalTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelNameData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;LogicAnalyzer.State&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;LogicAnalyzer.State&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enableChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">refresh</span> <span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">headerView</span> <span class="o">=</span>  <span class="n">RotatedHeaderView</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableView</span><span class="o">.</span><span class="n">setHorizontalHeader</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerView</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableModel</span> <span class="o">=</span> <span class="n">LogicAnalyzerTraceTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceTableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableView</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">traceTableModel</span><span class="o">.</span><span class="n">setReferenceTimeCell</span> <span class="p">)</span>
+        <span class="c1"># Context Menu for Table</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ActionsContextMenu</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideSelectedAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;hide selected&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showSelectedAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;show selected&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hideSelectedAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onShow</span><span class="p">,</span>  <span class="kc">False</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">showSelectedAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onShow</span><span class="p">,</span>  <span class="kc">True</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">hideSelectedAction</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSelectedAction</span> <span class="p">)</span>
+        <span class="n">restoreGuiState</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;LogicAnalyzer.guiState&#39;</span><span class="p">)</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.onShow"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onShow">[docs]</a>    <span class="k">def</span> <span class="nf">onShow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">show</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span> <span class="p">]))</span>
+        <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span> <span class="k">if</span> <span class="n">show</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Unchecked</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CheckStateRole</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span><span class="p">))</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.onData"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onData">[docs]</a>    <span class="k">def</span> <span class="nf">onData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logicData</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">logicData</span><span class="p">)</span> <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;Wordcount: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">logicData</span><span class="o">.</span><span class="n">wordcount</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicData</span> <span class="o">=</span> <span class="n">logicData</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span> <span class="o">*</span><span class="n">logicData</span><span class="o">.</span><span class="n">data</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xData</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xData</span> <span class="p">]</span>  <span class="c1"># convert tuple to list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">logicData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yData</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">value</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="p">)</span> <span class="k">else</span> <span class="n">offset</span> <span class="p">)</span>
+                    <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nextChannel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">auxData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAuxData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span> <span class="o">*</span><span class="n">logicData</span><span class="o">.</span><span class="n">auxData</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span> <span class="p">]</span>  <span class="c1"># convert tuple to list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">logicData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span><span class="p">[</span><span class="n">nextChannel</span><span class="o">+</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAuxData</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">value</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="p">)</span> <span class="k">else</span> <span class="n">offset</span> <span class="p">)</span>
+                    <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nextChannel</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">trigger</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yTrigger</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span> <span class="o">*</span><span class="n">logicData</span><span class="o">.</span><span class="n">trigger</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span> <span class="p">(</span><span class="n">x</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">,</span> <span class="n">x</span><span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">triggerWidth</span><span class="p">)</span>  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span> <span class="p">]))</span>  <span class="c1"># convert tuple to list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yTrigger</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">flatten</span><span class="p">([</span> <span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yTrigger</span> <span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">logicData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span><span class="p">[</span><span class="n">nextChannel</span><span class="o">+</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yTrigger</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">value</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="p">)</span> <span class="k">else</span> <span class="n">offset</span> <span class="p">)</span>
+                    <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">nextChannel</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">gateData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yGateData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span> <span class="o">*</span><span class="n">logicData</span><span class="o">.</span><span class="n">gateData</span> <span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span> <span class="o">=</span> <span class="p">[</span> <span class="n">x</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span> <span class="p">]</span>  <span class="c1"># convert tuple to list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">logicData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numGateChannels</span><span class="p">)]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numGateChannels</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span><span class="p">[</span><span class="n">nextChannel</span><span class="o">+</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">yGateData</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">height</span> <span class="k">if</span> <span class="n">value</span><span class="o">&amp;</span><span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">i</span><span class="p">)</span> <span class="k">else</span> <span class="n">offset</span> <span class="p">)</span>
+                    <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotData</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">single</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setStatusStopped</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluateData</span><span class="p">(</span><span class="n">logicData</span><span class="p">)</span></div>
+            
+            
+<div class="viewcode-block" id="LogicAnalyzer.evaluateData"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.evaluateData">[docs]</a>    <span class="k">def</span> <span class="nf">evaluateData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">logicData</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">lastval</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">clockcycle</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">logicData</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+                <span class="n">dictutil</span><span class="o">.</span><span class="n">getOrInsert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">,</span> <span class="n">clockcycle</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">bitEvaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">lastval</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">lastval</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">[</span><span class="n">logicData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">inext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">auxData</span><span class="p">:</span>
+            <span class="n">lastval</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">clockcycle</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">logicData</span><span class="o">.</span><span class="n">auxData</span><span class="p">:</span>
+                <span class="n">dictutil</span><span class="o">.</span><span class="n">getOrInsert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">,</span> <span class="n">clockcycle</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">bitEvaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">lastval</span><span class="p">,</span> <span class="n">inext</span><span class="p">)</span>  <span class="p">)</span>
+                <span class="n">lastval</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">inext</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">trigger</span><span class="p">:</span>
+            <span class="n">lastval</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">clockcycle</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">logicData</span><span class="o">.</span><span class="n">trigger</span><span class="p">:</span>
+                <span class="n">dictutil</span><span class="o">.</span><span class="n">getOrInsert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">,</span> <span class="n">clockcycle</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">bitEvaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">lastval</span><span class="p">,</span> <span class="n">inext</span><span class="p">,</span> <span class="n">trigger</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">lastval</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">inext</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span>
+        <span class="k">if</span> <span class="n">logicData</span><span class="o">.</span><span class="n">gateData</span><span class="p">:</span>
+            <span class="n">lastval</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">clockcycle</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">logicData</span><span class="o">.</span><span class="n">gateData</span><span class="p">:</span>
+                <span class="n">dictutil</span><span class="o">.</span><span class="n">getOrInsert</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">,</span> <span class="n">clockcycle</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">scaling</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">bitEvaluate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numGateChannels</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">lastval</span><span class="p">,</span> <span class="n">inext</span><span class="p">)</span>  <span class="p">)</span>
+                <span class="n">lastval</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableModel</span><span class="o">.</span><span class="n">setPulseData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traceTableView</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span></div>
+           
+<div class="viewcode-block" id="LogicAnalyzer.plotData"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.plotData">[docs]</a>    <span class="k">def</span> <span class="nf">plotData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">lastAutoRangeState</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">vb</span><span class="o">.</span><span class="n">getState</span><span class="p">()[</span><span class="s1">&#39;autoRange&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">disableAutoRange</span><span class="p">(</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">XYAxes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastEnabledChannels</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastEnabledChannels</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">curve</span> <span class="ow">in</span> <span class="n">concatenate_iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">curve</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">curve</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yData</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yData</span><span class="p">:</span>
+                        <span class="n">curve</span> <span class="o">=</span> <span class="n">PlotCurveItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xData</span><span class="p">,</span> <span class="n">yData</span><span class="p">,</span> <span class="n">stepMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillLevel</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> 
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="n">textItem</span> <span class="o">=</span> <span class="n">TextItem</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">primaryChannelName</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">textItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">offset</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">curve</span><span class="p">,</span> <span class="n">yData</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curveBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yData</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">curve</span><span class="p">:</span>
+                            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xData</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yData</span><span class="p">)</span>
+                            
+        <span class="n">nextChannel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numChannels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yAuxData</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yAuxData</span><span class="p">:</span>
+                        <span class="n">curve</span> <span class="o">=</span> <span class="n">PlotCurveItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span><span class="p">,</span> <span class="n">yAuxData</span><span class="p">,</span> <span class="n">stepMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillLevel</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="n">textItem</span> <span class="o">=</span> <span class="n">TextItem</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">auxChannelName</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">textItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">offset</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span> 
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+                        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">curve</span><span class="p">,</span> <span class="n">yAuxData</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curveAuxBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yAuxDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yAuxData</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">curve</span><span class="p">:</span>
+                            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xAuxData</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yAuxData</span><span class="p">)</span>
+        <span class="n">nextChannel</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numAuxChannels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yTrigger</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yTrigger</span><span class="p">:</span>
+                        <span class="n">curve</span> <span class="o">=</span> <span class="n">PlotCurveItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span><span class="p">,</span> <span class="n">yTrigger</span><span class="p">,</span> <span class="n">stepMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillLevel</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">3</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> 
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="n">textItem</span> <span class="o">=</span> <span class="n">TextItem</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">triggerChannelName</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">textItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">offset</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span> 
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+                        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">curve</span><span class="p">,</span> <span class="n">yTrigger</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curveTriggerBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yTriggerBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yTrigger</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">curve</span><span class="p">:</span>
+                            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xTrigger</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yTrigger</span><span class="p">)</span>
+        <span class="n">nextChannel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">numTriggerChannels</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">yGateData</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yGateData</span><span class="p">:</span>
+                        <span class="n">curve</span> <span class="o">=</span> <span class="n">PlotCurveItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span><span class="p">,</span> <span class="n">yGateData</span><span class="p">,</span> <span class="n">stepMode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fillLevel</span><span class="o">=</span><span class="n">offset</span><span class="p">,</span> <span class="n">brush</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">4</span><span class="p">],</span> <span class="n">pen</span><span class="o">=</span><span class="n">penList</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">curve</span> <span class="p">)</span>
+                        <span class="n">textItem</span> <span class="o">=</span> <span class="n">TextItem</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">gateChannelName</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="n">textItem</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="n">offset</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">textItems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">textItem</span><span class="p">)</span>
+                        <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span> 
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+                        
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">curve</span><span class="p">,</span> <span class="n">yGateData</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">curveGateBundle</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">yGateDataBundle</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">yGateData</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">curve</span><span class="p">:</span>
+                            <span class="n">curve</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xGateData</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yGateData</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lastEnabledChannels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">enabledList</span> <span class="p">)</span>
+        <span class="n">xautorange</span><span class="p">,</span> <span class="n">yautorange</span> <span class="o">=</span> <span class="n">lastAutoRangeState</span>
+        <span class="k">if</span> <span class="n">xautorange</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">enableAutoRange</span><span class="p">(</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">XAxis</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">yautorange</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">enableAutoRange</span><span class="p">(</span><span class="n">ViewBox</span><span class="o">.</span><span class="n">YAxis</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_graphicsView</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span></div>
+             
+<div class="viewcode-block" id="LogicAnalyzer.refresh"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.refresh">[docs]</a>    <span class="k">def</span> <span class="nf">refresh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicData</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicData</span><span class="p">)</span></div>
+                
+<div class="viewcode-block" id="LogicAnalyzer.onRun"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onRun">[docs]</a>    <span class="k">def</span> <span class="nf">onRun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Starting Logic Analyzer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">enableLogicAnalyzer</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStatusRunning</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.onStop"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onStop">[docs]</a>    <span class="k">def</span> <span class="nf">onStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Stopping Logic Analyzer&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">enableLogicAnalyzer</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStatusStopped</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.onSingle"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onSingle">[docs]</a>    <span class="k">def</span> <span class="nf">onSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Logic Analyzer Single Shot&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">enableLogicAnalyzer</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">logicAnalyzerTrigger</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStatusSingle</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.setStatusStopped"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.setStatusStopped">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusStopped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s2">&quot;Stopped&quot;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.setStatusRunning"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.setStatusRunning">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusRunning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s2">&quot;Running&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LogicAnalyzer.setStatusSingle"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.setStatusSingle">[docs]</a>    <span class="k">def</span> <span class="nf">setStatusSingle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">statusBar</span><span class="o">.</span><span class="n">showMessage</span><span class="p">(</span><span class="s2">&quot;Single shot&quot;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="LogicAnalyzer.saveConfig"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;LogicAnalyzerSettings&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">signalTableModel</span><span class="o">.</span><span class="n">saveConfig</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;LogicAnalyzer.State&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;LogicAnalyzer.guiState&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saveGuiState</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="LogicAnalyzer.onClose"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.onClose">[docs]</a>    <span class="k">def</span> <span class="nf">onClose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="LogicAnalyzer.closeEvent"><a class="viewcode-back" href="../../code/logicAnalyzer-doc.html#logicAnalyzer.LogicAnalyzer.LogicAnalyzer.closeEvent">[docs]</a>    <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onClose</span><span class="p">()</span></div></div>
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

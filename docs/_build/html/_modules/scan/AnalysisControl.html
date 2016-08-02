@@ -1,0 +1,692 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scan.AnalysisControl &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>scan.AnalysisControl</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for scan.AnalysisControl</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">modules.AttributeComparisonEquality</span> <span class="k">import</span> <span class="n">AttributeComparisonEquality</span>
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">from</span> <span class="nn">scan.AnalysisTableModel</span> <span class="k">import</span> <span class="n">AnalysisTableModel</span>             <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">modules.GuiAppearance</span> <span class="k">import</span> <span class="n">saveGuiState</span><span class="p">,</span> <span class="n">restoreGuiState</span>    <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">uiModules.MagnitudeSpinBoxDelegate</span> <span class="k">import</span> <span class="n">MagnitudeSpinBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">uiModules.ComboBoxDelegate</span> <span class="k">import</span> <span class="n">ComboBoxDelegate</span>
+<span class="kn">from</span> <span class="nn">scan.PushVariable</span> <span class="k">import</span> <span class="n">PushVariable</span>                         <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">modules.Utility</span> <span class="k">import</span> <span class="n">unique</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">scan.PushVariableTableModel</span> <span class="k">import</span> <span class="n">PushVariableTableModel</span>     <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">scan.DatabasePushDestination</span> <span class="k">import</span> <span class="n">DatabasePushDestination</span>   <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">fit.FitUiTableModel</span> <span class="k">import</span> <span class="n">FitUiTableModel</span>
+<span class="kn">from</span> <span class="nn">fit.FitResultsTableModel</span> <span class="k">import</span> <span class="n">FitResultsTableModel</span>
+<span class="kn">from</span> <span class="nn">fit.FitFunctionBase</span> <span class="k">import</span> <span class="n">fitFunctionMap</span>
+<span class="kn">from</span> <span class="nn">fit.StoredFitFunction</span> <span class="k">import</span> <span class="n">StoredFitFunction</span>                <span class="c1">#@UnresolvedImport</span>
+<span class="kn">from</span> <span class="nn">modules.PyqtUtility</span> <span class="k">import</span> <span class="n">BlockSignals</span><span class="p">,</span> <span class="n">Override</span><span class="p">,</span> <span class="n">updateComboBoxItems</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">uipath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;ui/AnalysisControl.ui&#39;</span><span class="p">)</span>
+<span class="n">ControlForm</span><span class="p">,</span> <span class="n">ControlBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="n">uipath</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AnalysisDefinitionElement"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisDefinitionElement">[docs]</a><span class="k">class</span> <span class="nc">AnalysisDefinitionElement</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionName</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span> <span class="o">=</span> <span class="n">SequenceDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionCache</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        
+    <span class="n">stateFields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;enabled&#39;</span><span class="p">,</span> <span class="s1">&#39;evaluation&#39;</span><span class="p">,</span> <span class="s1">&#39;fitfunctionName&#39;</span><span class="p">,</span> <span class="s1">&#39;pushVariables&#39;</span><span class="p">,</span> <span class="s1">&#39;fitfunction&#39;</span><span class="p">,</span> <span class="s1">&#39;fitfunctionCache&#39;</span><span class="p">]</span> 
+        
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">))</span>
+    
+<div class="viewcode-block" id="AnalysisDefinitionElement.pushVariableValues"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisDefinitionElement.pushVariableValues">[docs]</a>    <span class="k">def</span> <span class="nf">pushVariableValues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;get all push variable values that are within the bounds, no re-evaluation&quot;&quot;&quot;</span>
+        <span class="n">pushVarValues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">failedList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pushvar</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">pushRecord</span><span class="p">,</span> <span class="n">failedRecord</span> <span class="o">=</span> <span class="n">pushvar</span><span class="o">.</span><span class="n">pushRecord</span><span class="p">()</span>
+            <span class="n">failedList</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">failedRecord</span> <span class="p">)</span>
+            <span class="n">pushVarValues</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">pushRecord</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">pushVarValues</span><span class="p">,</span> <span class="n">failedList</span></div>
+    
+<div class="viewcode-block" id="AnalysisDefinitionElement.updatePushVariables"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisDefinitionElement.updatePushVariables">[docs]</a>    <span class="k">def</span> <span class="nf">updatePushVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">replacements</span> <span class="p">):</span>
+        <span class="k">for</span> <span class="n">pushvar</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">pushvar</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="n">replacements</span> <span class="p">)</span></div></div>
+            
+<div class="viewcode-block" id="AnalysisControlParameters"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControlParameters">[docs]</a><span class="k">class</span> <span class="nc">AnalysisControlParameters</span><span class="p">(</span><span class="n">AttributeComparisonEquality</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="AnalysisControl"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl">[docs]</a><span class="k">class</span> <span class="nc">AnalysisControl</span><span class="p">(</span><span class="n">ControlForm</span><span class="p">,</span> <span class="n">ControlBase</span> <span class="p">):</span>
+    <span class="n">analysisConfigurationChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">object</span> <span class="p">)</span>
+    <span class="n">currentAnalysisChanged</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">object</span> <span class="p">)</span>
+    <span class="n">analysisResultSignal</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">pyqtSignal</span><span class="p">(</span> <span class="nb">object</span> <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">,</span> <span class="n">parentname</span><span class="p">,</span> <span class="n">evaluationNames</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ControlForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">ControlBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configname</span> <span class="o">=</span> <span class="s1">&#39;AnalysisControl.&#39;</span><span class="o">+</span><span class="n">parentname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluationNames</span> <span class="o">=</span> <span class="n">evaluationNames</span>
+        <span class="c1"># History and Dictionary</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.dict&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Unable to read analysis control settings dictionary. Setting to empty dictionary.&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">list</span><span class="p">()</span> <span class="p">)</span>  <span class="c1"># add empty analysis</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Unable to read analysis control settings. Setting to new analysis.&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.settingsName&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluationIndex</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.parameters&#39;</span><span class="p">,</span> <span class="n">AnalysisControlParameters</span><span class="p">()</span> <span class="p">)</span>
+        
+<div class="viewcode-block" id="AnalysisControl.setupUi"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.setupUi">[docs]</a>    <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">ControlForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+        <span class="c1"># History and Dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeAnalysisConfigurationButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveAnalysisConfiguration</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reloadButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onReload</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAnalysisButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAddAnalysis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removeAnalysisButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveAnalysis</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addPushButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAddPushVariable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removePushButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemovePushVariable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onPush</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitAllButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFitAll</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onPlot</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removePlotButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onExtractFit</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitToStartButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFitToStart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getSmartStartButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onSmartToStart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUseSmartStart</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBarsCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onUseErrorBars</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisComboDelegate</span> <span class="o">=</span> <span class="n">ComboBoxDelegate</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span> <span class="o">=</span> <span class="n">AnalysisTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">evaluationNames</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">fitfunctionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onFitfunctionChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">analysisChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableView</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span><span class="o">.</span><span class="n">currentChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onActiveAnalysisChanged</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisComboDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisComboDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span> <span class="o">=</span> <span class="n">PushVariableTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">pushChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushItemDelegate</span> <span class="o">=</span> <span class="n">MagnitudeSpinBoxDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushComboDelegate</span> <span class="o">=</span> <span class="n">ComboBoxDelegate</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushComboDelegate</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushItemDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">[</span><span class="s1">&#39;Database&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DatabasePushDestination</span><span class="p">(</span><span class="s1">&#39;fit&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span> <span class="nb">sorted</span><span class="p">([</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="p">])</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onLoadAnalysisConfiguration</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">lineEdit</span><span class="p">()</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onConfigurationEditingFinished</span> <span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="p">)</span>
+
+        <span class="c1"># FitUi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span> <span class="o">=</span> <span class="n">FitUiTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">parametersChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span> <span class="o">=</span> <span class="n">MagnitudeSpinBoxDelegate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="n">emptyStringValue</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">setItemDelegateForColumn</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">magnitudeDelegate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span> <span class="o">=</span> <span class="n">FitResultsTableModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resultsTableView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="p">)</span>
+        <span class="n">restoreGuiState</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.guiState&#39;</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setButtonEnabledState</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ActionsContextMenu</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QAction</span><span class="p">(</span> <span class="s2">&quot;auto save&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">setCheckable</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span><span class="o">.</span><span class="n">triggered</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">onAutoSave</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveAction</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onUseErrorBars"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onUseErrorBars">[docs]</a>    <span class="k">def</span> <span class="nf">onUseErrorBars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useErrorBars</span> <span class="o">=</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span>        </div>
+        
+<div class="viewcode-block" id="AnalysisControl.onConfigurationEditingFinished"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onConfigurationEditingFinished">[docs]</a>    <span class="k">def</span> <span class="nf">onConfigurationEditingFinished</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onUseSmartStart"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onUseSmartStart">[docs]</a>    <span class="k">def</span> <span class="nf">onUseSmartStart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="o">=</span> <span class="n">state</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.setButtonEnabledState"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.setButtonEnabledState">[docs]</a>    <span class="k">def</span> <span class="nf">setButtonEnabledState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">allEnable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">currentEnable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitAllButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">allEnable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getSmartStartButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">currentEnable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">currentEnable</span> <span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">plotButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">currentEnable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">removePlotButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">currentEnable</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">extractButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="n">currentEnable</span> <span class="p">)</span></div>
+            
+<div class="viewcode-block" id="AnalysisControl.onFitfunctionChanged"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onFitfunctionChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onFitfunctionChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">newfitname</span> <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Swap out the fitfunction on the current analysis&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunctionName</span> <span class="o">=</span> <span class="n">newfitname</span>
+        <span class="k">if</span> <span class="n">newfitname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunctionCache</span><span class="p">[</span><span class="n">newfitname</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span>  <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">fitFunctionMap</span><span class="p">[</span><span class="n">newfitname</span><span class="p">]()</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">setPushVariables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">pushVariables</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="AnalysisControl.onActiveAnalysisChanged"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onActiveAnalysisChanged">[docs]</a>    <span class="k">def</span> <span class="nf">onActiveAnalysisChanged</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">,</span> <span class="n">deselected</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">deselected</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">selected</span><span class="o">.</span><span class="n">row</span><span class="p">()</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">[</span><span class="n">selected</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluationIndex</span> <span class="o">=</span> <span class="n">selected</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluationLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">setPushVariables</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">pushVariables</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluationIndex</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluationLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="kc">None</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">setPushVariables</span><span class="p">(</span> <span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setButtonEnabledState</span><span class="p">()</span></div>
+                       
+<div class="viewcode-block" id="AnalysisControl.onRemoveAnalysis"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onRemoveAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span> <span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">removeAnalysis</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+            
+<div class="viewcode-block" id="AnalysisControl.onAddAnalysis"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onAddAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">onAddAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">addAnalysis</span><span class="p">(</span> <span class="n">AnalysisDefinitionElement</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+       
+<div class="viewcode-block" id="AnalysisControl.onAddPushVariable"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onAddPushVariable">[docs]</a>    <span class="k">def</span> <span class="nf">onAddPushVariable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">addVariable</span><span class="p">(</span> <span class="n">PushVariable</span><span class="p">()</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="AnalysisControl.onRemovePushVariable"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onRemovePushVariable">[docs]</a>    <span class="k">def</span> <span class="nf">onRemovePushVariable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unique</span><span class="p">([</span> <span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushTableView</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span> <span class="p">]),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">removeVariable</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.addPushDestination"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.addPushDestination">[docs]</a>    <span class="k">def</span> <span class="nf">addPushDestination</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">destination</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">destination</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">updateDestinations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onPush"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onPush">[docs]</a>    <span class="k">def</span> <span class="nf">onPush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">push</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.push"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.push">[docs]</a>    <span class="k">def</span> <span class="nf">push</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation</span> <span class="p">):</span>
+        <span class="n">pushVarValues</span><span class="p">,</span> <span class="n">failedList</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">pushVariableValues</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pushVarValues</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">destination</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">[</span><span class="n">destination</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">[(</span><span class="n">destination</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">failedList</span></div>
+                
+<div class="viewcode-block" id="AnalysisControl.pushAll"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.pushAll">[docs]</a>    <span class="k">def</span> <span class="nf">pushAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">failedList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">:</span>    
+            <span class="n">failedList</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">push</span><span class="p">(</span> <span class="n">analysis</span> <span class="p">))</span>
+        <span class="k">return</span> <span class="n">failedList</span> </div>
+                
+<div class="viewcode-block" id="AnalysisControl.pushVariables"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.pushVariables">[docs]</a>    <span class="k">def</span> <span class="nf">pushVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pushVariables</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">destination</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">pushVariables</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">destination</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pushDestinations</span><span class="p">[</span><span class="n">destination</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="p">[(</span><span class="n">destination</span><span class="p">,</span> <span class="n">variable</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onAutoSave"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onAutoSave">[docs]</a>    <span class="k">def</span> <span class="nf">onAutoSave</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span> <span class="o">=</span> <span class="n">checked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="AnalysisControl.autoSave"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.autoSave">[docs]</a>    <span class="k">def</span> <span class="nf">autoSave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">autoSave</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onSave</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveable</span><span class="p">()</span> <span class="p">)</span></div>
+            
+<div class="viewcode-block" id="AnalysisControl.saveable"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.saveable">[docs]</a>    <span class="k">def</span> <span class="nf">saveable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="ow">and</span> <span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">]</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">))</span>            </div>
+                
+<div class="viewcode-block" id="AnalysisControl.saveConfig"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.saveConfig">[docs]</a>    <span class="k">def</span> <span class="nf">saveConfig</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.dict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.settingsName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.guiState&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">saveGuiState</span><span class="p">(</span> <span class="bp">self</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">configname</span><span class="o">+</span><span class="s1">&#39;.parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span></div>
+    
+<div class="viewcode-block" id="AnalysisControl.onSave"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onSave">[docs]</a>    <span class="k">def</span> <span class="nf">onSave</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">]:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Saving Analysis &#39;</span><span class="si">{0}</span><span class="s2">&#39; &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">)</span><span class="o">==-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">updateComboBoxItems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="p">,</span> <span class="nb">sorted</span><span class="p">([</span> <span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="p">]))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">saveButton</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="kc">False</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="AnalysisControl.onRemoveAnalysisConfiguration"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onRemoveAnalysisConfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveAnalysisConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">idx</span><span class="o">&gt;=</span><span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span> <span class="p">)</span></div>
+       
+<div class="viewcode-block" id="AnalysisControl.onLoadAnalysisConfiguration"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onLoadAnalysisConfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadAnalysisConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">Override</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="s1">&#39;autoSave&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setAnalysisDefinition</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitionDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">onActiveAnalysisChanged</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">!=</span><span class="n">name</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisConfigurationComboBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Loaded Analysis &#39;</span><span class="si">{0}</span><span class="s2">&#39; &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>                    
+                <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">autoSave</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.setAnalysisDefinition"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.setAnalysisDefinition">[docs]</a>    <span class="k">def</span> <span class="nf">setAnalysisDefinition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">analysisDef</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">analysisDef</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisTableModel</span><span class="o">.</span><span class="n">setAnalysisDefinition</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onReload"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onReload">[docs]</a>    <span class="k">def</span> <span class="nf">onReload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">onLoadAnalysisConfiguration</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span> <span class="p">)</span></div>
+   
+<div class="viewcode-block" id="AnalysisControl.updatePushVariables"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.updatePushVariables">[docs]</a>    <span class="k">def</span> <span class="nf">updatePushVariables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extraDict</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="n">myReplacementDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">extraDict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">myReplacementDict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="n">extraDict</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">pushvar</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pushVariables</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">try</span><span class="p">:</span>          
+                <span class="n">pushvar</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">myReplacementDict</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onFit"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onFit">[docs]</a>    <span class="k">def</span> <span class="nf">onFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.fit"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evaluation</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">evaluation</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasHeightColumn</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">height</span>
+                <span class="k">elif</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasTopColumn</span> <span class="ow">and</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasBottomColumn</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">top</span> <span class="o">+</span> <span class="n">plot</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">leastsq</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+                <span class="n">replacements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+                <span class="n">replacements</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">updatePushVariables</span><span class="p">(</span> <span class="n">replacements</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pushTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fitfunction</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span>
+            <span class="n">fitfunction</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasHeightColumn</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">height</span>
+                <span class="k">elif</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasTopColumn</span> <span class="ow">and</span> <span class="n">plot</span><span class="o">.</span><span class="n">hasBottomColumn</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">top</span> <span class="o">+</span> <span class="n">plot</span><span class="o">.</span><span class="n">bottom</span><span class="p">)</span>
+                <span class="n">fitfunction</span><span class="o">.</span><span class="n">leastsq</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+                <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="n">fitfunction</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="o">.</span><span class="n">fitDataChanged</span><span class="p">()</span>
+                <span class="n">replacements</span> <span class="o">=</span> <span class="n">fitfunction</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+                <span class="n">replacements</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">evaluation</span><span class="o">.</span><span class="n">updatePushVariables</span><span class="p">(</span> <span class="n">replacements</span> <span class="p">)</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span><span class="o">.</span><span class="n">parameterNames</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="n">evaluation</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">vals</span><span class="p">)))</span> <span class="c1">#Return a dictionary of fit parameters and fitted values</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onSmartToStart"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onSmartToStart">[docs]</a>    <span class="k">def</span> <span class="nf">onSmartToStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">plot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">smartParameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">smartStartValues</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">plot</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">parameterEnabled</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">smartParameters</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">startDataChanged</span><span class="p">()</span>            </div>
+           
+<div class="viewcode-block" id="AnalysisControl.onPlot"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onPlot">[docs]</a>    <span class="k">def</span> <span class="nf">onPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="n">fitfunction</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+            <span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span><span class="p">]</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">fitfunction</span><span class="o">.</span><span class="n">update</span><span class="p">()</span></div>
+                    
+<div class="viewcode-block" id="AnalysisControl.onFitAll"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onFitAll">[docs]</a>    <span class="k">def</span> <span class="nf">onFitAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitAll</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="AnalysisControl.fitAll"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.fitAll">[docs]</a>    <span class="k">def</span> <span class="nf">fitAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">allResults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">failedList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">evaluation</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinition</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">allResults</span><span class="p">[</span><span class="n">evaluation</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">evaluation</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Analysis &#39;</span><span class="si">{0}</span><span class="s2">&#39; failed with error &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">evaluation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">failedList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">evaluation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">analysisResultSignal</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">allResults</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">failedList</span></div>
+    
+<div class="viewcode-block" id="AnalysisControl.onLoadFitFunction"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onLoadFitFunction">[docs]</a>    <span class="k">def</span> <span class="nf">onLoadFitFunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentAnalysisName</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">StoredFitFunction</span><span class="o">.</span><span class="n">fromFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">analysisDefinitions</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">()</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.setFitfunction"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.setFitfunction">[docs]</a>    <span class="k">def</span> <span class="nf">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitfunction</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="o">=</span> <span class="n">fitfunction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitResultsTableModel</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">descriptionLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">functionString</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">hasSmartStart</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useSmartStartValues</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxUseSmartStartValues</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">hasSmartStart</span> <span class="p">)</span>
+            <span class="k">with</span> <span class="n">BlockSignals</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">useErrorBarsCheckBox</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">useErrorBarsCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">useErrorBars</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluate</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.setPlottedTraceDict"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.setPlottedTraceDict">[docs]</a>    <span class="k">def</span> <span class="nf">setPlottedTraceDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plottedTraceDict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span> <span class="o">=</span> <span class="n">plottedTraceDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setButtonEnabledState</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.analyze"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.analyze">[docs]</a>    <span class="k">def</span> <span class="nf">analyze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plottedTraceDict</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setPlottedTraceDict</span><span class="p">(</span><span class="n">plottedTraceDict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitAll</span><span class="p">()</span>
+        <span class="n">failedToPush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pushAll</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">failedToPush</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.evaluate"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameterTableView</span><span class="o">.</span><span class="n">viewport</span><span class="p">()</span><span class="o">.</span><span class="n">repaint</span><span class="p">()</span>
+            <span class="n">replacements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">replacementDict</span><span class="p">()</span>
+            <span class="n">replacements</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">updatePushVariables</span><span class="p">(</span> <span class="n">replacements</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="AnalysisControl.onRemoveFit"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onRemoveFit">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">plot</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalysisControl.onExtractFit"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onExtractFit">[docs]</a>    <span class="k">def</span> <span class="nf">onExtractFit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plottedTraceDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentEvaluation</span><span class="o">.</span><span class="n">evaluation</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setFitfunction</span><span class="p">(</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">plot</span><span class="o">.</span><span class="n">fitFunction</span><span class="p">))</span></div>
+            
+<div class="viewcode-block" id="AnalysisControl.onFitToStart"><a class="viewcode-back" href="../../code/scan-doc.html#scan.AnalysisControl.AnalysisControl.onFitToStart">[docs]</a>    <span class="k">def</span> <span class="nf">onFitToStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">startParameters</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fitfunction</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fitfunctionTableModel</span><span class="o">.</span><span class="n">startDataChanged</span><span class="p">()</span></div></div>
+    
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">MainWindow</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">AnalysisControl</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(),</span> <span class="s2">&quot;parent&quot;</span><span class="p">)</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

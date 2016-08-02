@@ -1,0 +1,833 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>AWG &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>AWG</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/AWG-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="awg">
+<h1>AWG<a class="headerlink" href="#awg" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="awgdevices">
+<h2>AWGDevices<a class="headerlink" href="#awgdevices" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-AWG.AWGDevices"></span><p>Created on Jul 2, 2015</p>
+<p>&#64;author: Geoffrey Ji</p>
+<p>AWG Devices are defined here. If a new AWG needs to be added,
+it must inherit AWGDeviceBase and implement:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>__init__</dt>
+<dd><p class="first last">to initialize whatever libraries it needs</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>open, program, trigger, and close</dt>
+<dd><p class="first last">to interface with the AWG</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>deviceProperties</dt>
+<dd><p class="first">To specify fixed properties of the AWG device. Required keys:</p>
+<blockquote class="last">
+<div><ul>
+<li><dl class="first docutils">
+<dt>minSamples (int)</dt>
+<dd><p class="first last">minimum number of samples to program</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>maxSamples (int)</dt>
+<dd><p class="first last">maximum number of samples to program</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>sampleChunkSize (int)</dt>
+<dd><p class="first last">number of samples must be a multiple of sampleChunkSize</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>padValue (int)</dt>
+<dd><p class="first last">the waveform will be padded with this number to make it a multiple of sampleChunkSize, or to make it the length of minSamples</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>minAmplitude (int)</dt>
+<dd><p class="first last">minimum amplitude value (raw)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>maxAmplitude (int)</dt>
+<dd><p class="first last">maximum amplitude value (raw)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>numChannels (int)</dt>
+<dd><p class="first last">Number of channels</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>calibration (function)</dt>
+<dd><p class="first last">function that returns raw amplitude number, given voltage</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>calibrationInv (function)</dt>
+<dd><p class="first last">function that returns voltage, given raw amplitude number</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>parameters</dt>
+<dd><p class="first last">To define dynamic properties and actions of the AWG, which are shown in the GUI and can be modified in the program.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="class">
+<dt id="AWG.AWGDevices.AWGDeviceBase">
+<em class="property">class </em><code class="descname">AWGDeviceBase</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>base class for AWG Devices</p>
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.AWGDeviceBase.deviceProperties">
+<code class="descname">deviceProperties</code><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.deviceProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.AWGDeviceBase.displayName">
+<code class="descname">displayName</code><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.displayName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.AWGDeviceBase.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665729A518&gt;</em><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the parameter definitions used by the parameterTable to show the gui</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.program">
+<code class="descname">program</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.program" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.AWGDeviceBase.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameter</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#AWGDeviceBase.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.AWGDeviceBase.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the parameter, called by the parameterTable</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="AWG.AWGDevices.ChaseDA12000">
+<em class="property">class </em><code class="descname">ChaseDA12000</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for programming a ChaseDA12000 AWG</p>
+<dl class="class">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT">
+<em class="property">class </em><code class="descname">SEGMENT</code><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.SEGMENT"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.EndingPadVal">
+<code class="descname">EndingPadVal</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.EndingPadVal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.NextSegNum">
+<code class="descname">NextSegNum</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.NextSegNum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.NumLoops">
+<code class="descname">NumLoops</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.NumLoops" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.NumPoints">
+<code class="descname">NumPoints</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.NumPoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.SegmentNum">
+<code class="descname">SegmentNum</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.SegmentNum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.SegmentPtr">
+<code class="descname">SegmentPtr</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.SegmentPtr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.SEGMENT.TrigEn">
+<code class="descname">TrigEn</code><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.SEGMENT.TrigEn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Structure/Union member</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.ChaseDA12000.close">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.deviceProperties">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">deviceProperties</code><em class="property"> = {'minAmplitude': 0, 'maxAmplitude': 4095, 'calibrationInv': &lt;function ChaseDA12000.&lt;lambda&gt; at 0x00000266591CC400&gt;, 'minSamples': 128, 'padValue': 2047, 'maxSamples': 4000000, 'numChannels': 1, 'sampleChunkSize': 64, 'calibration': &lt;function ChaseDA12000.&lt;lambda&gt; at 0x00000266591CC2F0&gt;}</em><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.deviceProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.ChaseDA12000.displayName">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">displayName</code><em class="property"> = 'Chase DA12000 AWG'</em><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.displayName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.ChaseDA12000.open">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.ChaseDA12000.parameters">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the parameter definition used by the ParameterTable to show the gui</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.ChaseDA12000.program">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">program</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.program" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.ChaseDA12000.trigger">
+<code class="descclassname">ChaseDA12000.</code><code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#ChaseDA12000.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.ChaseDA12000.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="AWG.AWGDevices.DummyAWG">
+<em class="property">class </em><code class="descname">DummyAWG</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#DummyAWG"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.DummyAWG" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="AWG.AWGDevices.DummyAWG.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#DummyAWG.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.DummyAWG.deviceProperties">
+<code class="descname">deviceProperties</code><em class="property"> = {'minAmplitude': 0, 'maxAmplitude': 4095, 'calibrationInv': &lt;function DummyAWG.&lt;lambda&gt; at 0x00000266591CC840&gt;, 'minSamples': 1, 'padValue': 2047, 'maxSamples': 4000000, 'numChannels': 2, 'sampleChunkSize': 1, 'calibration': &lt;function DummyAWG.&lt;lambda&gt; at 0x00000266591CC7B8&gt;}</em><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.deviceProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.DummyAWG.displayName">
+<code class="descname">displayName</code><em class="property"> = 'Dummy AWG'</em><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.displayName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.DummyAWG.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#DummyAWG.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.DummyAWG.program">
+<code class="descname">program</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#DummyAWG.program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.program" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.DummyAWG.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#DummyAWG.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.DummyAWG.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="AWG.AWGDevices.Lecroy1102">
+<em class="property">class </em><code class="descname">Lecroy1102</code><span class="sig-paren">(</span><em>settings</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for programming a Lecroy 1102 AWG</p>
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.Lecroy1102.deviceProperties">
+<code class="descname">deviceProperties</code><em class="property"> = {'minAmplitude': 0, 'maxAmplitude': 1.5, 'calibrationInv': &lt;function Lecroy1102.&lt;lambda&gt; at 0x000002665915AD08&gt;, 'minSamples': 8, 'padValue': 0, 'maxSamples': 2000000, 'numChannels': 2, 'sampleChunkSize': 2, 'calibration': &lt;function Lecroy1102.&lt;lambda&gt; at 0x000002665915AD90&gt;}</em><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.deviceProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGDevices.Lecroy1102.displayName">
+<code class="descname">displayName</code><em class="property"> = 'Lecroy 1102 AWG'</em><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.displayName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.open">
+<code class="descname">open</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.open"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.parameters">
+<code class="descname">parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.parameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the parameter definition used by the ParameterTable to show the gui</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.program">
+<code class="descname">program</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.program"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.program" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>command_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGDevices.Lecroy1102.trigger">
+<code class="descname">trigger</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#Lecroy1102.trigger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.Lecroy1102.trigger" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="AWG.AWGDevices.isAWGDevice">
+<code class="descname">isAWGDevice</code><span class="sig-paren">(</span><em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGDevices.html#isAWGDevice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGDevices.isAWGDevice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if obj is an AWG device.
+returns True if obj inherits from AWGDeviceBase, but is not itself AWGDeviceBase</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-AWG.AWGTableModel">
+<span id="awgtablemodel"></span><h2>AWGTableModel<a class="headerlink" href="#module-AWG.AWGTableModel" title="Permalink to this headline">¶</a></h2>
+<p>Created on Jul 2, 2015</p>
+<p>&#64;author: Geoffrey Ji</p>
+<dl class="class">
+<dt id="AWG.AWGTableModel.AWGTableModel">
+<em class="property">class </em><code class="descname">AWGTableModel</code><span class="sig-paren">(</span><em>settings</em>, <em>globalDict</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table model for displaying AWG variables</p>
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x00000266593D60B8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGTableModel.AWGTableModel.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x0000026659395EF0&gt;</em><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGTableModel.AWGTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Variable', 'Value']</em><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x00000266593D6048&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.setText">
+<code class="descname">setText</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.setText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGTableModel.AWGTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGTableModel.html#AWGTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGTableModel.AWGTableModel.valueChanged">
+<code class="descname">valueChanged</code><a class="headerlink" href="#AWG.AWGTableModel.AWGTableModel.valueChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-AWG.AWGUi">
+<span id="awgui"></span><h2>AWGUi<a class="headerlink" href="#module-AWG.AWGUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="AWG.AWGUi.AWGUi">
+<em class="property">class </em><code class="descname">AWGUi</code><span class="sig-paren">(</span><em>deviceClass</em>, <em>config</em>, <em>globalDict</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="AWG.AWGUi.AWGUi.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.close"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.convertListToNodes">
+<code class="descname">convertListToNodes</code><span class="sig-paren">(</span><em>data</em>, <em>parent=None</em>, <em>enabled=True</em>, <em>repetitions=None</em>, <em>isRoot=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.convertListToNodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.convertListToNodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.convertNodeToList">
+<code class="descname">convertNodeToList</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.convertNodeToList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.convertNodeToList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd><p>re-evaluate the text in the tableModel (happens when a global changes)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onAutoSave">
+<code class="descname">onAutoSave</code><span class="sig-paren">(</span><em>checked</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onAutoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onAutoSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>autosave is changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onCacheDepth">
+<code class="descname">onCacheDepth</code><span class="sig-paren">(</span><em>newVal</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onCacheDepth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onCacheDepth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onClearCache">
+<code class="descname">onClearCache</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onClearCache"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onClearCache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onComboBoxEditingFinished">
+<code class="descname">onComboBoxEditingFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onComboBoxEditingFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onComboBoxEditingFinished" title="Permalink to this definition">¶</a></dt>
+<dd><p>a settings name is typed into the combo box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onDependenciesChanged">
+<code class="descname">onDependenciesChanged</code><span class="sig-paren">(</span><em>channel=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onDependenciesChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onDependenciesChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>When dependencies change, refresh all variables</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onFilename">
+<code class="descname">onFilename</code><span class="sig-paren">(</span><em>basename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onFilename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onFilename" title="Permalink to this definition">¶</a></dt>
+<dd><p>filename combo box is changed. Open selected file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onLoad">
+<code class="descname">onLoad</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onLoad" title="Permalink to this definition">¶</a></dt>
+<dd><p>load settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onNewFile">
+<code class="descname">onNewFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onNewFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onNewFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>New button is clicked. Pop up dialog asking for new name, and create file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onOpenFile">
+<code class="descname">onOpenFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onOpenFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onOpenFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open file button is clicked. Pop up dialog asking for filename.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onReload">
+<code class="descname">onReload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onReload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onReload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reload settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onReloadFile">
+<code class="descname">onReloadFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onReloadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onReloadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onRemove">
+<code class="descname">onRemove</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onRemove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onRemove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove current settings from combo box</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onRemoveFile">
+<code class="descname">onRemoveFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onRemoveFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onRemoveFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove file button is clicked. Remove filename from combo box.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>save current settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onSaveFile">
+<code class="descname">onSaveFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onSaveFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onSaveFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save button is clicked. Save data to segment file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.onValue">
+<code class="descname">onValue</code><span class="sig-paren">(</span><em>var=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.onValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.onValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>variable value is changed in the table</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.openFile">
+<code class="descname">openFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.openFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.openFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open the file &#8216;filename&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.refreshVarDict">
+<code class="descname">refreshVarDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.refreshVarDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.refreshVarDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>refresh the variable dictionary by checking all waveform dependencies</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.replot">
+<code class="descname">replot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.replot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.replot" title="Permalink to this definition">¶</a></dt>
+<dd><p>plot all channels</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>save GUI configuration to config</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.saveIfNecessary">
+<code class="descname">saveIfNecessary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.saveIfNecessary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.saveIfNecessary" title="Permalink to this definition">¶</a></dt>
+<dd><p>save the current settings if autosave is on and something has changed</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.AWGUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#AWGUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.AWGUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.AWGUi.varAsOutputChannelDict">
+<code class="descname">varAsOutputChannelDict</code><a class="headerlink" href="#AWG.AWGUi.AWGUi.varAsOutputChannelDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>dict of output channels, for use in scans</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.AWGUi.varDictChanged">
+<code class="descname">varDictChanged</code><a class="headerlink" href="#AWG.AWGUi.AWGUi.varDictChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="AWG.AWGUi.Settings">
+<em class="property">class </em><code class="descname">Settings</code><a class="reference internal" href="../_modules/AWG/AWGUi.html#Settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Settings associated with AWGUi. Each entry in the settings menu has a corresponding Settings object.</p>
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.deviceSettings">
+<code class="descname">deviceSettings</code><a class="headerlink" href="#AWG.AWGUi.Settings.deviceSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>dict</em> &#8211; dynamic settings of the device, controlled by the parameterTable. Elements are defined
+in the device&#8217;s &#8216;parameters&#8217; method</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.channelSettingsList">
+<code class="descname">channelSettingsList</code><a class="headerlink" href="#AWG.AWGUi.Settings.channelSettingsList" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>list of dicts</em> &#8211; each element corresponds to a channel of the AWG. Each element is a dict,
+with keys that determine the channel&#8217;s setting (e.g. &#8216;plotEnabled&#8217;, etc.)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.filename">
+<code class="descname">filename</code><a class="headerlink" href="#AWG.AWGUi.Settings.filename" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>str</em> &#8211; the filename from which to save/load AWG segment data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.varDict">
+<code class="descname">varDict</code><a class="headerlink" href="#AWG.AWGUi.Settings.varDict" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>SequenceDict</em> &#8211; the list of variables which determine the AWG waveform</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.saveIfNecessary">
+<code class="descname">saveIfNecessary</code><a class="headerlink" href="#AWG.AWGUi.Settings.saveIfNecessary" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>function</em> &#8211; the AWGUi&#8217;s function that save&#8217;s the settings</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.replot">
+<code class="descname">replot</code><a class="headerlink" href="#AWG.AWGUi.Settings.replot" title="Permalink to this definition">¶</a></dt>
+<dd><p><em>function</em> &#8211; the AWGUi&#8217;s function that replots all waveforms</p>
+</dd></dl>
+
+<p>Note that &#8220;deviceProperties&#8221; are fixed settings of an AWG device, while &#8220;deviceSettings&#8221; are settings that can be
+changed on the fly.</p>
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.deviceProperties">
+<code class="descname">deviceProperties</code><em class="property"> = {}</em><a class="headerlink" href="#AWG.AWGUi.Settings.deviceProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.plotStyles">
+<code class="descname">plotStyles</code><a class="headerlink" href="#AWG.AWGUi.Settings.plotStyles" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Enum</span></code></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">replot</code><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt>
+<code class="descname">saveIfNecessary</code><em class="property"> = None</em></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="AWG.AWGUi.Settings.stateFields">
+<code class="descname">stateFields</code><em class="property"> = {'filename': '', 'deviceSettings': {}, 'varDict': SequenceDict(), 'cacheDepth': 0, 'channelSettingsList': []}</em><a class="headerlink" href="#AWG.AWGUi.Settings.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="AWG.AWGUi.Settings.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/AWG/AWGUi.html#Settings.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#AWG.AWGUi.Settings.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

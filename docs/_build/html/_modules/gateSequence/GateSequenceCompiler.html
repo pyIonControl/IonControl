@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gateSequence.GateSequenceCompiler &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>gateSequence.GateSequenceCompiler</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gateSequence.GateSequenceCompiler</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">modules.Expression</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span><span class="p">,</span> <span class="n">is_Q</span>
+
+<div class="viewcode-block" id="GateSequenceCompilerException"><a class="viewcode-back" href="../../code/gateSequence-doc.html#gateSequence.GateSequenceCompiler.GateSequenceCompilerException">[docs]</a><span class="k">class</span> <span class="nc">GateSequenceCompilerException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="GateSequenceCompiler"><a class="viewcode-back" href="../../code/gateSequence-doc.html#gateSequence.GateSequenceCompiler.GateSequenceCompiler">[docs]</a><span class="k">class</span> <span class="nc">GateSequenceCompiler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulseProgram</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseProgram</span> <span class="o">=</span> <span class="n">pulseProgram</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compiledGates</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+    <span class="sd">&quot;&quot;&quot;Compile all gate sequences into binary representation</span>
+<span class="sd">        returns tuple of start address list and bytearray data&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GateSequenceCompiler.gateSequencesCompile"><a class="viewcode-back" href="../../code/gateSequence-doc.html#gateSequence.GateSequenceCompiler.GateSequenceCompiler.gateSequencesCompile">[docs]</a>    <span class="k">def</span> <span class="nf">gateSequencesCompile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gatesets</span> <span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;compiling </span><span class="si">{0}</span><span class="s2"> gateSequences.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gatesets</span><span class="o">.</span><span class="n">GateSequenceDict</span><span class="p">))</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gateCompile</span><span class="p">(</span> <span class="n">gatesets</span><span class="o">.</span><span class="n">gateDefinition</span> <span class="p">)</span>
+        <span class="n">addresses</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">gateset</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">gatesets</span><span class="o">.</span><span class="n">GateSequenceDict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">gatesetdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gateSequenceCompile</span><span class="p">(</span> <span class="n">gateset</span> <span class="p">)</span>
+            <span class="n">addresses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">gatesetdata</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">gatesetdata</span><span class="p">)</span><span class="o">*</span><span class="mi">8</span>
+        <span class="k">return</span> <span class="n">addresses</span><span class="p">,</span> <span class="n">data</span></div>
+    
+    <span class="sd">&quot;&quot;&quot;Compile one gateset into its binary representation&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GateSequenceCompiler.gateSequenceCompile"><a class="viewcode-back" href="../../code/gateSequence-doc.html#gateSequence.GateSequenceCompiler.GateSequenceCompiler.gateSequenceCompile">[docs]</a>    <span class="k">def</span> <span class="nf">gateSequenceCompile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gateset</span> <span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">gateset</span><span class="p">:</span>
+            <span class="n">thisCompiledGate</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compiledGates</span><span class="p">[</span><span class="n">gate</span><span class="p">]</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">thisCompiledGate</span> <span class="p">)</span>
+            <span class="n">length</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">thisCompiledGate</span><span class="p">)</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">length</span><span class="p">]</span> <span class="o">+</span> <span class="n">data</span></div>
+
+    <span class="sd">&quot;&quot;&quot;Compile each gate definition into its binary representation&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GateSequenceCompiler.gateCompile"><a class="viewcode-back" href="../../code/gateSequence-doc.html#gateSequence.GateSequenceCompiler.GateSequenceCompiler.gateCompile">[docs]</a>    <span class="k">def</span> <span class="nf">gateCompile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gateDefinition</span> <span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseProgram</span><span class="o">.</span><span class="n">variables</span><span class="p">()</span>
+        <span class="n">pulseList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">gateDefinition</span><span class="o">.</span><span class="n">PulseDefinition</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pulseList</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">gatename</span><span class="p">,</span> <span class="n">gate</span> <span class="ow">in</span> <span class="n">gateDefinition</span><span class="o">.</span><span class="n">Gates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># for all defined gates</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">gateLength</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">strvalue</span> <span class="ow">in</span> <span class="n">gate</span><span class="o">.</span><span class="n">pulsedict</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">strvalue</span><span class="p">,</span> <span class="n">variables</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">!=</span><span class="n">pulseList</span><span class="p">[</span> <span class="n">gateLength</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span> <span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">GateSequenceCompilerException</span><span class="p">(</span><span class="s2">&quot;In gate </span><span class="si">{0}</span><span class="s2"> entry </span><span class="si">{1}</span><span class="s2"> found &#39;</span><span class="si">{2}</span><span class="s2">&#39; expected &#39;</span><span class="si">{3}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gatename</span><span class="p">,</span> <span class="n">gateLength</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">pulseList</span><span class="p">[</span> <span class="n">gateLength</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span> <span class="p">]))</span>
+                <span class="n">encoding</span> <span class="o">=</span> <span class="n">gateDefinition</span><span class="o">.</span><span class="n">PulseDefinition</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">encoding</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseProgram</span><span class="o">.</span><span class="n">convertParameter</span><span class="p">(</span> <span class="n">result</span><span class="p">,</span> <span class="n">encoding</span> <span class="p">)</span> <span class="p">)</span> 
+                <span class="n">gateLength</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">gateLength</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">GateSequenceCompilerException</span><span class="p">(</span><span class="s2">&quot;In gate </span><span class="si">{0}</span><span class="s2"> number of entries (</span><span class="si">{1}</span><span class="s2">) is not a multiple of the pulse definition length (</span><span class="si">{2}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gatename</span><span class="p">,</span> <span class="n">gateLength</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulseListLength</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compiledGates</span><span class="p">[</span><span class="n">gatename</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;compiled </span><span class="si">{0}</span><span class="s2"> to </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">gatename</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="p">)</span></div></div>
+                
+        
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pulseProgram.PulseProgram</span> <span class="k">import</span> <span class="n">PulseProgram</span>
+    <span class="kn">from</span> <span class="nn">gateSequence.GateDefinition</span> <span class="k">import</span> <span class="n">GateDefinition</span>
+    <span class="kn">from</span> <span class="nn">gateSequence.GateSequenceContainer</span> <span class="k">import</span> <span class="n">GateSequenceContainer</span>
+    
+    <span class="n">pp</span> <span class="o">=</span> <span class="n">PulseProgram</span><span class="p">()</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">pp</span><span class="o">.</span><span class="n">loadSource</span><span class="p">(</span><span class="s2">r&quot;C:\Users\Public\Documents\experiments\QGA\config\PulsePrograms\YbGateSequenceTomography.pp&quot;</span><span class="p">)</span>
+    
+    <span class="n">gatedef</span> <span class="o">=</span> <span class="n">GateDefinition</span><span class="p">()</span>
+    <span class="n">gatedef</span><span class="o">.</span><span class="n">loadGateDefinition</span><span class="p">(</span><span class="s2">r&quot;C:\Users\Public\Documents\experiments\QGA\config\GateSequences\StandardGateDefinitions.xml&quot;</span><span class="p">)</span>    
+    <span class="n">gatedef</span><span class="o">.</span><span class="n">printGates</span><span class="p">()</span>
+    
+    <span class="n">container</span> <span class="o">=</span> <span class="n">GateSequenceContainer</span><span class="p">(</span><span class="n">gatedef</span><span class="p">)</span>
+    <span class="n">container</span><span class="o">.</span><span class="n">loadXml</span><span class="p">(</span><span class="s2">r&quot;C:\Users\Public\Documents\experiments\QGA\config\GateSequences\GateSequenceDefinition.xml&quot;</span><span class="p">)</span>
+    <span class="n">container</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>  
+    <span class="c1">#print container</span>
+    
+    <span class="n">compiler</span> <span class="o">=</span> <span class="n">GateSequenceCompiler</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+    <span class="n">compiler</span><span class="o">.</span><span class="n">gateCompile</span><span class="p">(</span> <span class="n">container</span><span class="o">.</span><span class="n">gateDefinition</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">compiler</span><span class="o">.</span><span class="n">gateSequenceCompile</span><span class="p">(</span> <span class="n">container</span><span class="o">.</span><span class="n">GateSequenceDict</span><span class="p">[</span><span class="s1">&#39;S11&#39;</span><span class="p">]))</span>
+    
+    <span class="n">address</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">compiler</span><span class="o">.</span><span class="n">GateSequencesCompile</span><span class="p">(</span> <span class="n">container</span> <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

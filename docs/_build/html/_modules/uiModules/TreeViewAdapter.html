@@ -1,0 +1,406 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>uiModules.TreeViewAdapter &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>uiModules.TreeViewAdapter</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for uiModules.TreeViewAdapter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+
+<span class="kn">import</span> <span class="nn">PyQt5.uic</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">modules.SequenceDict</span> <span class="k">import</span> <span class="n">SequenceDict</span>
+<span class="kn">from</span> <span class="nn">_collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+
+<span class="n">ControlForm</span><span class="p">,</span> <span class="n">ControlBase</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">uic</span><span class="o">.</span><span class="n">loadUiType</span><span class="p">(</span><span class="s1">r&#39;..\ui\TreeViewTest.ui&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Structure"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure">[docs]</a><span class="k">class</span> <span class="nc">Structure</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span> <span class="nb">list</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="Structure.addChild"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.addChild">[docs]</a>    <span class="k">def</span> <span class="nf">addChild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span></div>
+        
+<div class="viewcode-block" id="Structure.addChildren"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.addChildren">[docs]</a>    <span class="k">def</span> <span class="nf">addChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">children</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span></div>
+                    
+<div class="viewcode-block" id="Structure.insertChild"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.insertChild">[docs]</a>    <span class="k">def</span> <span class="nf">insertChild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span></div>
+        
+<div class="viewcode-block" id="Structure.insertChildren"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.insertChildren">[docs]</a>    <span class="k">def</span> <span class="nf">insertChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">children</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="n">oldlist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+        <span class="n">newlist</span> <span class="o">=</span> <span class="n">oldlist</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">newlist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+        <span class="n">newlist</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">oldlist</span><span class="p">[</span><span class="n">index</span><span class="p">:])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span> <span class="o">=</span> <span class="n">newlist</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">child</span><span class="p">],</span> <span class="n">child</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="o">=</span> <span class="n">parent</span></div>
+        
+<div class="viewcode-block" id="Structure.removeChild"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.removeChild">[docs]</a>    <span class="k">def</span> <span class="nf">removeChild</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">child</span><span class="p">):</span>
+        <span class="n">children</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parent</span><span class="p">]</span>
+        <span class="n">children</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span> <span class="n">children</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">child</span><span class="p">)</span></div>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Structure.flatStructure"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.Structure.flatStructure">[docs]</a>    <span class="k">def</span> <span class="nf">flatStructure</span><span class="p">(</span> <span class="n">rootNode</span><span class="p">,</span> <span class="n">dictionary</span> <span class="p">):</span>
+        <span class="n">structure</span> <span class="o">=</span> <span class="n">Structure</span><span class="p">()</span>
+        <span class="n">structure</span><span class="o">.</span><span class="n">addChildren</span><span class="p">(</span> <span class="n">rootNode</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">dictionary</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">structure</span></div></div>
+        
+        
+
+<div class="viewcode-block" id="TreeViewModelAdapter"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter">[docs]</a><span class="k">class</span> <span class="nc">TreeViewModelAdapter</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractItemModel</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">structure</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rootNode</span><span class="o">=</span><span class="s1">&#39;rootNode&#39;</span><span class="p">,</span> <span class="n">denyStructuralChanges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">keyColumn</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">TreeViewModelAdapter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span> <span class="o">=</span> <span class="n">rootNode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span> <span class="o">=</span> <span class="n">structure</span> <span class="k">if</span> <span class="n">structure</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">Structure</span><span class="o">.</span><span class="n">flatStructure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">denyStructuralChanges</span> <span class="o">=</span> <span class="n">denyStructuralChanges</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keyColumn</span> <span class="o">=</span> <span class="n">keyColumn</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span> <span class="o">=</span> <span class="p">{</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">child</span><span class="p">:</span> <span class="n">child</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">child</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">child</span><span class="p">]</span> <span class="p">}</span>
+        
+<div class="viewcode-block" id="TreeViewModelAdapter.data"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="n">nodeName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()),</span> <span class="k">lambda</span> <span class="n">child</span><span class="p">:</span> <span class="kc">None</span> <span class="p">)(</span><span class="n">nodeName</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TreeViewModelAdapter.flags"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">keyColumn</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDropEnabled</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span>  <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">)</span></div>
+
+    <span class="n">headerLookup</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Key&#39;</span><span class="p">,</span> <span class="s1">&#39;Value&#39;</span><span class="p">]</span>
+<div class="viewcode-block" id="TreeViewModelAdapter.headerData"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">role</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">orientation</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">):</span> 
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span><span class="p">[</span><span class="n">section</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="TreeViewModelAdapter.index"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span> <span class="ow">and</span> <span class="n">parent</span><span class="o">.</span><span class="n">column</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="n">parentName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">&gt;=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parentName</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="n">childName</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parentName</span><span class="p">][</span><span class="n">row</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">childName</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">childName</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.getItem"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.getItem">[docs]</a>    <span class="k">def</span> <span class="nf">getItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">index</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span>    </div>
+
+<div class="viewcode-block" id="TreeViewModelAdapter.parent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="n">childName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">childName</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="n">parentName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">childName</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">parentName</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parentName</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">childName</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parentName</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="TreeViewModelAdapter.rowCount"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="n">parentName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">parentName</span><span class="p">])</span> </div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.columnCount"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.supportedDragActions"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDragActions">[docs]</a>    <span class="k">def</span> <span class="nf">supportedDragActions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.supportedDropActions"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.supportedDropActions">[docs]</a>    <span class="k">def</span> <span class="nf">supportedDropActions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.mimeTypes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeTypes">[docs]</a>    <span class="k">def</span> <span class="nf">mimeTypes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;text.list&quot;</span><span class="p">]</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.mimeData"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.mimeData">[docs]</a>    <span class="k">def</span> <span class="nf">mimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="n">mimedata</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
+        <span class="n">mimedata</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="s1">&#39;text.list&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">return</span> <span class="n">mimedata</span></div>
+        
+<div class="viewcode-block" id="TreeViewModelAdapter.dropMimeData"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.dropMimeData">[docs]</a>    <span class="k">def</span> <span class="nf">dropMimeData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mimedata</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">parentIndex</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">mimedata</span><span class="o">.</span><span class="n">hasFormat</span><span class="p">(</span><span class="s2">&quot;text.list&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">column</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">items</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">mimedata</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s2">&quot;text.list&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">denyStructuralChanges</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insertItems</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.insertItems"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.insertItems">[docs]</a>    <span class="k">def</span> <span class="nf">insertItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">):</span>
+        <span class="n">parentName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getItem</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="n">oldParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">item</span><span class="p">]</span>
+            <span class="n">oldRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">oldParent</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+            <span class="n">oldParentIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">oldParent</span><span class="p">)</span> <span class="k">if</span> <span class="n">oldParent</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span> <span class="n">oldParentIndex</span><span class="p">,</span> <span class="n">oldRow</span><span class="p">,</span> <span class="n">oldRow</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="n">oldParent</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>          
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span> <span class="n">parentIndex</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">row</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">insertChildren</span><span class="p">(</span> <span class="n">parentName</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">row</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span> </div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.removeRows"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.removeRows">[docs]</a>    <span class="k">def</span> <span class="nf">removeRows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is called internally upon drag move, however it is only called AFTER the drop.</span>
+<span class="sd">        We need the entry to be removed before it is re-added, thus the drop target takes care</span>
+<span class="sd">        of both and this function does nothing and returns success.&quot;&quot;&quot;</span>
+        <span class="c1">#print &quot;removeRows&quot;, row, count, self.getItem(parent)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+    
+<div class="viewcode-block" id="TreeViewModelAdapter.addRow"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.addRow">[docs]</a>    <span class="k">def</span> <span class="nf">addRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">rowCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowCount</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">rowCount</span><span class="p">,</span> <span class="n">rowCount</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">addChild</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span></div>
+            
+<div class="viewcode-block" id="TreeViewModelAdapter.popRow"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.TreeViewAdapter.TreeViewModelAdapter.popRow">[docs]</a>    <span class="k">def</span> <span class="nf">popRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">oldParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">parent</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">oldRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">oldParent</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">oldParentIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">oldParent</span><span class="p">)</span> <span class="k">if</span> <span class="n">oldParent</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">rootNode</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span> <span class="n">oldParentIndex</span><span class="p">,</span> <span class="n">oldRow</span><span class="p">,</span> <span class="n">oldRow</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">structure</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="n">oldParent</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>          </div></div>
+            
+
+<span class="k">if</span> <span class="n">__name__</span><span class="o">==</span><span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="k">class</span> <span class="nc">TreeViewTest</span><span class="p">(</span> <span class="n">ControlForm</span><span class="p">,</span> <span class="n">ControlBase</span> <span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">ControlForm</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">ControlBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;alpha&#39;</span><span class="p">:</span> <span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;beta&#39;</span><span class="p">:</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;gamma&#39;</span><span class="p">:</span><span class="s1">&#39;c&#39;</span> <span class="p">,</span> <span class="s1">&#39;delta&#39;</span><span class="p">:</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;epsilon&#39;</span><span class="p">:</span><span class="s1">&#39;e&#39;</span><span class="p">}</span>
+           
+        <span class="k">def</span> <span class="nf">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+            <span class="n">ControlForm</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">TreeViewModelAdapter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">treeView</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># History and Dictionary</span>
+
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtGui</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">MainWindow</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    
+    
+    <span class="n">data</span> <span class="o">=</span> <span class="n">SequenceDict</span><span class="p">(</span> <span class="p">{})</span>
+    
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">TreeViewTest</span><span class="p">()</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">setupUi</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">ui</span><span class="p">)</span>
+    <span class="n">MainWindow</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

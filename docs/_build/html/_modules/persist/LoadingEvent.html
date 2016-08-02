@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>persist.LoadingEvent &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>persist.LoadingEvent</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for persist.LoadingEvent</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">Column</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Interval</span><span class="p">,</span> <span class="n">Boolean</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="n">create_engine</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="k">import</span> <span class="n">declarative_base</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="k">import</span> <span class="n">sessionmaker</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="k">import</span> <span class="n">InvalidRequestError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">ProgrammingError</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="k">import</span> <span class="n">OperationalError</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">modules.Observable</span> <span class="k">import</span> <span class="n">Observable</span>
+
+<span class="n">Base</span> <span class="o">=</span> <span class="n">declarative_base</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LoadingEvent"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingEvent">[docs]</a><span class="k">class</span> <span class="nc">LoadingEvent</span><span class="p">(</span><span class="n">Base</span><span class="p">):</span>
+    <span class="n">__tablename__</span> <span class="o">=</span> <span class="s1">&#39;loading_history&#39;</span>
+    <span class="n">loadingProfile</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">String</span><span class="p">)</span>
+    <span class="n">loadingDuration</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Interval</span><span class="p">)</span>
+    <span class="n">trappingDuration</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Interval</span><span class="p">)</span>
+    <span class="n">trappingTime</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">DateTime</span><span class="p">(</span><span class="n">timezone</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">primary_key</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+    <span class="n">ionCount</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span><span class="n">Integer</span><span class="p">)</span>
+    <span class="n">valid</span> <span class="o">=</span> <span class="n">Column</span><span class="p">(</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LoadingHistory"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory">[docs]</a><span class="k">class</span> <span class="nc">LoadingHistory</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dbConnection</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database_conn_str</span> <span class="o">=</span> <span class="n">dbConnection</span><span class="o">.</span><span class="n">connectionString</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">engine</span> <span class="o">=</span> <span class="n">create_engine</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_conn_str</span><span class="p">,</span> <span class="n">echo</span><span class="o">=</span><span class="n">dbConnection</span><span class="o">.</span><span class="n">echo</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginResetModel</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endResetModel</span> <span class="o">=</span> <span class="n">Observable</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currentProfile</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_profiles</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="LoadingHistory.open"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.open">[docs]</a>    <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Base</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">create_all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Session</span> <span class="o">=</span> <span class="n">sessionmaker</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">engine</span><span class="p">,</span> <span class="n">expire_on_commit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="n">OperationalError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot open database: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="LoadingHistory.close"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isOpen</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+        
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exittype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LoadingHistory.addLoadingEvent"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.addLoadingEvent">[docs]</a>    <span class="k">def</span> <span class="nf">addLoadingEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">loadingEvent</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="n">loadingEvent</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_currentProfile</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">loadingEvent</span><span class="o">.</span><span class="n">loadingProfile</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">_currentProfile</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="o">.</span><span class="n">fire</span><span class="p">(</span><span class="n">first</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="p">),</span> <span class="n">last</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">loadingEvent</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span></div>
+            
+<div class="viewcode-block" id="LoadingHistory.setTrappingDuration"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.setTrappingDuration">[docs]</a>    <span class="k">def</span> <span class="nf">setTrappingDuration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">duration</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">trappingDuration</span> <span class="o">=</span> <span class="n">duration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="LoadingHistory.commit"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.commit">[docs]</a>    <span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">InvalidRequestError</span><span class="p">,</span> <span class="n">IntegrityError</span><span class="p">,</span> <span class="n">ProgrammingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Session</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="LoadingHistory.query"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.query">[docs]</a>    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fromTime</span><span class="p">,</span> <span class="n">toTime</span><span class="p">,</span> <span class="n">loadingProfile</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginResetModel</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>   <span class="c1"># clear the list in place</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="o">.</span><span class="n">trappingTime</span><span class="o">&gt;=</span><span class="n">fromTime</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="o">.</span><span class="n">trappingTime</span><span class="o">&lt;=</span><span class="n">toTime</span><span class="p">)</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="o">.</span><span class="n">loadingProfile</span> <span class="o">==</span> <span class="n">loadingProfile</span><span class="p">)</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">LoadingEvent</span><span class="o">.</span><span class="n">trappingTime</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endResetModel</span><span class="o">.</span><span class="n">firebare</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_currentProfile</span> <span class="o">=</span> <span class="n">loadingProfile</span></div>
+    
+<div class="viewcode-block" id="LoadingHistory.getProfiles"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.getProfiles">[docs]</a>    <span class="k">def</span> <span class="nf">getProfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">loadingEvents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span>
+    
+<div class="viewcode-block" id="LoadingHistory.lastEvent"><a class="viewcode-back" href="../../code/persist-doc.html#persist.LoadingEvent.LoadingHistory.lastEvent">[docs]</a>    <span class="k">def</span> <span class="nf">lastEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadingEvents</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div></div>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

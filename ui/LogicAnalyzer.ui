@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LogicAnalyzer</class>
+ <widget class="QMainWindow" name="LogicAnalyzer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>955</width>
+    <height>732</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Logic Analyzer</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="Experiment.qrc">
+    <normaloff>:/petersIcons/icons/ChipScope.png</normaloff>:/petersIcons/icons/ChipScope.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="CoordinatePlotWidget" name="graphicsLayout"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionRun"/>
+   <addaction name="actionStop"/>
+   <addaction name="actionSingle"/>
+   <addaction name="actionClear"/>
+   <addaction name="actionSave"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>Signal Trace</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>2</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="TableViewRotatedHorizontalHeader" name="traceTableView"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget_3">
+   <property name="minimumSize">
+    <size>
+     <width>40</width>
+     <height>111</height>
+    </size>
+   </property>
+   <property name="windowTitle">
+    <string>Signals</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>1</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents_3">
+    <layout class="QVBoxLayout" name="verticalLayout_2">
+     <item>
+      <widget class="QTableView" name="signalTableView"/>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <action name="actionExpand">
+   <property name="text">
+    <string>Expand</string>
+   </property>
+  </action>
+  <action name="actionRun">
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/openicon/icons/media-playback-start-7.png</normaloff>:/openicon/icons/media-playback-start-7.png</iconset>
+   </property>
+   <property name="text">
+    <string>Run</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/openicon/icons/media-playback-stop-7.png</normaloff>:/openicon/icons/media-playback-stop-7.png</iconset>
+   </property>
+   <property name="text">
+    <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionSingle">
+   <property name="text">
+    <string>Single</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/kde/icons/edit-clear.png</normaloff>:/kde/icons/edit-clear.png</iconset>
+   </property>
+   <property name="text">
+    <string>Clear</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/kde/icons/filesave.png</normaloff>:/kde/icons/filesave.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CoordinatePlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>uiModules.CoordinatePlotWidget</header>
+  </customwidget>
+  <customwidget>
+   <class>TableViewRotatedHorizontalHeader</class>
+   <extends>QTableView</extends>
+   <header>uiModules.TableViewRotatedHorizontalHeader</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="Experiment.qrc"/>
+ </resources>
+ <connections/>
+</ui>

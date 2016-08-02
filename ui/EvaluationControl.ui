@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>406</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="removeButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/edit-clear-locationbar-ltr.png</normaloff>:/openicon/icons/edit-clear-locationbar-ltr.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox">
+       <property name="contextMenuPolicy">
+        <enum>Qt::ActionsContextMenu</enum>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="maxVisibleItems">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="saveButton">
+       <property name="toolTip">
+        <string>Save current</string>
+       </property>
+       <property name="text">
+        <string notr="true">...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/kde/icons/filesave.png</normaloff>:/kde/icons/filesave.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="reloadButton">
+       <property name="toolTip">
+        <string>reload</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/document-revert-5.png</normaloff>:/openicon/icons/document-revert-5.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QToolBox" name="toolBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QToolBox {
+	    icon-size: 24px;
+	    border: 1px solid rgb(101, 147, 207);
+	    background-color: rgb(101, 147, 207);
+	}
+	
+	QToolBox:tab {
+	    height: 32px;
+	    color: rgb(32, 77, 137);
+	    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(227, 239, 255, 255), stop:0.4 rgba(196, 221, 255, 255), stop:0.401 rgba(173, 209, 255, 255), stop:1 rgba(192, 219, 255, 255));
+	}
+	
+	QToolBox:tab:hover {
+	    height: 32px;
+	    color: rgb(32, 77, 137);
+	    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 254, 228, 255), stop:0.4 rgba(255, 232, 167, 255), stop:0.401 rgba(255, 215, 103, 255), stop:1 rgba(255, 230, 158, 255));
+	}
+	
+	QToolBox:tab:selected {
+	    height: 32px;
+	    font-weight: bold;
+	    color: rgb(0, 0, 0);
+	    /*background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,
+26	 * stop:0 rgba(255, 217, 170, 255), stop:0.4 rgba(255, 187, 110, 255),
+27	 * stop:0.401 rgba(255, 171, 63, 255), stop:1 rgba(254, 225, 122, 255));*/
+	}
+	
+	QToolBox:tab:selected:hover {
+	    height: 32px;
+	    font-weight: bold;
+	    color: rgb(0, 0, 0);
+	    /*background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,
+	 * stop:0 rgba(255, 189, 105, 255), stop:0.4 rgba(255, 172, 66, 255),
+	 * stop:0.401 rgba(251, 140, 60, 255), stop:1 rgba(254, 211, 100, 255));*/
+	} </string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="evaluationPage">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>386</width>
+        <height>616</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Evaluation</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_8">
+           <property name="text">
+            <string>Histogram bins</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="histogramBinsBox">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <horstretch>1</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximum">
+            <number>1000</number>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="integrateHistogramCheckBox">
+           <property name="text">
+            <string>Integrate</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Evaluations:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="addEvaluationButton">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Experiment.qrc">
+             <normaloff>:/openicon/icons/edit-add.png</normaloff>:/openicon/icons/edit-add.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="removeEvaluationButton">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Experiment.qrc">
+             <normaloff>:/openicon/icons/edit-delete-6.png</normaloff>:/openicon/icons/edit-delete-6.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <widget class="QTableView" name="evalTableView"/>
+         <widget class="ParameterTable" name="evalParamTable"/>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="timestampsPage">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>172</width>
+        <height>171</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Timestamps</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_3">
+       <item row="0" column="0">
+        <widget class="QCheckBox" name="enableCheckBox">
+         <property name="text">
+          <string>Enable</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QCheckBox" name="saveRawDataCheckBox">
+         <property name="text">
+          <string>Save raw data</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>Binwidth</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="MagnitudeSpinBox" name="binwidthSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>ROI start</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="MagnitudeSpinBox" name="roiStartSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>ROI width</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="MagnitudeSpinBox" name="roiWidthSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>1</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_10">
+         <property name="text">
+          <string>Counter</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QSpinBox" name="channelSpinBox">
+         <property name="maximum">
+          <number>7</number>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QComboBox" name="integrateCombo">
+         <item>
+          <property name="text">
+           <string>Integrate all</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Integrate each run</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>One trace per point</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>52</width>
+           <height>141</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MagnitudeSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>uiModules.MagnitudeSpinBox</header>
+  </customwidget>
+  <customwidget>
+   <class>ParameterTable</class>
+   <extends>QTableView</extends>
+   <header>uiModules.ParameterTable</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>comboBox</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>histogramBinsBox</tabstop>
+  <tabstop>enableCheckBox</tabstop>
+  <tabstop>saveRawDataCheckBox</tabstop>
+  <tabstop>binwidthSpinBox</tabstop>
+  <tabstop>roiStartSpinBox</tabstop>
+  <tabstop>roiWidthSpinBox</tabstop>
+  <tabstop>channelSpinBox</tabstop>
+  <tabstop>integrateCombo</tabstop>
+ </tabstops>
+ <resources>
+  <include location="Experiment.qrc"/>
+ </resources>
+ <connections/>
+</ui>

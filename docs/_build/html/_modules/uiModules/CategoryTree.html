@@ -1,0 +1,810 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>uiModules.CategoryTree &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>uiModules.CategoryTree</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for uiModules.CategoryTree</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtWidgets</span>
+<span class="kn">from</span> <span class="nn">modules.enum</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">modules.Utility</span> <span class="k">import</span> <span class="n">indexWithDefault</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">getrefcount</span>
+<span class="kn">from</span> <span class="nn">uiModules.KeyboardFilter</span> <span class="k">import</span> <span class="n">KeyListFilter</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+
+<span class="n">nodeTypes</span> <span class="o">=</span> <span class="n">enum</span><span class="p">(</span><span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for tree nodes&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">nodeType</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span> <span class="c1">#parent node</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span> <span class="c1">#All nodes need a unique id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="n">content</span> <span class="c1">#content is the actual data in the tree, it can be anything</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeType</span> <span class="o">=</span> <span class="n">nodeType</span> <span class="c1">#nodeTypes.category or nodeTypes.data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">isBold</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#Determines whether node is shown bold</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bgColor</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1">#background color</span>
+
+<div class="viewcode-block" id="Node.childCount"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.Node.childCount">[docs]</a>    <span class="k">def</span> <span class="nf">childCount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Node.child"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.Node.child">[docs]</a>    <span class="k">def</span> <span class="nf">child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">childCount</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">row</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">==</span><span class="n">other</span><span class="o">.</span><span class="n">id</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;Node: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return this node&#39;s row in its parent&#39;s list of children&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="nd">@row</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">row</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newRow</span><span class="p">):</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">newRow</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span> <span class="n">newRow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">row</span><span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CategoryTreeModel"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel">[docs]</a><span class="k">class</span> <span class="nc">CategoryTreeModel</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QAbstractItemModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for category trees.</span>
+
+<span class="sd">    A category tree is a simplified tree structure in which a flat list of data is broken down by categories. It</span>
+<span class="sd">    is intended to be an extension of a table model, in which the elements of the table are broken down into different</span>
+<span class="sd">    categories. The data itself is not hierarchical. For that reasons, the data can be presented to the model as a</span>
+<span class="sd">    flat list. If a given element of the list has an attribute defined by categoriesAttr, then that element will be displayed</span>
+<span class="sd">    beneath those categories. categoriesAttr is a list of strings, with the most general category first. If categoriesAttr</span>
+<span class="sd">    is a string, it is interpreted as a list of strings of length 1.</span>
+
+<span class="sd">    Other attributes that are respected are &quot;hasDepedency&quot; and &quot;isBold.&quot; If the content has one of those attributes,</span>
+<span class="sd">    the content is displayed accordingly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contentList</span><span class="o">=</span><span class="p">[],</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categoriesAttr</span><span class="o">=</span><span class="s1">&#39;categories&#39;</span><span class="p">,</span> <span class="n">nodeNameAttr</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CategoryTreeModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c1">#attribute that determines how to categorize content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoriesAttr</span> <span class="o">=</span> <span class="n">categoriesAttr</span>
+        <span class="c1">#attribute that determines node names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeNameAttr</span> <span class="o">=</span> <span class="n">nodeNameAttr</span>
+
+        <span class="c1">#styling for different types of content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencyBgColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">green</span><span class="p">)</span><span class="o">.</span><span class="n">lighter</span><span class="p">(</span><span class="mi">175</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultFontName</span> <span class="o">=</span> <span class="s2">&quot;Segoe UI&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">defaultFontSize</span> <span class="o">=</span> <span class="mi">9</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultFontName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultFontSize</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Normal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boldFont</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">defaultFontName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultFontSize</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="o">.</span><span class="n">Bold</span><span class="p">)</span>
+
+        <span class="c1">#lookups to determine the appearance of the model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fontLookup</span> <span class="o">=</span> <span class="p">{</span><span class="kc">True</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">boldFont</span><span class="p">,</span> <span class="kc">False</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">normalFont</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#overwrite to set headers. key: (orientation, role, section) val: str</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span> <span class="o">=</span> <span class="p">{</span>
+                           <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                               <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">)</span> <span class="c1">#default, normally overwritten</span>
+                           <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependencyBgFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependencyBgColor</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;hasDependency&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;bgColor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toolTipFunction</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;hasDependency&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataAllColLookup</span> <span class="o">=</span> <span class="p">{</span>   <span class="c1">#data lookup that applies to all columns</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FontRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fontLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;isBold&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;bgColor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataLookup</span> <span class="o">=</span> <span class="p">{(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataAllColLookup</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">FontRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">fontLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;isBold&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)),</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BackgroundRole</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;bgColor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#overwrite to set data. key: (role, col). val: function that takes (index, value)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorySetDataLookup</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#overwrite to set data. key: (role, col). val: function that takes (index, value)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">flagsLookup</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">}</span> <span class="c1">#default, normally overwritten</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categoryFlagsLookup</span> <span class="o">=</span> <span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numColumns</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1">#Overwrite with number of columns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowReordering</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#If True, nodes can be moved around</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allowDeletion</span> <span class="o">=</span> <span class="kc">False</span> <span class="c1">#If True, nodes can be deleted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">nodeType</span><span class="o">=</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">}</span> <span class="c1">#dictionary of all nodes, with string indicating hierarchy to that item</span>
+        <span class="c1">#contentList is a list of objects. Can be anything. If the objects have a category attribute, a tree will result.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addNodeList</span><span class="p">(</span><span class="n">contentList</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CategoryTreeModel.nodeFromIndex"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.nodeFromIndex">[docs]</a>    <span class="k">def</span> <span class="nf">nodeFromIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the node at the given index&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">index</span><span class="o">.</span><span class="n">internalPointer</span><span class="p">()</span> <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">isValid</span><span class="p">()</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.indexFromNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.indexFromNode">[docs]</a>    <span class="k">def</span> <span class="nf">indexFromNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a model index for the given node column&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parentIndex</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span> <span class="c1">#recursive</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.getLocation"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.getLocation">[docs]</a>    <span class="k">def</span> <span class="nf">getLocation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the node, column at the given index&quot;&quot;&quot;</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.index"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a model index for the node at the given row, column, parentIndex&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hasIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parentNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">)</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">parentNode</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span> <span class="k">if</span> <span class="n">node</span> <span class="k">else</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ind</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.rowCount"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.rowCount">[docs]</a>    <span class="k">def</span> <span class="nf">rowCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">node</span><span class="o">.</span><span class="n">childCount</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.columnCount"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.columnCount">[docs]</a>    <span class="k">def</span> <span class="nf">columnCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">numColumns</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.data"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="n">node</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLocation</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoryDataAllColLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="kc">None</span><span class="p">))(</span><span class="n">node</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataAllColLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="kc">None</span><span class="p">))(</span><span class="n">node</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.setData"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.setData">[docs]</a>    <span class="k">def</span> <span class="nf">setData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="n">node</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLocation</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorySetDataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">False</span><span class="p">)(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span> <span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">col</span><span class="p">),</span> <span class="k">lambda</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="kc">False</span><span class="p">)(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.parent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.parent">[docs]</a>    <span class="k">def</span> <span class="nf">parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">parentNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+        <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">()</span> <span class="k">if</span> <span class="p">(</span><span class="n">node</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="ow">or</span> <span class="n">parentNode</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">createIndex</span><span class="p">(</span><span class="n">parentNode</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">parentNode</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.flags"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.flags">[docs]</a>    <span class="k">def</span> <span class="nf">flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span> <span class="p">):</span>
+        <span class="n">node</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getLocation</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoryFlagsLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">flagsLookup</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.headerData"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.headerData">[docs]</a>    <span class="k">def</span> <span class="nf">headerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">orientation</span><span class="p">,</span> <span class="n">role</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">orientation</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">section</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.addNodeList"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.addNodeList">[docs]</a>    <span class="k">def</span> <span class="nf">addNodeList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contentList</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a list of nodes to the tree&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">listIndex</span><span class="p">,</span> <span class="n">content</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">contentList</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeNameAttr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">listIndex</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addNode</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.addNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.addNode">[docs]</a>    <span class="k">def</span> <span class="nf">addNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a node to the tree containing &#39;content&#39; with name &#39;name&#39;. Return new Node.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeNameAttr</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">categoriesAttr</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">categories</span><span class="o">.</span><span class="n">__class__</span><span class="o">!=</span><span class="nb">list</span><span class="p">:</span>
+                <span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">]</span>  <span class="c1"># make a list of one if it&#39;s not a list</span>
+            <span class="n">categories</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">categories</span><span class="p">))</span> <span class="c1">#make sure it&#39;s a list of strings</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCategoryNodes</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">nodeID</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">name</span> <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">id</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="n">nodeType</span> <span class="o">=</span> <span class="n">nodeTypes</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="n">nodeID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span> <span class="c1">#nodeIDs must be unique. If the nodeID has already been used, we add &quot;_n&quot; to the ID and increment &#39;n&#39; until we find an available ID</span>
+            <span class="n">count</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">baseNodeID</span> <span class="o">=</span> <span class="n">nodeID</span>
+            <span class="k">while</span> <span class="n">nodeID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span>
+                <span class="n">nodeID</span> <span class="o">=</span> <span class="n">baseNodeID</span><span class="o">+</span><span class="s2">&quot;_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                <span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">nodeID</span><span class="p">,</span> <span class="n">nodeType</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">nodeID</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="k">return</span> <span class="n">node</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.removeNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.removeNode">[docs]</a>    <span class="k">def</span> <span class="nf">removeNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">useModelReset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the specified node from the tree</span>
+<span class="sd">        if useModelReset is True, the calling function will use beginModelReset and endModelReset.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allowDeletion</span> <span class="ow">and</span> <span class="n">node</span><span class="o">!=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="n">dataNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="n">okToDelete</span> <span class="o">=</span> <span class="p">[</span><span class="nb">getattr</span><span class="p">(</span><span class="n">dataNode</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="s1">&#39;okToDelete&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">dataNode</span> <span class="ow">in</span> <span class="n">dataNodes</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">okToDelete</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">childNode</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">childNode</span><span class="p">,</span> <span class="n">useModelReset</span><span class="p">)</span> <span class="c1">#recursively delete children</span>
+                <span class="n">parent</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span>
+                <span class="n">nodeID</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">id</span>
+                <span class="n">parentIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">useModelReset</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">nodeID</span><span class="p">]</span>
+                <span class="n">deletedID</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">node</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">useModelReset</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>
+                <span class="k">return</span> <span class="n">deletedID</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.makeCategoryNodes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.makeCategoryNodes">[docs]</a>    <span class="k">def</span> <span class="nf">makeCategoryNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">categories</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Recursively creates tree nodes from the provided list of categories&quot;&quot;&quot;</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span> <span class="c1">#the empty key will always be in the dictionary, so the recursion will end</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCategoryNodes</span><span class="p">(</span><span class="n">categories</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="c1">#This is the recursive step</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">categories</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">,</span> <span class="nb">id</span><span class="o">=</span><span class="n">parent</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">name</span> <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">id</span> <span class="k">else</span> <span class="n">name</span><span class="p">,</span> <span class="n">nodeType</span><span class="o">=</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.addRow"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.addRow">[docs]</a>    <span class="k">def</span> <span class="nf">addRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add &#39;node&#39; to the table under &#39;parent&#39;&quot;&quot;&quot;</span>
+        <span class="n">parentIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">childCount</span><span class="p">(),</span> <span class="n">parent</span><span class="o">.</span><span class="n">childCount</span><span class="p">())</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.nodeFromContent"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.nodeFromContent">[docs]</a>    <span class="k">def</span> <span class="nf">nodeFromContent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">content</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the node associated with the specified content.</span>
+
+<span class="sd">        This is an inefficient O(n) search. However, there is no other way to do this reverse lookup without</span>
+<span class="sd">        making assumptions about the nature of &#39;content&#39;. Child classes can re-implement this function to</span>
+<span class="sd">        make it more efficient.&quot;&quot;&quot;</span>
+        <span class="n">success</span><span class="o">=</span><span class="kc">False</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">==</span><span class="n">content</span><span class="p">:</span>
+                <span class="n">success</span><span class="o">=</span><span class="kc">True</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">node</span> <span class="k">if</span> <span class="n">success</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.nodeFromId"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.nodeFromId">[docs]</a>    <span class="k">def</span> <span class="nf">nodeFromId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the node associated with the specified node id&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.changeCategory"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.changeCategory">[docs]</a>    <span class="k">def</span> <span class="nf">changeCategory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">deleteOldIfEmpty</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;change node category</span>
+<span class="sd">        Args:</span>
+<span class="sd">            node (Node): the node to move</span>
+<span class="sd">            categories (str or list[str]): new category(ies) for node. defaults to None</span>
+<span class="sd">            deleteOldIfEmpty (bool): if True, delete the node&#39;s former category node if it is now empty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeNameAttr</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+        <span class="n">oldParent</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">oldID</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="n">oldRow</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">categories</span><span class="p">:</span>
+            <span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="n">categories</span><span class="p">]</span> <span class="k">if</span> <span class="n">categories</span><span class="o">.</span><span class="n">__class__</span><span class="o">!=</span><span class="nb">list</span> <span class="k">else</span> <span class="n">categories</span> <span class="c1"># make a list of one if it&#39;s not a list</span>
+            <span class="n">categories</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">categories</span><span class="p">))</span> <span class="c1">#make sure it&#39;s a list of strings</span>
+            <span class="n">newParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">makeCategoryNodes</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">newParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span>
+        <span class="n">newID</span> <span class="o">=</span> <span class="n">newParent</span><span class="o">.</span><span class="n">id</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">name</span> <span class="k">if</span> <span class="n">newParent</span><span class="o">.</span><span class="n">id</span> <span class="k">else</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">newID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span> <span class="c1">#nodeIDs must be unique. If the nodeID has already been used, we add &quot;_n&quot; to the ID and increment &#39;n&#39; until we find an available ID</span>
+            <span class="n">count</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">baseNodeID</span> <span class="o">=</span> <span class="n">newID</span>
+            <span class="k">while</span> <span class="n">newID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span>
+                <span class="n">newID</span> <span class="o">=</span> <span class="n">baseNodeID</span><span class="o">+</span><span class="s2">&quot;_</span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+                <span class="n">count</span><span class="o">+=</span><span class="mi">1</span>
+        <span class="c1">#remove node from dict, oldParent children</span>
+        <span class="n">oldParentIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">oldParent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span><span class="n">oldParentIndex</span><span class="p">,</span> <span class="n">oldRow</span><span class="p">,</span> <span class="n">oldRow</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">oldParent</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">oldRow</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">oldID</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>
+        <span class="c1">#add node to new parent</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">newID</span>
+        <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">newParent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">newParent</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">newID</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span>
+        <span class="c1">#delete old category node if necessary</span>
+        <span class="n">oldDeleted</span><span class="p">,</span> <span class="n">deletedCategoryNodeIDs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeAllEmptyParents</span><span class="p">(</span><span class="n">oldParent</span><span class="p">)</span> <span class="k">if</span> <span class="n">deleteOldIfEmpty</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">node</span><span class="p">,</span> <span class="n">oldDeleted</span><span class="p">,</span> <span class="n">deletedCategoryNodeIDs</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.removeAllEmptyParents"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.removeAllEmptyParents">[docs]</a>    <span class="k">def</span> <span class="nf">removeAllEmptyParents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldParent</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">oldParent</span><span class="o">.</span><span class="n">children</span><span class="o">==</span><span class="p">[]</span> <span class="ow">and</span> <span class="n">oldParent</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="n">deletedID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">oldParent</span><span class="p">)</span>
+            <span class="n">allDeletedCategoryNodeIDs</span> <span class="o">=</span> <span class="p">[</span><span class="n">deletedID</span><span class="p">]</span>
+            <span class="n">oldDeleted</span><span class="p">,</span> <span class="n">deletedCategoryNodeIDs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeAllEmptyParents</span><span class="p">(</span><span class="n">oldParent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">oldDeleted</span><span class="p">:</span>
+                <span class="n">allDeletedCategoryNodeIDs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">deletedCategoryNodeIDs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">allDeletedCategoryNodeIDs</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[]</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.clear"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.clear">[docs]</a>    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;clear the tree content&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nodeDict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.moveRow"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.moveRow">[docs]</a>    <span class="k">def</span> <span class="nf">moveRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">up</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;move modelIndex &#39;index&#39; up if up is True, else down&quot;&quot;&quot;</span>
+        <span class="n">node</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">delta</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">up</span> <span class="k">else</span> <span class="mi">1</span>
+        <span class="n">parentIndex</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="o">+</span><span class="n">delta</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">children</span><span class="p">):</span>
+            <span class="n">moveValid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">beginMoveRows</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="p">,</span> <span class="n">parentIndex</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span> <span class="k">if</span> <span class="n">up</span> <span class="k">else</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">moveValid</span><span class="p">:</span>
+                <span class="n">node</span><span class="o">.</span><span class="n">row</span> <span class="o">+=</span> <span class="n">delta</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">endMoveRows</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.contentFromIndex"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.contentFromIndex">[docs]</a>    <span class="k">def</span> <span class="nf">contentFromIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get the content associated with the given index&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">content</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.getTopNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.getTopNode">[docs]</a>    <span class="k">def</span> <span class="nf">getTopNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the highest level category node before root in the tree above node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">node</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="k">else</span> <span class="p">(</span><span class="n">node</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">getTopNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span> <span class="c1">#recursive</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.getFirstDataNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.getFirstDataNode">[docs]</a>    <span class="k">def</span> <span class="nf">getFirstDataNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the first data node under (and including) node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">node</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.getLastDataNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.getLastDataNode">[docs]</a>    <span class="k">def</span> <span class="nf">getLastDataNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the last data node under (and including) node&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">node</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">data</span> <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLastDataNode</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeModel.getDataNodes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeModel.getDataNodes">[docs]</a>    <span class="k">def</span> <span class="nf">getDataNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get a list of all data nodes under (and including) node&quot;&quot;&quot;</span>
+        <span class="n">dataNodes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">nodeType</span><span class="o">==</span><span class="n">nodeTypes</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">dataNodes</span><span class="o">=</span><span class="p">[</span><span class="n">node</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">childNode</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+                <span class="n">childSubNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDataNodes</span><span class="p">(</span><span class="n">childNode</span><span class="p">)</span> <span class="c1">#recursive step</span>
+                <span class="k">if</span> <span class="n">childSubNodes</span><span class="p">:</span>
+                    <span class="n">dataNodes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">childSubNodes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataNodes</span></div></div>
+
+
+<div class="viewcode-block" id="CategoryTreeView"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView">[docs]</a><span class="k">class</span> <span class="nc">CategoryTreeView</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QTreeView</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class for viewing category trees&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CategoryTreeView</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span> <span class="o">=</span> <span class="n">KeyListFilter</span><span class="p">(</span> <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageDown</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Delete</span><span class="p">],</span>
+                                     <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_B</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_W</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_R</span><span class="p">]</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="o">.</span><span class="n">keyPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onKey</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="o">.</span><span class="n">controlKeyPressed</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">onControl</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">installEventFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filter</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CategoryTreeView.onKey"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onKey">[docs]</a>    <span class="k">def</span> <span class="nf">onKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Delete</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onDelete</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageDown</span><span class="p">]:</span>
+            <span class="n">up</span> <span class="o">=</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_PageUp</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onReorder</span><span class="p">(</span><span class="n">up</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onControl"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onControl">[docs]</a>    <span class="k">def</span> <span class="nf">onControl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_B</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onBold</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Up</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">collapseAll</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_Down</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_W</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onSetBackgroundColor</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Key_R</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onRemoveBackgroundColor</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onBold"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onBold">[docs]</a>    <span class="k">def</span> <span class="nf">onBold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">indexList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRowIndexes</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">leftIndex</span> <span class="ow">in</span> <span class="n">indexList</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">leftIndex</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">isBold</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">node</span><span class="o">.</span><span class="n">isBold</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="s1">&#39;isBold&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="kc">True</span>
+            <span class="n">rightIndex</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">numColumns</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftIndex</span><span class="p">,</span> <span class="n">rightIndex</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onDelete"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onDelete">[docs]</a>    <span class="k">def</span> <span class="nf">onDelete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">allowDeletion</span><span class="p">:</span>
+            <span class="n">selectedNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+            <span class="n">useModelReset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">selectedNodes</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">10</span>
+            <span class="n">topNodeList</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">selectedNodes</span> <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">selectedNodes</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">useModelReset</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">beginResetModel</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">topNodeList</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">!=</span><span class="n">model</span><span class="o">.</span><span class="n">root</span><span class="p">:</span> <span class="c1">#don&#39;t delete root</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">removeNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">useModelReset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">useModelReset</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">endResetModel</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onReorder"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onReorder">[docs]</a>    <span class="k">def</span> <span class="nf">onReorder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">up</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">allowReordering</span><span class="p">:</span>
+            <span class="n">indexList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedRowIndexes</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">up</span><span class="p">:</span> <span class="n">indexList</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">indexList</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">moveRow</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">up</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.selectedRowIndexes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.selectedRowIndexes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedRowIndexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a list of unique model indexes corresponding to column &#39;col&#39; of each selected element, sorted by row.</span>
+
+<span class="sd">        Built-in selectionModel().selectedRows function seems to have a bug&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.selectedNodes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.selectedNodes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Same as selectedRows, but returns list of nodes rather than list of model indexes&quot;&quot;&quot;</span>
+        <span class="n">allIndexList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">allIndexList</span><span class="p">:</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">nodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+        <span class="n">nodeList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">nodeList</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="n">node</span><span class="o">.</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nodeList</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.selectedTopIndexes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.selectedTopIndexes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedTopIndexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns list of unique top level model indexes corresponding to column &#39;col&#39; of the top level of each selected element, sorted by row.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedTopNodes</span><span class="p">()]</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.selectedTopNodes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.selectedTopNodes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedTopNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Same as selectedTopIndexes, but returns list of nodes rather than list of model indexes&quot;&quot;&quot;</span>
+        <span class="n">nodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">topNodeList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodeList</span><span class="p">:</span>
+            <span class="n">topNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">getTopNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">topNode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">topNodeList</span><span class="p">:</span>
+                <span class="n">topNodeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topNode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">topNodeList</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.selectedDataNodes"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.selectedDataNodes">[docs]</a>    <span class="k">def</span> <span class="nf">selectedDataNodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns list of first data nodes of selected nodes&quot;&quot;&quot;</span>
+        <span class="n">nodeList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">dataNodeList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodeList</span><span class="p">:</span>
+            <span class="n">firstDataNode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">getFirstDataNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">firstDataNode</span><span class="p">:</span>
+                <span class="n">dataNodeList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">firstDataNode</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dataNodeList</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.treeState"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.treeState">[docs]</a>    <span class="k">def</span> <span class="nf">treeState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns tree state for saving config&quot;&quot;&quot;</span>
+        <span class="n">columnWidths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">()</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeColumnWidth</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">treeMarkup</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.treeColumnWidth"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.treeColumnWidth">[docs]</a>    <span class="k">def</span> <span class="nf">treeColumnWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">()</span><span class="o">.</span><span class="n">saveState</span><span class="p">()</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="CategoryTreeView.colorName"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.colorName">[docs]</a>    <span class="k">def</span> <span class="nf">colorName</span><span class="p">(</span><span class="n">child</span><span class="p">):</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s1">&#39;bgColor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">color</span><span class="o">.</span><span class="n">name</span><span class="p">())</span> <span class="k">if</span> <span class="n">color</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.treeMarkup"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.treeMarkup">[docs]</a>    <span class="k">def</span> <span class="nf">treeMarkup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nodeStates</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">nodeDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">nodeStates</span><span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">id</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span> <span class="n">child</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+                                     <span class="nb">getattr</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="s1">&#39;isBold&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">isExpanded</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">child</span><span class="p">)),</span>
+                                     <span class="bp">self</span><span class="o">.</span><span class="n">colorName</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
+                                     <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">node</span><span class="o">.</span><span class="n">children</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">nodeStates</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.restoreTreeState"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.restoreTreeState">[docs]</a>    <span class="k">def</span> <span class="nf">restoreTreeState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;load in a tree state from the given column widths and state&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state</span><span class="p">:</span>
+            <span class="n">columnWidths</span><span class="p">,</span> <span class="n">nodeStates</span> <span class="o">=</span> <span class="n">state</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreTreeColumnWidth</span><span class="p">(</span><span class="n">columnWidths</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restoreTreeMarkup</span><span class="p">(</span><span class="n">nodeStates</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.restoreTreeColumnWidth"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.restoreTreeColumnWidth">[docs]</a>    <span class="k">def</span> <span class="nf">restoreTreeColumnWidth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columnWidths</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">columnWidths</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">()</span><span class="o">.</span><span class="n">restoreState</span><span class="p">(</span><span class="n">columnWidths</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.restoreTreeMarkup"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.restoreTreeMarkup">[docs]</a>    <span class="k">def</span> <span class="nf">restoreTreeMarkup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nodeStates</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">nodeStates</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">allowReordering</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">beginResetModel</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">parentID</span><span class="p">,</span> <span class="n">childDataList</span> <span class="ow">in</span> <span class="n">nodeStates</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">parentNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">nodeFromId</span><span class="p">(</span><span class="n">parentID</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">parentNode</span><span class="p">:</span>
+                        <span class="n">childIDList</span> <span class="o">=</span> <span class="p">[</span><span class="n">childData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">childData</span> <span class="ow">in</span> <span class="n">childDataList</span><span class="p">]</span>
+                        <span class="n">parentNode</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">childNode</span><span class="p">:</span> <span class="n">indexWithDefault</span><span class="p">(</span><span class="n">childIDList</span><span class="p">,</span> <span class="n">childNode</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">endResetModel</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">nodeDataList</span> <span class="ow">in</span> <span class="n">nodeStates</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">nodeData</span> <span class="ow">in</span> <span class="n">nodeDataList</span><span class="p">:</span>
+                    <span class="n">nodeID</span><span class="p">,</span> <span class="n">isBold</span><span class="p">,</span> <span class="n">expanded</span><span class="p">,</span> <span class="n">bgColor</span> <span class="o">=</span> <span class="n">nodeData</span>
+                    <span class="k">if</span> <span class="n">nodeID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">:</span>
+                        <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="n">nodeID</span><span class="p">]</span>
+                        <span class="n">node</span><span class="o">.</span><span class="n">isBold</span> <span class="o">=</span> <span class="n">isBold</span>
+                        <span class="n">node</span><span class="o">.</span><span class="n">bgColor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">bgColor</span><span class="p">)</span> <span class="k">if</span> <span class="n">bgColor</span> <span class="k">else</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">expanded</span><span class="p">:</span>
+                            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onSetBackgroundColor"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onSetBackgroundColor">[docs]</a>    <span class="k">def</span> <span class="nf">onSetBackgroundColor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">color</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QColorDialog</span><span class="o">.</span><span class="n">getColor</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">color</span><span class="o">.</span><span class="n">isValid</span><span class="p">():</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBackgroundColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.onRemoveBackgroundColor"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.onRemoveBackgroundColor">[docs]</a>    <span class="k">def</span> <span class="nf">onRemoveBackgroundColor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setBackgroundColor</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.setBackgroundColor"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.setBackgroundColor">[docs]</a>    <span class="k">def</span> <span class="nf">setBackgroundColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">color</span><span class="p">):</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedNodes</span><span class="p">()</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">bgColor</span> <span class="o">=</span> <span class="n">color</span>
+            <span class="n">leftIndex</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">rightIndex</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">numColumns</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">leftIndex</span><span class="p">,</span> <span class="n">rightIndex</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CategoryTreeView.expandToNode"><a class="viewcode-back" href="../../code/uiModules-doc.html#uiModules.CategoryTree.CategoryTreeView.expandToNode">[docs]</a>    <span class="k">def</span> <span class="nf">expandToNode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Expand all parents above specified node&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+        <span class="n">parentNode</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">parent</span>
+        <span class="k">if</span> <span class="n">parentNode</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">root</span><span class="p">:</span>
+            <span class="n">parentIndex</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">indexFromNode</span><span class="p">(</span><span class="n">parentNode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">parentIndex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">expandToNode</span><span class="p">(</span><span class="n">parentNode</span><span class="p">)</span></div></div>
+
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="k">class</span> <span class="nc">myContent</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data1</span><span class="p">,</span> <span class="n">data2</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hasDependency</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">string</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">isBold</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data1</span> <span class="o">=</span> <span class="n">data1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data2</span> <span class="o">=</span> <span class="n">data2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">categories</span> <span class="o">=</span> <span class="n">categories</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hasDependency</span> <span class="o">=</span> <span class="n">hasDependency</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">string</span> <span class="o">=</span> <span class="n">string</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">isBold</span> <span class="o">=</span> <span class="n">isBold</span>
+        <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data1</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data2</span><span class="p">)))</span>
+    <span class="k">class</span> <span class="nc">myModel</span><span class="p">(</span><span class="n">CategoryTreeModel</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contentList</span><span class="o">=</span><span class="p">[],</span> <span class="n">parent</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categoriesAttr</span><span class="o">=</span><span class="s1">&#39;categories&#39;</span><span class="p">,</span> <span class="n">nodeNameAttr</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">):</span>
+            <span class="nb">super</span><span class="p">(</span><span class="n">myModel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">contentList</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">categoriesAttr</span><span class="p">,</span> <span class="n">nodeNameAttr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">numColumns</span><span class="o">=</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allowReordering</span><span class="o">=</span><span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">allowDeletion</span><span class="o">=</span><span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">headerLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                    <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span> <span class="s1">&#39;Name&#39;</span><span class="p">,</span>
+                    <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="s1">&#39;Value&#39;</span>
+                    <span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                           <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                               <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">data1</span><span class="p">),</span>
+                           <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                               <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">data2</span><span class="p">),</span>
+                           <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+                               <span class="k">lambda</span> <span class="n">node</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">data2</span><span class="p">)</span>
+                           <span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setDataLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span> <span class="k">lambda</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                <span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">flagsLookup</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="mi">0</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span><span class="p">,</span>
+                <span class="mi">1</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEnabled</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsEditable</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsSelectable</span>
+                <span class="p">})</span>
+
+        <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodeFromIndex</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">data2</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">myModel</span><span class="p">([</span><span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;hot dog&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Foods&#39;</span><span class="p">,</span> <span class="s1">&#39;Red&#39;</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;qq&#39;</span><span class="p">,</span> <span class="n">isBold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;grapes&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Foods&#39;</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;qq&#39;</span><span class="p">,</span> <span class="n">isBold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;strawberry&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Foods&#39;</span><span class="p">,</span> <span class="s1">&#39;Red&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;blueberry&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Foods&#39;</span><span class="p">,</span> <span class="s1">&#39;Blue&#39;</span><span class="p">],</span> <span class="n">isBold</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;golf&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Games&#39;</span><span class="p">,</span> <span class="s1">&#39;ball based&#39;</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;abc&#39;</span><span class="p">),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;baseball&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Games&#39;</span><span class="p">,</span> <span class="s1">&#39;ball based&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;hockey&#39;</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Games&#39;</span><span class="p">,</span> <span class="s1">&#39;puck based&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;People&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;People&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;Huey&#39;</span><span class="p">,</span> <span class="mi">225</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;People&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;Dewey&#39;</span><span class="p">,</span> <span class="mi">1251</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;People&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;Louie&#39;</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;People&#39;</span><span class="p">]),</span>
+                     <span class="n">myContent</span><span class="p">(</span><span class="s1">&#39;other&#39;</span><span class="p">,</span> <span class="mi">125121</span><span class="p">)</span>
+                     <span class="p">],</span> <span class="n">nodeNameAttr</span><span class="o">=</span><span class="s1">&#39;data1&#39;</span><span class="p">)</span>
+    <span class="n">view</span> <span class="o">=</span> <span class="n">CategoryTreeView</span><span class="p">()</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QAbstractItemView</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+    <span class="n">window</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMainWindow</span><span class="p">()</span>
+    <span class="n">dock</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QDockWidget</span><span class="p">(</span><span class="s2">&quot;Category Tree View&quot;</span><span class="p">)</span>
+    <span class="n">dock</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">addDockWidget</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">BottomDockWidgetArea</span><span class="p">,</span> <span class="n">dock</span><span class="p">)</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">(</span><span class="s1">&#39;move&#39;</span><span class="p">)</span>
+    <span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">changeCategory</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">nodeDict</span><span class="p">[</span><span class="s1">&#39;Games_ball based_golf&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">]))</span>
+
+    <span class="n">window</span><span class="o">.</span><span class="n">setCentralWidget</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">expandAll</span><span class="p">()</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">view</span><span class="o">.</span><span class="n">resizeColumnToContents</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

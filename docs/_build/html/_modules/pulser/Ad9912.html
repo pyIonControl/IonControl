@@ -1,0 +1,289 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.Ad9912 &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.Ad9912</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.Ad9912</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pulser.PulserHardwareClient</span> <span class="k">import</span> <span class="n">check</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+
+
+<div class="viewcode-block" id="Ad9912Exception"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912Exception">[docs]</a><span class="k">class</span> <span class="nc">Ad9912Exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="CombineWrites"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.CombineWrites">[docs]</a><span class="k">class</span> <span class="nc">CombineWrites</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ad9912</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span> <span class="o">=</span> <span class="n">ad9912</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span><span class="o">.</span><span class="n">autoFlush</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exittype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">restoreValue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ad9912</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Ad9912"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912">[docs]</a><span class="k">class</span> <span class="nc">Ad9912</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulser</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span> <span class="o">=</span> <span class="n">pulser</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">autoFlush</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Ad9912.rawToMagnitude"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.rawToMagnitude">[docs]</a>    <span class="k">def</span> <span class="nf">rawToMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39; MHz&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">raw</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">48</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Ad9912.setSquareEnabled"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.setSquareEnabled">[docs]</a>    <span class="k">def</span> <span class="nf">setSquareEnabled</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">enable</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">enable</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Ad9912.setFrequency"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.setFrequency">[docs]</a>    <span class="k">def</span> <span class="nf">setFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">frequency</span><span class="p">):</span>
+        <span class="n">intFrequency</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">48</span> <span class="o">*</span> <span class="n">frequency</span><span class="o">.</span><span class="n">m_as</span><span class="p">(</span><span class="s1">&#39;GHz&#39;</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffffffff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">intFrequency</span></div>
+    
+<div class="viewcode-block" id="Ad9912.setFrequencyRaw"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.setFrequencyRaw">[docs]</a>    <span class="k">def</span> <span class="nf">setFrequencyRaw</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">intFrequency</span><span class="p">)</span>
+        <span class="c1">#self.sendCommand(channel, 0, intFrequency &gt;&gt; 16 )</span>
+        <span class="c1">#self.sendCommand(channel, 4, intFrequency &amp; 0xffff ) # Frequency fine</span>
+        <span class="k">return</span> <span class="n">intFrequency</span>        </div>
+    
+<div class="viewcode-block" id="Ad9912.setPhase"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.setPhase">[docs]</a>    <span class="k">def</span> <span class="nf">setPhase</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">phase</span><span class="p">):</span>
+        <span class="n">intPhase</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="mi">14</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">phase</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">intPhase</span> <span class="o">&amp;</span> <span class="mh">0x3fff</span> <span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Ad9912.setAmplitude"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.setAmplitude">[docs]</a>    <span class="k">def</span> <span class="nf">setAmplitude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">amplitude</span><span class="p">):</span>
+        <span class="n">intAmplitude</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">amplitude</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sendCommand</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">intAmplitude</span> <span class="o">&amp;</span> <span class="mh">0x3ff</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Ad9912.flush"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.flush">[docs]</a>    <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">setMultipleExtendedWireIn</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Ad9912.sendCommand"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.sendCommand">[docs]</a>    <span class="k">def</span> <span class="nf">sendCommand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">commandBuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">([(</span><span class="mh">0x12</span><span class="p">,</span> <span class="n">data</span><span class="p">),</span>
+                                       <span class="p">(</span><span class="mh">0x1e</span><span class="p">,</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">15</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">channel</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span> <span class="o">|</span> <span class="p">(</span><span class="n">cmd</span> <span class="o">&amp;</span> <span class="mh">0xf</span><span class="p">))])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoFlush</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser not available&quot;</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9912.update"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channelmask</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="n">channelmask</span><span class="p">))</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="Ad9912.reset"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.Ad9912.Ad9912.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span>  <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x04</span><span class="p">,</span> <span class="n">mask</span><span class="o">&amp;</span><span class="mh">0xffff</span> <span class="p">),</span> <span class="s2">&quot;AD9912 reset mask&quot;</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">pulser</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x42</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s2">&quot;DDS Reset&quot;</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Pulser not available&quot;</span> <span class="p">)</span></div></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

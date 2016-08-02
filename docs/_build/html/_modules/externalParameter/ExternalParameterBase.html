@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>externalParameter.ExternalParameterBase &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>externalParameter.ExternalParameterBase</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for externalParameter.ExternalParameterBase</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">pyqtgraph.parametertree</span> <span class="k">import</span> <span class="n">Parameter</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">externalParameter.OutputChannel</span> <span class="k">import</span> <span class="n">OutputChannel</span><span class="p">,</span>\
+    <span class="n">SlowAdjustOutputChannel</span>
+<span class="kn">from</span> <span class="nn">externalParameter.InputChannel</span> <span class="k">import</span> <span class="n">InputChannel</span>
+<span class="kn">from</span> <span class="nn">.InstrumentSettings</span> <span class="k">import</span> <span class="n">InstrumentSettings</span>
+
+<span class="n">InstrumentDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+<div class="viewcode-block" id="InstrumentException"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.InstrumentException">[docs]</a><span class="k">class</span> <span class="nc">InstrumentException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="InstrumentMeta"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.InstrumentMeta">[docs]</a><span class="k">class</span> <span class="nc">InstrumentMeta</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="n">instrclass</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">InstrumentMeta</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">!=</span><span class="s1">&#39;ExternalParameterBase&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;className&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">InstrumentException</span><span class="p">(</span><span class="s2">&quot;Instrument class needs to have class attribute &#39;className&#39;&quot;</span><span class="p">)</span>
+            <span class="n">InstrumentDict</span><span class="p">[</span><span class="n">dct</span><span class="p">[</span><span class="s1">&#39;className&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">instrclass</span>
+        <span class="k">return</span> <span class="n">instrclass</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase">[docs]</a><span class="k">class</span> <span class="nc">ExternalParameterBase</span><span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">InstrumentMeta</span><span class="p">):</span>
+    <span class="n">_outputChannels</span> <span class="o">=</span> <span class="p">{</span> <span class="kc">None</span><span class="p">:</span> <span class="kc">None</span> <span class="p">}</span>    <span class="c1"># a single channel with key None designates a device only supporting a single channel</span>
+    <span class="n">_inputChannels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">_channelParams</span> <span class="o">=</span> <span class="p">{</span><span class="kc">None</span><span class="p">:</span> <span class="p">()}</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">deviceSettings</span><span class="p">,</span> <span class="n">globalDict</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">deviceSettings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setDefaults</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;params&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paramDef</span><span class="p">())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span><span class="o">.</span><span class="n">sigTreeStateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UniqueConnection</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span> <span class="o">=</span> <span class="n">globalDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">createOutputChannels</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExternalParameterBase.createOutputChannels"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.createOutputChannels">[docs]</a>    <span class="k">def</span> <span class="nf">createOutputChannels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;create all output channels&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[(</span><span class="n">channel</span><span class="p">,</span> <span class="n">SlowAdjustOutputChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">globalDict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">channelSettings</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">channel</span><span class="p">,</span> <span class="nb">dict</span><span class="p">()),</span> <span class="n">unit</span><span class="p">))</span> 
+                                    <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">unit</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ExternalParameterBase.lastOutputValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.lastOutputValue">[docs]</a>    <span class="k">def</span> <span class="nf">lastOutputValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the last value written to channel&quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span></div>
+        
+<div class="viewcode-block" id="ExternalParameterBase.initializeChannelsToExternals"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.initializeChannelsToExternals">[docs]</a>    <span class="k">def</span> <span class="nf">initializeChannelsToExternals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize all channels to the values read from the instrument&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">cname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span><span class="p">[</span><span class="n">cname</span><span class="p">]</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">cname</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalParameterBase.dimension"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.dimension">[docs]</a>    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the dimension eg &#39;Hz&#39; or &#39;V&#39; for channel&quot;&quot;&quot;</span> 
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> </div>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># re-create the parameters each time to prevent a exception that says the signal is not connected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;group&#39;</span><span class="p">,</span> <span class="n">children</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">paramDef</span><span class="p">())</span>     
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span><span class="o">.</span><span class="n">sigTreeStateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">UniqueConnection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter</span>        
+        
+<div class="viewcode-block" id="ExternalParameterBase.setDefaults"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.setDefaults">[docs]</a>    <span class="k">def</span> <span class="nf">setDefaults</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;channelSettings&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">cname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">channelSettings</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="n">cname</span><span class="p">,</span> <span class="n">InstrumentSettings</span><span class="p">()</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;channelSettings&#39;</span><span class="p">,</span> <span class="nb">dict</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">cname</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_outputChannels</span><span class="p">:</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">channelSettings</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span> <span class="n">cname</span><span class="p">,</span> <span class="n">InstrumentSettings</span><span class="p">()</span> <span class="p">)</span></div>
+               
+<div class="viewcode-block" id="ExternalParameterBase.setValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.setValue">[docs]</a>    <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;write the value to the instrument&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase.getValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.getValue">[docs]</a>    <span class="k">def</span> <span class="nf">getValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;returns current value as read from instrument (if the instruments supports reading)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastOutputValue</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase.getExternalValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.getExternalValue">[docs]</a>    <span class="k">def</span> <span class="nf">getExternalValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        if the value is determined externally, return the external value, otherwise return value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">channel</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalParameterBase.paramDef"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.paramDef">[docs]</a>    <span class="k">def</span> <span class="nf">paramDef</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return the parameter definition used by pyqtgraph parametertree to show the gui</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[]</span></div>
+        
+<div class="viewcode-block" id="ExternalParameterBase.update"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">changes</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        update the parameter, called by the signal of pyqtgraph parametertree</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;ExternalParameterBase.update&quot;</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">param</span><span class="p">,</span> <span class="n">change</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">changes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">change</span><span class="o">==</span><span class="s1">&#39;value&#39;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="s2">&quot;update&quot;</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)]</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="nb">setattr</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">(),</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">change</span><span class="o">==</span><span class="s1">&#39;activated&#39;</span><span class="p">:</span>
+                <span class="nb">getattr</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;field&#39;</span><span class="p">]</span> <span class="p">)()</span></div>
+            
+<div class="viewcode-block" id="ExternalParameterBase.close"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase.fullName"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.fullName">[docs]</a>    <span class="k">def</span> <span class="nf">fullName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2">_</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">channel</span><span class="p">)</span> <span class="k">if</span> <span class="n">channel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase.useExternalValue"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.useExternalValue">[docs]</a>    <span class="k">def</span> <span class="nf">useExternalValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+            
+<div class="viewcode-block" id="ExternalParameterBase.outputChannelList"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.outputChannelList">[docs]</a>    <span class="k">def</span> <span class="nf">outputChannelList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">channelName</span><span class="p">),</span> <span class="n">channel</span><span class="p">)</span> <span class="k">for</span> <span class="n">channelName</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputChannels</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span></div>
+    
+<div class="viewcode-block" id="ExternalParameterBase.inputChannelList"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.inputChannelList">[docs]</a>    <span class="k">def</span> <span class="nf">inputChannelList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">fullName</span><span class="p">(</span><span class="n">channel</span><span class="p">),</span> <span class="n">InputChannel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">channel</span><span class="p">))</span> <span class="k">for</span> <span class="n">channel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inputChannels</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span></div>
+        
+<div class="viewcode-block" id="ExternalParameterBase.getInputData"><a class="viewcode-back" href="../../code/externalParameter-doc.html#externalParameter.ExternalParameterBase.ExternalParameterBase.getInputData">[docs]</a>    <span class="k">def</span> <span class="nf">getInputData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

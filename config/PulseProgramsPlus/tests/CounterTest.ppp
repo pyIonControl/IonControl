@@ -1,0 +1,13 @@
+const co = 2
+const channel = 3
+
+parameter a
+parameter b
+parameter c
+
+c = a << b
+c = b
+c = load_count(channel)
+
+write_result( channel, c )
+

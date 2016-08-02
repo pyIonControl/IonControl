@@ -1,0 +1,1555 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>fit &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>fit</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/fit-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fit">
+<h1>fit<a class="headerlink" href="#fit" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-fit.FitFunctionBase">
+<span id="fitfunctionbase"></span><h2>FitFunctionBase<a class="headerlink" href="#module-fit.FitFunctionBase" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.FitFunctionBase.FitFunctionBase">
+<em class="property">class </em><code class="descname">FitFunctionBase</code><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.allFitParameters">
+<code class="descname">allFitParameters</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.allFitParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.allFitParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list where the disabled parameters are added to the enabled parameters given in p</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="fit.FitFunctionBase.FitFunctionBase.coercedValue">
+<em class="property">static </em><code class="descname">coercedValue</code><span class="sig-paren">(</span><em>val</em>, <em>bounds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.coercedValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.coercedValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.enabledBounds">
+<code class="descname">enabledBounds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.enabledBounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.enabledBounds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.enabledFitParameters">
+<code class="descname">enabledFitParameters</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.enabledFitParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.enabledFitParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of only the enabled fit parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.enabledParameterNames">
+<code class="descname">enabledParameterNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.enabledParameterNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.enabledParameterNames" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of only the enabled fit parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.enabledSmartStartValues">
+<code class="descname">enabledSmartStartValues</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.enabledSmartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.enabledSmartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.enabledStartParameters">
+<code class="descname">enabledStartParameters</code><span class="sig-paren">(</span><em>parameters=None</em>, <em>bounded=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.enabledStartParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.enabledStartParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of only the enabled start parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>globalDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctionBase.FitFunctionBase.expression">
+<code class="descname">expression</code><em class="property"> = &lt;modules.Expression.Expression object at 0x000002665C28E4E0&gt;</em><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.expression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.leastsq">
+<code class="descname">leastsq</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters=None</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.leastsq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.leastsq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctionBase.FitFunctionBase.name">
+<code class="descname">name</code><em class="property"> = 'None'</em><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctionBase.FitFunctionBase.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = []</em><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.replacementDict">
+<code class="descname">replacementDict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.replacementDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.replacementDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.setConstant">
+<code class="descname">setConstant</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.setConstant"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.setConstant" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.setEnabledConfidenceParameters">
+<code class="descname">setEnabledConfidenceParameters</code><span class="sig-paren">(</span><em>confidence</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.setEnabledConfidenceParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.setEnabledConfidenceParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the parameter confidence values for the enabled parameters</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.setEnabledFitParameters">
+<code class="descname">setEnabledFitParameters</code><span class="sig-paren">(</span><em>parameters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.setEnabledFitParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.setEnabledFitParameters" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the fitted parameters if enabled</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.toHdf5">
+<code class="descname">toHdf5</code><span class="sig-paren">(</span><em>group</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.toHdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.toHdf5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.toXmlElement">
+<code class="descname">toXmlElement</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.toXmlElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.toXmlElement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctionBase.FitFunctionBase.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionBase.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionBase.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="fit.FitFunctionBase.FitFunctionException">
+<em class="property">exception </em><code class="descname">FitFunctionException</code><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctionBase.FitFunctionMeta">
+<em class="property">class </em><code class="descname">FitFunctionMeta</code><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#FitFunctionMeta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.FitFunctionMeta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctionBase.ResultRecord">
+<em class="property">class </em><code class="descname">ResultRecord</code><span class="sig-paren">(</span><em>name=None</em>, <em>definition=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#ResultRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.ResultRecord" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.FitFunctionBase.ResultRecord.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['name', 'definition', 'value']</em><a class="headerlink" href="#fit.FitFunctionBase.ResultRecord.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.FitFunctionBase.native">
+<code class="descname">native</code><span class="sig-paren">(</span><em>method</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctionBase.html#native"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctionBase.native" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tag a method native to detect function overwrites in derived classes.
+Used to detect whether smartStartValues are implemented</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fit.FitFunctions">
+<span id="fitfunctions"></span><h2>FitFunctions<a class="headerlink" href="#module-fit.FitFunctions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.FitFunctions.AsymLorentzianFit">
+<em class="property">class </em><code class="descname">AsymLorentzianFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#AsymLorentzianFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.AsymLorentzianFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.AsymLorentzianFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>s1</em>, <em>s2</em>, <em>x0</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#AsymLorentzianFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.AsymLorentzianFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.AsymLorentzianFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*s**2*1/(s**2+(x-x0)**2)+O s=s1 for x&lt;x0, s=s2 x&gt;x0'</em><a class="headerlink" href="#fit.FitFunctions.AsymLorentzianFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.AsymLorentzianFit.name">
+<code class="descname">name</code><em class="property"> = 'Asymmetric Lorentzian'</em><a class="headerlink" href="#fit.FitFunctions.AsymLorentzianFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.AsymLorentzianFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 's1', ' s2', 'x0', 'O']</em><a class="headerlink" href="#fit.FitFunctions.AsymLorentzianFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.ChripedSinSqFit">
+<em class="property">class </em><code class="descname">ChripedSinSqFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#ChripedSinSqFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.ChripedSinSqFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.ChripedSinSqFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>T</em>, <em>x0</em>, <em>max_</em>, <em>min_</em>, <em>dt</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#ChripedSinSqFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.ChripedSinSqFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.ChripedSinSqFit.functionString">
+<code class="descname">functionString</code><em class="property"> = '(max-min)*sin^2( pi*(x-x0)/(2*(T+dt*x) ))+min'</em><a class="headerlink" href="#fit.FitFunctions.ChripedSinSqFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.ChripedSinSqFit.name">
+<code class="descname">name</code><em class="property"> = 'ChirpedSin2'</em><a class="headerlink" href="#fit.FitFunctions.ChripedSinSqFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.ChripedSinSqFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['T', 'x0', 'max', 'min', 'dt']</em><a class="headerlink" href="#fit.FitFunctions.ChripedSinSqFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.CosExpFit">
+<em class="property">class </em><code class="descname">CosExpFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosExpFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosExpFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.CosExpFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>T</em>, <em>theta</em>, <em>O</em>, <em>tau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosExpFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosExpFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosExpFit.functionString">
+<code class="descname">functionString</code><em class="property"> = '(A/2) * (1 - exp(-x/tau)Cos(pi*t/(2*T)+theta)) + O'</em><a class="headerlink" href="#fit.FitFunctions.CosExpFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosExpFit.name">
+<code class="descname">name</code><em class="property"> = 'Cos Exponential Decay'</em><a class="headerlink" href="#fit.FitFunctions.CosExpFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosExpFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'T', 'theta', 'O', 'tau']</em><a class="headerlink" href="#fit.FitFunctions.CosExpFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.CosFit">
+<em class="property">class </em><code class="descname">CosFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.FitFunctions.CosFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*cos(2*pi*k*x+theta)+O'</em><a class="headerlink" href="#fit.FitFunctions.CosFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosFit.name">
+<code class="descname">name</code><em class="property"> = 'Cos'</em><a class="headerlink" href="#fit.FitFunctions.CosFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'k', 'theta', 'O']</em><a class="headerlink" href="#fit.FitFunctions.CosFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.CosFit.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosFit.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosFit.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.CosFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.CosFit.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosFit.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosFit.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.CosSqFit">
+<em class="property">class </em><code class="descname">CosSqFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosSqFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosSqFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.CosSqFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>T</em>, <em>theta</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosSqFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosSqFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*cos^2(pi*x/(2*T)+theta)+O'</em><a class="headerlink" href="#fit.FitFunctions.CosSqFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqFit.name">
+<code class="descname">name</code><em class="property"> = 'Cos2'</em><a class="headerlink" href="#fit.FitFunctions.CosSqFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'T', 'theta', 'O']</em><a class="headerlink" href="#fit.FitFunctions.CosSqFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.CosSqPeakFit">
+<em class="property">class </em><code class="descname">CosSqPeakFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosSqPeakFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosSqPeakFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.CosSqPeakFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>T</em>, <em>x0</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#CosSqPeakFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.CosSqPeakFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqPeakFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*cos^2(pi*(x-x0)/(2*T))+O'</em><a class="headerlink" href="#fit.FitFunctions.CosSqPeakFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqPeakFit.name">
+<code class="descname">name</code><em class="property"> = 'Cos2 Peak'</em><a class="headerlink" href="#fit.FitFunctions.CosSqPeakFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.CosSqPeakFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'T', 'x0', 'O']</em><a class="headerlink" href="#fit.FitFunctions.CosSqPeakFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.DualToneSinSqFit">
+<em class="property">class </em><code class="descname">DualToneSinSqFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#DualToneSinSqFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.DualToneSinSqFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.DualToneSinSqFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>T</em>, <em>x0</em>, <em>max_</em>, <em>min_</em>, <em>dT</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#DualToneSinSqFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.DualToneSinSqFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.DualToneSinSqFit.functionString">
+<code class="descname">functionString</code><em class="property"> = '(max-min)*sin^2( pi*(x-x0)/(2*T) )+min'</em><a class="headerlink" href="#fit.FitFunctions.DualToneSinSqFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.DualToneSinSqFit.name">
+<code class="descname">name</code><em class="property"> = 'Dual Sin2'</em><a class="headerlink" href="#fit.FitFunctions.DualToneSinSqFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.DualToneSinSqFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['T', 'x0', 'max', 'min', 'dT']</em><a class="headerlink" href="#fit.FitFunctions.DualToneSinSqFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.GaussianFit">
+<em class="property">class </em><code class="descname">GaussianFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#GaussianFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.GaussianFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.GaussianFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>x0</em>, <em>s</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#GaussianFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.GaussianFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.GaussianFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*exp(-(x-x0)**2/s**2)+O'</em><a class="headerlink" href="#fit.FitFunctions.GaussianFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.GaussianFit.name">
+<code class="descname">name</code><em class="property"> = 'Gaussian'</em><a class="headerlink" href="#fit.FitFunctions.GaussianFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.GaussianFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'x0', 's', 'O']</em><a class="headerlink" href="#fit.FitFunctions.GaussianFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.GaussianFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#GaussianFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.GaussianFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.InvertedGaussianFit">
+<em class="property">class </em><code class="descname">InvertedGaussianFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#InvertedGaussianFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.InvertedGaussianFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>x0</em>, <em>s</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#InvertedGaussianFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.InvertedGaussianFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*exp(-(x-x0)**2/s**2)+O'</em><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.InvertedGaussianFit.name">
+<code class="descname">name</code><em class="property"> = 'InvertedGaussian'</em><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.InvertedGaussianFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'x0', 's', 'O']</em><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.InvertedGaussianFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#InvertedGaussianFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.InvertedGaussianFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.LinearFit">
+<em class="property">class </em><code class="descname">LinearFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#LinearFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.LinearFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>class for fitting to a line</p>
+<dl class="method">
+<dt id="fit.FitFunctions.LinearFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>m</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#LinearFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.LinearFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LinearFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'm*x + b'</em><a class="headerlink" href="#fit.FitFunctions.LinearFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LinearFit.name">
+<code class="descname">name</code><em class="property"> = 'Line'</em><a class="headerlink" href="#fit.FitFunctions.LinearFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LinearFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['m', 'b']</em><a class="headerlink" href="#fit.FitFunctions.LinearFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.LinearFit.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#LinearFit.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.LinearFit.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.LorentzianFit">
+<em class="property">class </em><code class="descname">LorentzianFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#LorentzianFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.LorentzianFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.LorentzianFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>s</em>, <em>x0</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#LorentzianFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.LorentzianFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LorentzianFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*s**2*1/(s**2+(x-x0)**2)+O'</em><a class="headerlink" href="#fit.FitFunctions.LorentzianFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LorentzianFit.name">
+<code class="descname">name</code><em class="property"> = 'Lorentzian'</em><a class="headerlink" href="#fit.FitFunctions.LorentzianFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.LorentzianFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 's', 'x0', 'O']</em><a class="headerlink" href="#fit.FitFunctions.LorentzianFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.RabiFieldProfileFit">
+<em class="property">class </em><code class="descname">RabiFieldProfileFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#RabiFieldProfileFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.RabiFieldProfileFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>c</em>, <em>x0</em>, <em>w</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#RabiFieldProfileFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.RabiFieldProfileFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*sin(c*exp(-(x-x0)**2/w**2)**2+O'</em><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.RabiFieldProfileFit.name">
+<code class="descname">name</code><em class="property"> = 'RabiFieldProfileFit'</em><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.RabiFieldProfileFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'c', 'x0', 'w', 'O']</em><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.RabiFieldProfileFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#RabiFieldProfileFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.RabiFieldProfileFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SaturationFit">
+<em class="property">class </em><code class="descname">SaturationFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SaturationFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SaturationFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SaturationFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>s</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SaturationFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SaturationFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SaturationFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*(x/s)/(1+(x/s))+O'</em><a class="headerlink" href="#fit.FitFunctions.SaturationFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SaturationFit.name">
+<code class="descname">name</code><em class="property"> = 'Saturation'</em><a class="headerlink" href="#fit.FitFunctions.SaturationFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SaturationFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 's', 'O']</em><a class="headerlink" href="#fit.FitFunctions.SaturationFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SaturationFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SaturationFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SaturationFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SinCosFit">
+<em class="property">class </em><code class="descname">SinCosFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinCosFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinCosFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.FitFunctions.SinCosFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*sin(2*pi*k*x)+B*sin(2*pi*k*x)+O'</em><a class="headerlink" href="#fit.FitFunctions.SinCosFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinCosFit.name">
+<code class="descname">name</code><em class="property"> = 'SinCos'</em><a class="headerlink" href="#fit.FitFunctions.SinCosFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinCosFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'B', 'k', 'O']</em><a class="headerlink" href="#fit.FitFunctions.SinCosFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SinCosFit.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinCosFit.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinCosFit.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SinCosFit.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinCosFit.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinCosFit.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SinCosFit.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinCosFit.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinCosFit.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SinSqExpFit">
+<em class="property">class </em><code class="descname">SinSqExpFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqExpFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqExpFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SinSqExpFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>T</em>, <em>theta</em>, <em>O</em>, <em>tau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqExpFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqExpFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqExpFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A * exp(-x/tau) * sin^2(pi/(2*T)*x+theta) + O'</em><a class="headerlink" href="#fit.FitFunctions.SinSqExpFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqExpFit.name">
+<code class="descname">name</code><em class="property"> = 'Sin2 Exponential Decay'</em><a class="headerlink" href="#fit.FitFunctions.SinSqExpFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqExpFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'T', 'theta', 'O', 'tau']</em><a class="headerlink" href="#fit.FitFunctions.SinSqExpFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SinSqFit">
+<em class="property">class </em><code class="descname">SinSqFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SinSqFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>T</em>, <em>x0</em>, <em>max_</em>, <em>min_</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqFit.functionString">
+<code class="descname">functionString</code><em class="property"> = '(max-min)*sin^2( pi*(x-x0)/(2*T) )+min'</em><a class="headerlink" href="#fit.FitFunctions.SinSqFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqFit.name">
+<code class="descname">name</code><em class="property"> = 'Sin2'</em><a class="headerlink" href="#fit.FitFunctions.SinSqFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['T', 'x0', 'max', 'min']</em><a class="headerlink" href="#fit.FitFunctions.SinSqFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SinSqFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SinSqGaussFit">
+<em class="property">class </em><code class="descname">SinSqGaussFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqGaussFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqGaussFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SinSqGaussFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>T</em>, <em>theta</em>, <em>O</em>, <em>tau</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SinSqGaussFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SinSqGaussFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqGaussFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A * exp(-x^2/tau^2) * sin^2(pi/(2*T)*x+theta) + O'</em><a class="headerlink" href="#fit.FitFunctions.SinSqGaussFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqGaussFit.name">
+<code class="descname">name</code><em class="property"> = 'Sin2 Gaussian Decay'</em><a class="headerlink" href="#fit.FitFunctions.SinSqGaussFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SinSqGaussFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'T', 'theta', 'O', 'tau']</em><a class="headerlink" href="#fit.FitFunctions.SinSqGaussFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SquareRabiFit">
+<em class="property">class </em><code class="descname">SquareRabiFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>T</em>, <em>C</em>, <em>A</em>, <em>O</em>, <em>t</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A/(1+(2*pi*(x-C)/R)**2) * sin**2(sqrt(1+(2*pi*(x-C)/R)**2)*R*t/2) + O where R=pi/T'</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFit.name">
+<code class="descname">name</code><em class="property"> = 'Square Rabi'</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['T', 'C', 'A', 'O', 't']</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFit.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFit.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFit.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFit.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFit.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.SquareRabiFitAmp">
+<em class="property">class </em><code class="descname">SquareRabiFitAmp</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFitAmp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>T</em>, <em>C</em>, <em>A</em>, <em>O</em>, <em>t</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFitAmp.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.functionString">
+<code class="descname">functionString</code><em class="property"> = '(A/(1+(2*pi*(x-C)/R)**2))/(sin**2(R*t/2)) * sin**2(sqrt(1+(2*pi*(x-C)/R)**2)*R*t/2) + O where R=pi/T'</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.name">
+<code class="descname">name</code><em class="property"> = 'Square Rabi w/Amp'</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['T', 'C', 'A', 'O', 't']</em><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.smartStartValues">
+<code class="descname">smartStartValues</code><span class="sig-paren">(</span><em>xIn</em>, <em>yIn</em>, <em>parameters</em>, <em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFitAmp.smartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.smartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitFunctions.SquareRabiFitAmp.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#SquareRabiFitAmp.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.SquareRabiFitAmp.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitFunctions.TruncatedLorentzianFit">
+<em class="property">class </em><code class="descname">TruncatedLorentzianFit</code><a class="reference internal" href="../_modules/fit/FitFunctions.html#TruncatedLorentzianFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.TruncatedLorentzianFit" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitFunctions.TruncatedLorentzianFit.functionEval">
+<code class="descname">functionEval</code><span class="sig-paren">(</span><em>x</em>, <em>A</em>, <em>s</em>, <em>x0</em>, <em>O</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#TruncatedLorentzianFit.functionEval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.TruncatedLorentzianFit.functionEval" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.TruncatedLorentzianFit.functionString">
+<code class="descname">functionString</code><em class="property"> = 'A*s**2*1/(s**2+(x-x0)**2)+O'</em><a class="headerlink" href="#fit.FitFunctions.TruncatedLorentzianFit.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.TruncatedLorentzianFit.name">
+<code class="descname">name</code><em class="property"> = 'Truncated Lorentzian'</em><a class="headerlink" href="#fit.FitFunctions.TruncatedLorentzianFit.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitFunctions.TruncatedLorentzianFit.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 's', 'x0', 'O']</em><a class="headerlink" href="#fit.FitFunctions.TruncatedLorentzianFit.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.FitFunctions.fitFunctionFactory">
+<code class="descname">fitFunctionFactory</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#fitFunctionFactory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.fitFunctionFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a FitFunction Object from a saved string representation</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.FitFunctions.fromHdf5">
+<code class="descname">fromHdf5</code><span class="sig-paren">(</span><em>group</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#fromHdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.fromHdf5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fit.FitFunctions.fromXmlElement">
+<code class="descname">fromXmlElement</code><span class="sig-paren">(</span><em>element</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitFunctions.html#fromXmlElement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitFunctions.fromXmlElement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a FitFunction Object from a saved string representation</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-fit.FitResultsTableModel">
+<span id="fitresultstablemodel"></span><h2>FitResultsTableModel<a class="headerlink" href="#module-fit.FitResultsTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel">
+<em class="property">class </em><code class="descname">FitResultsTableModel</code><span class="sig-paren">(</span><em>config</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.allDataChanged">
+<code class="descname">allDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.allDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.allDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C4035F8&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.fitDataChanged">
+<code class="descname">fitDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.fitDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.fitDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Name', 'Definition', 'Value']</em><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C403588&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.setFitfunction">
+<code class="descname">setFitfunction</code><span class="sig-paren">(</span><em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.setFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.setFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitResultsTableModel.FitResultsTableModel.startDataChanged">
+<code class="descname">startDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitResultsTableModel.html#FitResultsTableModel.startDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitResultsTableModel.FitResultsTableModel.startDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-fit.FitUi">
+<span id="fitui"></span><h2>FitUi<a class="headerlink" href="#module-fit.FitUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.FitUi.FitUi">
+<em class="property">class </em><code class="descname">FitUi</code><span class="sig-paren">(</span><em>traceui</em>, <em>config</em>, <em>parentname</em>, <em>globalDict=None</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitUi.FitUi.analysisFitfunction">
+<code class="descname">analysisFitfunction</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.analysisFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.analysisFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.analysisNames">
+<code class="descname">analysisNames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.analysisNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.analysisNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitUi.FitUi.analysisNamesChanged">
+<code class="descname">analysisNamesChanged</code><a class="headerlink" href="#fit.FitUi.FitUi.analysisNamesChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.autoSave">
+<code class="descname">autoSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.autoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.autoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.evaluate">
+<code class="descname">evaluate</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.evaluate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.evaluate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>plottedTrace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit plottedTrace using the current fit settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onAutoSave">
+<code class="descname">onAutoSave</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onAutoSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onAutoSave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onCopy">
+<code class="descname">onCopy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onCopy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onCopy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onExtractFit">
+<code class="descname">onExtractFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onExtractFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onExtractFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onFit">
+<code class="descname">onFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the selected traces using the current fit settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onFitfunctionChanged">
+<code class="descname">onFitfunctionChanged</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onFitfunctionChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onFitfunctionChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onGetSmartStart">
+<code class="descname">onGetSmartStart</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onGetSmartStart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onGetSmartStart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onLoadAnalysis">
+<code class="descname">onLoadAnalysis</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onLoadAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onLoadAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onPlot">
+<code class="descname">onPlot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onPlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onRemoveAnalysis">
+<code class="descname">onRemoveAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onRemoveAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onRemoveAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onRemoveFit">
+<code class="descname">onRemoveFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onRemoveFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onRemoveFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onSaveAnalysis">
+<code class="descname">onSaveAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onSaveAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onSaveAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onShowAnalysisEnabled">
+<code class="descname">onShowAnalysisEnabled</code><span class="sig-paren">(</span><em>status</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onShowAnalysisEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onShowAnalysisEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onUseErrorBars">
+<code class="descname">onUseErrorBars</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onUseErrorBars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onUseErrorBars" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.onUseSmartStartValues">
+<code class="descname">onUseSmartStartValues</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.onUseSmartStartValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.onUseSmartStartValues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.saveable">
+<code class="descname">saveable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.saveable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.saveable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.setFitfunction">
+<code class="descname">setFitfunction</code><span class="sig-paren">(</span><em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.setFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.setFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>widget</em>, <em>showCombos=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUi.FitUi.showAnalysis">
+<code class="descname">showAnalysis</code><span class="sig-paren">(</span><em>analysis</em>, <em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUi.html#FitUi.showAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.FitUi.showAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.FitUi.Parameters">
+<em class="property">class </em><code class="descname">Parameters</code><a class="reference internal" href="../_modules/fit/FitUi.html#Parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUi.Parameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fit.FitUiTableModel">
+<span id="fituitablemodel"></span><h2>FitUiTableModel<a class="headerlink" href="#module-fit.FitUiTableModel" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.FitUiTableModel.FitUiTableModel">
+<em class="property">class </em><code class="descname">FitUiTableModel</code><span class="sig-paren">(</span><em>config</em>, <em>parent=None</em>, <em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.allDataChanged">
+<code class="descname">allDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.allDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.allDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitUiTableModel.FitUiTableModel.backgroundLookup">
+<code class="descname">backgroundLookup</code><em class="property"> = {False: &lt;PyQt5.QtGui.QColor object at 0x000002665C403828&gt;, True: &lt;PyQt5.QtGui.QColor object at 0x000002665C403898&gt;}</em><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.backgroundLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.columnCount">
+<code class="descname">columnCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C403978&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.columnCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.columnCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.confidenceValue">
+<code class="descname">confidenceValue</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.confidenceValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.confidenceValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.data">
+<code class="descname">data</code><span class="sig-paren">(</span><em>index</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.fitDataChanged">
+<code class="descname">fitDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.fitDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.fitDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.fitValue">
+<code class="descname">fitValue</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.fitValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.fitValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.flags">
+<code class="descname">flags</code><span class="sig-paren">(</span><em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.flags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.flags" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.headerData">
+<code class="descname">headerData</code><span class="sig-paren">(</span><em>section</em>, <em>orientation</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.headerData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.headerData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitUiTableModel.FitUiTableModel.headerDataLookup">
+<code class="descname">headerDataLookup</code><em class="property"> = ['Fit', 'Var', 'Start', 'min', 'max', 'Fit', 'StdError', 'Relative']</em><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.headerDataLookup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.FitUiTableModel.FitUiTableModel.parametersChanged">
+<code class="descname">parametersChanged</code><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.parametersChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.relConfidenceValue">
+<code class="descname">relConfidenceValue</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.relConfidenceValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.relConfidenceValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.rowCount">
+<code class="descname">rowCount</code><span class="sig-paren">(</span><em>parent=&lt;PyQt5.QtCore.QModelIndex object at 0x000002665C403908&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.rowCount"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.rowCount" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setData">
+<code class="descname">setData</code><span class="sig-paren">(</span><em>index</em>, <em>value</em>, <em>role</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setFitfunction">
+<code class="descname">setFitfunction</code><span class="sig-paren">(</span><em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setParametersBound">
+<code class="descname">setParametersBound</code><span class="sig-paren">(</span><em>bound</em>, <em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setParametersBound"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setParametersBound" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setParametersBoundsExpression">
+<code class="descname">setParametersBoundsExpression</code><span class="sig-paren">(</span><em>bound</em>, <em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setParametersBoundsExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setParametersBoundsExpression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setParametersEnabled">
+<code class="descname">setParametersEnabled</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setParametersEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setParametersEnabled" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setStartParameterExpression">
+<code class="descname">setStartParameterExpression</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setStartParameterExpression"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setStartParameterExpression" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setStartParameters">
+<code class="descname">setStartParameters</code><span class="sig-paren">(</span><em>row</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setStartParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setStartParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>index</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.startDataChanged">
+<code class="descname">startDataChanged</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.startDataChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.startDataChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.FitUiTableModel.FitUiTableModel.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#FitUiTableModel.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.FitUiTableModel.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.FitUiTableModel.mystr">
+<code class="descname">mystr</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/FitUiTableModel.html#mystr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.FitUiTableModel.mystr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fit.MotionalRabiFlopping">
+<span id="motionalrabiflopping"></span><h2>MotionalRabiFlopping<a class="headerlink" href="#module-fit.MotionalRabiFlopping" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping">
+<em class="property">class </em><code class="descname">MotionalRabiFlopping</code><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#MotionalRabiFlopping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Motional Rabi Flopping'</em><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.name">
+<code class="descname">name</code><em class="property"> = 'MotionalRabiFlopping'</em><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'n', 'rabiFreq', 'mass', 'angle', 'trapFrequency', 'wavelength', 'delta_n']</em><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#MotionalRabiFlopping.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#MotionalRabiFlopping.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.updateTables">
+<code class="descname">updateTables</code><span class="sig-paren">(</span><em>nBar</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#MotionalRabiFlopping.updateTables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.updateTables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.MotionalRabiFlopping.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#MotionalRabiFlopping.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.MotionalRabiFlopping.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping">
+<em class="property">class </em><code class="descname">TwoModeMotionalRabiFlopping</code><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#TwoModeMotionalRabiFlopping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Two Mode Motional Rabi Flopping'</em><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.name">
+<code class="descname">name</code><em class="property"> = 'TwoModeMotionalRabiFlopping'</em><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'n', 'rabiFreq', 'mass', 'angle', 'trapFrequency', 'wavelength', 'delta_n', 'n_2', 'trapFrequency_2']</em><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#TwoModeMotionalRabiFlopping.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#TwoModeMotionalRabiFlopping.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.updateTables">
+<code class="descname">updateTables</code><span class="sig-paren">(</span><em>p</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#TwoModeMotionalRabiFlopping.updateTables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.updateTables" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#TwoModeMotionalRabiFlopping.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.TwoModeMotionalRabiFlopping.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.MotionalRabiFlopping.factorialRatio">
+<code class="descname">factorialRatio</code><span class="sig-paren">(</span><em>ng</em>, <em>nl</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#factorialRatio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.factorialRatio" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.laguerreTable">
+<code class="descname">laguerreTable</code><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#laguerreTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.laguerreTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.MotionalRabiFlopping.probabilityTable">
+<code class="descname">probabilityTable</code><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#probabilityTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.probabilityTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="fit.MotionalRabiFlopping.transitionAmplitude">
+<code class="descname">transitionAmplitude</code><span class="sig-paren">(</span><em>eta</em>, <em>n</em>, <em>m</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/MotionalRabiFlopping.html#transitionAmplitude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.MotionalRabiFlopping.transitionAmplitude" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fit.RabiCarrierFunction">
+<span id="rabicarrierfunction"></span><h2>RabiCarrierFunction<a class="headerlink" href="#module-fit.RabiCarrierFunction" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.RabiCarrierFunction.FullRabiCarrierFunction">
+<em class="property">class </em><code class="descname">FullRabiCarrierFunction</code><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#FullRabiCarrierFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.FullRabiCarrierFunction" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.RabiCarrierFunction.FullRabiCarrierFunction.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Numerical Carrier Rabi Transition without Lamb-Dicke approx'</em><a class="headerlink" href="#fit.RabiCarrierFunction.FullRabiCarrierFunction.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.RabiCarrierFunction.FullRabiCarrierFunction.name">
+<code class="descname">name</code><em class="property"> = 'FullRabiCarrier'</em><a class="headerlink" href="#fit.RabiCarrierFunction.FullRabiCarrierFunction.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.RabiCarrierFunction.FullRabiCarrierFunction.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#FullRabiCarrierFunction.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.FullRabiCarrierFunction.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.RabiCarrierFunction.FullRabiCarrierFunction.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#FullRabiCarrierFunction.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.FullRabiCarrierFunction.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction">
+<em class="property">class </em><code class="descname">RabiCarrierFunction</code><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#RabiCarrierFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Explicit Carrier Rabi Transition with Lamb-Dicke approximation'</em><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.name">
+<code class="descname">name</code><em class="property"> = 'RabiCarrier'</em><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['A', 'n', 'rabiFreq', 'mass', 'angle', 'trapFrequency', 'wavelength']</em><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#RabiCarrierFunction.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#RabiCarrierFunction.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.RabiCarrierFunction.RabiCarrierFunction.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#RabiCarrierFunction.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.RabiCarrierFunction.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="fit.RabiCarrierFunction.getLaguerreTable">
+<code class="descname">getLaguerreTable</code><span class="sig-paren">(</span><em>mass</em>, <em>trapFrequency</em>, <em>wavelength</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#getLaguerreTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.getLaguerreTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.RabiCarrierFunction.getPnTable">
+<code class="descname">getPnTable</code><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#getPnTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.getPnTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.RabiCarrierFunction.laguerreTableInternal">
+<code class="descname">laguerreTableInternal</code><a class="reference internal" href="../_modules/fit/RabiCarrierFunction.html#laguerreTableInternal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.RabiCarrierFunction.laguerreTableInternal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-fit.SelectionAnalysis">
+<span id="selectionanalysis"></span><h2>SelectionAnalysis<a class="headerlink" href="#module-fit.SelectionAnalysis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.SelectionAnalysis.SelectLast">
+<em class="property">class </em><code class="descname">SelectLast</code><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectLast"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectLast.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Choose last value'</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.SelectionAnalysis.SelectLast.leastsq">
+<code class="descname">leastsq</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters=None</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectLast.leastsq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.leastsq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectLast.name">
+<code class="descname">name</code><em class="property"> = 'SelectLastValue'</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectLast.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['value']</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.SelectionAnalysis.SelectLast.residuals">
+<code class="descname">residuals</code><span class="sig-paren">(</span><em>p</em>, <em>y</em>, <em>x</em>, <em>sigma</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectLast.residuals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.residuals" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.SelectionAnalysis.SelectLast.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectLast.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectLast.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="fit.SelectionAnalysis.SelectMax">
+<em class="property">class </em><code class="descname">SelectMax</code><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectMax"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectMax.functionString">
+<code class="descname">functionString</code><em class="property"> = 'Choose max value'</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax.functionString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.SelectionAnalysis.SelectMax.leastsq">
+<code class="descname">leastsq</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>parameters=None</em>, <em>sigma=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectMax.leastsq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax.leastsq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectMax.name">
+<code class="descname">name</code><em class="property"> = 'SelectMaxValue'</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.SelectionAnalysis.SelectMax.parameterNames">
+<code class="descname">parameterNames</code><em class="property"> = ['xAtMaxValue', 'max']</em><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax.parameterNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fit.SelectionAnalysis.SelectMax.value">
+<code class="descname">value</code><span class="sig-paren">(</span><em>x</em>, <em>p=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/SelectionAnalysis.html#SelectMax.value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.SelectionAnalysis.SelectMax.value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-fit.StoredFitFunction">
+<span id="storedfitfunction"></span><h2>StoredFitFunction<a class="headerlink" href="#module-fit.StoredFitFunction" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="fit.StoredFitFunction.StoredFitFunction">
+<em class="property">class </em><code class="descname">StoredFitFunction</code><span class="sig-paren">(</span><em>name=None</em>, <em>fitfunctionName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/StoredFitFunction.html#StoredFitFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.StoredFitFunction.StoredFitFunction" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fit.StoredFitFunction.StoredFitFunction.fitfunction">
+<code class="descname">fitfunction</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/StoredFitFunction.html#StoredFitFunction.fitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.StoredFitFunction.StoredFitFunction.fitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="fit.StoredFitFunction.StoredFitFunction.fromFitfunction">
+<em class="property">classmethod </em><code class="descname">fromFitfunction</code><span class="sig-paren">(</span><em>fitfunction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/fit/StoredFitFunction.html#StoredFitFunction.fromFitfunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#fit.StoredFitFunction.StoredFitFunction.fromFitfunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="fit.StoredFitFunction.StoredFitFunction.stateFields">
+<code class="descname">stateFields</code><em class="property"> = ['name', 'fitfunctionName', 'startParameters', 'parameterEnabled', 'results', 'useSmartStartValues', 'startParameterExpressions', 'parameters', 'parametersConfidence', 'parameterBounds', 'parameterBoundsExpressions', 'useErrorBars']</em><a class="headerlink" href="#fit.StoredFitFunction.StoredFitFunction.stateFields" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,19 @@
+var a = 1
+var b = 2
+
+def test():
+    a += b
+    a -= 2
+    update()
+    while a < 3:
+        a += 1
+
+
+if a < b:
+    a += b
+    test()
+else:
+    a -= b
+    test()
+    
+    

@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.CountrateConversion &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.CountrateConversion</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.CountrateConversion</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">converting count rates between different units</span>
+
+<span class="sd">This way of switching between conversion functions is certainly premature optimization.</span>
+<span class="sd">Thus I will see it as an excercise in function pointers</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">modules.AttributeComparisonEquality</span> <span class="k">import</span> <span class="n">AttributeComparisonEquality</span>
+
+
+<div class="viewcode-block" id="kHz"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.kHz">[docs]</a><span class="k">def</span> <span class="nf">kHz</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">count</span><span class="o">/</span><span class="n">time_ms</span></div>
+    
+<div class="viewcode-block" id="Hz"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.Hz">[docs]</a><span class="k">def</span> <span class="nf">Hz</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">count</span><span class="o">*</span><span class="mf">1000.</span><span class="o">/</span><span class="n">time_ms</span></div>
+    
+<div class="viewcode-block" id="MHz"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.MHz">[docs]</a><span class="k">def</span> <span class="nf">MHz</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">count</span><span class="o">/</span><span class="mf">1000.</span><span class="o">/</span><span class="n">time_ms</span></div>
+    
+<div class="viewcode-block" id="rawcount"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.rawcount">[docs]</a><span class="k">def</span> <span class="nf">rawcount</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">count</span></div>
+    
+<div class="viewcode-block" id="convertFunction"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.convertFunction">[docs]</a><span class="k">def</span> <span class="nf">convertFunction</span><span class="p">(</span><span class="n">unit</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="mi">0</span><span class="p">:</span> <span class="p">(</span><span class="n">Hz</span><span class="p">,</span> <span class="s2">&quot;Hz&quot;</span><span class="p">),</span>
+        <span class="mi">1</span><span class="p">:</span> <span class="p">(</span><span class="n">kHz</span><span class="p">,</span> <span class="s2">&quot;kHz&quot;</span><span class="p">),</span>
+        <span class="mi">2</span><span class="p">:</span> <span class="p">(</span><span class="n">MHz</span><span class="p">,</span> <span class="s2">&quot;MHz&quot;</span><span class="p">),</span>
+        <span class="mi">3</span><span class="p">:</span> <span class="p">(</span><span class="n">rawcount</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="p">}[</span><span class="n">unit</span><span class="p">]</span></div>
+        
+      
+<div class="viewcode-block" id="DisplayUnit"><a class="viewcode-back" href="../../code/modules-doc.html#modules.CountrateConversion.DisplayUnit">[docs]</a><span class="k">class</span> <span class="nc">DisplayUnit</span><span class="p">(</span><span class="n">AttributeComparisonEquality</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">unit</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">convertFunction</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span>
+        
+    <span class="nd">@unit</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unit</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span> <span class="o">=</span> <span class="n">unit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">convert</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">convertFunction</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span></div>
+        
+        
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">timeit</span>
+
+    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">unit</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">time_ms</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="n">count</span><span class="o">/</span><span class="n">time_ms</span><span class="p">,</span>
+                 <span class="mi">1</span><span class="p">:</span> <span class="n">count</span><span class="o">*</span><span class="mi">1000</span><span class="o">/</span><span class="n">time_ms</span><span class="p">,</span>
+                 <span class="mi">2</span><span class="p">:</span> <span class="n">count</span><span class="o">/</span><span class="mf">1000.</span><span class="o">/</span><span class="n">time_ms</span><span class="p">,</span>
+                 <span class="mi">3</span><span class="p">:</span> <span class="n">count</span><span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">DisplayUnit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10000</span><span class="p">):</span>
+            <span class="n">u</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">test2</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10000</span><span class="p">):</span>
+            <span class="n">convert</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">4</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        
+        
+    <span class="n">t</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s2">&quot;test()&quot;</span><span class="p">,</span> <span class="s2">&quot;from __main__ import test&quot;</span><span class="p">)</span>
+    <span class="n">time1</span> <span class="o">=</span> <span class="n">t</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test()&quot;</span><span class="p">,</span> <span class="n">time1</span><span class="p">)</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">Timer</span><span class="p">(</span><span class="s2">&quot;test2()&quot;</span><span class="p">,</span> <span class="s2">&quot;from __main__ import test2&quot;</span><span class="p">)</span>
+    <span class="n">time2</span> <span class="o">=</span> <span class="n">t2</span><span class="o">.</span><span class="n">timeit</span><span class="p">(</span> <span class="n">number</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;test2()&quot;</span><span class="p">,</span> <span class="n">time2</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ratio&quot;</span><span class="p">,</span> <span class="n">time2</span><span class="o">/</span><span class="n">time1</span><span class="p">)</span>
+    
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

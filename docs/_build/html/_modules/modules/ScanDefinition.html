@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>modules.ScanDefinition &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>modules.ScanDefinition</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for modules.ScanDefinition</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">Expression</span>
+<span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">staticmethod</span>
+
+<div class="viewcode-block" id="ScanSegmentDefinition"><a class="viewcode-back" href="../../code/modules-doc.html#modules.ScanDefinition.ScanSegmentDefinition">[docs]</a><span class="k">class</span> <span class="nc">ScanSegmentDefinition</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">expression</span> <span class="o">=</span> <span class="n">Expression</span><span class="o">.</span><span class="n">Expression</span><span class="p">()</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepPreference</span> <span class="o">=</span> <span class="s1">&#39;stepsize&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span> <span class="o">=</span> <span class="kc">None</span>
+        
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="n">d</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_inconsistent&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_startText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_stopText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_centerText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_spanText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_stepsText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;_stepsizeText&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        
+    <span class="n">stateFields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;_start&#39;</span><span class="p">,</span> <span class="s1">&#39;_stop&#39;</span><span class="p">,</span> <span class="s1">&#39;_center&#39;</span><span class="p">,</span> <span class="s1">&#39;_span&#39;</span><span class="p">,</span> <span class="s1">&#39;_steps&#39;</span><span class="p">,</span> <span class="s1">&#39;_stepsize&#39;</span><span class="p">,</span> <span class="s1">&#39;_stepPreference&#39;</span><span class="p">,</span> <span class="s1">&#39;_startText&#39;</span><span class="p">,</span> <span class="s1">&#39;_stopText&#39;</span><span class="p">,</span> <span class="s1">&#39;_centerText&#39;</span><span class="p">,</span> <span class="s1">&#39;_spanText&#39;</span><span class="p">,</span> <span class="s1">&#39;_stepsText&#39;</span><span class="p">,</span> <span class="s1">&#39;_stepsizeText&#39;</span><span class="p">]</span> 
+        
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span><span class="o">==</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="o">==</span> <span class="n">other</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stateFields</span><span class="p">))</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">startText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span>
+
+    <span class="nd">@startText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">startText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stopText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="p">)</span>
+
+    <span class="nd">@stopText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stopText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">centerText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="p">)</span>
+
+    <span class="nd">@centerText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">centerText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span> <span class="o">=</span> <span class="n">text</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">spanText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="p">)</span>
+
+    <span class="nd">@spanText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">spanText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stepsText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="p">)</span>
+
+    <span class="nd">@stepsText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stepsText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stepsizeText</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="p">)</span>
+
+    <span class="nd">@stepsizeText</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stepsizeText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span> <span class="o">=</span> <span class="n">text</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span>
+    
+    <span class="nd">@start</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculateCenterSpan</span><span class="p">()</span>
+                
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span>
+    
+    <span class="nd">@stop</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">calculateCenterSpan</span><span class="p">()</span>
+        
+<div class="viewcode-block" id="ScanSegmentDefinition.calculateCenterSpan"><a class="viewcode-back" href="../../code/modules-doc.html#modules.ScanDefinition.ScanSegmentDefinition.calculateCenterSpan">[docs]</a>    <span class="k">def</span> <span class="nf">calculateCenterSpan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepPreference</span><span class="o">==</span><span class="s1">&#39;steps&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span></div>
+          
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span>
+        
+    <span class="nd">@center</span><span class="o">.</span><span class="n">setter</span>  
+    <span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">center</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">=</span> <span class="n">center</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculateStartStop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">span</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span>
+    
+    <span class="nd">@span</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">span</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">span</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">=</span> <span class="n">span</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">calculateStartStop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepPreference</span><span class="o">==</span><span class="s1">&#39;steps&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+            
+        
+<div class="viewcode-block" id="ScanSegmentDefinition.calculateStartStop"><a class="viewcode-back" href="../../code/modules-doc.html#modules.ScanDefinition.ScanSegmentDefinition.calculateStartStop">[docs]</a>    <span class="k">def</span> <span class="nf">calculateStartStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_center</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="o">/</span><span class="mi">2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span> <span class="o">=</span> <span class="kc">None</span></div>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span>
+    
+    <span class="nd">@steps</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span> <span class="n">steps</span><span class="p">,</span> <span class="mi">2</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepPreference</span> <span class="o">=</span> <span class="s1">&#39;steps&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stepsize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span>
+    
+    <span class="nd">@stepsize</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">stepsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stepsize</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span> <span class="o">=</span> <span class="n">stepsize</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepPreference</span> <span class="o">=</span> <span class="s1">&#39;stepsize&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_span</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">checkConsistency</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">inconsistent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span>
+    
+<div class="viewcode-block" id="ScanSegmentDefinition.checkConsistency"><a class="viewcode-back" href="../../code/modules-doc.html#modules.ScanDefinition.ScanSegmentDefinition.checkConsistency">[docs]</a>    <span class="k">def</span> <span class="nf">checkConsistency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_start</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stop</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">==</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">_center</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_span</span><span class="o">.</span><span class="n">dimensionality</span> <span class="o">==</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">_stepsize</span><span class="o">.</span><span class="n">dimensionality</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_inconsistent</span> <span class="o">=</span> <span class="kc">True</span></div>
+        
+<div class="viewcode-block" id="ScanSegmentDefinition.evaluate"><a class="viewcode-back" href="../../code/modules-doc.html#modules.ScanDefinition.ScanSegmentDefinition.evaluate">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">):</span>
+        <span class="n">changed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_startText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_startText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stopText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_centerText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">span</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_spanText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stepsText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stepsize</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">evaluateAsMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stepsizeText</span><span class="p">,</span> <span class="n">globalDict</span> <span class="p">)</span>
+                <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>  <span class="c1"># happens if globalVariable not found</span>
+            <span class="k">pass</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">changed</span></div></div>
+           
+        
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

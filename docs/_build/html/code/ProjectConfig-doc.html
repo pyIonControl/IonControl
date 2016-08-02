@@ -1,0 +1,553 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>ProjectConfig &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>ProjectConfig</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/ProjectConfig-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="projectconfig">
+<h1>ProjectConfig<a class="headerlink" href="#projectconfig" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-ProjectConfig.ExptConfigUi">
+<span id="exptconfigui"></span><h2>ExptConfigUi<a class="headerlink" href="#module-ProjectConfig.ExptConfigUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ProjectConfig.ExptConfigUi.ConfigWidget">
+<em class="property">class </em><code class="descname">ConfigWidget</code><span class="sig-paren">(</span><em>exptConfigUi</em>, <em>fieldtype</em>, <em>objName</em>, <em>name</em>, <em>oldvalue</em>, <em>widgetDict</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ConfigWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ConfigWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for arbitrary config widget</p>
+<dl class="attribute">
+<dt id="ProjectConfig.ExptConfigUi.ConfigWidget.content">
+<code class="descname">content</code><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ConfigWidget.content" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi">
+<em class="property">class </em><code class="descname">ExptConfigUi</code><span class="sig-paren">(</span><em>project</em>, <em>scriptname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for configuring an experiment</p>
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ok button is clicked. Checks database settings before proceeding.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.addObj">
+<code class="descname">addObj</code><span class="sig-paren">(</span><em>guiName</em>, <em>objName</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.addObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.addObj" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add (objName, name) to the table widget, and add the appropriate tab to the tab widget.
+:param guiName: &#8216;hardware&#8217; or &#8216;software&#8217;
+:type guiName: str
+:param objName: The type of hardware or software
+:type objName: str
+:param name: The name of the specific piece of hardware or software
+:type name: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.getWidget">
+<code class="descname">getWidget</code><span class="sig-paren">(</span><em>guiName</em>, <em>objName</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.getWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.getWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the config widget associated with the given objName.
+:param guiName: &#8216;hardware&#8217; or &#8216;software&#8217;
+:type guiName: str
+:param objName: The type of hardware or software
+:type objName: str
+:param name: The name of the specific piece of hardware or software
+:type name: str</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.hardware">
+<code class="descname">hardware</code><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.hardware" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of hardware tuples of the form (objName, name)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.keyPressEvent">
+<code class="descname">keyPressEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onAdd">
+<code class="descname">onAdd</code><span class="sig-paren">(</span><em>guiName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onAdd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onAdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onCustomDatabaseNameChanged">
+<code class="descname">onCustomDatabaseNameChanged</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onCustomDatabaseNameChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onCustomDatabaseNameChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onItemChanged">
+<code class="descname">onItemChanged</code><span class="sig-paren">(</span><em>guiName</em>, <em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onItemChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onItemChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new name is typed in for a table entry</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onRemove">
+<code class="descname">onRemove</code><span class="sig-paren">(</span><em>guiName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onRemove"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onRemove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove is clicked. Remove selection from the table widget and remove from the tab widget.
+:param guiName: &#8216;hardware&#8217; or &#8216;software&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onSelect">
+<code class="descname">onSelect</code><span class="sig-paren">(</span><em>guiName</em>, <em>currentRow</em>, <em>currentColumn</em>, <em>previousRow</em>, <em>previousColumn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onSelect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onSelect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Table widget is clicked. Change the current tab on the tab widget.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.onTabWidgetChanged">
+<code class="descname">onTabWidgetChanged</code><span class="sig-paren">(</span><em>guiName</em>, <em>index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.onTabWidgetChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.onTabWidgetChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tab widget is clicked. Change the selection in the table widget.
+:param guiName: &#8216;hardware&#8217; or &#8216;software&#8217;
+:type guiName: str
+:param index: new selected index in tab widget
+:type index: int</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.reject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cancel or close is clicked. Shut down the program.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#ExptConfigUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>setup the dialog box ui</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.software">
+<code class="descname">software</code><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.software" title="Permalink to this definition">¶</a></dt>
+<dd><p>A list of software tuples of the form (objName, name)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.ExptConfigUi.ExptConfigUi.updateRoles">
+<code class="descname">updateRoles</code><a class="headerlink" href="#ProjectConfig.ExptConfigUi.ExptConfigUi.updateRoles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ProjectConfig.ExptConfigUi.OK_FPGA_Widget">
+<em class="property">class </em><code class="descname">OK_FPGA_Widget</code><span class="sig-paren">(</span><em>widgetDict</em>, <em>objName</em>, <em>name</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#OK_FPGA_Widget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.OK_FPGA_Widget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Config widget for selecting an Opal Kelly FPGA</p>
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onChanged">
+<code class="descname">onChanged</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#OK_FPGA_Widget.onChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>set modelLineEdit to display FPGA model name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onScan">
+<code class="descname">onScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#OK_FPGA_Widget.onScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of FPGAs</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onUpload">
+<code class="descname">onUpload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#OK_FPGA_Widget.onUpload"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.onUpload" title="Permalink to this definition">¶</a></dt>
+<dd><p>upload bitFile to FPGA</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.OK_FPGA_Widget.setToText">
+<code class="descname">setToText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#OK_FPGA_Widget.setToText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.OK_FPGA_Widget.setToText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set widget to particular device id text</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ProjectConfig.ExptConfigUi.PathWidget">
+<em class="property">class </em><code class="descname">PathWidget</code><span class="sig-paren">(</span><em>baseDir</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#PathWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.PathWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Config widget for selecting files</p>
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.PathWidget.onOpen">
+<code class="descname">onOpen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#PathWidget.onOpen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.PathWidget.onOpen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.PathWidget.setText">
+<code class="descname">setText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#PathWidget.setText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.PathWidget.setText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ProjectConfig.ExptConfigUi.RoleWidget">
+<em class="property">class </em><code class="descname">RoleWidget</code><span class="sig-paren">(</span><em>name</em>, <em>exptConfigUi</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#RoleWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.RoleWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combo box for selecting what hardware to use for a specific software role</p>
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.RoleWidget.onUpdate">
+<code class="descname">onUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#RoleWidget.onUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.RoleWidget.onUpdate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the list of possible hardware to use for this role</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ExptConfigUi.RoleWidget.setToText">
+<code class="descname">setToText</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ExptConfigUi.html#RoleWidget.setToText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ExptConfigUi.RoleWidget.setToText" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set widget to particular text</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ProjectConfig.Project">
+<span id="project"></span><h2>Project<a class="headerlink" href="#module-ProjectConfig.Project" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ProjectConfig.Project.Project">
+<em class="property">class </em><code class="descname">Project</code><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="staticmethod">
+<dt id="ProjectConfig.Project.Project.attemptDatabaseConnection">
+<em class="property">static </em><code class="descname">attemptDatabaseConnection</code><span class="sig-paren">(</span><em>dbConn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.attemptDatabaseConnection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.attemptDatabaseConnection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to connect to the database</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.Project.Project.baseDir">
+<code class="descname">baseDir</code><a class="headerlink" href="#ProjectConfig.Project.Project.baseDir" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.changeBlankNamesToNone">
+<code class="descname">changeBlankNamesToNone</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.changeBlankNamesToNone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.changeBlankNamesToNone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.findFile">
+<code class="descname">findFile</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.findFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.findFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.fromFullName">
+<code class="descname">fromFullName</code><span class="sig-paren">(</span><em>fullName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.fromFullName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.fromFullName" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the objName,name associated with the given fullName</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.fullName">
+<code class="descname">fullName</code><span class="sig-paren">(</span><em>objName</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.fullName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.fullName" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the full name to display associated with objName and name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.Project.Project.hardware">
+<code class="descname">hardware</code><a class="headerlink" href="#ProjectConfig.Project.Project.hardware" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.isEnabled">
+<code class="descname">isEnabled</code><span class="sig-paren">(</span><em>guiName</em>, <em>objName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.isEnabled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.isEnabled" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine what objects named &#8216;objName&#8217; are enabled (if any)
+:param guiName: &#8216;hardware&#8217; or &#8216;software&#8217;
+:type guiName: str
+:param objName: the name of the object in question
+:type objName: str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">dict of enabled objects &#8216;objName&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.Project.Project.name">
+<code class="descname">name</code><a class="headerlink" href="#ProjectConfig.Project.Project.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.setGlobalProject">
+<code class="descname">setGlobalProject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.setGlobalProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.setGlobalProject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ProjectConfig.Project.Project.software">
+<code class="descname">software</code><a class="headerlink" href="#ProjectConfig.Project.Project.software" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.Project.updateExptConfigVersion">
+<code class="descname">updateExptConfigVersion</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#Project.updateExptConfigVersion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.Project.updateExptConfigVersion" title="Permalink to this definition">¶</a></dt>
+<dd><p>update config file to latest version</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="ProjectConfig.Project.ProjectException">
+<em class="property">exception </em><code class="descname">ProjectException</code><a class="reference internal" href="../_modules/ProjectConfig/Project.html#ProjectException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.ProjectException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="ProjectConfig.Project.ProjectInfoUi">
+<em class="property">class </em><code class="descname">ProjectInfoUi</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#ProjectInfoUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.ProjectInfoUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for seeing project settings in the main GUI, and setting config GUIs to show on next program start</p>
+<dl class="method">
+<dt id="ProjectConfig.Project.ProjectInfoUi.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#ProjectInfoUi.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.ProjectInfoUi.accept" title="Permalink to this definition">¶</a></dt>
+<dd><p>update the config files based on the check boxes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.Project.ProjectInfoUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#ProjectInfoUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.ProjectInfoUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>setup the dialog box ui</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ProjectConfig.Project.getProject">
+<code class="descname">getProject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/Project.html#getProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.Project.getProject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ProjectConfig.ProjectConfigUi">
+<span id="projectconfigui"></span><h2>ProjectConfigUi<a class="headerlink" href="#module-ProjectConfig.ProjectConfigUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi">
+<em class="property">class </em><code class="descname">ProjectConfigUi</code><span class="sig-paren">(</span><em>project</em>, <em>scriptname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for selecting a project</p>
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.accept">
+<code class="descname">accept</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.accept"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.accept" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.onChangeBaseDirectory">
+<code class="descname">onChangeBaseDirectory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.onChangeBaseDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onChangeBaseDirectory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.onCreate">
+<code class="descname">onCreate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.onCreate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onCreate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new project folder</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.onFindConfigurationFile">
+<code class="descname">onFindConfigurationFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.onFindConfigurationFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onFindConfigurationFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.onSetConfigurationFile">
+<code class="descname">onSetConfigurationFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.onSetConfigurationFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.onSetConfigurationFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.populateProjectList">
+<code class="descname">populateProjectList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.populateProjectList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.populateProjectList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.reject">
+<code class="descname">reject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.reject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.reject" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.setBaseDir">
+<code class="descname">setBaseDir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.setBaseDir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.setBaseDir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a valid base directory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ProjectConfig.ProjectConfigUi.ProjectConfigUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ProjectConfig/ProjectConfigUi.html#ProjectConfigUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ProjectConfig.ProjectConfigUi.ProjectConfigUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>setup the dialog box ui</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

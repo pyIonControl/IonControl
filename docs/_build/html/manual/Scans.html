@@ -1,0 +1,780 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Scans &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Gate Sequences" href="GateSequences.html"/>
+        <link rel="prev" title="Pulse Program" href="PulseProgram.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Scans</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scan-control">Scan Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evaluation-control">Evaluation Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#analysis-control">Analysis Control</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#traces">Traces</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit">Fit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#progress">Progress</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#average">Average</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#todo-list">Todo List</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#timestamps">Timestamps</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Scans</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/Scans.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="scans">
+<span id="id1"></span><h1>Scans<a class="headerlink" href="#scans" title="Permalink to this headline">¶</a></h1>
+<p>The scan controls allow performing a one dimensional scan of any parameter, with a specified method of evaluating the returning data, and analyzing the resulting curve. This shows the sequence of a scan:</p>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/OneDimensionalScan.png"><img alt="../_images/OneDimensionalScan.png" src="../_images/OneDimensionalScan.png" style="width: 1121.0px; height: 705.0px;" /></a>
+</div>
+<p>An analysis is able to push fit results to global variables. Since pulse program parameters can depend on global variables, this can determine the parameter values used for the next scan.</p>
+<p>The scan is controlled and examined by the following docks:</p>
+<div class="section" id="scan-control">
+<h2>Scan Control<a class="headerlink" href="#scan-control" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/ScanControl.png"><img alt="../_images/ScanControl.png" src="../_images/ScanControl.png" style="width: 804.5px; height: 1101.0px;" /></a>
+</div>
+<p>The scan control determines how the scan runs. The controls are:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>scan settings menu</dt>
+<dd><p class="first last">Allows you to save and load different scan configurations. Works the same as the <a class="reference internal" href="PulseProgram.html#pulseprogram"><span class="std std-ref">Pulse Program</span></a> settings menu.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>scan mode</dt>
+<dd><p class="first">Allows you to choose from:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>Parameter scan</dt>
+<dd><p class="first last">one dimensional scan of the specified parameter</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Step in place</dt>
+<dd><p class="first last">Repeatedly run the same experiment without changing anything</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Gate Sequence Scan</dt>
+<dd><p class="first last">See <a class="reference internal" href="GateSequences.html#gatesequences"><span class="std std-ref">Gate Sequences</span></a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Free Running</dt>
+<dd><p class="first">Freerunning is a mode where the pulse program can trigger the end of a point and the beginning of the next point. No data is provided via the pipe to the pulse program at that point boundary.
+The pulse program can insert a point separator as follows:</p>
+<div class="last highlight-Python"><div class="highlight"><pre><span></span><span class="n">write_pipe</span><span class="p">(</span> <span class="n">nextPointMarker</span> <span class="p">)</span>  <span class="c1"># where nextPointMarker = 0xfffc000000000000</span>
+<span class="n">write_pipe</span><span class="p">(</span> <span class="n">counter</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>scan target</dt>
+<dd><p class="first">(Parameter scan only) Choose what type of parameter to scan:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>Internal</dt>
+<dd><p class="first last">A parameter controlled by the FPGA and defined in the pulse program</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>External</dt>
+<dd><p class="first last">An external instrument, see <a class="reference internal" href="ExternalParameters.html#externalparameters"><span class="std std-ref">External Parameters</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Voltage</dt>
+<dd><p class="first last">A voltage control gain.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>AWG</dt>
+<dd><p class="first last">An AWG parameter.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>scan parameter</dt>
+<dd><p class="first last">What parameter to scan</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>scan table</dt>
+<dd><p class="first last">Defines what points to scan. The fields are linked, meaning you can type value into center/span, or into start/stop, and the other will change. Steps and stepsize are similarly linked. The <a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> and <a class="reference internal" href="../_images/edit_remove.png"><img alt="remove" src="../_images/edit_remove.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> symbols next to the scan parameter drop down allows you to run a scan with multiple segments. The fields can also be set to an expression involving a global variable. This can be useful to create calibrations that stay centered. For example, if you have a global named &#8216;resonanceGlobal&#8217;, and you regularly scan a parameter &#8216;myFreq&#8217; to determine the value of &#8216;resonanceGlobal&#8217;, you can set the center of that scan to be equal to &#8216;resonanceGlobal&#8217;. The scan will then always be centered on the last known value. You can also create an analysis to automatically push the results of that scan to resonanceGlobal, see below.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Max Points (step-in-place only)</dt>
+<dd><p class="first">For step-in-place, The max points field determines the maximum number of points to display at one time while running step in place. Set it to zero to display all points.</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This does not determine when to stop the scan. Step in place runs until explicitly stopped. If you want to do step in place for a fixed number of points, create a &#8220;dummy&#8221; parameter in the pulse program that does not control anything, and scan the dummy parameter for the desired number of points.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>x-axis</dt>
+<dd><p class="first">Defines how to display and save the scan points.</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>unit</dt>
+<dd><p class="first last">The unit to use for the x-axis (e.g. us, ms, s). If this is blank or inconsistent with the scan, the program will just pick something.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>expression</dt>
+<dd><p class="first">Allows a transformation of the x-axis. For example, if you type in <cite>x-5 MHz</cite>, the x-axis will have a 5 MHz offset relative to the scan parameter value.</p>
+<div class="last admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Rather than using this functionality, you are often better off using pulse program parameters to accomplish the same thing. For example, if you have a parameter &#8220;myFreq,&#8221; and you wish to scan it from 40 MHz to 50 MHz, but you want to display it from -5 MHz to +5 MHz, create a parameter &#8220;offset = 45 MHz&#8221; and a parameter &#8220;shiftedFreq&#8221; and set &#8220;myFreq = offset + shiftedFreq.&#8221; Then scan &#8220;shiftedFreq&#8221; from -5 MHz to 5 MHz. This will have the same effect as using an x-axis expression, but it will be much more transparent what&#8217;s going on.</p>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>direction</dt>
+<dd><p class="first last">Define the order in which the scan proceeds.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Load PP</dt>
+<dd><p class="first last">If this is checked, the pulse program configuration specified in the drop down box will be loaded whenever this scan starts.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Filename</dt>
+<dd><p class="first">If this is checked, scan data will automatically be saved to using the specified filename template. By default the filename is the same as the settings name. You can change this by right clicking anywhere and unchecking &#8220;Use default filename.&#8221;</p>
+<div class="last admonition tip">
+<p class="first admonition-title">Tip</p>
+<p class="last">Just leave this checked and save everything. You will very rarely regret it.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Histogram file</dt>
+<dd><p class="first last">If this is checked, all histograms will be saved to the filename specified.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Raw data</dt>
+<dd><p class="first last">If this is checked, all raw, unevaluated data transmitted by the FPGA will be saved. For most simple experiments, this will contain no new information that is not already in the standard data file.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Gate Sequences</dt>
+<dd><p class="first last">Click to open <a class="reference internal" href="GateSequences.html#gatesequences"><span class="std std-ref">Gate Sequences</span></a> control.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="evaluation-control">
+<h2>Evaluation Control<a class="headerlink" href="#evaluation-control" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/EvaluationControl.png"><img alt="../_images/EvaluationControl.png" src="../_images/EvaluationControl.png" style="width: 575.0px; height: 636.0px;" /></a>
+</div>
+<p>The evaluation control determines what traces are generated by the scan. The controls are:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>evaluation settings menu</dt>
+<dd><p class="first last">As before, the evaluation settings can be saved/loaded via this menu.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Histogram bins</dt>
+<dd><p class="first last">How many histogram bins to display on histograms.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Integrate checkbox</dt>
+<dd><p class="first last">If this is checked, histograms will be integrated throughout the scan as one histogram. i.e., each scan point&#8217;s histogram will simply add to the existing histogram.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Evaluations table</dt>
+<dd><p class="first">This is where all evaluations are specified. Each evaluation will generate one trace. To add (remove) an evaluation, click <a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> (<a class="reference internal" href="../_images/edit_remove.png"><img alt="remove" src="../_images/edit_remove.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a>). The columns are:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>Type</dt>
+<dd><p class="first last">The type of evaluation &#8211; counter or result. &#8220;Counter&#8221; refers to the counter table in the pulse program counters dock. &#8220;Result&#8221; refers to a result sent back by the pulse program using the write_result command.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>ID/channel</dt>
+<dd><p class="first last">Specifies which counter channel to plot. The ID is the same ID specified in the pulse program counters dock. If the type is a counter, the channel will be a drop down with the available counter channels. If the type is a result, it will be a spin box, as result can be any 8 bit number (0-255).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Evaluation</dt>
+<dd><p class="first last">Specifies how to evaluate the counts on the specified channel. A number of evaluations are available. To add new evaluations, see <a class="reference internal" href="ExtendingTheCode.html#extendingthecode"><span class="std std-ref">Extending the Code</span></a>. Each evaluation has a set of configuration options. When you click a line in the evaluation table, the bottom of the evaluation control will show a set of configuration options for that specific evaluation.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Name</dt>
+<dd><p class="first last">Assign a name to the evaluation. This name will appear in the list of traces, and is used in the analysis control.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Hist</dt>
+<dd><p class="first last">Whether to display a histogram for the specified channel.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Plot</dt>
+<dd><p class="first last">What plot window to use for the trace.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Abszisse</dt>
+<dd><p class="first">What to use for x-axis in plot.</p>
+<ul class="simple">
+<li>x: scan value</li>
+<li>index: enumerates the points as taken</li>
+<li>time: software timestamp (time the computer added the point to the trace)</li>
+<li>fist: hardware timetick of first data in this point (in seconds since epoch)</li>
+<li>last: hardware timetick of last data in this point (in seconds since epoch)</li>
+</ul>
+<p class="last">These alternative x axes are useful if a scan is being done with randomized points while simultaneously a PI lock is being run during the scan. The evaluation looking at the scan itself will need to be plotted a function of the scan value, but the evaluation monitoring the PI lock is more informative if it plots as a function of time.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="analysis-control">
+<h2>Analysis Control<a class="headerlink" href="#analysis-control" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/AnalysisControl.png"><img alt="../_images/AnalysisControl.png" src="../_images/AnalysisControl.png" style="width: 527.0px; height: 800.0px;" /></a>
+</div>
+<p>The analysis control determines what fits (if any) are run at the conclusion of the scan. The controls are:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Settings menu</dt>
+<dd><p class="first last">As above.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Analysis table</dt>
+<dd><p class="first">Specify all fits to perform. Columns:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Enable</dt>
+<dd><p class="first last">If checked, this fit will run when the scan ends.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Name</dt>
+<dd><p class="first last">A name for the analysis.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Evaluation</dt>
+<dd><p class="first last">What evaluation from the evaluation control to perform the fit on.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Fit function</dt>
+<dd><p class="first last">What fit function to use. To add new fit functions, see <a class="reference internal" href="ExtendingTheCode.html#extendingthecode"><span class="std std-ref">Extending the Code</span></a>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>When an analysis in the table is clicked, the bottom of the analysis control window populates. The following is shown:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>fit function</dt>
+<dd><p class="first last">The equation for the fit function selected.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>fit variables table</dt>
+<dd><p class="first">The fit variables table has the following columns:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>Fit</dt>
+<dd><p class="first last">Whether or not the specified variable should be fitted. If it is unchecked, the value specified in &#8220;start&#8221; is used.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Var</dt>
+<dd><p class="first last">The name of the fit variable</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Start</dt>
+<dd><p class="first">The best guess value to use to start the fitting, or the value to use if the variable is not to be fitted.</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">If &#8220;Use Smart Start Values&#8221; is checked, these values are overridden for all fitted variables.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>min/max</dt>
+<dd><p class="first">bounds for the specified parameter</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Avoid using min and max for fit variables unless your fits aren&#8217;t working, as it changes the fit library used and coerces the fit.</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Fit</dt>
+<dd><p class="first last">The best fit value</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>fit information table</dt>
+<dd><p class="first last">Information about the fit</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Push table</dt>
+<dd><p class="first">This enables pushing results of the fit to global variables. To add (remove) a global push, click <a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> (<a class="reference internal" href="../_images/edit_remove.png"><img alt="remove" src="../_images/edit_remove.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a>) in the lower right hand corner. Columns:</p>
+<ul class="last">
+<li><dl class="first docutils">
+<dt>Push</dt>
+<dd><p class="first last">If this is clicked, push will be attempted after analysis is performed.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Destination</dt>
+<dd><p class="first last">What space to push the results to (e.g. Globals).</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Variable</dt>
+<dd><p class="first last">What global variable to push the results to.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Definition</dt>
+<dd><p class="first">An expression relating a fit variable to the global. This can be any expression involving the fit variable or globals.</p>
+<div class="last admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Fit variables are unfortunately unitless. This means that if you have a fit value of &#8220;C=42&#8221; but the global should be &#8220;42 MHz,&#8221; definition must be set to &#8220;C * (1.000 MHz).&#8221;</p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Value</dt>
+<dd><p class="first last">The resultant value</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Min/Max Accept</dt>
+<dd><p class="first last">The range of acceptable resultant values. If the result is outside of this range, the push will not occur. Putting a bound here is important to avoid analyses from bad fits wreaking havoc. You can also use a global here, which is useful for repeated calibrations, as it means that the push range could be set to the old value +/- 50 kHz.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Use Smart Start Values checkbox</dt>
+<dd><p class="first last">Certain fits have a &#8220;smart start&#8221; programmed in to attempt to determine what start values to use for the fit by looking at the data being fit. If your data more or less looks like a Gaussian, the smart start will do an extremely good job of finding start parameters that will result in a good fit. If this checkbox is checked, the smart start values will be used instead of the start values specified in the fit variables table.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Smart to Start button</dt>
+<dd><p class="first last">Clicking this button will replace the values in the &#8220;start&#8221; column of the fit variables table with the smart start values.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Use Errorbars checkbox</dt>
+<dd><p class="first last">If this is checked, the fit will be weighted by the errorbars on the points, i.e. lower error points will be given more weight. Use this if you trust that your error bars are an accurate reflection of your confidence in each point.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Other buttons along the bottom:</p>
+<blockquote>
+<div><p><a class="reference internal" href="../_images/arrow-left-2.png"><img alt="arrowLeft" src="../_images/arrow-left-2.png" style="width: 24.0px; height: 24.0px;" /></a> - copy the values from the &#8220;fit&#8221; column to the &#8220;start&#8221; column</p>
+<p><a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> - add a global push</p>
+<p><a class="reference internal" href="../_images/edit_remove.png"><img alt="remove" src="../_images/edit_remove.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> - remove a global push</p>
+<p><em>Manual fit control buttons:</em></p>
+<p><a class="reference internal" href="../_images/continue.png"><img alt="continue" src="../_images/continue.png" style="width: 24.0px; height: 24.0px;" /></a> - push global manually</p>
+<p><a class="reference internal" href="../_images/edit-delete-6.png"><img alt="abort" src="../_images/edit-delete-6.png" style="width: 24.0px; height: 24.0px;" /></a> - remove the fit from the selected trace</p>
+<p><a class="reference internal" href="../_images/color-picker-black.png"><img alt="eyedropper" src="../_images/color-picker-black.png" style="width: 24.0px; height: 24.0px;" /></a> - copy the fit from the selected trace onto the fit variables table</p>
+<p>Fit -</p>
+<p>Plot -</p>
+</div></blockquote>
+</li>
+</ul>
+</div>
+<div class="section" id="traces">
+<h2>Traces<a class="headerlink" href="#traces" title="Permalink to this headline">¶</a></h2>
+<div class="figure">
+<a class="reference internal image-reference" href="../_images/Traces.png"><img alt="../_images/Traces.png" src="../_images/Traces.png" style="width: 382.0px; height: 453.0px;" /></a>
+</div>
+<p>Whenever a scan is run, each evaluation in the evaluations table generates a trace. These traces appear in the traces dock. Columns:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Name</dt>
+<dd><p class="first last">The name of the trace from the evaluation control. They are categorized under the filename to which the traces are all saved. Checking/unchecking the checkbox determines if that trace is plotted.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Pen</dt>
+<dd><p class="first last">What color to use to draw the trace.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Window</dt>
+<dd><p class="first last">What plot window to show the trace on. Existing traces can be moved around.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Comment</dt>
+<dd><p class="first last">Add a comment to the saved file.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Right clicking anywhere in the traces dock will show three checkable options:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Unplot last trace set</dt>
+<dd><p class="first last">If this is checked, whenever a scan is started, the previous set of traces will be unplotted.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Collapse last trace set</dt>
+<dd><p class="first last">If this is checked, whenever a scan is started, the previous set of traces will be collapsed to just the filename line.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Expand new traces</dt>
+<dd><p class="first last">If this is checked, new traces will be created expanded.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Clicking on any trace will show when it was created and when it was finalized. The button &#8220;Open in Measurement Log&#8221; will open the corresponding entry in the <a class="reference internal" href="MeasurementLog.html#measurementlog"><span class="std std-ref">Measurement Log</span></a> for the selected trace. Hitting CTRL-M with the trace selected will have the same effect.</p>
+<p>The buttons on the top do the following:</p>
+<p><a class="reference internal" href="../_images/collapse-all.png"><img alt="collapse" src="../_images/collapse-all.png" style="width: 21.0px; height: 22.0px;" /></a> - collapse all trace sets (CTRL-UP)</p>
+<p><a class="reference internal" href="../_images/expand-all.png"><img alt="expand" src="../_images/expand-all.png" style="width: 21.0px; height: 22.0px;" /></a> - expand all trace sets (CTRL-DOWN)</p>
+<p><a class="reference internal" href="../_images/update_misc.png"><img alt="selectAll" src="../_images/update_misc.png" style="width: 24.0px; height: 24.0px;" /></a> - select all traces (CTRL-A)</p>
+<p><a class="reference internal" href="../_images/edit-clear.png"><img alt="clear" src="../_images/edit-clear.png" style="width: 24.0px; height: 24.0px;" /></a> - unplot selected traces (equivalent to checkbox)</p>
+<p><a class="reference internal" href="../_images/office-chart-line.png"><img alt="plot" src="../_images/office-chart-line.png" style="width: 24.0px; height: 24.0px;" /></a> - plot selected traces (equivalent to checkbox)</p>
+<p><a class="reference internal" href="../_images/filesave.png"><img alt="save" src="../_images/filesave.png" style="width: 24.0px; height: 24.0px;" /></a> - save selected trace (CTRL-S). By default, assuming the traces are being automatically saved, the traces are saved when they are created and they are finalized. If you are running a long scan and wish to save the current status of a trace that hasn&#8217;t yet been finalized, you can do so with this button.</p>
+<p><a class="reference internal" href="../_images/document-open-5.png"><img alt="open" src="../_images/document-open-5.png" style="width: 24.0px; height: 24.0px;" /></a> - open an existing trace.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">It&#8217;s recommended to do this via the <a class="reference internal" href="MeasurementLog.html#measurementlog"><span class="std std-ref">Measurement Log</span></a> if possible, rather than via this button.</p>
+</div>
+<p><a class="reference internal" href="../_images/remove.png"><img alt="remove2" src="../_images/remove.png" style="width: 22.4px; height: 22.4px;" /></a> - remove the selected trace from the list (DEL). This has no effect on the file on disk. Only finalized traces can be removed.</p>
+<p><a class="reference internal" href="../_images/colorize.png"><img alt="applyStyle" src="../_images/colorize.png" style="width: 24.0px; height: 24.0px;" /></a> - Apply the style in the drop down menu to the selected traces.</p>
+<p>style drop down menu - Determines what style to use for plotting the trace (lines, points, linespoints, etc.)</p>
+<p><a class="reference internal" href="../_images/games-solve.png"><img alt="magicWand" src="../_images/games-solve.png" style="width: 24.0px; height: 24.0px;" /></a> - Show only last dataset.</p>
+<p>Traces can be moved around in the dock using the PG-UP and PG-DOWN keys. Hitting CTRL-B on a trace will bold the text in that line. This has no effect on the trace, it is to make it easier to find a specific trace in a long list.</p>
+</div>
+<div class="section" id="fit">
+<h2>Fit<a class="headerlink" href="#fit" title="Permalink to this headline">¶</a></h2>
+<p>The fit interface allows fitting to traces outside of the context of fitting at the end of a scan via an analysis. The interface is the same as the Analysis control.</p>
+</div>
+<div class="section" id="progress">
+<h2>Progress<a class="headerlink" href="#progress" title="Permalink to this headline">¶</a></h2>
+<p>The progress dock shows the progress of the current scan, and what scan/evaluation/analysis are currently selected.</p>
+</div>
+<div class="section" id="average">
+<h2>Average<a class="headerlink" href="#average" title="Permalink to this headline">¶</a></h2>
+<p>Shows averaging information for the current scan.</p>
+</div>
+<div class="section" id="todo-list">
+<h2>Todo List<a class="headerlink" href="#todo-list" title="Permalink to this headline">¶</a></h2>
+<p>The Todo List allows a simple GUI interface for queueing up a list of scans/evaluations/analyses, and then running through the sequence.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This same functionality is available via the <a class="reference internal" href="Scripting.html#scripting"><span class="std std-ref">Scripting</span></a> interface, which is considerably more powerful.</p>
+</div>
+</div>
+<div class="section" id="timestamps">
+<span id="id2"></span><h2>Timestamps<a class="headerlink" href="#timestamps" title="Permalink to this headline">¶</a></h2>
+<p>This feature must be enabled in the experiment config file to be visible. It is intended to allow viewing a histogram of timestamps of detected photons, with 10 ns resolution. It is currently non-functional, although could be made functional if necessary with a bit of effort.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GateSequences.html" class="btn btn-neutral float-right" title="Gate Sequences" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="PulseProgram.html" class="btn btn-neutral" title="Pulse Program" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

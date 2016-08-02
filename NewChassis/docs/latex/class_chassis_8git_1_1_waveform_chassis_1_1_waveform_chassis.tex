@@ -1,0 +1,187 @@
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{\section{Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis Class Reference}
+\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}\index{Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis@{Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis}}
+}
+
+
+This class contains a list of Waveform\-Generator objects and a Timing object.  
+
+
+Inheritance diagram for Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.000000cm]{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a63b700f5fce0e49c55597c40e3798fd0}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afb17a99247044103a60826a2357f4bed}{load\-Itf}
+\begin{DoxyCompactList}\small\item\em A high level function to load the data in the itf file into memory. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a9b6ce2f7198a17174291c897223fed5c}{step\-Itf}
+\begin{DoxyCompactList}\small\item\em This function allows the user to step through an itf file by generating the voltages in the loaded itf file based on the start and stop input parameters. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7d54d1cb22401a78d82d4d36451ffe7e}{run\-Itf}
+\begin{DoxyCompactList}\small\item\em This function will run through an entire itf file by generating the voltages in the loaded itf file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7e0c50ee0735e6d2e77e09e67bd8ca8e}{apply\-Array}
+\begin{DoxyCompactList}\small\item\em This function will take an array of data and generate the voltages contained in the array. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a71d5648046e72865b346e57b83781eb4}{itf}
+\begin{DoxyCompactList}\small\item\em This is a object containing information about the itf file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_ae0368ac25643a170bdd6584ea3ea90cb}{e\-Map\-Path}
+\begin{DoxyCompactList}\small\item\em This is the path of the e\-Map file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afe1eb500d55c8e701524b05749458642}{e\-Map\-Dict}
+\begin{DoxyCompactList}\small\item\em This is a dictionary representation of the data in the e\-Map file. \end{DoxyCompactList}\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a28548fc866c3410f6eb58781341458a0}{{\bfseries itflines}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a28548fc866c3410f6eb58781341458a0}
+
+\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_af842d70f15e68a31ce3cf4fd8639060e}{{\bfseries itf\-Data}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_af842d70f15e68a31ce3cf4fd8639060e}
+
+\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_ac83f0edd5f904f55a3b931ec99004513}{{\bfseries samples\-Per\-Channel}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_ac83f0edd5f904f55a3b931ec99004513}
+
+\end{DoxyCompactItemize}
+\subsection*{Properties}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a16763fd83619749af6b48bbd29b557e1}{{\bfseries last\-Line} property(\-\_\-get\-Last\-Line)}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a16763fd83619749af6b48bbd29b557e1}
+
+\item 
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a9782179b5599e73c03fde581c6689e1a}{{\bfseries last\-Line\-Dict} property(\-\_\-get\-Last\-Line\-Dict)}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a9782179b5599e73c03fde581c6689e1a}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class contains a list of Waveform\-Generator objects and a Timing object. 
+
+It is intended to represent a chasis with a Ni\-Sync Card and a number of P\-X\-I-\/6733s. It contains low level functions from the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_w_c_low_level}{W\-C\-Low\-Level} class as well as high level functions. 
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a63b700f5fce0e49c55597c40e3798fd0}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a63b700f5fce0e49c55597c40e3798fd0}
+
+
+This function is a constructor for the \hyperlink{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis}{Waveform\-Chassis} class. 
+
+It creates the internal variables required to perform functions within the class. This function does not initialize any hardware. 
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7e0c50ee0735e6d2e77e09e67bd8ca8e}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!apply\-Array@{apply\-Array}}
+\index{apply\-Array@{apply\-Array}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{apply\-Array}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-apply\-Array (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{ao\-Data, }
+\item[{}]{do\-Data = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7e0c50ee0735e6d2e77e09e67bd8ca8e}
+
+
+This function will take an array of data and generate the voltages contained in the array. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em ao\-Data} & A numpy ndarray representing data to generate from the Analog Outputs. \\
+\hline
+{\em do\-Data} & (optional) A numpy ndarray representing data to generate from the Digital Outputs. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afb17a99247044103a60826a2357f4bed}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!load\-Itf@{load\-Itf}}
+\index{load\-Itf@{load\-Itf}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{load\-Itf}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-load\-Itf (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{itf\-Path, }
+\item[{}]{e\-Map\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afb17a99247044103a60826a2357f4bed}
+
+
+A high level function to load the data in the itf file into memory. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em itf\-Path} & The file path for an itf file. \\
+\hline
+{\em e\-Map\-Path} & A file path for the e\-Map file. This parameter is optional. An emap file will not be utilized if one is not specified. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7d54d1cb22401a78d82d4d36451ffe7e}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!run\-Itf@{run\-Itf}}
+\index{run\-Itf@{run\-Itf}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{run\-Itf}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-run\-Itf (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a7d54d1cb22401a78d82d4d36451ffe7e}
+
+
+This function will run through an entire itf file by generating the voltages in the loaded itf file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a9b6ce2f7198a17174291c897223fed5c}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!step\-Itf@{step\-Itf}}
+\index{step\-Itf@{step\-Itf}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{step\-Itf}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-step\-Itf (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{start, }
+\item[{}]{stop}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a9b6ce2f7198a17174291c897223fed5c}
+
+
+This function allows the user to step through an itf file by generating the voltages in the loaded itf file based on the start and stop input parameters. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em start} & The start index of a row in the loaded itf file. \\
+\hline
+{\em stop} & The stop index of a row in the loaded itf file. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afe1eb500d55c8e701524b05749458642}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!e\-Map\-Dict@{e\-Map\-Dict}}
+\index{e\-Map\-Dict@{e\-Map\-Dict}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{e\-Map\-Dict}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-e\-Map\-Dict}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_afe1eb500d55c8e701524b05749458642}
+
+
+This is a dictionary representation of the data in the e\-Map file. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_ae0368ac25643a170bdd6584ea3ea90cb}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!e\-Map\-Path@{e\-Map\-Path}}
+\index{e\-Map\-Path@{e\-Map\-Path}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{e\-Map\-Path}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-e\-Map\-Path}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_ae0368ac25643a170bdd6584ea3ea90cb}
+
+
+This is the path of the e\-Map file. 
+
+\hypertarget{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a71d5648046e72865b346e57b83781eb4}{\index{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}!itf@{itf}}
+\index{itf@{itf}!Chassis.git::WaveformChassis::WaveformChassis@{Chassis.\-git\-::\-Waveform\-Chassis\-::\-Waveform\-Chassis}}
+\subsubsection[{itf}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-Waveform\-Chassis.\-Waveform\-Chassis.\-itf}}\label{class_chassis_8git_1_1_waveform_chassis_1_1_waveform_chassis_a71d5648046e72865b346e57b83781eb4}
+
+
+This is a object containing information about the itf file. 
+
+
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+Waveform\-Chassis.\-py\end{DoxyCompactItemize}

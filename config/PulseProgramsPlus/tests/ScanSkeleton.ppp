@@ -1,0 +1,86 @@
+###########################################################################
+#
+#  example for PulseProgramPlus input
+#
+const ResultChannel = 4
+const DDSChannel = 0
+const serialChannel = 3
+
+
+# excitcodes
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xffffffffffffffff
+
+parameter dummy
+parameter delay
+parameter pulse_time
+shutter init_shutter
+masked_shutter my_shutter
+masked_shutter pulse_shutter
+masked_shutter trigger_shuttling
+masked_shutter pulse_shutter_2
+counter my_counter
+parameter experiments
+var currentexperiment
+parameter usePulses
+var mycounter = 7
+parameter a
+parameter b
+var result
+parameter gap_time
+parameter upData
+parameter downData
+parameter external_trigger
+
+while not pipe_empty():
+    apply_next_scan_point()
+    currentexperiment += 1
+    mycounter += 2
+    result = a 
+    result /= b
+    write_result( ResultChannel, result )
+    set_shutter( init_shutter )
+    update(delay)
+
+    serial_write( serialChannel, upData )
+    update(delay)
+    serial_write( serialChannel, downData )
+    wait_trigger( external_trigger )
+
+    if usePulses>0:
+        set_shutter( pulse_shutter )
+        update(pulse_time, pulse_mode=True)
+        update(gap_time)
+        set_shutter( trigger_shuttling )
+        set_counter( my_counter )
+        update(pulse_time, pulse_mode=True)
+        update(gap_time)
+        clear_counter()
+        set_shutter( pulse_shutter )
+        #set_dds( channel=DDSChannel, freq=a )
+        update(pulse_time, pulse_mode=True, wait_dds=True)
+        update(gap_time)
+    else:
+        set_shutter( pulse_shutter )
+        update(pulse_time)
+        set_inv_shutter( pulse_shutter )
+        update(pulse_time)
+        set_shutter( pulse_shutter )
+        update(pulse_time)
+        set_inv_shutter( pulse_shutter )
+        update(pulse_time)
+        set_shutter( pulse_shutter )
+        update(pulse_time)
+        set_inv_shutter( pulse_shutter )
+        update(pulse_time)
+        set_shutter( pulse_shutter )
+        update(pulse_time)
+        set_inv_shutter( pulse_shutter )
+        update(pulse_time)
+#    set_shutter( pulse_shutter )
+#    update(pulse_time, pulse_mode=True)
+#    update(pulse_time)
+#    set_shutter( pulse_shutter )
+#    update(pulse_time, pulse_mode=True)
+#    update(pulse_time)
+exit( endLabel )

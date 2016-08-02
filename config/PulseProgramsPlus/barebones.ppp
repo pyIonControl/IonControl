@@ -1,0 +1,69 @@
+const DDSMicrowave = 0
+const PMTChannel = 0
+
+shutter InitializationShutter
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter MicrowaveOn
+masked_shutter DetectOn
+
+parameter <AD9912_FRQ> MicrowaveFreq
+parameter CoolingTime
+parameter PumpTime
+parameter MicrowaveTime
+parameter DetectTime
+parameter experiments
+
+counter DetectCounters
+trigger ddsApplyAll
+exitcode endLabel = 0xffffffffffffffff
+var currentexperiment = 0
+
+def cool():
+  set_shutter( CoolingOn )
+  update( CoolingTime )
+  set_inv_shutter( CoolingOn )
+  update()
+
+def pump():
+  set_shutter( PumpingOn )
+  update( PumpTime )
+  set_inv_shutter( PumpingOn )
+  update()
+
+def microwave():
+  set_shutter( MicrowaveOn )
+  update( MicrowaveTime )
+  set_inv_shutter( MicrowaveOn )
+  update()
+
+def detect():
+  set_shutter( DetectOn )
+  set_counter( DetectCounters )
+  update( DetectTime )
+  set_inv_shutter( DetectOn )
+  set_shutter( CoolingOn )
+  clear_counter()
+  update()
+
+set_shutter(InitializationShutter)
+update()
+while not pipe_empty():
+  apply_next_scan_point()
+
+  set_dds( channel=DDSMicrowave, freq=MicrowaveFreq )
+  set_trigger( ddsApplyAll )
+
+  currentexperiment = 0
+  while currentexperiment < experiments:
+      if CoolingTime>0:
+          cool()
+      if PumpTime>0:
+          pump()
+      if MicrowaveTime>0:
+          microwave()
+      if DetectTime>0:
+          detect()
+      currentexperiment += 1
+
+exit( endLabel )

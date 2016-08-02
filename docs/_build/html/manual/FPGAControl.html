@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FPGA Control &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Pulse Program" href="PulseProgram.html"/>
+        <link rel="prev" title="Main GUI" href="MainGUI.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Projects.html">Projects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">FPGA Control</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pi-loops">PI Loops</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>FPGA Control</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/FPGAControl.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fpga-control">
+<span id="fpgacontrol"></span><h1>FPGA Control<a class="headerlink" href="#fpga-control" title="Permalink to this headline">¶</a></h1>
+<p>When a scan is not running, the FPGA outputs can be controlled via the following docks:</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Shutters</dt>
+<dd><p class="first">Allows control of each TTL output &#8211; red is TTL low, green is TTL high. When the program is first run, default TTL names (set by the pulser config file) are shown in gray. Double click a name to change it. These shutter names also appear as labels in the pulse program shutters window.</p>
+<p class="last">Shutter values set here are completely overwritten by the pulse program when a scan is running. When a scan stops, shutter values return to the values set here.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Triggers</dt>
+<dd><p class="first last">Allows control of each trigger line. Triggers go high for one clock cycle (= 10 ns) before going low again. The are used internally to control when the DDSs or DACs change their value. Select the lines you want to trigger, then click <em>Apply</em>. As with shutters, these names appear in the pulse program triggers window.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>DDS</dt>
+<dd><p class="first">Set the frequency, amplitude and phase of each DDS. The <em>On</em> checkbox for a given DDS is completely equivalent to the corresponding DDS enable shutter channel (the two are linked; clicking one will click the other). The <em>Square</em> checkbox enables the digital output of the DDS.</p>
+<p>All fields here can be set to globals, or more generally to a mathematical expression, which can involve globals. If a field is set to a global (or an expression), it will be highlighted in green.</p>
+<p>If &#8220;Apply directly&#8221; is checked, the DDS will change to the value typed upon hitting enter. Otherwise, &#8220;Write All&#8221; will write the information to the DDSs (but not change their output), and &#8220;Apply&#8221; will trigger the DDSs to change their output to the values written. This is only necessary if you want to change the DDSs synchronously.</p>
+<p class="last">DDS values set in the pulse program overwrite values set here during a scan. If the pulse program does NOT write a given value, then that value is left unchanged during a scan. At the conclusion of a scan, values revert to those set here.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>DAC</dt>
+<dd><p class="first">Similar to DDS. For <em>IonControl-firmware-LX150-UMD.bit</em>, channels 0-7 control the DACs directly. The &#8220;Write All&#8221; checkbox controls whether the value set here is written to the DAC Channels when the pulse program stops. If the DAC is the output of an &#8220;always on&#8221; servo loop, make sure this box is unchecked. Otherwise, whenever a pulse program stops, there will be hiccup in the lock, as the DAC gets reset to this value.</p>
+<p>Channels 8-15 are virtual DAC channels that control the DAC in concert with the PI loops. see <a class="reference internal" href="#piloops"><span class="std std-ref">PI Loops</span></a> .</p>
+<p class="last">As with the DDSs, globals and expressions can be used, and values written in the pulse program overwrite values set here.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Pulser Parameters</p>
+<blockquote>
+<div><p>Control various parameters associated with the FPGA.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>PI Loop Parameters</dt>
+<dd><p class="first last">see <a class="reference internal" href="#piloops"><span class="std std-ref">PI Loops</span></a> .</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>DAC Scan Parameters</dt>
+<dd><p class="first">Each of the 8 DACs on the breakout board can be configured to put out a triangle waveform by turning on the respective DAC Scan (shutters 41-48 on <em>IonControl-firmware-LX150-UMD.bit</em>). This can be useful if the DAC is being used for a lock. The parameters set here control the behavior of that scan:</p>
+<ul class="last simple">
+<li><strong>Max</strong>: The maximum of the triangle waveform (units: Volts)</li>
+<li><strong>Min</strong>: The minimum of the triangle waveform (units: Volts)</li>
+<li><strong>Increment</strong>: The amount it changes each clock cycle (which indirectly determines the frequency) (units: Volts)</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>PI Loop Regulator Inputs</dt>
+<dd><p class="first last">see <a class="reference internal" href="#piloops"><span class="std std-ref">PI Loops</span></a> .</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>Output Delays</dt>
+<dd><p class="first last">Any TTL output shutter can be set to have a hardwired delay <em>t</em> of up to 1.25 us. This means that if an <strong>update</strong> command in the pulse program changes that shutter, the shutter actually changes a time <em>t</em> later. This is useful for compensating for timing offsets caused by things like the delay between triggering an AOM and the beam actually turning on.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<div class="section" id="pi-loops">
+<span id="piloops"></span><h2>PI Loops<a class="headerlink" href="#pi-loops" title="Permalink to this headline">¶</a></h2>
+<p>Each of the 8 ADCs on the breakout board can be used as the error signal for a PI control loop. PI Loop &lt;n&gt; corresponds to ADC &lt;n&gt;. The output of the PI loop is reconfigurable &#8211; any DAC or any DDS amplitude can &#8220;listen&#8221; to any PI loop. The PI loops are turned on and off via the shutters (shutters 32-39 on <em>IonControl-firmware-LX150-UMD.bit</em>). The PI loops can be used as either always-on or sample-and-hold. If <em>PI loop &lt;n&gt;</em> is turned off during the pulse program, and turned back on later, the integrator will pick up where it left off.</p>
+<p>There are cases where this behavior is undesirable. For example, if the lock is a laser lock to a spectral feature, then you want the ability to move the DAC to the appropriate point, then turn on the lock, and have the lock start at wherever the DAC is currently, i.e. NOT wherever the lock was the last time it was turned off. This is the purpose of the virtual channels DACs 8-15. If you write a value to DAC 8, this is equivalent to writing a value to DAC 0, except that when the PI loop is turned on, the output will initially be set to the value DAC 8 is set to. If you write a value to DAC 0 and turn on the PI loop, the output will be whatever it was when last the PI loop was turned off (or 0). Thus, use DACs 0-7 for things like laser power stabilization locks (or unlocked DACs), and DACs 8-15 for things like laser frequency locks.</p>
+<p>The routing of the PI loops is controlled in the Pulser Parameters dock by the PI Loop Regulator Inputs section. If <em>DAC&lt;n&gt; regulator input</em> is set to <em>&lt;m&gt;</em> where <em>m</em> is between 0 and 7, then <em>DAC&lt;n&gt;</em> will be controlled by <em>PI loop &lt;m&gt;</em> (and the corresponding error signal on <em>ADC&lt;m&gt;</em>) when <em>PI loop &lt;m&gt;</em> is enabled. If <em>DAC&lt;n&gt; regulator input</em> is set to any number over 7, then it will not be controlled by a PI loop. The same applies to all DDS amplitudes, which can also be controlled by a PI loop by setting <em>DDS&lt;n&gt; regulator input</em>.</p>
+<p>The settings of the PI loop are set in the <em>PI Loop Parameters</em> section of the Pulser Parameters dock.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>P Coefficient</dt>
+<dd><p class="first last">32 bit proportional gain (units: unitless)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>I Coefficient</dt>
+<dd><p class="first last">32 bit integrator gain (units: unitless)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>delay Coefficient (units: time)</dt>
+<dd><p class="first last">This is similar to &#8220;Output Delays&#8221; in the Pulser parameters dock. It tells the PI loop to not engage after being switched on until the delay has elapsed. For example, suppose the PI loop is stabilizing a laser intensity in a sample-and-hold configuration in the pulse program. After the laser is switched on, there is a 5 us ramp up before it is fully on and the photodiode signal is stable. The PI loop should not try and stabilize for those first 5 us. By setting the delay to 5 us in the pulser parameters, the PI loop and the laser can be turned on in the same shutter in the pulse program without causing problems.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>offset Coefficient (units: volts)</dt>
+<dd><p class="first last">This is the lock point of the PI loop. The PI loop will try and stabilize the ADC signal to this value.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>ErrorSignal = ADC - offset (each 16 bit)
+Output = P/(2^16) * ErrorSignal + Sum(I/(2^16) * ErrorSignal)
+integration depends on ADC update rate, which is of order 10 us</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="PulseProgram.html" class="btn btn-neutral float-right" title="Pulse Program" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="MainGUI.html" class="btn btn-neutral" title="Main GUI" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

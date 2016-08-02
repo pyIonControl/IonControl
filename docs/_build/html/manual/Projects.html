@@ -1,0 +1,255 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Projects &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/>
+        <link rel="up" title="User Manual" href="experimentUi_manual.html"/>
+        <link rel="next" title="Main GUI" href="MainGUI.html"/>
+        <link rel="prev" title="Introduction" href="Introduction.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="experimentUi_manual.html">User Manual</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="Introduction.html">Introduction</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Projects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#project-selection">Project Selection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#experiment-configuration">Experiment Configuration</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="MainGUI.html">Main GUI</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FPGAControl.html">FPGA Control</a></li>
+<li class="toctree-l2"><a class="reference internal" href="PulseProgram.html">Pulse Program</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scans.html">Scans</a></li>
+<li class="toctree-l2"><a class="reference internal" href="GateSequences.html">Gate Sequences</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Scripting.html">Scripting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MeasurementLog.html">Measurement Log</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Hardware.html">Hardware</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExternalParameters.html">External Parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DedicatedCounters.html">Dedicated Counters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="LogicAnalyzer.html">Logic Analyzer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ExtendingTheCode.html">Extending the Code</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="experimentUi_manual.html">User Manual</a> &raquo;</li>
+      
+    <li>Projects</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/manual/Projects.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="projects">
+<span id="id1"></span><h1>Projects<a class="headerlink" href="#projects" title="Permalink to this headline">¶</a></h1>
+<p>All of the program settings, GUI configuration, data, etc. are attached to a specific <em>project</em>. Oftentimes only a single project is necessary for a given lab. However, if for whatever reason you need to be able to switch between totally different configurations of the program, the project functionality will allow this.</p>
+<div class="section" id="project-selection">
+<h2>Project Selection<a class="headerlink" href="#project-selection" title="Permalink to this headline">¶</a></h2>
+<p>When you start the program for the very first time, you will be asked to select a base directory. This will be the directory under which will be the individual project directories. Once you select a base directory, the project selection GUI will appear:</p>
+<div class="figure" id="id2">
+<a class="reference internal image-reference" href="../_images/ProjectSelection.png"><img alt="../_images/ProjectSelection.png" src="../_images/ProjectSelection.png" style="width: 380.0px; height: 363.0px;" /></a>
+<p class="caption"><span class="caption-text">Project selection GUI.</span></p>
+</div>
+<p>Existing projects can be selected in the table, or a new project can be added by typing a name into the editor and clicking &#8220;create.&#8221; If &#8220;Set as default&#8221; is checked, the GUI will not be shown the next time the program opens. Instead, the selected project will be used. A different base directory can also be selected via this GUI.</p>
+<p>This GUI creates a configuration file in the source directory: <em>\IonControl\config\ProjectConfig.yml</em>. This file contains three lines, specifying the base directory, the project name, and whether or not to show the project selection GUI the next time the program starts. The GUI can be bypassed entirely by editing this file directly. The GUI is simply an interface for editing the config file.</p>
+<p>If you wish to see the project selection GUI the next time the program starts up, you can do so via the main control program by selecting File &gt; Project. This will display the currently selected project along with its configuration, and give you the option to show the selection GUI on next startup. Alternatively, you can directly edit ProjectConfig.yml, and change <em>showGui</em> to <em>True</em>.</p>
+</div>
+<div class="section" id="experiment-configuration">
+<h2>Experiment Configuration<a class="headerlink" href="#experiment-configuration" title="Permalink to this headline">¶</a></h2>
+<p>Once a project is selected, the experiment configuration GUI will appear:</p>
+<div class="figure" id="id3">
+<a class="reference internal image-reference" href="../_images/ExptConfig.png"><img alt="../_images/ExptConfig.png" src="../_images/ExptConfig.png" style="width: 674.0px; height: 897.0px;" /></a>
+<p class="caption"><span class="caption-text">Experiment configuration GUI.</span></p>
+</div>
+<p>This GUI allows you to select what pieces of hardware or types of hardware are connected to the computer, and how it is configured. It also allows you to selectively enable or disable specific software features and establishes the connection to the database. For example, select <em>Opal Kelly FPGA: Pulser</em> from the &#8220;Available Hardware&#8221; drop down menu, then click <a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a>. This will add that item to the list of available hardware. A tab will appear with configuration data specific to that item. For the FPGA, click &#8220;Scan&#8221; to scan for Opal Kelly FPGA devices connected to the computer, which will populate the device drop down menu. Select from that menu which FPGA to use. Click &#8220;Upload&#8221; to upload the selected bitfile to the selected FPGA. Click &#8220;uploadOnStartup&#8221; to have the program automatically upload the bitfile whenever the program starts (this is normally not necessary).</p>
+<p>&#8220;Software Features&#8221; works the same way as does the hardware. Under &#8220;Software Features,&#8221; select <em>Pulser</em> and click <a class="reference internal" href="../_images/edit-add.png"><img alt="add" src="../_images/edit-add.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> . This has one configuration field, which is what piece of hardware to use for the pulser. Select <em>Opal Kelly FPGA: Pulser</em> from the dropdown. Other hardware/software features can be added similarly.</p>
+<p>Each hardware and software item has an enable checkbox next to it. Unchecking this disables that item, and is functionally equivalent to removing that item completely by clicking <a class="reference internal" href="../_images/edit_remove.png"><img alt="remove" src="../_images/edit_remove.png" style="width: 14.399999999999999px; height: 14.399999999999999px;" /></a> . The only difference is that if an item is removed, its configuration data is deleted. If an item is unchecked, its configuration data remains. Therefore, use the enable checkbox for items you wish to remove only temporarily.</p>
+<p>Under &#8220;Database connection,&#8221; type in the password you set up during <a class="reference internal" href="../installation.html#installation"><span class="std std-ref">Installation</span></a>.</p>
+<p>If &#8220;Set as default&#8221; is checked, the GUI will not be shown the next time the program starts.</p>
+<p>This GUI creates a configuration file in the project directory: <em>\YourBaseDirectory\YourProjectName\config\ExptConfig.yml</em>. This file contains a list of hardware, software, the configuration of each, and the database connection. As with the project selection GUI, the experiment configuration GUI is a front end for editing this file. The GUI can be bypassed by editing the file directly. As with the project configuration file, if you wish to see the experiment configuration GUI on next program start after it was already set to default, you can do so via the main control program by selecting File &gt; Project. Alternatively, you can edit ExptConfig.yml and change <em>showGui</em> to <em>True</em>.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="MainGUI.html" class="btn btn-neutral float-right" title="Main GUI" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="Introduction.html" class="btn btn-neutral" title="Introduction" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

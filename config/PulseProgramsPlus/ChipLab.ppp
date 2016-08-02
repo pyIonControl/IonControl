@@ -1,0 +1,276 @@
+###########################################################################
+
+const DDSCooling = 1
+const DDSDetect = 0
+const DDSMicrowave = 2
+const DDSRaman1 = 3
+const DDSRaman2 = 4
+
+const PMTChannel = 0
+
+const dac369 = 3
+parameter <DAC8568_VOLTAGE> dac369voltage
+parameter dummy
+
+# frequencies and amplitudes
+parameter <AD9912_FRQ> CoolingFreq
+parameter CoolingAmp = 1023
+parameter <AD9912_FRQ> DetectFreq = 100 MHz
+parameter DetectAmp = 1023
+parameter <AD9912_FRQ> MicrowaveFreq = 42 MHz
+parameter MicrowaveAmp = 1023
+parameter <AD9912_FRQ> Raman1Freq = 240 MHz
+parameter Raman1Amp = 1023
+parameter <AD9912_FRQ> Raman2Freq = 240 MHz
+parameter Raman2Amp = 1023
+parameter Raman1SBCoolAmp = 1023
+parameter Raman2SBCoolAmp = 1023
+parameter <AD9912_FRQ> RedSidebandFreq_1 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_2 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_3 = 247 MHz
+parameter <AD9912_FRQ> RedSidebandFreq_4 = 247 MHz
+
+#parameter Raman1CarrierFreq = 247 MHz
+parameter RamanTwoCarrierFreq = 247 MHz
+parameter RamanTwoDetuning = 0 MHz
+parameter RedSidebandDetuning_1 = 2 MHz
+parameter RedSidebandDetuning_2 = 2 MHz
+parameter RedSidebandDetuning_3 = 2 MHz
+parameter RedSidebandDetuning_4 = 2 MHz
+parameter InitialRedSidebandPiTime_1 = 10 us
+parameter InitialRedSidebandPiTime_2 = 10 us
+parameter InitialRedSidebandPiTime_3 = 10 us
+parameter InitialRedSidebandPiTime_4 = 10 us
+parameter RSBIncrement_1 = 1 us
+parameter RSBIncrement_2 = 1 us
+parameter RSBIncrement_3 = 1 us
+parameter RSBIncrement_4 = 1 us
+
+# masks and shutters
+shutter InitializationShutter 
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter MicrowaveOn
+masked_shutter RamanOn
+masked_shutter RamanPIOn
+masked_shutter DetectOn
+
+# times
+parameter CoolingTime = 1 ms
+parameter PumpTime = 0 ms
+parameter SbCoolingOn_1 = 0
+parameter SbCoolingOn_2 = 0
+parameter SbCoolingOn_3 = 0
+parameter SbCoolingOn_4 = 0
+parameter NumSBCoolingLoops = 0
+parameter PreWaitTime = 2 us
+parameter MicrowaveInitTime = 10 us
+parameter RamanInitTime = 0 ms
+parameter RamanPITime = 0 us
+parameter RamanPIAcquireTime
+parameter RamseyWaitTime
+parameter MicrowaveInitTime2
+parameter RamanInitTime2
+parameter PostWaitTime = 2 us
+parameter DetectTime = 1 ms
+
+# control parameters
+parameter MaxCoolingRepeat = 10
+parameter PresenceThreshold = 6
+parameter experiments = 100
+counter DetectCounters = 0
+counter CheckIonCounters = 1
+counter RamanCounters = 2
+trigger ddsApplyAll = 3
+
+# exitcodes
+exitcode IonLostExitcode = 0xfffe000000000001
+exitcode endLabel = 0xffffffffffffffff
+
+# internal variables
+var experimentsleft = 100
+var coolingRemaining = 0
+var currentexperiment = 0
+var coolPhotons = 0
+var SBCoolingLoopsLeft = 0
+var RedSidebandPiTime_1 = 10 us
+var RedSidebandPiTime_2 = 10 us
+var RedSidebandPiTime_3 = 10 us
+var RedSidebandPiTime_4 = 10 us
+
+def cool():
+    set_shutter( CoolingOn )
+    set_counter( CheckIonCounters )
+    update( CoolingTime )
+    clear_counter()
+    update( )
+    coolPhotons = load_count( PMTChannel )
+    set_inv_shutter( CoolingOn )
+
+def pump():
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+    update()
+
+def microwaveInit():
+    set_shutter( MicrowaveOn )
+    update( MicrowaveInitTime )
+    set_inv_shutter( MicrowaveOn )
+    update()
+
+def ramanPIInit():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq)
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanPIOn )
+    set_counter( RamanCounters )
+    update( RamanPITime )
+    set_inv_shutter( RamanPIOn )
+    clear_counter()
+    update()
+
+def ramanPIAcquire():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq)
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanPIOn )
+    set_counter( RamanCounters )
+    update( RamanPIAcquireTime )
+    set_inv_shutter( RamanPIOn )
+    clear_counter()
+    update()
+
+def ramanInit():
+    set_dds( channel=DDSRaman2, freq=Raman2Freq)
+    #set_dds( channel=DDSRaman2, freq=Raman2Freq, amp=Raman2Amp )
+    #set_dds( channel=DDSRaman1, amp=Raman1Amp )
+    set_trigger( ddsApplyAll)
+    set_shutter( RamanOn )
+    set_counter( RamanCounters )
+
+    update( RamanInitTime )
+    set_inv_shutter( RamanOn )
+    clear_counter()
+    update()
+
+def detect():
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+def sidebandCoolPulse_1():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_1 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_1 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_2():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_2 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_2 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_3():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_3 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_3 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )   
+
+def sidebandCoolPulse_4():
+    set_dds( channel=DDSRaman2, freq=RedSidebandFreq_4 )
+    set_trigger( ddsApplyAll )
+    set_shutter( RamanOn )
+    update( RedSidebandPiTime_4 )
+    set_inv_shutter( RamanOn )
+    set_shutter( PumpingOn )
+    update( PumpTime )
+    set_inv_shutter( PumpingOn )
+
+# startup switching on cooling quickly
+set_shutter( InitializationShutter )
+update()
+while not pipe_empty():
+    update()
+    apply_next_scan_point()
+
+    #set_dds( channel=DDSRaman1, freq=Raman1Freq )
+    #set_dds( channel=DDSRaman2, freq=Raman2Freq )
+    set_dds( channel=DDSRaman1, freq=Raman1Freq, amp=Raman1Amp )
+    set_dds( channel=DDSRaman2, freq=Raman2Freq, amp=Raman2Amp )
+    set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+    set_dds( channel=DDSCooling, freq=CoolingFreq, amp=CoolingAmp )
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, amp=MicrowaveAmp )
+
+    if dac369voltage > 0:
+        set_dac(dac369, dac369voltage)
+
+    set_trigger( ddsApplyAll )
+    
+    currentexperiment = 0
+    ramanPIAcquire()
+    while currentexperiment < experiments:
+        cool()
+        if MaxCoolingRepeat>0: 
+            coolingRemaining = MaxCoolingRepeat
+            while coolPhotons<PresenceThreshold: 
+                if coolingRemaining==0:
+                    exit( IonLostExitcode )
+                coolingRemaining -= 1
+                cool()
+        if RamanPITime>0:
+            ramanPIInit()
+        if PumpTime>0:
+            pump()
+        SBCoolingLoopsLeft = NumSBCoolingLoops
+        RedSidebandPiTime_1 = InitialRedSidebandPiTime_1
+        RedSidebandPiTime_2 = InitialRedSidebandPiTime_2
+        RedSidebandPiTime_3 = InitialRedSidebandPiTime_3
+        RedSidebandPiTime_4 = InitialRedSidebandPiTime_4
+        while SBCoolingLoopsLeft > 0:
+            if SbCoolingOn_1 > 0:
+                sidebandCoolPulse_1()
+            if SbCoolingOn_2 > 0:
+                sidebandCoolPulse_2()
+            if SbCoolingOn_3 > 0:
+                sidebandCoolPulse_3()
+            if SbCoolingOn_4 > 0:
+                sidebandCoolPulse_4()
+            SBCoolingLoopsLeft -= 1
+            RedSidebandPiTime_1 += RSBIncrement_1
+            RedSidebandPiTime_2 += RSBIncrement_2
+            RedSidebandPiTime_3 += RSBIncrement_3
+            RedSidebandPiTime_4 += RSBIncrement_4
+        if PreWaitTime>0:
+            update( PreWaitTime )
+        if MicrowaveInitTime>0:
+            microwaveInit()
+        if RamanInitTime>0:
+            ramanInit()
+        if RamseyWaitTime>0:
+            update(RamseyWaitTime)
+        if MicrowaveInitTime2>0:
+            microwaveInit()
+        if RamanInitTime2>0:
+            ramanInit()
+        if PostWaitTime>0:
+            update( PostWaitTime )
+        if DetectTime>0:
+            detect()
+        currentexperiment += 1
+
+exit( endLabel )

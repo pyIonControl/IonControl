@@ -1,0 +1,1315 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>scripting &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+    <li>scripting</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/code/scripting-doc.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="scripting">
+<h1>scripting<a class="headerlink" href="#scripting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-scripting.Script">
+<span id="script"></span><h2>Script<a class="headerlink" href="#module-scripting.Script" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scripting.Script.Script">
+<em class="property">class </em><code class="descname">Script</code><span class="sig-paren">(</span><em>fullname=''</em>, <em>code=''</em>, <em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encapsulates a running script together with all the scripting functions. Script executes in separate thread.</p>
+<p>The script behavior is as follows: each script function that manipulates a GUI element does so by emitting a
+signal, followed by entering  QWaitCondition. The ScriptHandler responds to the signal, and wakes up the
+QWaitCondition. For access to GUI data, the script waits at a QWaitCondition until the data is available.
+When the data is available, the ScriptHandler sets the script data variables appropriately, and then wakes the
+wait condition. This back-and-forth handoff between the Script thread and the ScriptHandler (which lives in the
+main GUI thread) is what ensures synchronicity and avoids race conditions.</p>
+<p>Note that the script thread does not have an event loop. This means that it cannot respond to emitted signals,
+and calls like Script.quit and Script.exit do not work. Instead, the script emits signals indicating what to
+change, and then enters a QWaitCondition. The ScriptingUi responds to the signal, and tells the script to exit
+the wait condition once the action has been done.</p>
+<p>All the script functions are executed via the script function decorator, which simplifies the code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fullname</strong> (<em>str</em>) &#8211; full path to script</li>
+<li><strong>code</strong> (<em>str</em>) &#8211; code in the script</li>
+<li><strong>parent</strong> (<em>QObject</em>) &#8211; parent QObject, if any</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="scripting.Script.Script.abortScan">
+<code class="descname">abortScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.abortScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.abortScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abort the scan.</p>
+<p>This is equivalent to clicking &#8220;abort&#8221; on the experiment GUI.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.abortScanSignal">
+<code class="descname">abortScanSignal</code><a class="headerlink" href="#scripting.Script.Script.abortScanSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.addGlobal">
+<code class="descname">addGlobal</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.addGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.addGlobal" title="Permalink to this definition">¶</a></dt>
+<dd><p>add a global &#8216;name&#8217;, set to (value, unit).</p>
+<p>This is equivalent to adding a global via the globals UI,and then setting its value in the globals table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; name of the global to add</li>
+<li><strong>value</strong> (<em>float</em>) &#8211; value to set it to</li>
+<li><strong>unit</strong> (<em>str</em>) &#8211; unit to use</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.addGlobalSignal">
+<code class="descname">addGlobalSignal</code><a class="headerlink" href="#scripting.Script.Script.addGlobalSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.addPlot">
+<code class="descname">addPlot</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.addPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.addPlot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a plot named &#8220;name&#8221;.</p>
+<p>This is equivalent to clicking &#8220;add plot&#8221; on the experiment GUI. If &#8216;name&#8217; already exists, does nothing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; name of plot to add</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.addPlotSignal">
+<code class="descname">addPlotSignal</code><a class="headerlink" href="#scripting.Script.Script.addPlotSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.closeTrace">
+<code class="descname">closeTrace</code><span class="sig-paren">(</span><em>traceName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.closeTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.closeTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finalize trace. Registers in the measurement log and saves. No new data can be added to the trace.</p>
+<p>If this function is not called on a trace, it will be closed automatically when the script ends.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>traceName</strong> (<em>str</em>) &#8211; name of trace to close</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.closeTraceSignal">
+<code class="descname">closeTraceSignal</code><a class="headerlink" href="#scripting.Script.Script.closeTraceSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.consolePrint">
+<code class="descname">consolePrint</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.consolePrint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.consolePrint" title="Permalink to this definition">¶</a></dt>
+<dd><p>consolePrint(message, error=False, color=&#8217;&#8216;):
+write a message to the console.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> (<em>str</em>) &#8211; the message to print</li>
+<li><strong>error</strong> (<em>bool</em>) &#8211; If True, message prints in red</li>
+<li><strong>color</strong> (<em>str</em>) &#8211; color to print in if error is False, HTML color names accepted</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.consolePrintSignal">
+<code class="descname">consolePrintSignal</code><a class="headerlink" href="#scripting.Script.Script.consolePrintSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.consoleSignal">
+<code class="descname">consoleSignal</code><a class="headerlink" href="#scripting.Script.Script.consoleSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.createTrace">
+<code class="descname">createTrace</code><span class="sig-paren">(</span><em>traceName</em>, <em>plotName</em>, <em>xUnit=''</em>, <em>xLabel=''</em>, <em>comment=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.createTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.createTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a new trace</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>traceName</strong> (<em>str</em>) &#8211; name of new trace</li>
+<li><strong>plotName</strong> (<em>str</em>) &#8211; plot to plot it on</li>
+<li><strong>xUnit</strong> (<em>str</em>) &#8211; unit for x axis</li>
+<li><strong>xLabel</strong> (<em>str</em>) &#8211; label for x axis</li>
+<li><strong>comment</strong> (<em>str</em>) &#8211; comment for trace file</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if plotName is not a plot</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.createTraceSignal">
+<code class="descname">createTraceSignal</code><a class="headerlink" href="#scripting.Script.Script.createTraceSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.emitLocation">
+<code class="descname">emitLocation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.emitLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.emitLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Emits a signal containing the current script location</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.exceptionSignal">
+<code class="descname">exceptionSignal</code><a class="headerlink" href="#scripting.Script.Script.exceptionSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.fit">
+<code class="descname">fit</code><span class="sig-paren">(</span><em>fitName</em>, <em>traceName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit trace using specified fit.
+:param traceName: name of trace to fit
+:type traceName: str
+:param fitName: name of fit settings to use (from fit GUI)
+:type fitName: str</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.fitSignal">
+<code class="descname">fitSignal</code><a class="headerlink" href="#scripting.Script.Script.fitSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.genericCallSignal">
+<code class="descname">genericCallSignal</code><a class="headerlink" href="#scripting.Script.Script.genericCallSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getAllData">
+<code class="descname">getAllData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getAllData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getAllData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the full set of data from the most recent scan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">all data from most recent scan. <strong>key</strong>: name of each evaluation in the evaluation list. <strong>val</strong>: tuple (xList, yList).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getAnalysis">
+<code class="descname">getAnalysis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the analysis results for the most recent scan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">analysis results as dictionary of dictionaries. <strong>key</strong>: to the name of each analysis in the analysis list. <strong>val</strong>: Another dictionary. <strong>Inner key</strong>: names of fit parameters in the specified evaluation. <strong>Inner val</strong>: fit value of that parameter</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>A Gaussian fit named &#8220;myFit&#8221; in the analysis, with center parameter &#8216;x0&#8217;, would return its best fit center value as:</p>
+<p>getAnalysis()[&#8216;myFit&#8217;][&#8216;x0&#8217;]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getData">
+<code class="descname">getData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the most recent data point from a running scan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">data from running scan. <strong>key</strong>: the name of each evaluation in the evaluation list. <strong>val</strong>: tuple (x, y).</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getFit">
+<code class="descname">getFit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getFit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the fit results for the most recent scan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">fit results as dictionary. <strong>key</strong>: to the name of the parameter <strong>val</strong>: fit value of that parameter</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Example</p>
+<p>A Gaussian fit named &#8220;myFit&#8221; in the analysis, with center parameter &#8216;x0&#8217;, would return its best fit center value as:</p>
+<p>getFit[&#8216;x0&#8217;]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getGlobal">
+<code class="descname">getGlobal</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getGlobal" title="Permalink to this definition">¶</a></dt>
+<dd><p>get current value of global &#8216;name&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.getScanStatus">
+<code class="descname">getScanStatus</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.getScanStatus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.getScanStatus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the current state of the scan.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">One of &#8216;idle&#8217;, &#8216;running&#8217;, &#8216;paused&#8217;, &#8216;starting&#8217;, &#8216;stopping&#8217;, or &#8216;interrupted&#8217;</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.loadVoltageDef">
+<code class="descname">loadVoltageDef</code><span class="sig-paren">(</span><em>fileName</em>, <em>path=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.loadVoltageDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.loadVoltageDef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load a waveform and its associated shuttling.xml file.
+:param fileName: name of waveform including the &#8216;.txt&#8217;
+:type fileName: str
+:param path: path to the fileName
+:type path: str</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.loadVoltageDefSignal">
+<code class="descname">loadVoltageDefSignal</code><a class="headerlink" href="#scripting.Script.Script.loadVoltageDefSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.locationSignal">
+<code class="descname">locationSignal</code><a class="headerlink" href="#scripting.Script.Script.locationSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.namedTraceSignal">
+<code class="descname">namedTraceSignal</code><a class="headerlink" href="#scripting.Script.Script.namedTraceSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.pauseScan">
+<code class="descname">pauseScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.pauseScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.pauseScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the scan.</p>
+<p>This is equivalent to clicking &#8220;pause&#8221; on the experiment GUI.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.pauseScanSignal">
+<code class="descname">pauseScanSignal</code><a class="headerlink" href="#scripting.Script.Script.pauseScanSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.pauseScript">
+<code class="descname">pauseScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.pauseScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.pauseScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause the script.</p>
+<p>This is equivalent to clicking the &#8220;pause script&#8221; button.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.pauseScriptSignal">
+<code class="descname">pauseScriptSignal</code><a class="headerlink" href="#scripting.Script.Script.pauseScriptSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.plotList">
+<code class="descname">plotList</code><span class="sig-paren">(</span><em>xList</em>, <em>yList</em>, <em>traceName</em>, <em>overwrite=False</em>, <em>plotStyle=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.plotList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.plotList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a set of points given in xList, yList to trace traceName.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>list[float]</em>) &#8211; x coordinates</li>
+<li><strong>y</strong> (<em>list[float]</em>) &#8211; y coordinates</li>
+<li><strong>traceName</strong> (<em>str</em>) &#8211; name of trace to use</li>
+<li><strong>overwrite</strong> (<em>bool</em>) &#8211; if True, overwrite existing data</li>
+<li><strong>plotStyle</strong> (<em>int</em>) &#8211; <dl class="docutils">
+<dt>plot with lines, points, etc...</dt>
+<dd>0: lines
+1: points
+2: linespoints
+3: lines errors
+4: points errors
+5: linespoints errors</dd>
+</dl>
+<p>otherwise: GUI default</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if traceName is not a trace</li>
+<li><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if x and y are of unequal lengths</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.plotListSignal">
+<code class="descname">plotListSignal</code><a class="headerlink" href="#scripting.Script.Script.plotListSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.plotPoint">
+<code class="descname">plotPoint</code><span class="sig-paren">(</span><em>x</em>, <em>y</em>, <em>traceName</em>, <em>plotStyle=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.plotPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.plotPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot a single point (x, y) to trace traceName.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<em>float</em>) &#8211; x coordinate</li>
+<li><strong>y</strong> (<em>float</em>) &#8211; y coordinate</li>
+<li><strong>traceName</strong> (<em>str</em>) &#8211; name of trace to use</li>
+<li><strong>plotStyle</strong> (<em>int</em>) &#8211; <dl class="docutils">
+<dt>plot with lines, points, etc...</dt>
+<dd>0: lines
+1: points
+2: linespoints
+3: lines errors
+4: points errors
+5: linespoints errors</dd>
+</dl>
+<p>otherwise: GUI default</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if traceName is not a trace</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.plotPointSignal">
+<code class="descname">plotPointSignal</code><a class="headerlink" href="#scripting.Script.Script.plotPointSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.pushToNamedTrace">
+<code class="descname">pushToNamedTrace</code><span class="sig-paren">(</span><em>topNode</em>, <em>child</em>, <em>row</em>, <em>data</em>, <em>col='y'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.pushToNamedTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.pushToNamedTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push some data to a Named Trace. col specifies x or y data but can be a trace column dict key if desired.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>run the script</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.scanRunning">
+<code class="descname">scanRunning</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.scanRunning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.scanRunning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if scan is running.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the scan is running. Otherwise, False.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.scriptFunction">
+<code class="descname">scriptFunction</code><span class="sig-paren">(</span><em>waitForGui=True</em>, <em>waitForAnalysis=False</em>, <em>waitForData=False</em>, <em>waitForAllData=False</em>, <em>runIfStopped=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.scriptFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.scriptFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for script functions.</p>
+<p>This decorator performs all the functions that are common to all the script functions. It checks
+whether the script has been stopped or paused, and emits the current location in the script. Once
+the function has executed, it waits to be told to continue by the main GUI. Exceptions that occur
+during execution are sent back to the script thread and raised here.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>waitForGui</strong> (<em>Optional[bool]</em>) &#8211; defaults to True. If True, script waits on guiWait after executing function.</li>
+<li><strong>waitForAnalysis</strong> (<em>Optional[bool]</em>) &#8211; defaults to False. If True, script waits on analysisWait before executing function.</li>
+<li><strong>waitForData</strong> (<em>Optional[bool]</em>) &#8211; defaults to False. If True, script waits on dataWait before executing function.</li>
+<li><strong>waitForAllData</strong> (<em>Optional[bool]</em>) &#8211; defaults to False. If True, script waits on allDataWait before executing function.</li>
+<li><strong>runIfStopped</strong> (<em>Optional[bool]</em>) &#8211; defaults to False. If True, function executes even if the script has been stopped.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.scriptIsStopped">
+<code class="descname">scriptIsStopped</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.scriptIsStopped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.scriptIsStopped" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if script is stopped.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the script has been stopped, Otherwise, False.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.setAnalysis">
+<code class="descname">setAnalysis</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.setAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.setAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the analysis settings to &#8220;name.&#8221;</p>
+<p>This is equivalent to selecting &#8220;name&#8221; from the analysis settings drop down menu.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; name of the analysis settings to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if there is no analysis by that name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.setAnalysisSignal">
+<code class="descname">setAnalysisSignal</code><a class="headerlink" href="#scripting.Script.Script.setAnalysisSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.setEvaluation">
+<code class="descname">setEvaluation</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.setEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.setEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the evaluation settings to &#8220;name.&#8221;</p>
+<p>This is equivalent to selecting &#8220;name&#8221; from the evaluation settings drop down menu.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; name of the evaluation settings to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if there is no evaluation by that name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.setEvaluationSignal">
+<code class="descname">setEvaluationSignal</code><a class="headerlink" href="#scripting.Script.Script.setEvaluationSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.setGlobal">
+<code class="descname">setGlobal</code><span class="sig-paren">(</span><em>name</em>, <em>value</em>, <em>unit</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.setGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.setGlobal" title="Permalink to this definition">¶</a></dt>
+<dd><p>set global &#8216;name&#8217; to (value, unit).</p>
+<p>This is equivalent to typing in a value/unit in the globals table.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<em>str</em>) &#8211; name of the global to change</li>
+<li><strong>value</strong> (<em>float</em>) &#8211; value to set it to</li>
+<li><strong>unit</strong> (<em>str</em>) &#8211; unit to use</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if there is not a global with the given name. This is to avoid typos leading to unexpected behavior. To add a global, use &#8216;addGlobal&#8217;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.setGlobalSignal">
+<code class="descname">setGlobalSignal</code><a class="headerlink" href="#scripting.Script.Script.setGlobalSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.setScan">
+<code class="descname">setScan</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.setScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.setScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the scan settings to &#8220;name.&#8221;</p>
+<p>This is equivalent to selecting &#8220;name&#8221; from the scan settings drop down menu.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) &#8211; name of the scan settings to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="#scripting.Script.ScriptException" title="scripting.Script.ScriptException"><code class="xref py py-exc docutils literal"><span class="pre">ScriptException</span></code></a> &#8211; if there is no scan by that name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.setScanSignal">
+<code class="descname">setScanSignal</code><a class="headerlink" href="#scripting.Script.Script.setScanSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.shortname">
+<code class="descname">shortname</code><a class="headerlink" href="#scripting.Script.Script.shortname" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.startScan">
+<code class="descname">startScan</code><span class="sig-paren">(</span><em>globalOverrides=list()</em>, <em>wait=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.startScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.startScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the scan.</p>
+<p>This is equivalent to clicking &#8220;start&#8221; on the experiment GUI.
+Optionally a list of (name, magnitude) tuples or (name, (value, unit)) tuples
+can be given that overrides global variables during the scan.
+If wait=True, the script will not continue until the scan is finished.</p>
+<p>globalOverrides: list((name, value)) or list((name, (value, unit)))
+wait: bool</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.startScanSignal">
+<code class="descname">startScanSignal</code><a class="headerlink" href="#scripting.Script.Script.startScanSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.stopScan">
+<code class="descname">stopScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.stopScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.stopScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the scan.</p>
+<p>This is equivalent to clicking &#8220;stop&#8221; on the experiment GUI.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.stopScanSignal">
+<code class="descname">stopScanSignal</code><a class="headerlink" href="#scripting.Script.Script.stopScanSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.stopScript">
+<code class="descname">stopScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.stopScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.stopScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the script.</p>
+<p>This is equivalent to clicking the &#8220;stop script&#8221; button.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="scripting.Script.Script.stopScriptSignal">
+<code class="descname">stopScriptSignal</code><a class="headerlink" href="#scripting.Script.Script.stopScriptSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.Script.Script.waitForScan">
+<code class="descname">waitForScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#Script.waitForScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.Script.waitForScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wait for scan to finish before continuing script.</p>
+<p>If startScan is run with wait=True, this function is unnecessary.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="scripting.Script.ScriptException">
+<em class="property">exception </em><code class="descname">ScriptException</code><a class="reference internal" href="../_modules/scripting/Script.html#ScriptException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.ScriptException" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="scripting.Script.checkScripting">
+<code class="descname">checkScripting</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/Script.html#checkScripting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.Script.checkScripting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether a function has been marked as a script function</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripting.ScriptHandler">
+<span id="scripthandler"></span><h2>ScriptHandler<a class="headerlink" href="#module-scripting.ScriptHandler" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scripting.ScriptHandler.ScriptHandler">
+<em class="property">class </em><code class="descname">ScriptHandler</code><span class="sig-paren">(</span><em>script</em>, <em>experimentUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>The ScriptHandler is what handles all the interfacing between the Script and the GUI. The Script
+emits signals, which are picked up by the ScriptHandler, which executes the necessary changes on the
+GUI.</p>
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.getGlobal">
+<code class="descname">getGlobal</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.getGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.getGlobal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onAbortScan">
+<code class="descname">onAbortScan</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onAbortScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onAbortScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onAddGlobal">
+<code class="descname">onAddGlobal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onAddGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onAddGlobal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a global &#8216;name&#8217; and set it to &#8216;value, unit&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onAddPlot">
+<code class="descname">onAddPlot</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onAddPlot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onAddPlot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onAllData">
+<code class="descname">onAllData</code><span class="sig-paren">(</span><em>allData</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onAllData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onAllData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onAnalysisResult">
+<code class="descname">onAnalysisResult</code><span class="sig-paren">(</span><em>allResults</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onAnalysisResult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onAnalysisResult" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onCloseTrace">
+<code class="descname">onCloseTrace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onCloseTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onCloseTrace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onConsolePrintSignal">
+<code class="descname">onConsolePrintSignal</code><span class="sig-paren">(</span><em>message</em>, <em>error</em>, <em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onConsolePrintSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onConsolePrintSignal" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onConsoleSignal">
+<code class="descname">onConsoleSignal</code><span class="sig-paren">(</span><em>message</em>, <em>error</em>, <em>color</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onConsoleSignal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onConsoleSignal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when script emits a console signal. Writes message to console.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onCreateTrace">
+<code class="descname">onCreateTrace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onCreateTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onCreateTrace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onData">
+<code class="descname">onData</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onException">
+<code class="descname">onException</code><span class="sig-paren">(</span><em>message</em>, <em>trace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onException"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when script emits exception signal. Highlights error.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onFinished">
+<code class="descname">onFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onFinished" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onFit">
+<code class="descname">onFit</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onFit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onFit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onGenericCall">
+<code class="descname">onGenericCall</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onGenericCall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onGenericCall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a generic piece of data from the program, specified by &#8216;funcname&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onLoadVoltageDef">
+<code class="descname">onLoadVoltageDef</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onLoadVoltageDef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onLoadVoltageDef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load voltage definition given by name and the associated &#8216;_shuttling.xml&#8217; from path</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onLocation">
+<code class="descname">onLocation</code><span class="sig-paren">(</span><em>locs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mark where the script currently is</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPauseScan">
+<code class="descname">onPauseScan</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPauseScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPauseScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPauseScript">
+<code class="descname">onPauseScript</code><span class="sig-paren">(</span><em>paused</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPauseScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPauseScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when pause script button clicked. Sets paused variable and wakes up script if unpaused.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPauseScriptAndScan">
+<code class="descname">onPauseScriptAndScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPauseScriptAndScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPauseScriptAndScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when pause script and scan button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPauseScriptFromScript">
+<code class="descname">onPauseScriptFromScript</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPauseScriptFromScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPauseScriptFromScript" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPlotList">
+<code class="descname">onPlotList</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPlotList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPlotList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot [x1, x2,...], [y1, y2,...] to traceName</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPlotPoint">
+<code class="descname">onPlotPoint</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPlotPoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPlotPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot point (x,y) to traceName</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onPushToNamedTrace">
+<code class="descname">onPushToNamedTrace</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onPushToNamedTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onPushToNamedTrace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onRepeat">
+<code class="descname">onRepeat</code><span class="sig-paren">(</span><em>repeat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onRepeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onRepeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when repeat button is clicked. Set repeat variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onScanStateChanged">
+<code class="descname">onScanStateChanged</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onScanStateChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onScanStateChanged" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when the scan state changes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onSetAnalysis">
+<code class="descname">onSetAnalysis</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onSetAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onSetAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onSetEvaluation">
+<code class="descname">onSetEvaluation</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onSetEvaluation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onSetEvaluation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onSetGlobal">
+<code class="descname">onSetGlobal</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onSetGlobal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onSetGlobal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set global &#8216;name&#8217; to &#8216;value, unit&#8217;</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onSetScan">
+<code class="descname">onSetScan</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onSetScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onSetScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onSlow">
+<code class="descname">onSlow</code><span class="sig-paren">(</span><em>slow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onSlow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onSlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when slow button is clicked. Set slow variable.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStartScan">
+<code class="descname">onStartScan</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStartScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStartScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the scan
+globalOverrrides is list of (name, magnitude) values or list of (name, (value, unit)) values
+that will override global variables during the scan</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStartScript">
+<code class="descname">onStartScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStartScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStartScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when start script button clicked. Starts the script and disables some aspects of the script GUI</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStopScan">
+<code class="descname">onStopScan</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStopScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStopScan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStopScript">
+<code class="descname">onStopScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStopScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStopScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when stop script button is clicked. Sets stopped variable and wakes up all waitConditions.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStopScriptAndScan">
+<code class="descname">onStopScriptAndScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStopScriptAndScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStopScriptAndScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when stop script and scan button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.onStopScriptFromScript">
+<code class="descname">onStopScriptFromScript</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.onStopScriptFromScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.onStopScriptFromScript" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.plotList">
+<code class="descname">plotList</code><span class="sig-paren">(</span><em>xList</em>, <em>yList</em>, <em>traceName</em>, <em>overwrite=False</em>, <em>plotStyle=-1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.plotList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.plotList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot [x1, x2,...], [y1, y2,...] to traceName</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.registerMeasurement">
+<code class="descname">registerMeasurement</code><span class="sig-paren">(</span><em>plottedTrace</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.registerMeasurement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.registerMeasurement" title="Permalink to this definition">¶</a></dt>
+<dd><p>register a script created trace in the measurement log</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.scriptCommand">
+<code class="descname">scriptCommand</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.scriptCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.scriptCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for script commands.</p>
+<p>Catches exceptions, sets the script exception variables, and wakes the script after the
+specified action has been completed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptHandler.ScriptHandler.writeToConsole">
+<code class="descname">writeToConsole</code><span class="sig-paren">(</span><em>message</em>, <em>error=False</em>, <em>color=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptHandler.html#ScriptHandler.writeToConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptHandler.ScriptHandler.writeToConsole" title="Permalink to this definition">¶</a></dt>
+<dd><p>write a message to the console.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripting.ScriptingUi">
+<span id="scriptingui"></span><h2>ScriptingUi<a class="headerlink" href="#module-scripting.ScriptingUi" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="scripting.ScriptingUi.ScriptingUi">
+<em class="property">class </em><code class="descname">ScriptingUi</code><span class="sig-paren">(</span><em>experimentUi</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ui for the scripting interface.</p>
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.confirmLoad">
+<code class="descname">confirmLoad</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.confirmLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.confirmLoad" title="Permalink to this definition">¶</a></dt>
+<dd><p>pop up window to confirm loss of unsaved changes when loading new file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.enableScriptChange">
+<code class="descname">enableScriptChange</code><span class="sig-paren">(</span><em>enabled</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.enableScriptChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.enableScriptChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Enable or disable any changes to script editor</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.getDocs">
+<code class="descname">getDocs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.getDocs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.getDocs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assemble the script function documentation into a dictionary</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.loadFile">
+<code class="descname">loadFile</code><span class="sig-paren">(</span><em>fullname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.loadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.loadFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load in a file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.markError">
+<code class="descname">markError</code><span class="sig-paren">(</span><em>lines</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.markError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.markError" title="Permalink to this definition">¶</a></dt>
+<dd><p>mark error at specified lines, and show message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.markLocation">
+<code class="descname">markLocation</code><span class="sig-paren">(</span><em>lines</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.markLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.markLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>mark a specified location</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onClearConsole">
+<code class="descname">onClearConsole</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onClearConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onClearConsole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onClose">
+<code class="descname">onClose</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onClose"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onClose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onConsoleMaximumLinesChanged">
+<code class="descname">onConsoleMaximumLinesChanged</code><span class="sig-paren">(</span><em>maxlines</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onConsoleMaximumLinesChanged"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onConsoleMaximumLinesChanged" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onDoubleClick">
+<code class="descname">onDoubleClick</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onDoubleClick"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onDoubleClick" title="Permalink to this definition">¶</a></dt>
+<dd><p>open a file that is double clicked in file tree</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onEnableConsole">
+<code class="descname">onEnableConsole</code><span class="sig-paren">(</span><em>state</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onEnableConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onEnableConsole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onExpandOrCollapse">
+<code class="descname">onExpandOrCollapse</code><span class="sig-paren">(</span><em>expglobal=True</em>, <em>expand=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onExpandOrCollapse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onExpandOrCollapse" title="Permalink to this definition">¶</a></dt>
+<dd><p>For expanding/collapsing file tree, expglobal=True will expand/collapse everything and False will
+collapse/expand only selected nodes. expand=True will expand, False will collapse</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onFilenameChange">
+<code class="descname">onFilenameChange</code><span class="sig-paren">(</span><em>shortname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onFilenameChange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onFilenameChange" title="Permalink to this definition">¶</a></dt>
+<dd><p>A name is typed into the filename combo box.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onFinished">
+<code class="descname">onFinished</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onFinished"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onFinished" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs when script thread finishes. re-enables script GUI.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onLoad">
+<code class="descname">onLoad</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onLoad"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onLoad" title="Permalink to this definition">¶</a></dt>
+<dd><p>The load button is clicked. Open file prompt for file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onNew">
+<code class="descname">onNew</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onNew"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onNew" title="Permalink to this definition">¶</a></dt>
+<dd><p>New button is clicked. Pop up dialog asking for new name, and create file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onPauseScript">
+<code class="descname">onPauseScript</code><span class="sig-paren">(</span><em>paused</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onPauseScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onPauseScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause script button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onPauseScriptAndScan">
+<code class="descname">onPauseScriptAndScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onPauseScriptAndScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onPauseScriptAndScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pause script and scan button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onRemoveCurrent">
+<code class="descname">onRemoveCurrent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onRemoveCurrent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onRemoveCurrent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove current button is clicked. Remove file from combo box.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onRepeat">
+<code class="descname">onRepeat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onRepeat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onRepeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repeat button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onReset">
+<code class="descname">onReset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onReset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onReset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset action. Reset file state saved on disk.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onRevert">
+<code class="descname">onRevert</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onRevert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onRevert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revert button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onSave">
+<code class="descname">onSave</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onSave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onSave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save action. Save file to disk, and clear any highlighted errors.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onSlow">
+<code class="descname">onSlow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onSlow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onSlow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slow button is clicked.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onStartScript">
+<code class="descname">onStartScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onStartScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onStartScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start script button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onStopScript">
+<code class="descname">onStopScript</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onStopScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onStopScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop script button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.onStopScriptAndScan">
+<code class="descname">onStopScriptAndScan</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.onStopScriptAndScan"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.onStopScriptAndScan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop script and scan button is clicked</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.populateTree">
+<code class="descname">populateTree</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.populateTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.populateTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>constructs the file tree viewer</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.recurseExpand">
+<code class="descname">recurseExpand</code><span class="sig-paren">(</span><em>node</em>, <em>expand=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.recurseExpand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.recurseExpand" title="Permalink to this definition">¶</a></dt>
+<dd><p>recursively descends into tree structure below node to expand/collapse all subdirectories.
+expand=True will expand, False will collapse.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.restoreSettingsState">
+<code class="descname">restoreSettingsState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.restoreSettingsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.restoreSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Restore the settings to their original values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.saveConfig">
+<code class="descname">saveConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.saveConfig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.saveConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save configuration.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.saveSettingsState">
+<code class="descname">saveSettingsState</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.saveSettingsState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.saveSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the state of the scan, evaluation, and analysis</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.setupUi">
+<code class="descname">setupUi</code><span class="sig-paren">(</span><em>parent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.setupUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.setupUi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.show">
+<code class="descname">show</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.updateValidator">
+<code class="descname">updateValidator</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.updateValidator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.updateValidator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make the validator match the recentFiles list. Uses regExp b(f1|f2|f3...)b, where fn are filenames.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="scripting.ScriptingUi.ScriptingUi.writeToConsole">
+<code class="descname">writeToConsole</code><span class="sig-paren">(</span><em>message</em>, <em>error=False</em>, <em>color=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/scripting/ScriptingUi.html#ScriptingUi.writeToConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#scripting.ScriptingUi.ScriptingUi.writeToConsole" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

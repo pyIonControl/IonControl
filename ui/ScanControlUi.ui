@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>488</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="removeButton">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/edit-clear-locationbar-ltr.png</normaloff>:/openicon/icons/edit-clear-locationbar-ltr.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBox">
+       <property name="contextMenuPolicy">
+        <enum>Qt::ActionsContextMenu</enum>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <property name="maxVisibleItems">
+        <number>100</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="saveButton">
+       <property name="toolTip">
+        <string>Save current</string>
+       </property>
+       <property name="text">
+        <string notr="true">...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/kde/icons/filesave.png</normaloff>:/kde/icons/filesave.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="reloadButton">
+       <property name="toolTip">
+        <string>reload</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="Experiment.qrc">
+         <normaloff>:/openicon/icons/document-revert-5.png</normaloff>:/openicon/icons/document-revert-5.png</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QToolBox" name="toolBox">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QToolBox {
+	    icon-size: 24px;
+	    border: 1px solid rgb(101, 147, 207);
+	    background-color: rgb(101, 147, 207);
+	}
+	
+	QToolBox:tab {
+	    height: 32px;
+	    color: rgb(32, 77, 137);
+	    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(227, 239, 255, 255), stop:0.4 rgba(196, 221, 255, 255), stop:0.401 rgba(173, 209, 255, 255), stop:1 rgba(192, 219, 255, 255));
+	}
+	
+	QToolBox:tab:hover {
+	    height: 32px;
+	    color: rgb(32, 77, 137);
+	    background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 rgba(255, 254, 228, 255), stop:0.4 rgba(255, 232, 167, 255), stop:0.401 rgba(255, 215, 103, 255), stop:1 rgba(255, 230, 158, 255));
+	}
+	
+	QToolBox:tab:selected {
+	    height: 32px;
+	    font-weight: bold;
+	    color: rgb(0, 0, 0);
+	    /*background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,
+26	 * stop:0 rgba(255, 217, 170, 255), stop:0.4 rgba(255, 187, 110, 255),
+27	 * stop:0.401 rgba(255, 171, 63, 255), stop:1 rgba(254, 225, 122, 255));*/
+	}
+	
+	QToolBox:tab:selected:hover {
+	    height: 32px;
+	    font-weight: bold;
+	    color: rgb(0, 0, 0);
+	    /*background-color: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,
+	 * stop:0 rgba(255, 189, 105, 255), stop:0.4 rgba(255, 172, 66, 255),
+	 * stop:0.401 rgba(251, 140, 60, 255), stop:1 rgba(254, 211, 100, 255));*/
+	} </string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="page">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>468</width>
+        <height>643</height>
+       </rect>
+      </property>
+      <attribute name="label">
+       <string>Scan</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QComboBox" name="scanModeComboBox">
+         <item>
+          <property name="text">
+           <string>Parameter Scan</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Step in Place</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Gate Sequence Scan</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Freerunning</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="RedBlackComboBox" name="comboBoxScanTarget">
+         <property name="maxVisibleItems">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <item>
+            <widget class="RedBlackComboBox" name="comboBoxParameter">
+             <property name="maxVisibleItems">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QToolButton" name="addSegmentButton">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Experiment.qrc">
+             <normaloff>:/openicon/icons/edit-add.png</normaloff>:/openicon/icons/edit-add.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="removeSegmentButton">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="Experiment.qrc">
+             <normaloff>:/openicon/icons/edit_remove.png</normaloff>:/openicon/icons/edit_remove.png</iconset>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="RedBlackComboBox" name="parallelInternalScanComboBox">
+         <property name="toolTip">
+          <string>IN parallel scanned internal parameter. Use None for no internal scan.</string>
+         </property>
+         <property name="maxVisibleItems">
+          <number>100</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSplitter" name="splitter_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="childrenCollapsible">
+          <bool>false</bool>
+         </property>
+         <widget class="QTableView" name="tableView"/>
+         <widget class="QWidget" name="layoutWidget">
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="4" column="2" colspan="2">
+            <widget class="QLineEdit" name="filenameEdit"/>
+           </item>
+           <item row="2" column="2" colspan="2">
+            <widget class="QComboBox" name="scanTypeCombo">
+             <item>
+              <property name="text">
+               <string>Linear Start to Stop</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Linear Stop to Start</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Randomized</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Center Out</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="2" colspan="2">
+            <widget class="QComboBox" name="loadPPComboBox">
+             <property name="maxVisibleItems">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="xaxisLabel">
+             <property name="text">
+              <string>x-axis </string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QCheckBox" name="autoSaveCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QCheckBox" name="loadPPcheckBox">
+             <property name="text">
+              <string>Load PP</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="directionLabel">
+             <property name="text">
+              <string>Direction</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2" colspan="2">
+            <widget class="QLineEdit" name="histogramFilenameEdit"/>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="histogramSaveCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Histogram file</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2" colspan="2">
+            <widget class="QLineEdit" name="rawFilenameEdit"/>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="saveRawCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Raw data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="maxPointsLabel">
+             <property name="text">
+              <string>Max Points</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2" colspan="2">
+            <widget class="MagnitudeSpinBox" name="maxPointsBox">
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>expression</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="xExprEdit">
+               <property name="toolTip">
+                <string>expression x is current value</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="3">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>unit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="xUnitEdit">
+               <property name="toolTip">
+                <string>unit</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RedBlackComboBox</class>
+   <extends>QComboBox</extends>
+   <header>uiModules.RedBlackComboBox</header>
+  </customwidget>
+  <customwidget>
+   <class>MagnitudeSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>uiModules.MagnitudeSpinBox</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>comboBox</tabstop>
+  <tabstop>saveButton</tabstop>
+  <tabstop>scanModeComboBox</tabstop>
+  <tabstop>scanTypeCombo</tabstop>
+  <tabstop>filenameEdit</tabstop>
+  <tabstop>autoSaveCheckBox</tabstop>
+ </tabstops>
+ <resources>
+  <include location="Experiment.qrc"/>
+ </resources>
+ <connections/>
+</ui>

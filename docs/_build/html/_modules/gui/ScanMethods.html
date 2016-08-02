@@ -1,0 +1,385 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>gui.ScanMethods &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>gui.ScanMethods</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for gui.ScanMethods</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">PyQt5</span> <span class="k">import</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">gui.ScanProgress</span> <span class="k">import</span> <span class="n">ScanProgress</span>
+
+
+<div class="viewcode-block" id="ScanException"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ScanException">[docs]</a><span class="k">class</span> <span class="nc">ScanException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ScanNotAvailableException"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ScanNotAvailableException">[docs]</a><span class="k">class</span> <span class="nc">ScanNotAvailableException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="InternalScanMethod"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod">[docs]</a><span class="k">class</span> <span class="nc">InternalScanMethod</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Internal&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span> <span class="o">=</span> <span class="n">experiment</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxUpdatesToWrite</span> <span class="o">=</span> <span class="kc">None</span>
+    
+<div class="viewcode-block" id="InternalScanMethod.startScan"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.startScan">[docs]</a>    <span class="k">def</span> <span class="nf">startScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">setRunning</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">100</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Starting&quot;</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppStart</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;elapsed time </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">startTime</span> <span class="p">)</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InternalScanMethod.onStop"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.onStop">[docs]</a>    <span class="k">def</span> <span class="nf">onStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">finalizeStop</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="InternalScanMethod.onData"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.onData">[docs]</a>    <span class="k">def</span> <span class="nf">onData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queuesize</span><span class="p">,</span> <span class="n">x</span> <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">dataMiddlePart</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">queuesize</span><span class="p">,</span> <span class="n">x</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="InternalScanMethod.onStash"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.onStash">[docs]</a>    <span class="k">def</span> <span class="nf">onStash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppInterrupt</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="InternalScanMethod.resume"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.resume">[docs]</a>    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">resumeBottomHalf</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="InternalScanMethod.prepareNextPoint"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.InternalScanMethod.prepareNextPoint">[docs]</a>    <span class="k">def</span> <span class="nf">prepareNextPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+            <span class="c1">#self.experiment.finalizeData(reason=&#39;end of scan&#39;)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">conetxt</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">dataOnFinal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">state</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">):</span>    <span class="c1"># if all points were taken</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;current index </span><span class="si">{0}</span><span class="s2"> expected </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">dataOnFinal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">state</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="n">ScanProgress</span><span class="o">.</span><span class="n">OpStates</span><span class="o">.</span><span class="n">stashing</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span> <span class="s2">&quot;current index </span><span class="si">{0}</span><span class="s2"> expected </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">onInterrupt</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulseProgramUi</span><span class="o">.</span><span class="n">exitcode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">exitcode</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mycode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">dataNextCode</span><span class="p">(</span><span class="bp">self</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">mycode</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppWriteData</span><span class="p">(</span><span class="n">mycode</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">onData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span> <span class="p">)</span></div></div>
+   
+<div class="viewcode-block" id="ExternalScanMethod"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod">[docs]</a><span class="k">class</span> <span class="nc">ExternalScanMethod</span><span class="p">(</span><span class="n">InternalScanMethod</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;External&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Initialize with a given experiment.</span>
+<span class="sd">        experiment :: ScanExperiment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">ExternalScanMethod</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxUpdatesToWrite</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interrupt</span> <span class="o">=</span> <span class="kc">False</span>
+    
+<div class="viewcode-block" id="ExternalScanMethod.startScan"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.startScan">[docs]</a>    <span class="k">def</span> <span class="nf">startScan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interrupt</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanParameter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">scanTargetDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanTarget</span><span class="p">]:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> Scan Parameter &#39;</span><span class="si">{1}</span><span class="s2">&#39; is not enabled.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanParameter</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ScanNotAvailableException</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">scanTargetDict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanParameter</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">saveValue</span><span class="p">(</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>                 
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">setStarting</span><span class="p">()</span>
+        <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startBottomHalf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.startBottomHalf"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.startBottomHalf">[docs]</a>    <span class="k">def</span> <span class="nf">startBottomHalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">is_starting</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]):</span>
+                <span class="sd">&quot;&quot;&quot;We are done adjusting&quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppStart</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">currentIndex</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">timestampsNewRun</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;elapsed time </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">startTime</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Status -&gt; Running&quot;</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">setRunning</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startBottomHalf</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.onStash"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.onStash">[docs]</a>    <span class="k">def</span> <span class="nf">onStash</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interrupt</span> <span class="o">=</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.onStop"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.onStop">[docs]</a>    <span class="k">def</span> <span class="nf">onStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">setStopping</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopBottomHalf</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.resume"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.resume">[docs]</a>    <span class="k">def</span> <span class="nf">resume</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">saveValue</span><span class="p">(</span><span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">setRunning</span><span class="p">(</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">resumeBottomHalf</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resume</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.stopBottomHalf"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.stopBottomHalf">[docs]</a>    <span class="k">def</span> <span class="nf">stopBottomHalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">is_stopping</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">restoreValue</span><span class="p">():</span>
+                <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopBottomHalf</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">finalizeStop</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Status -&gt; Idle&quot;</span> <span class="p">)</span></div>
+             
+<div class="viewcode-block" id="ExternalScanMethod.onData"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.onData">[docs]</a>    <span class="k">def</span> <span class="nf">onData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queuesize</span><span class="p">,</span> <span class="n">x</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">useExternalValue</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">xValue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">dataMiddlePart</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">queuesize</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">asyncCurrentExternalValue</span><span class="p">(</span> <span class="n">partial</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">dataMiddlePart</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">queuesize</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">interrupt</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stashMiddlePart</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.stashMiddlePart"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.stashMiddlePart">[docs]</a>    <span class="k">def</span> <span class="nf">stashMiddlePart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">is_stashing</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">restoreValue</span><span class="p">():</span>
+                <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stashMiddlePart</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">onStashBottomHalf</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ExternalScanMethod.prepareNextPoint"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.prepareNextPoint">[docs]</a>    <span class="k">def</span> <span class="nf">prepareNextPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">is_running</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">final</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">exitcode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0xffff</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">onInterrupt</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulseProgramUi</span><span class="o">.</span><span class="n">exitcode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">exitcode</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">):</span>
+                <span class="n">mycode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">dataNextCode</span><span class="p">(</span><span class="bp">self</span> <span class="p">)</span>
+                <span class="k">if</span> <span class="n">mycode</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppWriteData</span><span class="p">(</span><span class="n">mycode</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataBottomHalf</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">onData</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="p">)</span>  
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">finalizeData</span><span class="p">(</span><span class="n">reason</span><span class="o">=</span><span class="s1">&#39;end of scan&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">generator</span><span class="o">.</span><span class="n">dataOnFinal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">state</span> <span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scan Completed&quot;</span><span class="p">)</span>               </div>
+
+<div class="viewcode-block" id="ExternalScanMethod.dataBottomHalf"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.ExternalScanMethod.dataBottomHalf">[docs]</a>    <span class="k">def</span> <span class="nf">dataBottomHalf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">progressUi</span><span class="o">.</span><span class="n">is_running</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">scanMode</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">]):</span>
+                <span class="sd">&quot;&quot;&quot;We are done adjusting&quot;&quot;&quot;</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">pulserHardware</span><span class="o">.</span><span class="n">ppStart</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> Value: </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">context</span><span class="o">.</span><span class="n">scan</span><span class="o">.</span><span class="n">list</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">])</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">QtCore</span><span class="o">.</span><span class="n">QTimer</span><span class="o">.</span><span class="n">singleShot</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataBottomHalf</span><span class="p">)</span></div></div>
+   
+<div class="viewcode-block" id="GlobalScanMethod"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.GlobalScanMethod">[docs]</a><span class="k">class</span> <span class="nc">GlobalScanMethod</span><span class="p">(</span><span class="n">ExternalScanMethod</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Global&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">GlobalScanMethod</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="VoltageScanMethod"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.VoltageScanMethod">[docs]</a><span class="k">class</span> <span class="nc">VoltageScanMethod</span><span class="p">(</span><span class="n">ExternalScanMethod</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Voltage&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">VoltageScanMethod</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VoltageLocalAdjustScanMethod"><a class="viewcode-back" href="../../code/gui-doc.html#gui.ScanMethods.VoltageLocalAdjustScanMethod">[docs]</a><span class="k">class</span> <span class="nc">VoltageLocalAdjustScanMethod</span><span class="p">(</span><span class="n">ExternalScanMethod</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Voltage Local Adjust&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">experiment</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span> <span class="n">VoltageLocalAdjustScanMethod</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">experiment</span><span class="p">)</span></div>
+
+
+<span class="n">ScanMethodsDict</span> <span class="o">=</span> <span class="p">{</span> <span class="n">InternalScanMethod</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">InternalScanMethod</span><span class="p">,</span>
+                    <span class="n">ExternalScanMethod</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">ExternalScanMethod</span><span class="p">,</span>
+                    <span class="n">GlobalScanMethod</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">GlobalScanMethod</span><span class="p">,</span>
+                    <span class="n">VoltageScanMethod</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">VoltageScanMethod</span><span class="p">,</span>
+                    <span class="n">VoltageLocalAdjustScanMethod</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">VoltageLocalAdjustScanMethod</span> <span class="p">}</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,1008 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.PulserHardwareServer &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.PulserHardwareServer</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.PulserHardwareServer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Encapsulation of the Pulse Programmer Hardware </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">_collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span> <span class="k">as</span> <span class="n">time_time</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span>
+
+<span class="kn">from</span> <span class="nn">modules</span> <span class="k">import</span> <span class="n">enum</span>
+<span class="kn">from</span> <span class="nn">modules.quantity</span> <span class="k">import</span> <span class="n">Q</span>
+<span class="kn">from</span> <span class="nn">mylogging.ServerLogging</span> <span class="k">import</span> <span class="n">configureServerLogging</span>
+<span class="kn">from</span> <span class="nn">pulser.OKBase</span> <span class="k">import</span> <span class="n">OKBase</span><span class="p">,</span> <span class="n">check</span>
+<span class="kn">from</span> <span class="nn">pulser.PulserConfig</span> <span class="k">import</span> <span class="n">getPulserConfiguration</span>
+
+
+<div class="viewcode-block" id="PulserHardwareException"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareException">[docs]</a><span class="k">class</span> <span class="nc">PulserHardwareException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">count</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>       <span class="c1"># list of counts in the counter channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>   
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestampZero</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scanvalue</span> <span class="o">=</span> <span class="kc">None</span>                           <span class="c1"># scanvalue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">other</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overrun</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exitcode</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dependentValues</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>                   <span class="c1"># additional scan values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">evaluated</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>                              <span class="c1"># data received in the result channels dict with channel number as key</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">externalStatus</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creationTime</span> <span class="o">=</span> <span class="n">time_time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timingViolations</span> <span class="o">=</span> <span class="kc">None</span>
+        
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">creationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creationTime</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timeinterval</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span> <span class="p">((</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span><span class="p">)</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span> 
+                 <span class="k">else</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_creationTime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creationTime</span><span class="p">)</span> <span class="p">)</span>
+        
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">))</span><span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">+</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span> <span class="p">])</span>
+    
+<div class="viewcode-block" id="Data.defaultTimestampZero"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.Data.defaultTimestampZero">[docs]</a>    <span class="k">def</span> <span class="nf">defaultTimestampZero</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+    
+<div class="viewcode-block" id="Data.dataString"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.Data.dataString">[docs]</a>    <span class="k">def</span> <span class="nf">dataString</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestampZero</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scanvalue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">final</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">other</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">overrun</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">exitcode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependentValues</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">externalStatus</span><span class="p">,</span>
+                           <span class="bp">self</span><span class="o">.</span><span class="n">_creationTime</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTick</span><span class="p">])</span>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Data.fromJson"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.Data.fromJson">[docs]</a>    <span class="k">def</span> <span class="nf">fromJson</span><span class="p">(</span><span class="n">string</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">timestampZero</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">scanvalue</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">final</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">other</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">overrun</span><span class="p">,</span>
+         <span class="n">data</span><span class="o">.</span><span class="n">exitcode</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">dependentValues</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">result</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">externalStatus</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">_creationTime</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">timeTickOffset</span><span class="p">)</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">string</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="DedicatedData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.DedicatedData">[docs]</a><span class="k">class</span> <span class="nc">DedicatedData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeTickOffset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span><span class="o">*</span><span class="mi">34</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">externalStatus</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="n">timeTickOffset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="n">time_time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">maxBytesRead</span> <span class="o">=</span> <span class="mi">0</span>
+        
+<div class="viewcode-block" id="DedicatedData.count"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.DedicatedData.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="DedicatedData.analog"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.DedicatedData.analog">[docs]</a>    <span class="k">def</span> <span class="nf">analog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">16</span><span class="p">:</span><span class="mi">31</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="DedicatedData.integration"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.DedicatedData.integration">[docs]</a>    <span class="k">def</span> <span class="nf">integration</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">32</span><span class="p">]</span></div>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">33</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span><span class="n">e</span><span class="o">-</span><span class="mi">9</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">33</span><span class="p">]</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span>
+    
+    <span class="nd">@timestamp</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="o">=</span> <span class="n">ts</span></div>
+
+<div class="viewcode-block" id="LogicAnalyzerData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.LogicAnalyzerData">[docs]</a><span class="k">class</span> <span class="nc">LogicAnalyzerData</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auxData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trigger</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gateData</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">countOffset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">overrun</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wordcount</span> <span class="o">=</span> <span class="mi">0</span>
+        
+<div class="viewcode-block" id="LogicAnalyzerData.dataToStr"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.LogicAnalyzerData.dataToStr">[docs]</a>    <span class="k">def</span> <span class="nf">dataToStr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">l</span><span class="p">):</span>
+        <span class="n">strlist</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">time</span><span class="p">,</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">l</span><span class="p">:</span>
+            <span class="n">strlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;(</span><span class="si">{0}</span><span class="s2">, </span><span class="si">{1:x}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s2">&quot;[&quot;</span><span class="o">+</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strlist</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span></div>
+                  
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;data: </span><span class="si">{0}</span><span class="s2"> auxdata: </span><span class="si">{1}</span><span class="s2"> trigger: </span><span class="si">{2}</span><span class="s2"> gate: </span><span class="si">{3}</span><span class="s2"> stopMarker: </span><span class="si">{4}</span><span class="s2"> countOffset: </span><span class="si">{5}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataToStr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataToStr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxData</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataToStr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">trigger</span><span class="p">),</span> 
+                                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">dataToStr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gateData</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">stopMarker</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">countOffset</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FinishException"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.FinishException">[docs]</a><span class="k">class</span> <span class="nc">FinishException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer">[docs]</a><span class="k">class</span> <span class="nc">PulserHardwareServer</span><span class="p">(</span><span class="n">Process</span><span class="p">,</span> <span class="n">OKBase</span><span class="p">):</span>
+    <span class="n">timestep</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+    <span class="n">integrationTimestep</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="s1">&#39;ns&#39;</span><span class="p">)</span>
+    <span class="n">dedicatedDataClass</span> <span class="o">=</span> <span class="n">DedicatedData</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataQueue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">commandPipe</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loggingQueue</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sharedMemoryArray</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">OKBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span> <span class="o">=</span> <span class="n">dataQueue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commandPipe</span> <span class="o">=</span> <span class="n">commandPipe</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span> <span class="o">=</span> <span class="n">loggingQueue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span> <span class="o">=</span> <span class="n">sharedMemoryArray</span>
+        
+        <span class="c1"># PipeReader stuff</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">normal</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedDataClass</span><span class="p">(</span><span class="n">time_time</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_integrationTime</span> <span class="o">=</span> <span class="n">Q</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;ms&#39;</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerEnabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerStopAtEnd</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span> <span class="o">=</span> <span class="n">LogicAnalyzerData</span><span class="p">()</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerBuffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">0</span>      <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span> <span class="o">=</span> <span class="kc">None</span>
+        
+<div class="viewcode-block" id="PulserHardwareServer.run"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">configureServerLogging</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="p">)</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="k">while</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">commandPipe</span><span class="o">.</span><span class="n">poll</span><span class="p">(</span><span class="mf">0.01</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">commandstring</span><span class="p">,</span> <span class="n">argument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">commandPipe</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span>
+                        <span class="n">command</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commandstring</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;PulserHardwareServer </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">commandstring</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">commandPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">command</span><span class="p">(</span><span class="o">*</span><span class="n">argument</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">commandPipe</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">readDataFifo</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">FinishException</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Pulser Hardware Server Process finished.&quot;</span> <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware Server Process exception </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loggingQueue</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+<span class="c1">#         self.loggingQueue.join_thread()</span>
+            
+<div class="viewcode-block" id="PulserHardwareServer.syncTime"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.syncTime">[docs]</a>    <span class="k">def</span> <span class="nf">syncTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Time synchronized at </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time_time</span><span class="p">()))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No time synchronization because FPGA is not available&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="n">time_time</span><span class="p">()</span>        </div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.finish"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.finish">[docs]</a>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="n">analyzingState</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">enum</span><span class="p">(</span><span class="s1">&#39;normal&#39;</span><span class="p">,</span> <span class="s1">&#39;scanparameter&#39;</span><span class="p">,</span> <span class="s1">&#39;dependentscanparameter&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="PulserHardwareServer.readDataFifo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.readDataFifo">[docs]</a>    <span class="k">def</span> <span class="nf">readDataFifo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; run is responsible for reading the data back from the FPGA</span>
+<span class="sd">            0xffffffffffffffff end of experiment marker</span>
+<span class="sd">            0xfffexxxxxxxxxxxx exitcode marker</span>
+<span class="sd">            0xfffd000000000000 timestamping overflow marker</span>
+<span class="sd">            0xfffcxxxxxxxxxxxx scan parameter, followed by scanparameter value</span>
+<span class="sd">            0xfffb00000000xxxx timing was not met, xxxx address of update command whose timing could not be met</span>
+<span class="sd">            0x01ddnnxxxxxxxxxx count result from channel n id dd</span>
+<span class="sd">            0x02ddnnxxxxxxxxxx timestamp result channel n id dd</span>
+<span class="sd">            0x03ddnnxxxxxxxxxx timestamp gate start channel n id dd</span>
+<span class="sd">            0x04nnxxxxxxxxxxxx other return</span>
+<span class="sd">            0x05nnxxxxxxxxxxxx ADC return MSB 16 bits count, LSB 32 bits sum</span>
+<span class="sd">            0x06ddxxxxxxxxxxxx</span>
+<span class="sd">            0xeennxxxxxxxxxxxx dedicated result</span>
+<span class="sd">            0x50nn00000000xxxx result n return Hi 16 bits, only being sent if xxxx is not identical to zero</span>
+<span class="sd">            0x51nnxxxxxxxxxxxx result n return Low 48 bits, guaranteed to come first</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerEnabled</span><span class="p">):</span>
+            <span class="n">logicAnalyzerData</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppReadLogicAnalyzerData</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerOverrun</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Logic Analyzer Pipe overrun&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerClearOverrun</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">overrun</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">logicAnalyzerData</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerBuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">logicAnalyzerData</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sliceview</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerBuffer</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">wordcount</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span> <span class="o">&amp;</span> <span class="mh">0xffffff</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">countOffset</span>
+                    <span class="n">pattern</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span> <span class="o">&gt;&gt;</span> <span class="mi">24</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span>
+                    <span class="n">header</span> <span class="o">=</span> <span class="p">(</span><span class="n">code</span> <span class="o">&gt;&gt;</span> <span class="mi">56</span> <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">header</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># overrun marker</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">countOffset</span> <span class="o">+=</span> <span class="mh">0x1000000</span>   <span class="c1"># overrun of 24 bit counter</span>
+                    <span class="k">elif</span> <span class="n">header</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>  <span class="c1"># end marker</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">stopMarker</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span> <span class="o">=</span> <span class="n">LogicAnalyzerData</span><span class="p">()</span>
+                    <span class="k">elif</span> <span class="n">header</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span> <span class="c1"># trigger</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">4</span>
+                    <span class="k">elif</span> <span class="n">header</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span> <span class="c1"># standard</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">3</span>  
+                    <span class="k">elif</span> <span class="n">header</span><span class="o">==</span><span class="mi">5</span><span class="p">:</span> <span class="c1"># aux data</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">5</span>
+                    <span class="k">elif</span> <span class="n">header</span><span class="o">==</span><span class="mi">6</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">6</span>                                       
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Time </span><span class="si">{0:x}</span><span class="s2"> header </span><span class="si">{1}</span><span class="s2"> pattern </span><span class="si">{2:x}</span><span class="s2"> </span><span class="si">{3:x}</span><span class="s2"> </span><span class="si">{4:x}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">countOffset</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">trigger</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span><span class="o">==</span><span class="mi">5</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">auxData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span><span class="p">,</span> <span class="n">pattern</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span><span class="o">==</span><span class="mi">6</span><span class="p">:</span>
+                    <span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerData</span><span class="o">.</span><span class="n">gateData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerTime</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerReadStatus</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerBuffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="n">sliceview_remainder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerBuffer</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span> <span class="p">)</span>           
+
+                   
+        <span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">overrun</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">externalStatus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppReadData</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">externalStatus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">externalStatus</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">maxBytesRead</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">maxBytesRead</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">data</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sliceview</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">token</span><span class="p">,)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+                <span class="c1">#print(hex(token))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">dependentscanparameter</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">dependentValues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;Dependent value </span><span class="si">{0}</span><span class="s2"> received&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">normal</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">scanparameter</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span> <span class="s2">&quot;Scan value </span><span class="si">{0}</span><span class="s2"> received&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">token</span><span class="p">)</span> <span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scanvalue</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scanvalue</span> <span class="o">=</span> <span class="n">token</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">scanvalue</span> <span class="o">=</span> <span class="n">token</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">normal</span>
+                <span class="k">elif</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xff00000000000000</span> <span class="o">==</span> <span class="mh">0xee00000000000000</span><span class="p">:</span> <span class="c1"># dedicated results</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">48</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span> <span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedDataClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">channel</span><span class="o">==</span><span class="mi">33</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffffffffff</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">dedicatedData</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffffffffffff</span>
+                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                        <span class="c1">#logger.debug(&quot;dedicated {0} {1}&quot;.format(channel, token &amp; 0xffffffffffff))</span>
+                <span class="k">elif</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xff00000000000000</span> <span class="o">==</span> <span class="mh">0xff00000000000000</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">token</span> <span class="o">==</span> <span class="mh">0xffffffffffffffff</span><span class="p">:</span>    <span class="c1"># end of run</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">final</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">exitcode</span> <span class="o">=</span> <span class="mh">0x0000</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;End of Run marker received&quot;</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+                    <span class="k">elif</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffff000000000000</span> <span class="o">==</span> <span class="mh">0xfffe000000000000</span><span class="p">:</span>  <span class="c1"># exitparameter</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">final</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">exitcode</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x0000ffffffffffff</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Exitcode </span><span class="si">{0:x}</span><span class="s2"> received&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">exitcode</span><span class="p">)</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+                    <span class="k">elif</span> <span class="n">token</span> <span class="o">==</span> <span class="mh">0xfffd000000000000</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">40</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffff000000000000</span> <span class="o">==</span> <span class="mh">0xfffc000000000000</span><span class="p">:</span>  <span class="c1"># new scan parameter</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">dependentscanparameter</span> <span class="k">if</span> <span class="p">(</span><span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x8000</span> <span class="o">==</span> <span class="mh">0x8000</span><span class="p">)</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">analyzingState</span><span class="o">.</span><span class="n">scanparameter</span> 
+                    <span class="k">elif</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffff000000000000</span> <span class="o">==</span> <span class="mh">0xfffb000000000000</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timingViolations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timingViolations</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timingViolations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&gt;&gt;</span> <span class="mi">56</span> 
+                    <span class="c1">#print(&quot;token&quot;, hex(token))</span>
+                    <span class="k">if</span> <span class="n">key</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>   <span class="c1"># count</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x000000ffffffffff</span>
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">[</span> <span class="n">channel</span> <span class="p">])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>  <span class="c1"># timestamp</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x000000ffffffffff</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span> <span class="o">+</span> <span class="n">value</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestampZero</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>  <span class="c1"># timestamp gate start</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x000000ffffffffff</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestampZero</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestampZero</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestampZero</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span> <span class="o">+</span> <span class="n">value</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timestamp</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">list</span><span class="p">())</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mi">4</span><span class="p">:</span> <span class="c1"># other return value</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x000000ffffffffff</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mi">5</span><span class="p">:</span> <span class="c1"># ADC return</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span>
+                        <span class="n">sumvalue</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xfffffff</span>
+                        <span class="n">count</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span> <span class="mi">28</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xfff</span>
+                        <span class="k">if</span> <span class="n">count</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">count</span><span class="p">[</span><span class="n">channel</span> <span class="o">+</span> <span class="mi">32</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">sumvalue</span><span class="o">/</span><span class="nb">float</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>  <span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mi">6</span><span class="p">:</span> <span class="c1"># clock timestamp</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timeTick</span><span class="p">[(</span><span class="n">token</span><span class="o">&gt;&gt;</span><span class="mi">40</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">timestampOffset</span> <span class="o">+</span> <span class="p">(</span><span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0xffffffffff</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mh">0x51</span><span class="p">:</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">48</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x0000ffffffffffff</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">result</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">channel</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">value</span>  <span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">key</span><span class="o">==</span><span class="mh">0x50</span><span class="p">:</span>
+                        <span class="n">channel</span> <span class="o">=</span> <span class="p">(</span><span class="n">token</span> <span class="o">&gt;&gt;</span><span class="mi">48</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xff</span> 
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">token</span> <span class="o">&amp;</span> <span class="mh">0x000000000000ffff</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">result</span><span class="p">[</span><span class="n">channel</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">|=</span> <span class="p">(</span> <span class="n">value</span> <span class="o">&lt;&lt;</span> <span class="mi">48</span> <span class="p">)</span>                           
+<span class="c1">#                  logger.debug(&quot;result key: {0} hi-low: {1} value: {2} length: {3} value: {4}&quot;.format(resultkey,channel,value&amp;0xffff,len(self.data.result[resultkey]),self.data.result[resultkey][-1]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">other</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">overrun</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;Overrun detected, triggered data queue&quot;</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">timeTickOffset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">timeTickOffset</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">clearOverrun</span><span class="p">()</span></div>
+                
+            
+     
+<div class="viewcode-block" id="PulserHardwareServer.__getattr__"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.__getattr__">[docs]</a>    <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delegate not available procedures to xem&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;__&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PulserHardwareServer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__getattr__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">,</span> <span class="n">name</span> <span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">wrapper</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>      </div>
+     
+<div class="viewcode-block" id="PulserHardwareServer.openBySerial"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.openBySerial">[docs]</a>    <span class="k">def</span> <span class="nf">openBySerial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">serial</span> <span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PulserHardwareServer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">openBySerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syncTime</span><span class="p">()</span></div>
+     
+<div class="viewcode-block" id="PulserHardwareServer.getShutter"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getShutter">[docs]</a>    <span class="k">def</span> <span class="nf">getShutter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span>  <span class="c1">#</span></div>
+         
+<div class="viewcode-block" id="PulserHardwareServer.setShutter"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setShutter">[docs]</a>    <span class="k">def</span> <span class="nf">setShutter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x10</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="n">data</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.setShutterBit"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setShutterBit">[docs]</a>    <span class="k">def</span> <span class="nf">setShutterBit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bit</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">bit</span>
+        <span class="n">newval</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_shutter</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">mask</span><span class="p">))</span> <span class="o">|</span> <span class="p">(</span><span class="n">mask</span> <span class="k">if</span> <span class="n">value</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setShutter</span><span class="p">(</span> <span class="n">newval</span> <span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.getTrigger"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getTrigger">[docs]</a>    <span class="k">def</span> <span class="nf">getTrigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.setExtendedWireIn"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setExtendedWireIn">[docs]</a>    <span class="k">def</span> <span class="nf">setExtendedWireIn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">value</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span> <span class="k">if</span> <span class="n">value</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;=Hq&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Writing Extended wire </span><span class="si">{0}</span><span class="s2"> value </span><span class="si">{1}</span><span class="s2"> </span><span class="si">{2}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.setMultipleExtendedWireIn"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setMultipleExtendedWireIn">[docs]</a>    <span class="k">def</span> <span class="nf">setMultipleExtendedWireIn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">writebuffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+                <span class="n">writebuffer</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span> <span class="k">if</span> <span class="n">value</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;=Hq&#39;</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">value</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="n">writebuffer</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Writing All Extended wire values&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.setTrigger"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setTrigger">[docs]</a>    <span class="k">def</span> <span class="nf">setTrigger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x11</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_trigger</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.getCounterMask"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getCounterMask">[docs]</a>    <span class="k">def</span> <span class="nf">getCounterMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span> </div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.setCounterMask"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setCounterMask">[docs]</a>    <span class="k">def</span> <span class="nf">setCounterMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0xffff</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setExtendedWireIn</span><span class="p">(</span><span class="mh">0x1d</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;set counterMask </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span><span class="p">)</span> <span class="p">)</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_counterMask</span> </div>
+
+<div class="viewcode-block" id="PulserHardwareServer.getAdcMask"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getAdcMask">[docs]</a>    <span class="k">def</span> <span class="nf">getAdcMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span> </div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.setAdcMask"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setAdcMask">[docs]</a>    <span class="k">def</span> <span class="nf">setAdcMask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0xffff</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setExtendedWireIn</span><span class="p">(</span><span class="mh">0x1c</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;set adc mask </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_adcMask</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.getIntegrationTime"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getIntegrationTime">[docs]</a>    <span class="k">def</span> <span class="nf">getIntegrationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_integrationTime</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.setIntegrationTime"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.setIntegrationTime">[docs]</a>    <span class="k">def</span> <span class="nf">setIntegrationTime</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimeBinary</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimestep</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;set dedicated integration time </span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimeBinary</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">setExtendedWireIn</span><span class="p">(</span><span class="mh">0x1b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimeBinary</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_integrationTime</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimeBinary</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.getIntegrationTimeBinary"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getIntegrationTimeBinary">[docs]</a>    <span class="k">def</span> <span class="nf">getIntegrationTimeBinary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">integrationTimestep</span><span class="p">)))</span> <span class="o">&amp;</span> <span class="mh">0xffffffff</span></div>
+    
+<div class="viewcode-block" id="PulserHardwareServer.ppUpload"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppUpload">[docs]</a>    <span class="k">def</span> <span class="nf">ppUpload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xxx_todo_changeme</span><span class="p">,</span> <span class="n">codestartaddress</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">datastartaddress</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+        <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">=</span> <span class="n">xxx_todo_changeme</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppUploadCode</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">codestartaddress</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppUploadData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">datastartaddress</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.ppUploadCode"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppUploadCode">[docs]</a>    <span class="k">def</span> <span class="nf">ppUploadCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">binarycode</span><span class="p">,</span><span class="n">startaddress</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;PP Code segment uses </span><span class="si">{0}</span><span class="s2"> / </span><span class="si">{1}</span><span class="s2"> words </span><span class="si">{2:.0f}</span><span class="s2"> %&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarycode</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">,</span> <span class="mi">4095</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binarycode</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span><span class="mf">40.95</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">binarycode</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span><span class="o">.</span><span class="n">commandMemorySize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;Code segment exceeds 4095 words (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarycode</span><span class="p">)</span><span class="o">/</span><span class="mi">4</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;starting PP Code upload&quot;</span> <span class="p">)</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="mh">0x0FFF</span><span class="p">),</span> <span class="s2">&quot;ppUpload write start address&quot;</span> <span class="p">)</span>	<span class="c1"># start addr at zero</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="s2">&quot;ppUpload trigger&quot;</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> bytes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarycode</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x83</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">binarycode</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">check</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="s1">&#39;Write to program pipe&#39;</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>   <span class="s2">&quot;uploaded pp file </span><span class="si">{0}</span><span class="s2"> bytes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">num</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppDownloadCode</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>   <span class="s2">&quot;Verified </span><span class="si">{0}</span><span class="s2"> bytes. </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">data</span><span class="o">==</span><span class="n">binarycode</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.ppDownloadCode"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppDownloadCode">[docs]</a>    <span class="k">def</span> <span class="nf">ppDownloadCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="mh">0x0FFF</span><span class="p">)</span>	<span class="c1"># start addr at 3900</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">b</span><span class="s1">&#39;</span><span class="se">\000</span><span class="s1">&#39;</span><span class="o">*</span><span class="n">length</span><span class="p">)</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xA4</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">num</span><span class="p">,</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppUploadData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppUploadData">[docs]</a>    <span class="k">def</span> <span class="nf">ppUploadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">binarydata</span><span class="p">,</span><span class="n">startaddress</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;PP Data segment uses </span><span class="si">{0}</span><span class="s2"> / </span><span class="si">{1}</span><span class="s2"> words ( </span><span class="si">{2:.0f}</span><span class="s2"> % )&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarydata</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4095</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">binarydata</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span><span class="o">/</span><span class="mf">40.95</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">binarydata</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span><span class="o">.</span><span class="n">dataMemorySize</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;Code segment exceeds 4095 words (</span><span class="si">{0}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarydata</span><span class="p">)</span><span class="o">/</span><span class="mi">8</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;starting PP Datasegment upload&quot;</span> <span class="p">)</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="mh">0x0FFF</span><span class="p">),</span> <span class="s2">&quot;ppUpload write start address&quot;</span> <span class="p">)</span>    <span class="c1"># start addr at zero</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="s2">&quot;ppUpload trigger&quot;</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>  <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> bytes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">binarydata</span><span class="p">))</span> <span class="p">)</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x80</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">binarydata</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">check</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="s1">&#39;Write to program pipe&#39;</span> <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>   <span class="s2">&quot;uploaded pp file </span><span class="si">{0}</span><span class="s2"> bytes&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="p">)</span>
+            <span class="n">num</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppDownloadData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>   <span class="s2">&quot;Verified </span><span class="si">{0}</span><span class="s2"> bytes. </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">data</span><span class="o">==</span><span class="n">binarydata</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.ppDownloadData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppDownloadData">[docs]</a>    <span class="k">def</span> <span class="nf">ppDownloadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x00</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">,</span> <span class="mh">0x0FFF</span><span class="p">)</span>    <span class="c1"># start addr at 3900</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">b</span><span class="s1">&#39;</span><span class="se">\000</span><span class="s1">&#39;</span><span class="o">*</span><span class="n">length</span><span class="p">)</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xA0</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">num</span><span class="p">,</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span></div>
+        
+<div class="viewcode-block" id="PulserHardwareServer.ppIsRunning"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppIsRunning">[docs]</a>    <span class="k">def</span> <span class="nf">ppIsRunning</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="o">*</span><span class="mi">32</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xA1</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">data</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">!=</span> <span class="n">b</span><span class="s1">&#39;</span><span class="se">\xED\xFE</span><span class="s1">&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span> <span class="o">!=</span> <span class="n">b</span><span class="s1">&#39;</span><span class="se">\xED\x0F</span><span class="s1">&#39;</span><span class="p">)):</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Bad data string: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="n">data</span><span class="p">))</span> <span class="p">)</span> <span class="p">)</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">ord</span><span class="p">,</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="c1">#Decode</span>
+            <span class="n">active</span> <span class="o">=</span>  <span class="nb">bool</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x80</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">active</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+            
+
+<div class="viewcode-block" id="PulserHardwareServer.ppReset"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReset">[docs]</a>    <span class="k">def</span> <span class="nf">ppReset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="c1">#, widget = None, data = None):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;pp_reset is not working right now... CWC 08302012&quot;</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppStart"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppStart">[docs]</a>    <span class="k">def</span> <span class="nf">ppStart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="c1">#, widget = None, data = None):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># pp_stop_trig</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>  <span class="c1"># clear fifo</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>  <span class="c1"># reset overrun</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">readDataFifo</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">readDataFifo</span><span class="p">()</span>   <span class="c1"># after the first time the could still be data in the FIFO not reported by the fifo count</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>    <span class="c1"># flush data that might have been accumulated</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending start trigger&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># pp_start_trig</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppStop"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppStop">[docs]</a>    <span class="k">def</span> <span class="nf">ppStop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span><span class="c1">#, widget, data= None):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># pp_stop_trig</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppInterrupt"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppInterrupt">[docs]</a>    <span class="k">def</span> <span class="nf">ppInterrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set a stop flag for the pulse program. The prepare_next_scan_point() function will then exit</span>
+<span class="sd">        with exitrcode 0xfffe100000000000 to signal an interrupt&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mi">14</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.interruptRead"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.interruptRead">[docs]</a>    <span class="k">def</span> <span class="nf">interruptRead</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sleepQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppWriteData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppWriteData">[docs]</a>    <span class="k">def</span> <span class="nf">ppWriteData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x81</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">code</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                    <span class="n">code</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;Q&#39;</span> <span class="k">if</span> <span class="n">item</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;q&#39;</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+                <span class="c1">#print &quot;ppWriteData length&quot;,len(code)</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x81</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+                
+<div class="viewcode-block" id="PulserHardwareServer.ppReadData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadData">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">minbytes</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireOuts</span><span class="p">()</span>
+            <span class="n">wirevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">GetWireOutValue</span><span class="p">(</span><span class="mh">0x25</span><span class="p">)</span>   <span class="c1"># pipe_out_available</span>
+            <span class="n">byteswaiting</span> <span class="o">=</span> <span class="p">(</span><span class="n">wirevalue</span> <span class="o">&amp;</span> <span class="mh">0x1ffe</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span>
+            <span class="n">externalStatus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">GetWireOutValue</span><span class="p">(</span><span class="mh">0x30</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">GetWireOutValue</span><span class="p">(</span><span class="mh">0x31</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">byteswaiting</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">byteswaiting</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xa2</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">overrun</span> <span class="o">=</span> <span class="p">(</span><span class="n">wirevalue</span> <span class="o">&amp;</span> <span class="mh">0x4000</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span>
+                <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">overrun</span><span class="p">,</span> <span class="n">externalStatus</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">externalStatus</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span></div>
+                        
+<div class="viewcode-block" id="PulserHardwareServer.ppReadLogicAnalyzerData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadLogicAnalyzerData">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadLogicAnalyzerData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">minbytes</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireOuts</span><span class="p">()</span>
+            <span class="n">wirevalue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">GetWireOutValue</span><span class="p">(</span><span class="mh">0x27</span><span class="p">)</span>   <span class="c1"># pipe_out_available</span>
+            <span class="n">byteswaiting</span> <span class="o">=</span> <span class="p">(</span><span class="n">wirevalue</span> <span class="o">&amp;</span> <span class="mh">0x1ffe</span><span class="p">)</span><span class="o">*</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerOverrun</span> <span class="o">=</span> <span class="p">(</span><span class="n">wirevalue</span> <span class="o">&amp;</span> <span class="mh">0x4000</span><span class="p">)</span> <span class="o">==</span> <span class="mh">0x4000</span>
+            <span class="k">if</span> <span class="n">byteswaiting</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">byteswaiting</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xa1</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="n">overrun</span> <span class="o">=</span> <span class="p">(</span><span class="n">wirevalue</span> <span class="o">&amp;</span> <span class="mh">0x4000</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span>
+                <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">overrun</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">False</span></div>
+                        
+<div class="viewcode-block" id="PulserHardwareServer.wordListToBytearray"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.wordListToBytearray">[docs]</a>    <span class="k">def</span> <span class="nf">wordListToBytearray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; convert list of words to binary bytearray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">wordlist</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.bytearrayToWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.bytearrayToWordList">[docs]</a>    <span class="k">def</span> <span class="nf">bytearrayToWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">barray</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">barray</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int64</span> <span class="p">))</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.ppWriteRam"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppWriteRam">[docs]</a>    <span class="k">def</span> <span class="nf">ppWriteRam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">appendlength</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">/</span><span class="mf">128.</span><span class="p">))</span><span class="o">*</span><span class="mi">128</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">+=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">appendlength</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;set write address </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span> <span class="mh">0x01</span><span class="p">,</span> <span class="n">address</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span> <span class="mh">0x02</span><span class="p">,</span> <span class="p">(</span><span class="n">address</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x41</span><span class="p">,</span> <span class="mi">6</span> <span class="p">)</span> <span class="c1"># ram set wwrite address</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x82</span><span class="p">,</span> <span class="n">data</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.ppReadRam"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadRam">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadRam</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+<span class="c1">#           print &quot;set read address&quot;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span> <span class="mh">0x01</span><span class="p">,</span> <span class="n">address</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span> <span class="mh">0x02</span><span class="p">,</span> <span class="p">(</span><span class="n">address</span> <span class="o">&gt;&gt;</span> <span class="mi">16</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0xffff</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x41</span><span class="p">,</span> <span class="mi">7</span> <span class="p">)</span> <span class="c1"># Ram set read address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span> <span class="mh">0xa3</span><span class="p">,</span> <span class="n">data</span> <span class="p">)</span>
+<span class="c1">#           print &quot;read&quot;, len(data)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+            
+    <span class="n">quantum</span> <span class="o">=</span> <span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span>
+<div class="viewcode-block" id="PulserHardwareServer.ppWriteRamWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppWriteRamWordList">[docs]</a>    <span class="k">def</span> <span class="nf">ppWriteRamWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wordListToBytearray</span><span class="p">(</span><span class="n">wordlist</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantum</span> <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ppWriteRam</span><span class="p">(</span> <span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">],</span> <span class="n">address</span><span class="o">+</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">matches</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">myslice</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantum</span> <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ppReadRam</span><span class="p">(</span><span class="n">myslice</span><span class="p">,</span> <span class="n">address</span><span class="o">+</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">-</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">matches</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">]</span> <span class="o">==</span> <span class="n">myslice</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;ppWriteRamWordList </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Write unsuccessful data does not match write length </span><span class="si">{0}</span><span class="s2"> read length </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;RAM write unsuccessful&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppReadRamWordList"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadRamWordList">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadRamWordList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wordlist</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wordlist</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="n">myslice</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">start</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">quantum</span> <span class="p">):</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">quantum</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">-</span><span class="n">start</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ppReadRam</span><span class="p">(</span><span class="n">myslice</span><span class="p">,</span> <span class="n">address</span><span class="o">+</span><span class="n">start</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">length</span><span class="p">]</span> <span class="o">=</span> <span class="n">myslice</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">wordlist</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytearrayToWordList</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wordlist</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppWriteRamWordListShared"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppWriteRamWordListShared">[docs]</a>    <span class="k">def</span> <span class="nf">ppWriteRamWordListShared</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="c1">#self.ppWriteRamWordList(self.sharedMemoryArray[:length], address)</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wordListToBytearray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span><span class="p">[:</span><span class="n">length</span><span class="p">])</span>
+        <span class="c1">#logger.debug( &quot;write {0}&quot;.format([hex(int(d)) for d in data[0:100]]) )</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppWriteRam</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">check</span><span class="p">:</span>
+            <span class="n">myslice</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ppReadRam</span><span class="p">(</span><span class="n">myslice</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+            <span class="c1">#logger.debug( &quot;read {0}&quot;.format([hex(int(d)) for d in myslice[0:100]]) )</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">data</span> <span class="o">==</span> <span class="n">myslice</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span> <span class="s2">&quot;ppWriteRamWordList </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;Write unsuccessful data does not match write length </span><span class="si">{0}</span><span class="s2"> read length </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+                <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;RAM write unsuccessful&quot;</span><span class="p">)</span></div>
+                
+<div class="viewcode-block" id="PulserHardwareServer.ppReadRamWordListShared"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadRamWordListShared">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadRamWordListShared</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">length</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ppReadRam</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">address</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sharedMemoryArray</span><span class="p">[:</span><span class="n">length</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bytearrayToWordList</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppClearWriteFifo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppClearWriteFifo">[docs]</a>    <span class="k">def</span> <span class="nf">ppClearWriteFifo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.ppFlushData"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppFlushData">[docs]</a>    <span class="k">def</span> <span class="nf">ppFlushData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">Data</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.ppClearReadFifo"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppClearReadFifo">[docs]</a>    <span class="k">def</span> <span class="nf">ppClearReadFifo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.ppReadLog"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.ppReadLog">[docs]</a>    <span class="k">def</span> <span class="nf">ppReadLog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="c1">#Commented CWC 04032012</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span><span class="mh">0xA1</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">r&#39;debug\log&#39;</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Pulser Hardware not available&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+        
+        
+<div class="viewcode-block" id="PulserHardwareServer.enableLogicAnalyzer"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.enableLogicAnalyzer">[docs]</a>    <span class="k">def</span> <span class="nf">enableLogicAnalyzer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">enable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">enable</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerEnabled</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerEnabled</span> <span class="o">=</span> <span class="n">enable</span>
+            <span class="k">if</span> <span class="n">enable</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x0d</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">)</span>    <span class="c1"># set logic analyzer enabled</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x0d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x01</span><span class="p">)</span>    <span class="c1"># set logic analyzer disabled</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span></div>
+                    
+<div class="viewcode-block" id="PulserHardwareServer.logicAnalyzerTrigger"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.logicAnalyzerTrigger">[docs]</a>    <span class="k">def</span> <span class="nf">logicAnalyzerTrigger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerEnabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logicAnalyzerStopAtEnd</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mi">12</span> <span class="p">)</span> <span class="c1"># Ram set read address</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.logicAnalyzerClearOverrun"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.logicAnalyzerClearOverrun">[docs]</a>    <span class="k">def</span> <span class="nf">logicAnalyzerClearOverrun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mi">10</span> <span class="p">)</span> <span class="c1"># Ram set read address</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.clearOverrun"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.clearOverrun">[docs]</a>    <span class="k">def</span> <span class="nf">clearOverrun</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x41</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>  <span class="c1"># reset overrun</span></div>
+            
+<div class="viewcode-block" id="PulserHardwareServer.uploadBitfile"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.uploadBitfile">[docs]</a>    <span class="k">def</span> <span class="nf">uploadBitfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bitfile</span><span class="p">):</span>
+        <span class="n">OKBase</span><span class="o">.</span><span class="n">uploadBitfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bitfile</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">syncTime</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.getOpenModule"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.getOpenModule">[docs]</a>    <span class="k">def</span> <span class="nf">getOpenModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">openModule</span></div>
+
+<div class="viewcode-block" id="PulserHardwareServer.pulserConfiguration"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.PulserHardwareServer.pulserConfiguration">[docs]</a>    <span class="k">def</span> <span class="nf">pulserConfiguration</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hardwareId</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">configfile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pulserConfigurationList</span> <span class="o">=</span> <span class="n">getPulserConfiguration</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+            <span class="n">hardwareId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardwareConfigurationId</span><span class="p">()</span> <span class="k">if</span> <span class="n">hardwareId</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">hardwareId</span>
+            <span class="k">if</span> <span class="n">hardwareId</span> <span class="ow">in</span> <span class="n">pulserConfigurationList</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span> <span class="o">=</span> <span class="n">pulserConfigurationList</span><span class="p">[</span><span class="n">hardwareId</span><span class="p">]</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">PulserHardwareException</span><span class="p">(</span><span class="s2">&quot;No information on configuration 0x</span><span class="si">{0:x}</span><span class="s2"> in configuration file &#39;</span><span class="si">{1}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">hardwareId</span><span class="p">,</span> <span class="n">configfile</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pulserConfiguration</span></div></div>
+
+
+<div class="viewcode-block" id="sliceview"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.sliceview">[docs]</a><span class="k">def</span> <span class="nf">sliceview</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">view</span><span class="p">)</span> <span class="o">-</span> <span class="n">length</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="nb">memoryview</span><span class="p">(</span><span class="n">view</span><span class="p">)[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="sliceview_remainder"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.PulserHardwareClient.sliceview_remainder">[docs]</a><span class="k">def</span> <span class="nf">sliceview_remainder</span><span class="p">(</span><span class="n">view</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">view</span><span class="p">)</span>
+    <span class="n">full_items</span> <span class="o">=</span> <span class="n">l</span> <span class="o">//</span> <span class="n">length</span>
+    <span class="n">appendix</span> <span class="o">=</span> <span class="n">l</span> <span class="o">-</span> <span class="n">length</span> <span class="o">*</span> <span class="n">full_items</span>
+    <span class="k">return</span> <span class="nb">memoryview</span><span class="p">(</span><span class="n">view</span><span class="p">)[</span><span class="n">l</span> <span class="o">-</span> <span class="n">appendix</span><span class="p">:]</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

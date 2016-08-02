@@ -1,0 +1,308 @@
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser}{\section{Chassis.\-git.\-itf\-Parser.\-itf\-Parser Class Reference}
+\label{class_chassis_8git_1_1itf_parser_1_1itf_parser}\index{Chassis.\-git.\-itf\-Parser.\-itf\-Parser@{Chassis.\-git.\-itf\-Parser.\-itf\-Parser}}
+}
+
+
+This class will parse through an itf file.  
+
+
+Inheritance diagram for Chassis.\-git.\-itf\-Parser.\-itf\-Parser\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_chassis_8git_1_1itf_parser_1_1itf_parser}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8e9537630ab0367284a49646e39ce7f3}{\-\_\-\-\_\-init\-\_\-\-\_\-}
+\begin{DoxyCompactList}\small\item\em This function is the constructor of the \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser}{itf\-Parser} class. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a5527ce6be0f2aef18382dff07b28a59d}{readline}
+\begin{DoxyCompactList}\small\item\em This function will read a line from the itf file and returns the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a2e00fa383a8b60fe0b058cf2c9b57f1d}{e\-Map\-Read\-Line}
+\begin{DoxyCompactList}\small\item\em This function reads a line from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_ac4e1d090df9c4e0d527b94d80a5b1db1}{readlines}
+\begin{DoxyCompactList}\small\item\em This function will read the number of lines specified by the num\-Lines argument and return the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_ad09d9277d52d00e8346ca827f0beaf6d}{e\-Map\-Read\-Lines}
+\begin{DoxyCompactList}\small\item\em This function reads lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8d64e3f53ad0cb74ad10da1f6be331b0}{read}
+\begin{DoxyCompactList}\small\item\em This function will read all of the lines within the file and returns the data as a dictionary. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_aebf2240abfec136b866ebafac1923c67}{e\-Map\-Read}
+\begin{DoxyCompactList}\small\item\em This function reads all lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a4d4fc8b1f33a7b919e4be2dc02247012}{appendline}
+\begin{DoxyCompactList}\small\item\em This function will append a line of data to the itf file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_ab7961ca676d903be12603c2d29a86390}{appendlines}
+\begin{DoxyCompactList}\small\item\em This function will append lines of data to the itf file. \end{DoxyCompactList}\item 
+def \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa3dae5b08b74c6d65c2a8b94cda7e075}{close}
+\begin{DoxyCompactList}\small\item\em This funciotn will close the itf file. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_aabe657c777e68a49fc38cfd1fbd39858}{table\-Header}
+\begin{DoxyCompactList}\small\item\em This is the names of the columns for the table header of the itf file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a30e8967fe68b381f94cf97c8f9a26475}{e\-Map\-File\-Path}
+\begin{DoxyCompactList}\small\item\em This is the file path to the electrode map file. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a6b33c67f09f9e00b2123608603319604}{e\-Col\-Header}
+\begin{DoxyCompactList}\small\item\em This sepcifies the itf file column header. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa26d0241c83bf5bb06755dbf400c48b0}{comments}
+\begin{DoxyCompactList}\small\item\em The comments within the file as a list. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_aab9e99f0ba1172bdc0a0c2ff59a6ef4e}{meta}
+\begin{DoxyCompactList}\small\item\em The meta data of the file as a dictionary. \end{DoxyCompactList}\item 
+\hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a75bd647d304a98ce719934c5696ac49b}{empty}
+\begin{DoxyCompactList}\small\item\em A boolean file that is true if the file is empty, and false otherwise. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+This class will parse through an itf file. 
+
+
+
+\subsection{Constructor \& Destructor Documentation}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8e9537630ab0367284a49646e39ce7f3}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}}
+\index{\-\_\-\-\_\-init\-\_\-\-\_\-@{\-\_\-\-\_\-init\-\_\-\-\_\-}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{\-\_\-\-\_\-init\-\_\-\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-\_\-\-\_\-init\-\_\-\-\_\- (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{file\-Obj = {\ttfamily None}, }
+\item[{}]{file\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8e9537630ab0367284a49646e39ce7f3}
+
+
+This function is the constructor of the \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser}{itf\-Parser} class. 
+
+It initializes class attributes. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em file\-Obj} & A file object pointer for a file that has already been opened. \\
+\hline
+{\em file\-Path} & A path to the itf file that hasn't already been opened. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a4d4fc8b1f33a7b919e4be2dc02247012}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!appendline@{appendline}}
+\index{appendline@{appendline}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{appendline}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-appendline (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a4d4fc8b1f33a7b919e4be2dc02247012}
+
+
+This function will append a line of data to the itf file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em data} & This will take mulitple data types. Supported types are numpy 1\-D float64, a list, and a dictionary. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_ab7961ca676d903be12603c2d29a86390}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!appendlines@{appendlines}}
+\index{appendlines@{appendlines}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{appendlines}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-appendlines (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{data}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_ab7961ca676d903be12603c2d29a86390}
+
+
+This function will append lines of data to the itf file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+{\em data} & This will take a dictionary of mulitple data types. Supported types are numpy 1\-D float64, a list, and a dictionary. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa3dae5b08b74c6d65c2a8b94cda7e075}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!close@{close}}
+\index{close@{close}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-close (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa3dae5b08b74c6d65c2a8b94cda7e075}
+
+
+This funciotn will close the itf file. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object reference. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_aebf2240abfec136b866ebafac1923c67}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!e\-Map\-Read@{e\-Map\-Read}}
+\index{e\-Map\-Read@{e\-Map\-Read}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-e\-Map\-Read (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_aebf2240abfec136b866ebafac1923c67}
+
+
+This function reads all lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a2e00fa383a8b60fe0b058cf2c9b57f1d}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!e\-Map\-Read\-Line@{e\-Map\-Read\-Line}}
+\index{e\-Map\-Read\-Line@{e\-Map\-Read\-Line}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read\-Line}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-e\-Map\-Read\-Line (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{line\-Num = {\ttfamily None}, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}, }
+\item[{}]{kwargs}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a2e00fa383a8b60fe0b058cf2c9b57f1d}
+
+
+This function reads a line from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em line\-Num} & If this argument is provided then the line number refered to by this argument is returned. Otherwise the next line is returned. (This argument is zero-\/based. Meaning that passing a value of zero will return the first line in the file.) \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_ad09d9277d52d00e8346ca827f0beaf6d}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!e\-Map\-Read\-Lines@{e\-Map\-Read\-Lines}}
+\index{e\-Map\-Read\-Lines@{e\-Map\-Read\-Lines}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-Read\-Lines}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-e\-Map\-Read\-Lines (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Lines, }
+\item[{}]{e\-Map\-File\-Path = {\ttfamily None}, }
+\item[{}]{kwargs}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_ad09d9277d52d00e8346ca827f0beaf6d}
+
+
+This function reads lines from the itf file and uses an electrode map file to sort the data by the electrode order within the file. 
+
+This function returns a numpy float64 array, which is compatible with the array fromat accepted by the Waveform\-Chassis class. 
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Lines} & The number of lines to return from the itf file. \\
+\hline
+{\em e\-Map\-File\-Path} & The file path to the eletrode map. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8d64e3f53ad0cb74ad10da1f6be331b0}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!read@{read}}
+\index{read@{read}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-read (
+\begin{DoxyParamCaption}
+\item[{}]{self}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a8d64e3f53ad0cb74ad10da1f6be331b0}
+
+
+This function will read all of the lines within the file and returns the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a5527ce6be0f2aef18382dff07b28a59d}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!readline@{readline}}
+\index{readline@{readline}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{readline}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-readline (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{line\-Num = {\ttfamily None}}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a5527ce6be0f2aef18382dff07b28a59d}
+
+
+This function will read a line from the itf file and returns the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em line\-Num} & If this argument is provided then the line number refered to by this argument is returned. Otherwise the next line is returned. (This argument is zero-\/based. Meaning that passing a value of zero will return the first line in the file.) \\
+\hline
+\end{DoxyParams}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_ac4e1d090df9c4e0d527b94d80a5b1db1}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!readlines@{readlines}}
+\index{readlines@{readlines}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{readlines}]{\setlength{\rightskip}{0pt plus 5cm}def Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-readlines (
+\begin{DoxyParamCaption}
+\item[{}]{self, }
+\item[{}]{num\-Lines}
+\end{DoxyParamCaption}
+)}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_ac4e1d090df9c4e0d527b94d80a5b1db1}
+
+
+This function will read the number of lines specified by the num\-Lines argument and return the data as a dictionary. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em self} & The object pointer. \\
+\hline
+{\em num\-Lines} & The number of lines to pull from the file. \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Data Documentation}
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa26d0241c83bf5bb06755dbf400c48b0}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!comments@{comments}}
+\index{comments@{comments}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{comments}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-comments}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_aa26d0241c83bf5bb06755dbf400c48b0}
+
+
+The comments within the file as a list. 
+
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a6b33c67f09f9e00b2123608603319604}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!e\-Col\-Header@{e\-Col\-Header}}
+\index{e\-Col\-Header@{e\-Col\-Header}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Col\-Header}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-e\-Col\-Header}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a6b33c67f09f9e00b2123608603319604}
+
+
+This sepcifies the itf file column header. 
+
+The default is 'e\{0\-:02d\}' which means that the column headers will be represented by e00 through e99. \hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a30e8967fe68b381f94cf97c8f9a26475}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!e\-Map\-File\-Path@{e\-Map\-File\-Path}}
+\index{e\-Map\-File\-Path@{e\-Map\-File\-Path}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{e\-Map\-File\-Path}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-e\-Map\-File\-Path}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a30e8967fe68b381f94cf97c8f9a26475}
+
+
+This is the file path to the electrode map file. 
+
+If this variable is populated then this file path will be used when a \hyperlink{class_chassis_8git_1_1itf_parser_1_1itf_parser_a2e00fa383a8b60fe0b058cf2c9b57f1d}{e\-Map\-Read\-Line()} method is called. \hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_a75bd647d304a98ce719934c5696ac49b}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!empty@{empty}}
+\index{empty@{empty}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{empty}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-empty}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_a75bd647d304a98ce719934c5696ac49b}
+
+
+A boolean file that is true if the file is empty, and false otherwise. 
+
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_aab9e99f0ba1172bdc0a0c2ff59a6ef4e}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!meta@{meta}}
+\index{meta@{meta}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{meta}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-meta}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_aab9e99f0ba1172bdc0a0c2ff59a6ef4e}
+
+
+The meta data of the file as a dictionary. 
+
+\hypertarget{class_chassis_8git_1_1itf_parser_1_1itf_parser_aabe657c777e68a49fc38cfd1fbd39858}{\index{Chassis.\-git\-::itf\-Parser\-::itf\-Parser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}!table\-Header@{table\-Header}}
+\index{table\-Header@{table\-Header}!Chassis.git::itfParser::itfParser@{Chassis.\-git\-::itf\-Parser\-::itf\-Parser}}
+\subsubsection[{table\-Header}]{\setlength{\rightskip}{0pt plus 5cm}Chassis.\-git.\-itf\-Parser.\-itf\-Parser.\-table\-Header}}\label{class_chassis_8git_1_1itf_parser_1_1itf_parser_aabe657c777e68a49fc38cfd1fbd39858}
+
+
+This is the names of the columns for the table header of the itf file. 
+
+Get the table\-Header if it doesn't allready exist.
+
+The documentation for this class was generated from the following file\-:\begin{DoxyCompactItemize}
+\item 
+itf\-Parser.\-py\end{DoxyCompactItemize}

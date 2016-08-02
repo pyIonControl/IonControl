@@ -1,0 +1,54 @@
+const DDSDetect = 0
+const ReadoutChannel = 4
+
+exitcode endLabel = 0xfffe000000000000
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter<AD9912_PHASE> DetectPhase = 0
+parameter DetectAmp = 1023
+shutter initShutter
+masked_shutter first
+masked_shutter second
+masked_shutter third
+masked_shutter fourth
+counter VoltageReadout
+parameter timeOne
+parameter timeTwo
+parameter timeThree
+parameter initTime = 1 ms
+parameter waitTime
+parameter DetectTime
+parameter Dummy
+var dummy
+var VOut
+
+while not pipe_empty():
+    update()
+    apply_next_scan_point()
+    set_shutter( initShutter )
+    update( initTime )
+#    #update (initTime, wait_dds=False)
+#     #set_dds( channel=DDSDetect, freq=DetectFreq, phase=DetectPhase, amp=DetectAmp )
+#    #wait_dds()
+#    set_shutter(first)
+#    update( timeOne, pulse_mode=True )
+#    set_inv_shutter(first)
+#    update( waitTime )
+#    set_shutter(second)
+#    update( timeOne, pulse_mode=True )
+#    set_inv_shutter(second)
+#    update( waitTime)
+    
+
+
+  #  set_shutter( DetectOn )
+    set_counter( VoltageReadout )
+    update( DetectTime )
+    clear_counter()
+    update( waitTime)
+    dummy = 3   # makes a delay to read the photon counts
+    VOut = load_count( DDSDetect )
+    update()
+    write_result( ReadoutChannel, VOut )
+
+
+exit( endLabel )

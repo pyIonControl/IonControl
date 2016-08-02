@@ -1,0 +1,61 @@
+#This is a commented example showing what an experiment config file looks like.
+
+#This determines whether a GUI is shown at the program start to allow setting
+#all the fields in this file. If showGui is True, then the GUI
+#will be initialized via the config file, but will subsequently overwrite it.
+showGui: false
+
+#This section defines the available software, and how it's configured.
+software:
+  Pulser:
+    enabled: true
+    hardware: "Opal Kelly FPGA: Pulser"
+  Voltages:
+    enabled: true
+    hardware: "Opal Kelly FPGA: DAC"
+  AWG:
+    enabled: true
+    hardware: Chase AWG
+  Gate Sequences:
+    enabled: true
+  Timestamps:
+    enabled: true
+
+#This section defines the available hardware, and how it's configured.
+hardware:
+  "Opal Kelly FPGA: Pulser":
+    enabled: true
+    device: ChipLabPulseProgrammer
+    bitFile: C:\Users\jmizrahi\IonControl\FPGA_Ions\IonControl-firmware-UMD.bit
+    uploadOnStartup: False
+  "Opal Kelly FPGA: 32 Channel PMT":
+    enabled: true
+    device: 32PMTFPGA
+    bitFile: C:\Users\jmizrahi\IonControl\FPGA_Ions\mybitfile.bit
+    uploadOnStartup: False
+  "Opal Kelly FPGA: DAC":
+    enabled: true
+    device: DACFPGA
+    bitFile: C:\Users\jmizrahi\IonControl\FPGA_Ions\mybitfile.bit
+    uploadOnStartup: False
+  Chase AWG:
+    enabled: true
+    name: Chase DA12000 AWG
+    instrument: Chase DA12000 AWG
+    DLL: DA12000_DLL64.dll
+  Conex Motion:
+    enabled: true
+  APT Motion:
+    enabled: true
+  VISA:
+    enabled: true
+
+#This section defines the settings to use to connect to the database.
+#Yes, the password is plain text. Don't use one you care deeply about.
+databaseConnection:
+  user: python
+  password: mydbpassword
+  database: ioncontrol
+  host: localhost
+  port: 5432
+  echo: False

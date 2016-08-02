@@ -1,0 +1,8 @@
+add additional columns to measurement table 1/19/2015
+
+alter table measurements add column "scanTarget" character varying;
+alter table measurements add column "scanPP" character varying;    
+
+Highlight failed Analysis in MeasurementLog 1/22/2015
+
+alter table measurements add column "failedAnalysis" character varying;    

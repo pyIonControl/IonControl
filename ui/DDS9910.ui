@@ -1,0 +1,743 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>369</width>
+    <height>915</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>Channel</string>
+     </property>
+     <property name="textInteractionFlags">
+      <set>Qt::LinksAccessibleByMouse</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="8" column="0" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout_6">
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>1</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="channelEdit1">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="24" column="1">
+      <widget class="QCheckBox" name="rampDwellHigh3">
+       <property name="text">
+        <string>Dwell High</string>
+       </property>
+      </widget>
+     </item>
+     <item row="23" column="2">
+      <widget class="QSpinBox" name="amplitudeBox3">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>1023</number>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="0">
+      <widget class="MagnitudeSpinBox" name="frequencyBox2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="16" column="1">
+      <widget class="MagnitudeSpinBox" name="phaseBox2">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="23" column="0">
+      <widget class="MagnitudeSpinBox" name="frequencyBox3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="22" column="0" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label_8">
+         <property name="text">
+          <string>3</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="channelEdit3">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="15" column="0" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>2</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="channelEdit2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="16" column="2">
+      <widget class="QSpinBox" name="amplitudeBox2">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>1023</number>
+       </property>
+      </widget>
+     </item>
+     <item row="23" column="1">
+      <widget class="MagnitudeSpinBox" name="phaseBox3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Frequency</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Phase</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>Amplitude</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="3">
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>0</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="channelEdit0">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item row="2" column="0">
+      <widget class="MagnitudeSpinBox" name="frequencyBox0">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="MagnitudeSpinBox" name="phaseBox0">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>2</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="2">
+      <widget class="QSpinBox" name="amplitudeBox0">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>1023</number>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
+      <widget class="MagnitudeSpinBox" name="frequencyBox1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="1">
+      <widget class="MagnitudeSpinBox" name="phaseBox1">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="buttonSymbols">
+        <enum>QAbstractSpinBox::NoButtons</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="2">
+      <widget class="QSpinBox" name="amplitudeBox1">
+       <property name="minimumSize">
+        <size>
+         <width>60</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximum">
+        <number>1023</number>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="0">
+      <widget class="QCheckBox" name="rampEnable2">
+       <property name="text">
+        <string>Ramp On</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QCheckBox" name="rampDwellHigh1">
+       <property name="text">
+        <string>Dwell High</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="2">
+      <widget class="QCheckBox" name="rampDwellLow1">
+       <property name="text">
+        <string>Dwell Low</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="2">
+      <widget class="QCheckBox" name="rampDwellLow0">
+       <property name="text">
+        <string>Dwell Low</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="rampDwellHigh0">
+       <property name="text">
+        <string>Dwell High</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QCheckBox" name="rampEnable0">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="baseSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="whatsThis">
+        <string>Enable digital ramping</string>
+       </property>
+       <property name="text">
+        <string>Ramp On</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="2">
+      <widget class="QCheckBox" name="rampDwellLow2">
+       <property name="text">
+        <string>Dwell Low</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QCheckBox" name="rampEnable1">
+       <property name="text">
+        <string>Ramp On</string>
+       </property>
+      </widget>
+     </item>
+     <item row="17" column="1">
+      <widget class="QCheckBox" name="rampDwellHigh2">
+       <property name="text">
+        <string>Dwell High</string>
+       </property>
+      </widget>
+     </item>
+     <item row="24" column="0">
+      <widget class="QCheckBox" name="rampEnable3">
+       <property name="text">
+        <string>Ramp On</string>
+       </property>
+      </widget>
+     </item>
+     <item row="24" column="2">
+      <widget class="QCheckBox" name="rampDwellLow3">
+       <property name="text">
+        <string>Dwell Low</string>
+       </property>
+      </widget>
+     </item>
+     <item row="25" column="0">
+      <widget class="QComboBox" name="rampType3">
+       <item>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phase</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Amplitude</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="11" column="0">
+      <widget class="QComboBox" name="rampType1">
+       <item>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phase</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Amplitude</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QComboBox" name="rampType0">
+       <item>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phase</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Amplitude</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="18" column="0">
+      <widget class="QComboBox" name="rampType2">
+       <item>
+        <property name="text">
+         <string>Frequency</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Phase</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Amplitude</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="26" column="1">
+      <widget class="QDoubleSpinBox" name="rampMin3"/>
+     </item>
+     <item row="20" column="0">
+      <widget class="QLabel" name="label_33">
+       <property name="text">
+        <string>Step Size, Up / Down:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="19" column="0">
+      <widget class="QLabel" name="label_15">
+       <property name="text">
+        <string>Min / Max:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QDoubleSpinBox" name="rampRatePos0"/>
+     </item>
+     <item row="26" column="2">
+      <widget class="QDoubleSpinBox" name="rampMax3"/>
+     </item>
+     <item row="28" column="0">
+      <widget class="QLabel" name="label_32">
+       <property name="text">
+        <string>Step Size, Up / Down:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="29" column="0">
+      <widget class="QLabel" name="label_31">
+       <property name="text">
+        <string>Rate, Pos / Neg:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="14" column="0">
+      <widget class="QLabel" name="label_35">
+       <property name="text">
+        <string>Rate, Pos / Neg:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QDoubleSpinBox" name="rampMax0"/>
+     </item>
+     <item row="20" column="1">
+      <widget class="QDoubleSpinBox" name="rampStepUp2"/>
+     </item>
+     <item row="21" column="0">
+      <widget class="QLabel" name="label_34">
+       <property name="text">
+        <string>Rate, Pos / Neg:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="0">
+      <widget class="QLabel" name="label_36">
+       <property name="text">
+        <string>Rate, Pos / Neg (ns):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="2">
+      <widget class="QDoubleSpinBox" name="rampStepDown0"/>
+     </item>
+     <item row="26" column="0">
+      <widget class="QLabel" name="label_14">
+       <property name="text">
+        <string>Min / Max:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="label_38">
+       <property name="text">
+        <string>Step Size, Up / Down (MHz,deg,arb):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="2">
+      <widget class="QDoubleSpinBox" name="rampMax1"/>
+     </item>
+     <item row="19" column="1">
+      <widget class="QDoubleSpinBox" name="rampMin2"/>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="label_16">
+       <property name="text">
+        <string>Min / Max:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QDoubleSpinBox" name="rampMin0"/>
+     </item>
+     <item row="5" column="0">
+      <widget class="QLabel" name="label_20">
+       <property name="text">
+        <string>Min / Max (MHz,deg,arb):</string>
+       </property>
+      </widget>
+     </item>
+     <item row="19" column="2">
+      <widget class="QDoubleSpinBox" name="rampMax2"/>
+     </item>
+     <item row="7" column="2">
+      <widget class="QDoubleSpinBox" name="rampRateNeg0"/>
+     </item>
+     <item row="13" column="2">
+      <widget class="QDoubleSpinBox" name="rampStepDown1"/>
+     </item>
+     <item row="6" column="1">
+      <widget class="QDoubleSpinBox" name="rampStepUp0"/>
+     </item>
+     <item row="12" column="1">
+      <widget class="QDoubleSpinBox" name="rampMin1"/>
+     </item>
+     <item row="20" column="2">
+      <widget class="QDoubleSpinBox" name="rampStepDown2"/>
+     </item>
+     <item row="28" column="1">
+      <widget class="QDoubleSpinBox" name="rampStepUp3"/>
+     </item>
+     <item row="13" column="1">
+      <widget class="QDoubleSpinBox" name="rampStepUp1"/>
+     </item>
+     <item row="28" column="2">
+      <widget class="QDoubleSpinBox" name="rampStepDown3"/>
+     </item>
+     <item row="14" column="1">
+      <widget class="QDoubleSpinBox" name="rampRatePos1"/>
+     </item>
+     <item row="21" column="1">
+      <widget class="QDoubleSpinBox" name="rampRatePos2"/>
+     </item>
+     <item row="29" column="1">
+      <widget class="QDoubleSpinBox" name="rampRatePos3"/>
+     </item>
+     <item row="14" column="2">
+      <widget class="QDoubleSpinBox" name="rampRateNeg1"/>
+     </item>
+     <item row="21" column="2">
+      <widget class="QDoubleSpinBox" name="rampRateNeg2"/>
+     </item>
+     <item row="29" column="2">
+      <widget class="QDoubleSpinBox" name="rampRateNeg3"/>
+     </item>
+     <item row="13" column="0">
+      <widget class="QLabel" name="label_37">
+       <property name="text">
+        <string>Step Size, Up / Down:</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_8">
+     <item>
+      <widget class="QCheckBox" name="autoApplyBox">
+       <property name="text">
+        <string>Apply directly</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="writeAllButton">
+       <property name="text">
+        <string>Write All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="resetButton">
+       <property name="text">
+        <string>Reset</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyButton">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+  <zorder>label_5</zorder>
+  <zorder>verticalLayoutWidget</zorder>
+  <zorder>applyButton</zorder>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MagnitudeSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>uiModules.MagnitudeSpinBox</header>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>channelEdit0</tabstop>
+  <tabstop>frequencyBox0</tabstop>
+  <tabstop>phaseBox0</tabstop>
+  <tabstop>amplitudeBox0</tabstop>
+  <tabstop>channelEdit1</tabstop>
+  <tabstop>frequencyBox1</tabstop>
+  <tabstop>phaseBox1</tabstop>
+  <tabstop>amplitudeBox1</tabstop>
+  <tabstop>channelEdit2</tabstop>
+  <tabstop>frequencyBox2</tabstop>
+  <tabstop>phaseBox2</tabstop>
+  <tabstop>amplitudeBox2</tabstop>
+  <tabstop>channelEdit3</tabstop>
+  <tabstop>frequencyBox3</tabstop>
+  <tabstop>phaseBox3</tabstop>
+  <tabstop>amplitudeBox3</tabstop>
+  <tabstop>autoApplyBox</tabstop>
+  <tabstop>writeAllButton</tabstop>
+  <tabstop>resetButton</tabstop>
+  <tabstop>applyButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

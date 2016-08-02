@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>pulser.DACController &mdash; IonControl 0.8 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="IonControl 0.8 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> IonControl
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.8
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../FPGAhardware.html">Hardware</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/experimentUi_manual.html">User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../manual/instrumentLoggerUi_manual.html">Instrument Logger User Manual</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../code/codeDocs.html">Code Documentation</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">IonControl</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>pulser.DACController</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for pulser.DACController</h1><div class="highlight"><pre>
+<span></span><span class="c1"># *****************************************************************</span>
+<span class="c1"># IonControl:  Copyright 2016 Sandia Corporation</span>
+<span class="c1"># This Software is released under the GPL license detailed</span>
+<span class="c1"># in the file &quot;license.txt&quot; in the top-level IonControl directory</span>
+<span class="c1"># *****************************************************************</span>
+<span class="kn">from</span> <span class="nn">pulser.OKBase</span> <span class="k">import</span> <span class="n">OKBase</span><span class="p">,</span> <span class="n">check</span>
+<span class="c1"># import logging</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">chain</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<div class="viewcode-block" id="DACControllerException"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACControllerException">[docs]</a><span class="k">class</span> <span class="nc">DACControllerException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="DACController"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController">[docs]</a><span class="k">class</span> <span class="nc">DACController</span><span class="p">(</span> <span class="n">OKBase</span> <span class="p">):</span>
+    <span class="n">channelCount</span> <span class="o">=</span> <span class="mi">112</span>
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="DACController.shuttleLookupCode"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.shuttleLookupCode">[docs]</a>    <span class="k">def</span> <span class="nf">shuttleLookupCode</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">channelCount</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=IIII&#39;</span><span class="p">,</span> <span class="n">edge</span><span class="o">.</span><span class="n">interpolStopLine</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">channelCount</span><span class="p">,</span>
+                           <span class="n">edge</span><span class="o">.</span><span class="n">interpolStartLine</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">cls</span><span class="o">.</span><span class="n">channelCount</span><span class="p">,</span>
+                           <span class="nb">int</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">idleCount</span><span class="p">),</span> <span class="mh">0x0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DACController.toInteger"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.toInteger">[docs]</a>    <span class="k">def</span> <span class="nf">toInteger</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterable</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">chain</span><span class="p">(</span><span class="n">iterable</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">4</span><span class="p">],</span> <span class="n">iterable</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">4</span><span class="p">],</span> <span class="n">iterable</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">4</span><span class="p">],</span> <span class="n">iterable</span><span class="p">[</span><span class="mi">3</span><span class="p">::</span><span class="mi">4</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="o">-</span><span class="mi">10</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DACControllerException</span><span class="p">(</span><span class="s2">&quot;voltage </span><span class="si">{0}</span><span class="s2"> out of range -10V &lt;= V &lt; 10V&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="nb">int</span><span class="p">(</span> <span class="n">value</span> <span class="o">/</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="mh">0x7fff</span> <span class="p">)</span> <span class="p">)</span> 
+        <span class="k">return</span> <span class="n">result</span> <span class="c1"># list(chain(range(96)[0::4], range(96)[1::4], range(96)[2::4], range(96)[3::4])) # list( [0x000 for _ in range(96)]) #result #</span></div>
+    
+<div class="viewcode-block" id="DACController.writeVoltage"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.writeVoltage">[docs]</a>    <span class="k">def</span> <span class="nf">writeVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">line</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)))</span>  <span class="c1"># extend the line to the channel count</span>
+            <span class="n">startaddress</span> <span class="o">=</span> <span class="n">address</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span>  <span class="c1"># 2 bytes per channel, 96 channels</span>
+            <span class="c1"># set the host write address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x84</span><span class="p">,</span>
+                                   <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x4</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">)))</span>  <span class="c1"># write start address to extended wire 2</span>
+            <span class="n">check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x43</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="s1">&#39;HostSetWriteAddress&#39;</span><span class="p">)</span>
+
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toInteger</span><span class="p">(</span><span class="n">line</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">toInteger</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+            <span class="c1"># check( self.xem.ActivateTriggerIn( 0x40, 2), &#39;ActivateTrigger&#39; )</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x83</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DACController.writeVoltages"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.writeVoltages">[docs]</a>    <span class="k">def</span> <span class="nf">writeVoltages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">lineList</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">startaddress</span> <span class="o">=</span> <span class="n">address</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span>   <span class="c1"># 2 bytes per channel, 96 channels</span>
+            <span class="c1"># set the host write address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x4</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">)))</span>  <span class="c1"># write start address to extended wire 2</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x43</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="s1">&#39;HostSetWriteAddress&#39;</span> <span class="p">)</span>
+            
+            <span class="n">odata</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">lineList</span> <span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lineList</span><span class="p">),</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="p">)</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+            <span class="n">maximum</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">odata</span><span class="p">)</span>
+            <span class="n">minimum</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">odata</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">maximum</span><span class="o">&gt;=</span><span class="mf">10.0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DACControllerException</span><span class="p">(</span><span class="s2">&quot;voltage </span><span class="si">{0}</span><span class="s2"> out of range V &gt;= 10V&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maximum</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">minimum</span><span class="o">&lt;-</span><span class="mi">10</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">DACControllerException</span><span class="p">(</span><span class="s2">&quot;voltage </span><span class="si">{0}</span><span class="s2"> out of range V &lt; -10V&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">maximum</span><span class="p">))</span>
+            <span class="n">odata</span> <span class="o">*=</span> <span class="mh">0x7fff</span><span class="o">/</span><span class="mf">10.0</span>          
+            <span class="n">outdata</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">odata</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;uploading </span><span class="si">{0}</span><span class="s2"> bytes to DAC controller, </span><span class="si">{1}</span><span class="s2"> voltage samples&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">outdata</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">outdata</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x83</span><span class="p">,</span> <span class="n">outdata</span> <span class="p">)</span>
+            <span class="k">return</span> <span class="n">outdata</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DACController.verifyVoltages"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.verifyVoltages">[docs]</a>    <span class="k">def</span> <span class="nf">verifyVoltages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">data</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">startaddress</span> <span class="o">=</span> <span class="n">address</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span>   <span class="c1"># 2 bytes per channel, 96 channels</span>
+            <span class="c1"># set the host write address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x3</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">)))</span>  <span class="c1"># write start address to extended wire 2</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x43</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="s1">&#39;HostSetWriteAddress&#39;</span> <span class="p">)</span>
+            
+            <span class="n">returndata</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span> <span class="mh">0xa3</span><span class="p">,</span> <span class="n">returndata</span> <span class="p">)</span>
+            <span class="n">matches</span> <span class="o">=</span> <span class="n">data</span> <span class="o">==</span> <span class="n">returndata</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Data verification failure&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Data verified&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">returndata</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">()</span></div>
+
+    
+<div class="viewcode-block" id="DACController.readVoltage"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.readVoltage">[docs]</a>    <span class="k">def</span> <span class="nf">readVoltage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">line</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">&lt;</span><span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="n">line</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="p">))</span>   <span class="c1"># extend the line to the channel count</span>
+            <span class="n">startaddress</span> <span class="o">=</span> <span class="n">address</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span>   <span class="c1"># 2 bytes per channel, 96 channels</span>
+            <span class="c1"># set the host write address</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x84</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=HQ&#39;</span><span class="p">,</span> <span class="mh">0x3</span><span class="p">,</span> <span class="n">startaddress</span><span class="p">)))</span>  <span class="c1"># write start address to extended wire 2</span>
+            <span class="n">check</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x43</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="s1">&#39;HostSetReadAddress&#39;</span> <span class="p">)</span>
+            
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span> <span class="mh">0xa3</span><span class="p">,</span> <span class="n">data</span> <span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span> <span class="n">data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int8</span> <span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">int16</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">matches</span> <span class="o">=</span> <span class="nb">all</span><span class="p">(</span><span class="n">result</span> <span class="o">==</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toInteger</span><span class="p">(</span><span class="n">line</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toInteger</span><span class="p">(</span><span class="n">line</span><span class="p">)),</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toInteger</span><span class="p">(</span><span class="n">line</span><span class="p">))))</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span> <span class="s2">&quot;</span><span class="si">{0}</span><span class="s2"> </span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="n">result</span><span class="p">)))</span>            
+                    <span class="c1">#raise DACControllerException(&quot;Data read from memory does not match data written&quot;)</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Data written and read does NOT match&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Data written and read matches&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+        <span class="k">return</span> <span class="nb">bytearray</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DACController.writeShuttleLookup"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.writeShuttleLookup">[docs]</a>    <span class="k">def</span> <span class="nf">writeShuttleLookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shuttleEdges</span><span class="p">,</span> <span class="n">startAddress</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">shuttleEdge</span> <span class="ow">in</span> <span class="n">shuttleEdges</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">shuttleLookupCode</span><span class="p">(</span><span class="n">shuttleEdge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span> <span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x3</span><span class="p">,</span> <span class="n">startAddress</span><span class="o">&lt;&lt;</span><span class="mi">3</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">written</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x85</span><span class="p">,</span> <span class="n">data</span> <span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Wrote ShuttleLookup table </span><span class="si">{0}</span><span class="s2"> bytes, </span><span class="si">{1}</span><span class="s2"> entries&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">written</span><span class="p">,</span> <span class="n">written</span><span class="o">/</span><span class="mi">16</span><span class="p">))</span>   
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">SetWireInValue</span><span class="p">(</span><span class="mh">0x3</span><span class="p">,</span> <span class="n">startAddress</span><span class="o">&lt;&lt;</span><span class="mi">3</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">UpdateWireIns</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span> <span class="mh">0x40</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">mybuffer</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ReadFromPipeOut</span><span class="p">(</span> <span class="mh">0xa4</span><span class="p">,</span> <span class="n">mybuffer</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="o">==</span><span class="n">mybuffer</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Written and read lookup data matches&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Written and read lookup data do NOT match&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DACController.shuttleDirect"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.shuttleDirect">[docs]</a>    <span class="k">def</span> <span class="nf">shuttleDirect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startLine</span><span class="p">,</span> <span class="n">beyondEndLine</span><span class="p">,</span> <span class="n">idleCount</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">immediateTrigger</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span><span class="mh">0x86</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=IIII&#39;</span><span class="p">,</span> <span class="p">(</span><span class="mh">0x01000000</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">boolToCode</span><span class="p">(</span><span class="n">immediateTrigger</span><span class="p">)),</span>
+                                                               <span class="n">idleCount</span><span class="p">,</span> <span class="n">startLine</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="p">,</span>
+                                                               <span class="n">beyondEndLine</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">channelCount</span><span class="p">)))</span></div>
+        
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="DACController.boolToCode"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.boolToCode">[docs]</a>    <span class="k">def</span> <span class="nf">boolToCode</span><span class="p">(</span> <span class="n">b</span><span class="p">,</span> <span class="n">bit</span><span class="o">=</span><span class="mi">0</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">bit</span> <span class="k">if</span> <span class="n">b</span> <span class="k">else</span> <span class="mi">0</span></div>
+        
+<div class="viewcode-block" id="DACController.shuttle"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.shuttle">[docs]</a>    <span class="k">def</span> <span class="nf">shuttle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookupIndex</span><span class="p">,</span> <span class="n">reverseEdge</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">immediateTrigger</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x86</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=IIII&#39;</span><span class="p">,</span> <span class="mh">0x03000000</span><span class="p">,</span>  <span class="mh">0x0</span><span class="p">,</span> 
+                                                  <span class="bp">self</span><span class="o">.</span><span class="n">boolToCode</span><span class="p">(</span><span class="n">reverseEdge</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">|</span><span class="bp">self</span><span class="o">.</span><span class="n">boolToCode</span><span class="p">(</span><span class="n">immediateTrigger</span><span class="p">),</span> <span class="n">lookupIndex</span><span class="p">)))</span></div>
+        
+<div class="viewcode-block" id="DACController.shuttlePath"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.shuttlePath">[docs]</a>    <span class="k">def</span> <span class="nf">shuttlePath</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">lookupIndex</span><span class="p">,</span> <span class="n">reverseEdge</span><span class="p">,</span> <span class="n">immediateTrigger</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s1">&#39;=IIII&#39;</span><span class="p">,</span> <span class="mh">0x03000000</span><span class="p">,</span>  <span class="mh">0x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boolToCode</span><span class="p">(</span><span class="n">reverseEdge</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">|</span><span class="bp">self</span><span class="o">.</span><span class="n">boolToCode</span><span class="p">(</span><span class="n">immediateTrigger</span><span class="p">),</span> <span class="n">lookupIndex</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">WriteToPipeIn</span><span class="p">(</span> <span class="mh">0x86</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>        </div>
+    
+<div class="viewcode-block" id="DACController.triggerShuttling"><a class="viewcode-back" href="../../code/pulser-doc.html#pulser.DACController.DACController.triggerShuttling">[docs]</a>    <span class="k">def</span> <span class="nf">triggerShuttling</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="p">:</span>
+            <span class="n">check</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xem</span><span class="o">.</span><span class="n">ActivateTriggerIn</span><span class="p">(</span><span class="mh">0x40</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;ActivateTrigger&#39;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.8',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
