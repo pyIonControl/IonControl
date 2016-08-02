@@ -26,6 +26,7 @@ from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
 from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse#, FileTreeModel#, expandAboveChild
+from collections import OrderedDict
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
@@ -133,6 +134,7 @@ class LastUpdatedOrderedDict(OrderedDict):
         if key in self:
             del self[key]
         OrderedDict.__setitem__(self, key, value)
+
 class UserCode:
     def __init__(self):
         self.code = ''
