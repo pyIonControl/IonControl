@@ -87,6 +87,8 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         #setup filename combo box
         self.recentFiles = self.config.get( self.configname+'.recentFiles', dict() )
         self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
+        self.filenameComboBox.setInsertPolicy(1)
+        self.filenameComboBox.setMaxCount(10)
         self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
         self.filenameComboBox.currentIndexChanged[str].connect( self.onFilenameChange )
         self.removeCurrent.clicked.connect( self.onRemoveCurrent )
@@ -261,7 +263,7 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
                     self.onConsoleSignal(message, False)
                     return
             self.loadFile(fullname)
-            self.populateTree()
+            self.populateTree(fullname)
 
     def enableScriptChange(self, enabled):
         """Enable or disable any changes to script editor"""
@@ -318,7 +320,10 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
                 self.filenameComboBox.addItem(self.script.shortname)
                 self.updateValidator()
             with BlockSignals(self.filenameComboBox) as w:
-                w.setCurrentIndex(w.findText(self.script.shortname))
+                ind = w.findText(self.script.shortname)
+                w.removeItem(ind)
+                w.insertItem(0, self.script.shortname)
+                w.setCurrentIndex(0)
             logger.info('{0} loaded'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
 
@@ -358,12 +363,9 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
                return False
         self.loadFile(args[0].path)
 
-    def populateTree(self):
+    def populateTree(self, newfilepath=None):
         """constructs the file tree viewer"""
-        self.fileTreeWidget.setHeaderLabels(['Scripts'])
-        localpath = getProject().configDir+'/Scripts/'
-        self.fileTreeWidget.clear()
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(localpath))
+        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
 
     def onReset(self):
         """Reset action. Reset file state saved on disk."""
