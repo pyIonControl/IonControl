@@ -22,7 +22,7 @@ from .ScriptHandler import ScriptHandler
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from collections import OrderedDict
 from pathlib import Path
-from gui.UserFunctionsEditor import ensurePath, genFileTree
+from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Scripting.ui')
 ScriptingWidget, ScriptingBase = PyQt5.uic.loadUiType(uipath)
@@ -38,6 +38,7 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.script = Script() #encapsulates the script
         self.scriptHandler = ScriptHandler(self.script, experimentUi) #handles interface to the script
         self.revert = False
+        self.allowFileViewerLoad = True
         self.initcode = ''
         self.defaultDir = getProject().configDir+'/Scripts'
         if not os.path.exists(self.defaultDir):
@@ -129,10 +130,10 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.collapseTree = QtWidgets.QAction("Collapse All", self)
         self.expandChild = QtWidgets.QAction("Expand Selected", self)
         self.collapseChild = QtWidgets.QAction("Collapse Selected", self)
-        self.expandTree.triggered.connect(partial(self.onExpandOrCollapse, True, True))
-        self.collapseTree.triggered.connect(partial(self.onExpandOrCollapse, True, False))
-        self.expandChild.triggered.connect(partial(self.onExpandOrCollapse, False, True))
-        self.collapseChild.triggered.connect(partial(self.onExpandOrCollapse, False, False))
+        self.expandTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, True))
+        self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
+        self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
+        self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
         self.fileTreeWidget.addAction(self.expandTree)
         self.fileTreeWidget.addAction(self.collapseTree)
         self.fileTreeWidget.addAction(self.expandChild)
@@ -282,6 +283,7 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.actionStopScript.setEnabled(not enabled)
         self.actionPauseScriptAndScan.setEnabled(not enabled)
         self.actionStopScriptAndScan.setEnabled(not enabled)
+        self.allowFileViewerLoad = enabled
     
     def onFilenameChange(self, shortname ):
         """A name is typed into the filename combo box."""
@@ -336,32 +338,14 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
             return True
         return False
 
-    def onExpandOrCollapse(self, expglobal=True, expand=True):
-        """For expanding/collapsing file tree, expglobal=True will expand/collapse everything and False will
-           collapse/expand only selected nodes. expand=True will expand, False will collapse"""
-        if expglobal:
-            root = self.fileTreeWidget.invisibleRootItem()
-            self.recurseExpand(root, expand)
-        else:
-            selected = self.fileTreeWidget.selectedItems()
-            if selected:
-                for child in selected:
-                    child.setExpanded(expand)
-                    self.recurseExpand(child, expand)
-
-    def recurseExpand(self, node, expand=True):
-        """recursively descends into tree structure below node to expand/collapse all subdirectories.
-           expand=True will expand, False will collapse."""
-        for childind in range(node.childCount()):
-            node.child(childind).setExpanded(expand)
-            self.recurseExpand(node.child(childind), expand)
-
     def onDoubleClick(self, *args):
         """open a file that is double clicked in file tree"""
-        if self.script.code != str(self.textEdit.toPlainText()):
-            if not self.confirmLoad():
-               return False
-        self.loadFile(args[0].path)
+        if self.allowFileViewerLoad:
+            if self.script.code != str(self.textEdit.toPlainText()):
+                if not self.confirmLoad():
+                   return False
+            if not args[0].isdir:
+                self.loadFile(args[0].path)
 
     def populateTree(self, newfilepath=None):
         """constructs the file tree viewer"""
