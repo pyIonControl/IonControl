@@ -24,7 +24,7 @@ def ensurePath(path):
         if not os.path.exists(newpath):
             os.mkdir(newpath)
 
-def checkTree(widget, pathobj):
+def checkTree(widget, pathobj, fileChanges=[]):
     """
     Construct the file tree
     :param widget: Initial object is root TreeWidget
@@ -37,10 +37,12 @@ def checkTree(widget, pathobj):
         oldpath = Path(widget.child(childind).path)
         if pathobj != oldpath.parent:
             newpath = pathobj.joinpath(oldpath.name)
-            oldpath.rename(newpath)
+            fileChanges.append((oldpath, newpath))
+            if oldpath.exists(): #check if file has already been moved
+                oldpath.rename(newpath)
             widget.child(childind).path = str(newpath)
         if widget.child(childind).isdir:
-            checkTree(widget.child(childind), Path(widget.child(childind).path))
+            checkTree(widget.child(childind), Path(widget.child(childind).path),fileChanges)
 
 def genFileTree(widget, pathobj, expandAbovePathName=None):
     """
