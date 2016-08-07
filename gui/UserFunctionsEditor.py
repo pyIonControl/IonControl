@@ -25,7 +25,7 @@ from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
-from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse#, FileTreeModel#, expandAboveChild
+from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse, checkTree#, FileTreeModel#, expandAboveChild
 from collections import OrderedDict, UserDict, ChainMap
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
@@ -179,9 +179,16 @@ class EvalTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
+class treetest(QtWidgets.QTreeWidget):
+    def dropEvent(self, event):
+        """ QTreeWidget.dropEvent(QDropEvent) """
+        print('innerdrop')
+        if event.source() == self2:#self.fileTreeWidget:
+             QtWidgets.QAbstractItemView.dropEvent(self2.fileTreeWidget, event)
+        #event.accept()
+
 class LastUpdatedOrderedDict(OrderedDict):
     'Store items in the order the keys were last added'
-    #def __contains__(self, item):
     def __setitem__(self, key, value):
         if key in self:
             del self[key]
@@ -217,15 +224,26 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.globalDict = globalDict
         self.configDirFolder = 'UserFunctions'
         self.defaultDir = getProject().configDir+'/' + self.configDirFolder
-        self.displayFullPathNames = True#False
+        self.displayFullPathNames = True
         self.script = UserCode(self.displayFullPathNames, self.configDirFolder) #carries around code body and filepath info
         if not os.path.exists(self.defaultDir):
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/' + self.configDirFolder)) #/IonControl/config/UserFunctions directory
             shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
 
+    def drop(self, event):
+        if event.source() == self.fileTreeWidget:
+             QtWidgets.QTreeWidget.dropEvent(self.fileTreeWidget, event)
+        checkTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir))
+
     def setupUi(self, parent):
         super(UserFunctionsEditor, self).setupUi(parent)
         self.configname = 'UserFunctionsEditor'
+        self.fileTreeWidget.setDragDropMode(self.fileTreeWidget.InternalMove)
+        self.fileTreeWidget.setAcceptDrops(True)
+        self.fileTreeWidget.setDragEnabled(True)
+        self.fileTreeWidget.setDropIndicatorShown(True)
+        self.fileTreeWidget.setSortingEnabled(True)
+        self.fileTreeWidget.sortItems(0,QtCore.Qt.AscendingOrder)
         self.fileTreeWidget.setHeaderLabels(['User Function Files'])
         self.populateTree()
 
@@ -299,6 +317,8 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.actionSave.triggered.connect(self.onSave)
         self.actionNew.triggered.connect(self.onNew)
 
+        self.fileTreeWidget.dropEvent = lambda x: self.drop(x)#lambda x: print('drop')
+        #self.fileTreeWidget.itemChanged.connect(self.onDoubleClick)#lambda *x: print(x[0].path) ) #print(x, y))
         self.fileTreeWidget.itemDoubleClicked.connect(self.onDoubleClick)
         self.loadFile(self.script.fullname)
 

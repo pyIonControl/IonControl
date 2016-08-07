@@ -24,6 +24,24 @@ def ensurePath(path):
         if not os.path.exists(newpath):
             os.mkdir(newpath)
 
+def checkTree(widget, pathobj):
+    """
+    Construct the file tree
+    :param widget: Initial object is root TreeWidget
+    :param pathobj: Root directory that contains files that show up in the file tree
+    :param expandAbovePathName: Specifies path of a new file so directories can be expanded to reveal the file
+    :return:
+    """
+    childrange = range(widget.childCount())
+    for childind in childrange:
+        oldpath = Path(widget.child(childind).path)
+        if pathobj != oldpath.parent:
+            newpath = pathobj.joinpath(oldpath.name)
+            oldpath.rename(newpath)
+            widget.child(childind).path = str(newpath)
+        if widget.child(childind).isdir:
+            checkTree(widget.child(childind), Path(widget.child(childind).path))
+
 def genFileTree(widget, pathobj, expandAbovePathName=None):
     """
     Construct the file tree
@@ -45,6 +63,7 @@ def genFileTree(widget, pathobj, expandAbovePathName=None):
                 child.setText(0, str(path.parts[-1]))
                 child.path = str(path)
                 child.isdir = False
+                child.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 widget.addChild(child)
                 if not expandAbovePathName is None and path == Path(expandAbovePathName): # expand directories containing a new file
                     expandAboveChild(widget)
@@ -52,9 +71,11 @@ def genFileTree(widget, pathobj, expandAbovePathName=None):
                 child = TreeItem()
                 child.setText(0, str(path.parts[-1]))
                 child.path = str(path)
+                child.setFlags(QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 widget.addChild(child)
                 genFileTree(child, path, expandAbovePathName)
     widget.sortChildren(0, 0)
+
 
 def expandAboveChild(child):
     """expands all parent directories, for use with new file creation"""
