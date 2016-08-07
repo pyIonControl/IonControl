@@ -191,8 +191,8 @@ class UserCode:
     def __init__(self, dispfull=False, splitDir=''):
         self.code = ''
         self.fullname = ''
-        self.dispfull = dispfull#False
-        self.splitDir = splitDir#''
+        self.dispfull = dispfull
+        self.splitDir = splitDir
 
     @QtCore.pyqtProperty(str)
     def shortname(self):
@@ -241,8 +241,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.optionsWindow.setupUi(self.optionsWindow)
         self.actionOptions.triggered.connect(self.onOpenOptions)
         self.optionsWindow.OptionsChangedSignal.connect(self.updateOptions)
-        #self.displayFullPathNames = self.optionsWindow.displayPath
-        #self.defaultExpandAll = self.optionsWindow.defaultExpand
         self.updateOptions()
 
         if self.optionsWindow.defaultExpand:
@@ -264,26 +262,19 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.textEdit.setPlainText(self.script.code)
         self.splitterVertical.insertWidget(0, self.textEdit)
 
-        self.recentFiles = self.config.get( self.configname+'.recentFiles', LastUpdatedOrderedDict())
-
-        if not isinstance(self.recentFiles, LastUpdatedOrderedDict):
-            self.recentFiles = LastUpdatedOrderedDict()
+        tempdict = self.config.get( self.configname+'.recentFiles', LastUpdatedOrderedDict())
+        if not isinstance(tempdict, LastUpdatedOrderedDict):
+            tempdict = LastUpdatedOrderedDict()
+        self.recentFiles = LastUpdatedOrderedDict()
         self.recentFiles.splitdir = self.configDirFolder
-        for k, fullname in self.recentFiles.items():
+        for k, fullname in tempdict.items():
             if os.path.exists(fullname):
-                self.filenameComboBox.insertItem(0, self.getName(fullname))
-                self.filenameComboBox.setItemData(0, fullname)
-            else:
-                del self.recentFiles[k]
-        #tempdict = {k: v for k,v in self.recentFiles.items() if not v is None and os.path.exists(v)}
-        #self.recentFiles = LastUpdatedOrderedDict()
-        #self.recentFiles.splitdir = self.configDirFolder
-        #for k, v in tempdict.items():
-            #self.recentFiles[k] = v
+                correctedPath = str(Path(fullname))
+                self.recentFiles[self.getName(correctedPath)] = str(Path(correctedPath))
         self.filenameComboBox.setInsertPolicy(1)
-        #for shortname, fullname in self.recentFiles.items():
-            #self.filenameComboBox.insertItem(0, self.getName(fullname))
-            #self.filenameComboBox.setItemData(0, fullname)
+        for shortname, fullname in self.recentFiles.items():
+            self.filenameComboBox.insertItem(0, self.getName(fullname))
+            self.filenameComboBox.setItemData(0, fullname)
         self.filenameComboBox.currentIndexChanged[str].connect( self.onFilenameChange )
         self.removeCurrent.clicked.connect( self.onRemoveCurrent )
         self.filenameComboBox.setValidator( QtGui.QRegExpValidator() ) #verifies that files typed into combo box can be used
@@ -303,7 +294,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         else:
             self.script.code = ''
 
-        #self.recentFilesDual = {fullname: {shortname: sname, midname: mname}}
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
         self.actionSave.triggered.connect(self.onSave)
@@ -343,7 +333,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.script.dispfull = self.optionsWindow.displayPath
         self.defaultExpandAll = self.optionsWindow.defaultExpand
         self.updateFileComboBoxNames(self.displayFullPathNames)
-        #print("updated, ", self.optionsWindow.lineno)
 
     def getName(self, fullpath):
         if self.displayFullPathNames:
@@ -390,7 +379,7 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
             shortname = shortname.split('.')[0] #Take only what's before the '.'
             ensurePath(self.defaultDir + '/' + shortname)
             shortname += '.py'
-            fullname = self.defaultDir + '/' + shortname
+            fullname = str(Path(self.defaultDir + '/' + shortname))
             if not os.path.exists(fullname):
                 try:
                     with open(fullname, 'w') as f:
