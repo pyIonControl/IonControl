@@ -7,7 +7,6 @@
 
 import os.path
 import shutil
-from functools import partial
 import copy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -22,12 +21,12 @@ from .ScriptHandler import ScriptHandler
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from collections import OrderedDict
 from pathlib import Path
-from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse
+from gui.FileTree import ensurePath, onExpandOrCollapse, FileTreeMixin, OrderedList, OptionsWindow
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Scripting.ui')
 ScriptingWidget, ScriptingBase = PyQt5.uic.loadUiType(uipath)
 
-class ScriptingUi(ScriptingWidget, ScriptingBase):
+class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
     """Ui for the scripting interface."""
     def __init__(self, experimentUi):
         ScriptingWidget.__init__(self)
@@ -35,21 +34,29 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.config = experimentUi.config
         self.experimentUi = experimentUi
         self.recentFiles = dict() #dict of form {shortname: fullname}, where fullname has path and shortname doesn't
-        self.script = Script() #encapsulates the script
+        self.defaultDir = Path(getProject().configDir+'/Scripts')
+        self.script = Script(homeDir=self.defaultDir) #encapsulates the script
         self.scriptHandler = ScriptHandler(self.script, experimentUi) #handles interface to the script
         self.revert = False
         self.allowFileViewerLoad = True
         self.initcode = ''
-        self.defaultDir = getProject().configDir+'/Scripts'
-        if not os.path.exists(self.defaultDir):
+        if not self.defaultDir.exists():
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/Scripts')) #/IonControl/config/Scripts directory
             shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
-
 
     def setupUi(self, parent):
         super(ScriptingUi, self).setupUi(parent)
         self.configname = 'Scripting'
-        
+
+        #initialize default options
+        self.optionsWindow = OptionsWindow(self.config, 'ScriptingEditorOptions')
+        self.optionsWindow.setupUi(self.optionsWindow)
+        self.actionOptions.triggered.connect(self.onOpenOptions)
+        self.optionsWindow.OptionsChangedSignal.connect(self.updateOptions)
+        self.updateOptions()
+        if self.optionsWindow.defaultExpand:
+            onExpandOrCollapse(self.fileTreeWidget, True, True)
+
         #setup console
         self.consoleMaximumLines = self.config.get(self.configname+'.consoleMaximumLinesNew', 100)
         self.consoleEnable = self.config.get(self.configname+'.consoleEnable', True)
@@ -77,24 +84,43 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
             QtWidgets.QTreeWidgetItem(itemDef, [funcDesc])
             self.docTreeWidget.setWordWrap(True)
 
-        #load file
-        self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
-        if self.script.fullname != '' and os.path.exists(self.script.fullname):
-            with open(self.script.fullname, "r") as f:
-                self.script.code = f.read()
-        else:
-            self.script.code = ''
-        
-        #setup filename combo box
-        self.recentFiles = self.config.get( self.configname+'.recentFiles', dict() )
-        self.recentFiles = {k: v for k,v in self.recentFiles.items() if os.path.exists(v)} #removes files from dict if file paths no longer exist
+        #load recent files, also checks if data was saved correctly and if files still exist
+        savedfiles = self.config.get( self.configname+'.recentFiles', OrderedList())
+        if not isinstance(savedfiles, OrderedList):
+            savedfiles = OrderedList()
+        self.recentFiles = OrderedList()
+        for fullname in savedfiles:
+            if isinstance(fullname, Path) and fullname.exists():
+                self.recentFiles.add(fullname)
+            elif isinstance(fullname, str) and os.path.exists(fullname):
+                correctedname = Path(fullname)
+                self.recentFiles.add(correctedname)
         self.filenameComboBox.setInsertPolicy(1)
-        self.filenameComboBox.setMaxCount(10)
-        self.filenameComboBox.addItems( [shortname for shortname, fullname in list(self.recentFiles.items()) if os.path.exists(fullname)] )
-        self.filenameComboBox.currentIndexChanged[str].connect( self.onFilenameChange )
-        self.removeCurrent.clicked.connect( self.onRemoveCurrent )
-        self.filenameComboBox.setValidator( QtGui.QRegExpValidator() ) #verifies that files typed into combo box can be used
-        self.updateValidator()
+        for fullname in self.recentFiles:
+            self.filenameComboBox.insertItem(0, self.getName(fullname))
+            self.filenameComboBox.setItemData(0, fullname)
+        self.filenameComboBox.currentIndexChanged[int].connect(self.onComboIndexChange)
+        self.removeCurrent.clicked.connect(self.onRemoveCurrent)
+        self.filenameComboBox.setEditable(False)
+
+        #load file, this part is a bit more extensive than it needs to be but can handle a number of issues that might occur during development
+        self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
+        if self.script.fullname != '':
+            if isinstance(self.script.fullname, str):
+                self.script.fullname = Path(self.script.fullname)
+            if self.script.fullname.exists():
+                self.loadFile(self.script.fullname)
+            elif len(self.recentFiles):
+                self.script.fullname = self.recentFiles[-1]
+                recentFileGen = iter(self.recentFiles)
+                while True:
+                    if self.script.fullname.exists():
+                        self.loadFile(self.script.fullname)
+                        break
+                    else:
+                        self.script.fullname = next(recentFileGen)
+                else:
+                    self.script.fullname = ''
 
         #connect buttons
         self.script.repeat = self.config.get(self.configname+'.repeat',False)
@@ -120,30 +146,21 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         #Script finished signal
         self.script.finished.connect( self.onFinished )
 
-        self.loadFile(self.script.fullname)
-        self.populateTree() #populates file explorer tree widget
-
-        #Connect buttons for fileTreeWidget
-        self.fileTreeWidget.itemDoubleClicked.connect(self.onDoubleClick)
-
-        self.expandTree = QtWidgets.QAction("Expand All", self)
-        self.collapseTree = QtWidgets.QAction("Collapse All", self)
-        self.expandChild = QtWidgets.QAction("Expand Selected", self)
-        self.collapseChild = QtWidgets.QAction("Collapse Selected", self)
-        self.expandTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, True))
-        self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
-        self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
-        self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
-        self.fileTreeWidget.addAction(self.expandTree)
-        self.fileTreeWidget.addAction(self.collapseTree)
-        self.fileTreeWidget.addAction(self.expandChild)
-        self.fileTreeWidget.addAction(self.collapseChild)
-
-        self.fileTreeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-
         self.setWindowTitle(self.configname)
         self.setWindowIcon(QtGui.QIcon(":/other/icons/Terminal-icon.png"))
         self.statusLabel.setText("Idle")
+
+    def onOpenOptions(self):
+        self.optionsWindow.show()
+        self.optionsWindow.setWindowState(QtCore.Qt.WindowActive)
+        self.optionsWindow.raise_()
+
+    def updateOptions(self):
+        self.filenameComboBox.setMaxVisibleItems(self.optionsWindow.lineno)
+        self.displayFullPathNames = self.optionsWindow.displayPath
+        self.script.dispfull = self.optionsWindow.displayPath
+        self.defaultExpandAll = self.optionsWindow.defaultExpand
+        self.updateFileComboBoxNames(self.displayFullPathNames)
 
     @QtCore.pyqtSlot()
     def onStartScript(self):
@@ -245,23 +262,21 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
     def onNew(self):
         """New button is clicked. Pop up dialog asking for new name, and create file."""
         logger = logging.getLogger(__name__)
-        shortname, ok = QtWidgets.QInputDialog.getText(self, 'New script name', 'Please enter a new script name: ')
+        shortname, ok = QtWidgets.QInputDialog.getText(self, 'New script name', 'Enter new file name (optional path specified by localpath/filename): ')
         if ok:
             shortname = str(shortname)
             shortname = shortname.replace(' ', '_') #Replace spaces with underscores
-            shortname = shortname.split('.')[0] #Take only what's before the '.'
-            ensurePath(self.defaultDir + '/' + shortname)
-            shortname += '.py'
-            fullname = self.defaultDir + '/' + shortname
-            if not os.path.exists(fullname):
+            shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
+            fullname = self.defaultDir.joinpath(shortname)
+            ensurePath(fullname.parent)
+            if not fullname.exists():
                 try:
-                    with open(fullname, 'w') as f:
-                        newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n'
+                    with fullname.open('w') as f:
+                        newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
                         f.write(newFileText)
                 except Exception as e:
                     message = "Unable to create new file {0}: {1}".format(shortname, e)
                     logger.error(message)
-                    self.onConsoleSignal(message, False)
                     return
             self.loadFile(fullname)
             self.populateTree(fullname)
@@ -284,72 +299,42 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.actionPauseScriptAndScan.setEnabled(not enabled)
         self.actionStopScriptAndScan.setEnabled(not enabled)
         self.allowFileViewerLoad = enabled
-    
-    def onFilenameChange(self, shortname ):
+
+    def onComboIndexChange(self, ind):
         """A name is typed into the filename combo box."""
-        shortname = str(shortname)
-        logger = logging.getLogger(__name__)
-        if not shortname:
-            self.script.fullname=''
-            self.textEdit.setPlainText('')
-        elif shortname not in self.recentFiles:
-            logger.info('Use "open" or "new" commands to access a file not in the drop down menu')
-            self.loadFile(self.recentFiles[self.script.shortname])
-        else:
-            fullname = self.recentFiles[shortname]
-            if os.path.isfile(fullname) and fullname != self.script.fullname:
-                self.loadFile(fullname)
-                if str(self.filenameComboBox.currentText())!=fullname:
-                    with BlockSignals(self.filenameComboBox) as w:
-                        w.setCurrentIndex( self.filenameComboBox.findText( shortname ))
-    
+        if ind == 0:
+            return False
+        if self.script.code != str(self.textEdit.toPlainText()):
+            if not self.confirmLoad():
+                self.filenameComboBox.setCurrentIndex(0)
+                return False
+        self.loadFile(self.filenameComboBox.itemData(ind))
+
     def onLoad(self):
         """The load button is clicked. Open file prompt for file."""
         fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', self.defaultDir, 'Python scripts (*.py *.pyw)')
         if fullname!="":
             self.loadFile(fullname)
-           
+
     def loadFile(self, fullname):
         """Load in a file."""
         logger = logging.getLogger(__name__)
         if fullname:
             self.script.fullname = fullname
-            with open(fullname, "r") as f:
+            with fullname.open("r") as f:
                 self.script.code = f.read()
             self.textEdit.setPlainText(self.script.code)
-            if self.script.shortname not in self.recentFiles:
-                self.recentFiles[self.script.shortname] = fullname
+            if self.script.fullname not in self.recentFiles:
                 self.filenameComboBox.addItem(self.script.shortname)
-                self.updateValidator()
+            self.recentFiles.add(fullname)
             with BlockSignals(self.filenameComboBox) as w:
-                ind = w.findText(self.script.shortname)
-                w.removeItem(ind)
-                w.insertItem(0, self.script.shortname)
+                ind = w.findText(str(self.script.shortname)) #having issues with findData Path object comparison
+                w.removeItem(ind) #these two lines just push the loaded filename to the top of the combobox
+                w.insertItem(0, str(self.script.shortname))
+                w.setItemData(0, self.script.fullname)
                 w.setCurrentIndex(0)
             logger.info('{0} loaded'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
-
-    def confirmLoad(self):
-        """pop up window to confirm loss of unsaved changes when loading new file"""
-        reply = QtWidgets.QMessageBox.question(self, 'Message',
-            "Are you sure you want to discard changes?", QtWidgets.QMessageBox.Yes |
-            QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-        if reply == QtWidgets.QMessageBox.Yes:
-            return True
-        return False
-
-    def onDoubleClick(self, *args):
-        """open a file that is double clicked in file tree"""
-        if self.allowFileViewerLoad:
-            if self.script.code != str(self.textEdit.toPlainText()):
-                if not self.confirmLoad():
-                   return False
-            if not args[0].isdir:
-                self.loadFile(args[0].path)
-
-    def populateTree(self, newfilepath=None):
-        """constructs the file tree viewer"""
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
 
     def onReset(self):
         """Reset action. Reset file state saved on disk."""
@@ -358,13 +343,11 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
 
     def onRemoveCurrent(self):
         """Remove current button is clicked. Remove file from combo box."""
-        text = str(self.filenameComboBox.currentText())
-        ind = self.filenameComboBox.findText(text)
-        self.filenameComboBox.setCurrentIndex(ind)
-        self.filenameComboBox.removeItem(ind)
-        if text in self.recentFiles:
-            self.recentFiles.pop(text)
-        self.updateValidator()
+        path = self.filenameComboBox.currentData()
+        if path in self.recentFiles:
+            self.recentFiles.remove(path)
+        self.filenameComboBox.removeItem(0)
+        self.loadFile(self.filenameComboBox.currentData())
 
     def onSave(self):
         """Save action. Save file to disk, and clear any highlighted errors."""
@@ -372,7 +355,7 @@ class ScriptingUi(ScriptingWidget, ScriptingBase):
         self.script.code = str(self.textEdit.toPlainText())
         self.textEdit.clearHighlightError()
         if self.script.code and self.script.fullname:
-            with open(self.script.fullname, 'w') as f:
+            with self.script.fullname.open('w') as f:
                 f.write(self.script.code)
                 logger.info('{0} saved'.format(self.script.fullname))
     

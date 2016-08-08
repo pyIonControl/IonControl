@@ -25,63 +25,11 @@ from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
-from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse, checkTree#, FileTreeModel#, expandAboveChild
+from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse, checkTree, FileTreeMixin, OptionsWindow, OrderedList#, FileTreeModel#, expandAboveChild
 from collections import OrderedDict, UserList, UserDict, ChainMap
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
-uipathOptions = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsOptions.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
-OptionsWidget, OptionsBase = PyQt5.uic.loadUiType(uipathOptions)
-
-class OptionsWindow(OptionsWidget, OptionsBase):
-    OptionsChangedSignal = QtCore.pyqtSignal()
-    def __init__(self, config):
-        super().__init__()
-        self.config = config
-        self.lineno = 15
-        self.displayPath = False
-        self.defaultExpand = False
-
-    def setupUi(self, parent):
-        super(OptionsWindow, self).setupUi(parent)
-        self.configname = 'UserFunctionsEditorOptions'
-
-        self.loadConfig()
-        self.spinBox.setValue(self.lineno)
-        self.radioButton_2.setChecked(self.displayPath)
-        self.checkBox.setChecked(self.defaultExpand)
-        self.applyButton.clicked.connect(self.saveAndClose)
-        self.cancelButton.clicked.connect(self.cancelAndClose)
-        self.radioButton.toggled.connect(lambda: self.btnstate(self.radioButton, True))
-
-    def btnstate(self, b, buttonFlag):
-        self.displayPath = b.isChecked() ^ buttonFlag
-
-    def loadConfig(self):
-        """Save configuration."""
-        self.lineno = self.config.get(self.configname+'.lineno', 15)
-        self.displayPath = self.config.get(self.configname+'.displayPath', False)
-        self.defaultExpand = self.config.get(self.configname+'.defaultExpand', False)
-
-    def saveConfig(self):
-        """Save configuration."""
-        self.config[self.configname+'.lineno'] = self.lineno
-        self.config[self.configname+'.displayPath'] = self.displayPath
-        self.config[self.configname+'.defaultExpand'] = self.defaultExpand
-
-    def saveAndClose(self):
-        self.lineno = self.spinBox.value()
-        self.defaultExpand = self.checkBox.isChecked()
-        self.saveConfig()
-        self.OptionsChangedSignal.emit()
-        self.hide()
-
-    def cancelAndClose(self):
-        self.loadConfig()
-        self.spinBox.setValue(self.lineno)
-        self.radioButton.setChecked(not self.displayPath)
-        self.checkBox.setChecked(self.defaultExpand)
-        self.hide()
 
 class EvalTableModel(QtCore.QAbstractTableModel):
     def __init__(self, globalDict):
@@ -179,24 +127,6 @@ class EvalTableModel(QtCore.QAbstractTableModel):
             return True
         return False
 
-class LastUpdatedOrderedDict(OrderedDict):
-    'Store items in the order the keys were last added'
-    def __setitem__(self, key, value):
-        if key in self:
-            del self[key]
-        OrderedDict.__setitem__(self, key, value)
-
-class OrderedList(UserList):
-    def add(self, item):
-        if item in self.data:
-            self.remove(item)
-        self.data.append(item)
-
-    def replace(self, olditem, newitem):
-        for i in range(self.__len__()):
-            if self.data[i] == olditem:
-                self.data[i] = newitem
-
 class UserCode:
     def __init__(self, dispfull=False, homeDir=Path()):
         self.code = ''
@@ -218,7 +148,7 @@ class UserCode:
     def localpathname(self):
         return str(self.fullname.relative_to(self.homeDir).as_posix())
 
-class UserFunctionsEditor(EditorWidget, EditorBase):
+class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
     """Ui for the user function interface."""
     def __init__(self, experimentUi, globalDict):
         super().__init__()
@@ -226,6 +156,7 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.experimentUi = experimentUi
         self.globalDict = globalDict
         self.configDirFolder = 'UserFunctions'
+        self.configname = 'UserFunctionsEditor'
         self.defaultDir = Path(getProject().configDir + '/' + self.configDirFolder)
         self.displayFullPathNames = True
         self.script = UserCode(self.displayFullPathNames, self.defaultDir) #carries around code body and filepath info
@@ -233,19 +164,8 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/' + self.configDirFolder)) #/IonControl/config/UserFunctions directory
             shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
 
-
     def setupUi(self, parent):
         super(UserFunctionsEditor, self).setupUi(parent)
-        self.configname = 'UserFunctionsEditor'
-        self.fileTreeWidget.setDragDropMode(self.fileTreeWidget.InternalMove)
-        self.fileTreeWidget.setAcceptDrops(True)
-        self.fileTreeWidget.setDragEnabled(True)
-        self.fileTreeWidget.setDropIndicatorShown(True)
-        self.fileTreeWidget.setSortingEnabled(True)
-        self.fileTreeWidget.sortItems(0, QtCore.Qt.AscendingOrder)
-        self.fileTreeWidget.setHeaderLabels(['User Function Files'])
-        self.populateTree()
-
         self.tableModel = EvalTableModel(self.globalDict)
         self.tableView.setModel(self.tableModel)
         self.tableView.setSortingEnabled(True)   # triggers sorting
@@ -254,12 +174,12 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.addEvalRow.clicked.connect(self.onAddRow)
         self.removeEvalRow.clicked.connect(self.onRemoveRow)
 
-        self.optionsWindow = OptionsWindow(self.config)
+        #initialize default options
+        self.optionsWindow = OptionsWindow(self.config, 'UserFunctionsEditorOptions')
         self.optionsWindow.setupUi(self.optionsWindow)
         self.actionOptions.triggered.connect(self.onOpenOptions)
         self.optionsWindow.OptionsChangedSignal.connect(self.updateOptions)
         self.updateOptions()
-
         if self.optionsWindow.defaultExpand:
             onExpandOrCollapse(self.fileTreeWidget, True, True)
 
@@ -285,11 +205,11 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
             savedfiles = OrderedList()
         self.recentFiles = OrderedList()
         for fullname in savedfiles:
-            if (isinstance(fullname, Path) and fullname.exists()):
+            if isinstance(fullname, Path) and fullname.exists():
                 self.recentFiles.add(fullname)
-            elif (isinstance(fullname, str) and os.path.exists(fullname)):
-                correctedName = Path(fullname)
-                self.recentFiles.add(correctedName)
+            elif isinstance(fullname, str) and os.path.exists(fullname):
+                correctedname = Path(fullname)
+                self.recentFiles.add(correctedname)
         self.filenameComboBox.setInsertPolicy(1)
         for fullname in self.recentFiles:
             self.filenameComboBox.insertItem(0, self.getName(fullname))
@@ -329,48 +249,10 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.actionSave.triggered.connect(self.onSave)
         self.actionNew.triggered.connect(self.onNew)
 
-        self.fileTreeWidget.dropEvent = lambda x: self.onDrop(x)#lambda x: print('drop')
-        self.fileTreeWidget.itemDoubleClicked.connect(self.onDoubleClick)
-
-        self.expandTree = QtWidgets.QAction("Expand All", self)
-        self.collapseTree = QtWidgets.QAction("Collapse All", self)
-        self.expandChild = QtWidgets.QAction("Expand Selected", self)
-        self.collapseChild = QtWidgets.QAction("Collapse Selected", self)
-        self.expandTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, True))
-        self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
-        self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
-        self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
-        self.fileTreeWidget.addAction(self.expandTree)
-        self.fileTreeWidget.addAction(self.collapseTree)
-        self.fileTreeWidget.addAction(self.expandChild)
-        self.fileTreeWidget.addAction(self.collapseChild)
-
-        self.fileTreeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-
         self.setWindowTitle(self.configname)
         self.setWindowIcon(QtGui.QIcon( ":/latex/icons/FuncIcon2.png"))
         self.statusLabel.setText("")
         self.tableModel.updateData()
-
-    def onDrop(self, event):
-        changedFiles = []
-        if event.source() == self.fileTreeWidget:
-            QtWidgets.QTreeWidget.dropEvent(self.fileTreeWidget, event)
-        checkTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), changedFiles)
-        self.updatePathChanges(changedFiles)
-        for oldName, newName in changedFiles:
-            if oldName == self.script.fullname:
-                self.script.fullname = newName
-
-    def updatePathChanges(self, changedFiles):
-        with BlockSignals(self.filenameComboBox) as w:
-            combolen = range(w.count())
-            for oldPath, newPath in changedFiles:
-                self.recentFiles.replace(oldPath, newPath)
-                for ind in combolen:
-                    if w.itemData(ind) == oldPath:
-                        w.setItemData(ind, newPath)
-                        w.setItemText(ind, self.getName(newPath))
 
     def onOpenOptions(self):
         self.optionsWindow.show()
@@ -383,37 +265,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.script.dispfull = self.optionsWindow.displayPath
         self.defaultExpandAll = self.optionsWindow.defaultExpand
         self.updateFileComboBoxNames(self.displayFullPathNames)
-
-    def getName(self, fullpath):
-        if self.displayFullPathNames:
-            return fullpath.relative_to(self.defaultDir).as_posix()
-        return fullpath.name
-
-    def updateFileComboBoxNames(self, fullnames):
-        with BlockSignals(self.filenameComboBox) as w:
-            for ind in range(w.count()):
-                w.setItemText(ind, self.getName(w.itemData(ind)))
-
-    def confirmLoad(self):
-        """pop up window to confirm loss of unsaved changes when loading new file"""
-        reply = QtWidgets.QMessageBox.question(self, 'Message',
-            "Are you sure you want to discard changes?", QtWidgets.QMessageBox.Yes |
-            QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
-        if reply == QtWidgets.QMessageBox.Yes:
-            return True
-        return False
-
-    def onDoubleClick(self, *args):
-        """open a file that is double clicked in file tree"""
-        if self.script.code != str(self.textEdit.toPlainText()):
-            if not self.confirmLoad():
-               return False
-        if not args[0].isdir:
-            self.loadFile(Path(args[0].path))
-
-    def populateTree(self, newfilepath=None):
-        """constructs the file tree viewer"""
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
 
     @QtCore.pyqtSlot()
     def onNew(self):
