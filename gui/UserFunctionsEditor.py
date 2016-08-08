@@ -279,14 +279,17 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.textEdit.setPlainText(self.script.code)
         self.splitterVertical.insertWidget(0, self.textEdit)
 
-        tempdict = self.config.get( self.configname+'.recentFiles', OrderedList())
-        if not isinstance(tempdict, OrderedList):
-            tempdict = OrderedList()
+        #load recent files, also checks if data was saved correctly and if files still exist
+        savedfiles = self.config.get( self.configname+'.recentFiles', OrderedList())
+        if not isinstance(savedfiles, OrderedList):
+            savedfiles = OrderedList()
         self.recentFiles = OrderedList()
-        for fullname in tempdict:
-            if (isinstance(fullname, str) and os.path.exists(fullname)) or (isinstance(fullname, Path) and fullname.exists()):
-                correctedPath = Path(fullname)
-                self.recentFiles.add(correctedPath)
+        for fullname in savedfiles:
+            if (isinstance(fullname, Path) and fullname.exists()):
+                self.recentFiles.add(fullname)
+            elif (isinstance(fullname, str) and os.path.exists(fullname)):
+                correctedName = Path(fullname)
+                self.recentFiles.add(correctedName)
         self.filenameComboBox.setInsertPolicy(1)
         for fullname in self.recentFiles:
             self.filenameComboBox.insertItem(0, self.getName(fullname))
@@ -295,22 +298,31 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.removeCurrent.clicked.connect(self.onRemoveCurrent)
         self.filenameComboBox.setEditable(False)
 
-        #load file
-        self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
-        if isinstance(self.script.fullname, str):
-            self.script.fullname = Path(self.script.fullname)
         self.tableModel.exprList = self.config.get(self.configname + '.evalstr', [ExpressionValue(None, self.globalDict)])
         if not isinstance(self.tableModel.exprList, list) or not isinstance(self.tableModel.exprList[0], ExpressionValue):
             self.tableModel.exprList = [ExpressionValue(None, self.globalDict)]
         self.tableModel.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         self.tableModel.layoutChanged.emit()
         self.tableModel.connectAllExprVals()
-        if Path(self.script.fullname).exists():
-            with self.script.fullname.open("r") as f:
-                self.script.code = f.read()
-            #self.script.code = self.script.fullname.read_bytes() #for python 3.5
-        else:
-            self.script.code = ''
+
+        #load file, this part is a bit more extensive than it needs to be but can handle a number of issues that might occur during development
+        self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
+        if self.script.fullname != '':
+            if isinstance(self.script.fullname, str):
+                self.script.fullname = Path(self.script.fullname)
+            if self.script.fullname.exists():
+                self.loadFile(self.script.fullname)
+            elif len(self.recentFiles):
+                self.script.fullname = self.recentFiles[-1]
+                recentFileGen = iter(self.recentFiles)
+                while True:
+                    if self.script.fullname.exists():
+                        self.loadFile(self.script.fullname)
+                        break
+                    else:
+                        self.script.fullname = next(recentFileGen)
+                else:
+                    self.script.fullname = ''
 
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
@@ -319,7 +331,6 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
 
         self.fileTreeWidget.dropEvent = lambda x: self.onDrop(x)#lambda x: print('drop')
         self.fileTreeWidget.itemDoubleClicked.connect(self.onDoubleClick)
-        self.loadFile(self.script.fullname)
 
         self.expandTree = QtWidgets.QAction("Expand All", self)
         self.collapseTree = QtWidgets.QAction("Collapse All", self)
@@ -347,6 +358,9 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
             QtWidgets.QTreeWidget.dropEvent(self.fileTreeWidget, event)
         checkTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), changedFiles)
         self.updatePathChanges(changedFiles)
+        for oldName, newName in changedFiles:
+            if oldName == self.script.fullname:
+                self.script.fullname = newName
 
     def updatePathChanges(self, changedFiles):
         with BlockSignals(self.filenameComboBox) as w:
@@ -409,13 +423,12 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         if ok:
             shortname = str(shortname)
             shortname = shortname.replace(' ', '_') #Replace spaces with underscores
-            shortname = shortname.split('.')[0] #Take only what's before the '.'
-            ensurePath(self.defaultDir + '/' + shortname)
-            shortname += '.py'
-            fullname = str(Path(self.defaultDir + '/' + shortname))
-            if not os.path.exists(fullname):
+            shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
+            fullname = self.defaultDir.joinpath(shortname)
+            ensurePath(fullname.parent)
+            if not fullname.exists():
                 try:
-                    with open(fullname, 'w') as f:
+                    with fullname.open('w') as f:
                         newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
                         f.write(newFileText)
                         defaultImportText = 'from expressionFunctions.ExprFuncDecorator import userfunc\n\n'
@@ -477,18 +490,18 @@ class UserFunctionsEditor(EditorWidget, EditorBase):
         self.script.code = str(self.textEdit.toPlainText())
         self.textEdit.clearHighlightError()
         if self.script.code and self.script.fullname:
-            with open(self.script.fullname, 'w') as f:
+            with self.script.fullname.open('w') as f:
                 f.write(self.script.code)
                 logger.info('{0} saved'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
         try:
-            importlib.machinery.SourceFileLoader("UserFunctions", self.script.fullname).load_module()
+            importlib.machinery.SourceFileLoader("UserFunctions", str(self.script.fullname)).load_module()
             self.tableModel.updateData()
             ExprFunUpdate.dataChanged.emit('__exprfunc__')
-            self.statusLabel.setText("Successfully updated {0}".format(self.script.fullname.split('\\')[-1]))
+            self.statusLabel.setText("Successfully updated {0}".format(self.script.fullname.name))
             self.statusLabel.setStyleSheet('color: green')
         except SyntaxError as e:
-            self.statusLabel.setText("Failed to execute {0}: {1}".format(self.script.fullname.split('\\')[-1], e))
+            self.statusLabel.setText("Failed to execute {0}: {1}".format(self.script.fullname.name, e))
             self.statusLabel.setStyleSheet('color: red')
 
     def saveConfig(self):

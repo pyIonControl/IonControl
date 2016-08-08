@@ -17,12 +17,8 @@ class TreeItem(QtWidgets.QTreeWidgetItem):
 
 def ensurePath(path):
     """check if path exists, if not add the path"""
-    pathlist = path.replace('\\','/').split('/')
-    newpath = ''
-    for dir in pathlist[:-1]:
-        newpath += dir + '/'
-        if not os.path.exists(newpath):
-            os.mkdir(newpath)
+    if not path.exists():
+        path.mkdir(parents=True)
 
 def checkTree(widget, pathobj, fileChanges=[]):
     """
@@ -42,9 +38,9 @@ def checkTree(widget, pathobj, fileChanges=[]):
                 oldpath.rename(newpath)
             widget.child(childind).path = str(newpath)
         if widget.child(childind).isdir:
-            checkTree(widget.child(childind), Path(widget.child(childind).path),fileChanges)
+            checkTree(widget.child(childind), Path(widget.child(childind).path), fileChanges)
 
-def genFileTree(widget, pathobj, expandAbovePathName=None):
+def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPyFiles=False):
     """
     Construct the file tree
     :param widget: Initial object is root TreeWidget
@@ -67,9 +63,9 @@ def genFileTree(widget, pathobj, expandAbovePathName=None):
                 child.isdir = False
                 child.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 widget.addChild(child)
-                if not expandAbovePathName is None and path == Path(expandAbovePathName): # expand directories containing a new file
+                if not expandAbovePathName is None and path == expandAbovePathName: # expand directories containing a new file
                     expandAboveChild(widget)
-            elif path.is_dir() and len(list(path.glob('**/*.py'))):
+            elif path.is_dir() and not path.match('*/__*__*') and (not onlyIncludeDirsWithPyFiles or len(list(path.glob('**/*.py')))):
                 child = TreeItem()
                 child.setText(0, str(path.parts[-1]))
                 child.path = str(path)
