@@ -201,22 +201,8 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
 
         #load recent files, also checks if data was saved correctly and if files still exist
         savedfiles = self.config.get( self.configname+'.recentFiles', OrderedList())
-        if not isinstance(savedfiles, OrderedList):
-            savedfiles = OrderedList()
-        self.recentFiles = OrderedList()
-        for fullname in savedfiles:
-            if isinstance(fullname, Path) and fullname.exists():
-                self.recentFiles.add(fullname)
-            elif isinstance(fullname, str) and os.path.exists(fullname):
-                correctedname = Path(fullname)
-                self.recentFiles.add(correctedname)
-        self.filenameComboBox.setInsertPolicy(1)
-        for fullname in self.recentFiles:
-            self.filenameComboBox.insertItem(0, self.getName(fullname))
-            self.filenameComboBox.setItemData(0, fullname)
-        self.filenameComboBox.currentIndexChanged[int].connect(self.onComboIndexChange)
-        self.removeCurrent.clicked.connect(self.onRemoveCurrent)
-        self.filenameComboBox.setEditable(False)
+        self.initRecentFiles(savedfiles)
+        self.initComboBox()
 
         self.tableModel.exprList = self.config.get(self.configname + '.evalstr', [ExpressionValue(None, self.globalDict)])
         if not isinstance(self.tableModel.exprList, list) or not isinstance(self.tableModel.exprList[0], ExpressionValue):
@@ -225,24 +211,9 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.tableModel.layoutChanged.emit()
         self.tableModel.connectAllExprVals()
 
-        #load file, this part is a bit more extensive than it needs to be but can handle a number of issues that might occur during development
+        #load last opened file
         self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
-        if self.script.fullname != '':
-            if isinstance(self.script.fullname, str):
-                self.script.fullname = Path(self.script.fullname)
-            if self.script.fullname.exists():
-                self.loadFile(self.script.fullname)
-            elif len(self.recentFiles):
-                self.script.fullname = self.recentFiles[-1]
-                recentFileGen = iter(self.recentFiles)
-                while True:
-                    if self.script.fullname.exists():
-                        self.loadFile(self.script.fullname)
-                        break
-                    else:
-                        self.script.fullname = next(recentFileGen)
-                else:
-                    self.script.fullname = ''
+        self.initLoad()
 
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
@@ -260,7 +231,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.optionsWindow.raise_()
 
     def updateOptions(self):
-        self.filenameComboBox.setMaxVisibleItems(self.optionsWindow.lineno)
+        self.filenameComboBox.setMaxCount(self.optionsWindow.lineno)
         self.displayFullPathNames = self.optionsWindow.displayPath
         self.script.dispfull = self.optionsWindow.displayPath
         self.defaultExpandAll = self.optionsWindow.defaultExpand
