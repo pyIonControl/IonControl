@@ -87,7 +87,7 @@ class DACUi(dacForm, dacBase):
         time, value, minval, maxval = data
         unit = None
         if is_Q(value):
-            value, unit = value.m, "{:~}".format(value.unit)
+            value, unit = value.m, "{:~}".format(value.units)
         self.persistence.persist(self.persistSpace, source, time, value, minval, maxval, unit)
     
     def onWriteAll(self, writeUnchecked=False):
