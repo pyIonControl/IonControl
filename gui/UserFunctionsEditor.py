@@ -107,12 +107,6 @@ class EvalTableModel(QtCore.QAbstractTableModel):
                 return self.headerDataLookup[section]
         return None
 
-    def displayGain2(self, val):
-        """check if the object returned is a function for proper display"""
-        if isfunction(val):
-            return str(val())
-        return str(val)
-
     def copy_rows(self, rows, position):
         """creates a copy of elements in table specified by indices in the rows variable and inserts at position+1"""
         for i in reversed(rows):
@@ -189,7 +183,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         #setup documentation list
         self.getDocs()
         self.docTreeWidget.setHeaderLabels(['Available Script Functions'])
-        #self.docTreeWidget.setSortIndicator(0, 0)
+        self.docTreeWidget.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         #initialize default options
         self.optionsWindow = OptionsWindow(self.config, 'UserFunctionsEditorOptions')
