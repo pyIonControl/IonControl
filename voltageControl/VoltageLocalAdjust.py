@@ -56,16 +56,19 @@ class LocalAdjustRecord(object):
         self._updateGainValue()
 
     def _updateGainValue(self):
-        if is_Q(self.gain._value):
-            if not callable(self.gain._value.m):
-                self.gainValue = float(self.gain._value)
+        try:
+            if is_Q(self.gain._value):
+                if not callable(self.gain._value.m):
+                    self.gainValue = float(self.gain._value)
+                else:
+                    self.gainValue = float(self.gain._value.m())
             else:
-                self.gainValue = float(self.gain._value.m())
-        else:
-            if not callable(self.gain._value):
-                self.gainValue = float(self.gain._value)
-            else:
-                self.gainValue = float(self.gain._value())
+                if not callable(self.gain._value):
+                    self.gainValue = float(self.gain._value)
+                else:
+                    self.gainValue = float(self.gain._value())
+        except:
+            self.gainValue = 0
 
     @property
     def filename(self):
@@ -112,6 +115,7 @@ class VoltageLocalAdjust(Form, Base ):
         self.localAdjustList = self.config.get( self.configname+".local", list() )
         for record in self.localAdjustList:
             record.globalDict = globalDict
+            record._updateGainValue()
             try:
                 record.gain.valueChanged.connect( partial( self.onValueChanged, record ), QtCore.Qt.UniqueConnection)
             except:
