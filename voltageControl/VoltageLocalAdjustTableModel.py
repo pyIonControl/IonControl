@@ -65,7 +65,7 @@ class VoltageLocalAdjustTableModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role):
         if index.column()==1:
             if role==QtCore.Qt.EditRole:
-                self.localAdjustList[index.row()].gain.value = float(value)
+                self.localAdjustList[index.row()].gain.value = float(value) if not callable(value.m) else value.m
                 return True
             if role==QtCore.Qt.UserRole:
                 self.localAdjustList[index.row()].gain.string = value

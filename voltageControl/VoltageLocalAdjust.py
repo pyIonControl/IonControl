@@ -19,6 +19,7 @@ from modules.Utility import unique
 import hashlib
 import numpy
 from _functools import partial
+from modules.quantity import is_Q
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/VoltageLocalAdjust.ui')
 Form, Base = PyQt5.uic.loadUiType(uipath)
@@ -55,8 +56,17 @@ class LocalAdjustRecord(object):
         self._updateGainValue()
 
     def _updateGainValue(self):
-        self.gainValue = float(self.gain.value)
-        
+        if is_Q(self.gain._value):
+            if not callable(self.gain._value.m):
+                self.gainValue = float(self.gain._value)
+            else:
+                self.gainValue = float(self.gain._value.m())
+        else:
+            if not callable(self.gain._value):
+                self.gainValue = float(self.gain._value)
+            else:
+                self.gainValue = float(self.gain._value())
+
     @property
     def filename(self):
         return os.path.split(self.path)[1] if self.path else ""
@@ -127,7 +137,16 @@ class VoltageLocalAdjust(Form, Base ):
     def onValueChanged(self, record, name, value, string, origin):
         if origin=='recalculate':
             self.tableModel.valueRecalcualted(record)
-        record.gain._value = float( record.gain._value )
+        if is_Q(record.gain._value):
+            if not callable(record.gain._value.m):
+                record.gain._value = float(record.gain._value)
+            else:
+                record.gain._value = record.gain._value.m
+        else:
+            if not callable(record.gain._value):
+                record.gain._value = float(record.gain._value)
+            else:
+                record.gain._value = record.gain._value
         self.updateOutput.emit(self.localAdjustList, 0)
 
     def onAdd(self):
