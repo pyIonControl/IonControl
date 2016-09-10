@@ -18,7 +18,7 @@ Form, Base = PyQt5.uic.loadUiType(uipath)
 
 class ScanProgress(Form, Base):
     OpStates = enum('idle', 'running', 'paused', 'starting', 'stopping', 'interrupted', 'stashing', 'resuming')
-    stateChanged = QtCore.pyqtSignal( object )
+    stateChanged = QtCore.pyqtSignal( str )#object )
     def __init__(self):
         Form.__init__(self)
         Base.__init__(self)

@@ -22,11 +22,12 @@ import pytz
 from persist.MeasurementLog import  Measurement, Parameter, Result
 from copy import deepcopy
 
-class ScriptHandler:
+class ScriptHandler(QtCore.QObject):
     """The ScriptHandler is what handles all the interfacing between the Script and the GUI. The Script
     emits signals, which are picked up by the ScriptHandler, which executes the necessary changes on the
     GUI."""
     def __init__(self, script, experimentUi):
+        super().__init__()
         self.experimentUi = experimentUi
         self.scanExperiment = experimentUi.tabDict['Scan']
         self.globalVariablesUi = experimentUi.globalVariablesUi

@@ -29,7 +29,7 @@ APTDll = None
 
 def loadDll(path):
     global APTDll
-    APTDll = ctypes.WinDLL("dll/APT.dll")
+    APTDll = ctypes.WinDLL(path)
 
 
 class APTError(Exception):
