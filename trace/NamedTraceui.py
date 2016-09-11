@@ -158,13 +158,11 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.editData = QtWidgets.QAction("Edit Data", self)
         self.editData.triggered.connect(self.onEditData)
         self.addAction(self.editData)
-        #self.removeData.triggered.connect(self.onNamedDelete)
         self.removeButton.clicked.disconnect()
         self.removeButton.clicked.connect(self.onNamedDelete)
         self.confirmCreateTrace.clicked.connect(self.createRawData)
         self.cancelCreateTrace.clicked.connect(self.resetTraceOptions)
         self.comboBox.currentIndexChanged[int].connect(self.setDefaultPlot)
-        #self.traceView.clicked.connect(self.onViewClicked)
         self.comboBox.setCurrentIndex(0)
         self.comboBox.setInsertPolicy(1)
         for plotname in self.graphicsViewDict:
@@ -336,12 +334,13 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         for index in reversed(range(len(self.childTableModel.childList))):
             yColumnName = self.childTableModel.childList[index][0]
             rawColumnName = '{0}_raw'.format(yColumnName)
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"], #self.plotDict[self.context.evaluation.evalList[index].plotname]["view"] if self.context.evaluation.evalList[index].plotname != 'None' else None,
-                                        pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,#.context.evaluation.evalList[index].name,
-                                        xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())#"Scripting")
+            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
+                                        pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
+                                        xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
             plottedTrace.x = numpy.append(plottedTrace.x, range(self.childTableModel.childList[index][1]))
             plottedTrace.y = numpy.append(plottedTrace.y, self.childTableModel.childList[index][1]*[0.0])
-            plottedTrace.raw = numpy.append(plottedTrace.raw, self.childTableModel.childList[index][1]*[0.0])
+            plottedTrace.traceCollection.x = plottedTrace.x
+            plottedTrace.traceCollection.y = plottedTrace.y
             self.plottedTraceList.append(plottedTrace)
         self.plottedTraceList[0].traceCollection.name = self.parentNameField.text()
         self.plottedTraceList[0].traceCollection.description["name"] = self.parentNameField.text()
@@ -350,7 +349,6 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.plottedTraceList[0].traceCollection.description["Scan"] = None
         self.plottedTraceList[0].traceCollection.description["traceFinalized"] = datetime.now(pytz.utc)
         self.plottedTraceList[0].traceCollection.autoSave = True
-        #self.plottedTraceList[0].traceCollection.traceCreation = self.plottedTraceList[0].traceCollection.description["traceFinalized"]
         self.plottedTraceList[0].traceCollection.filenamePattern = self.parentNameField.text()
         if len(self.plottedTraceList)==1:
             category = None
@@ -363,12 +361,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         if self.expandNew:
             self.expand(self.plottedTraceList[0])
         self.resizeColumnsToContents()
-        #self.plottedTraceList[0].traceCollection.save()
-        #self.finalizeData()
-        #self.openFile(self.plottedTraceList[0].traceCollection.filename)
         self.resetTraceOptions()
         self.settings.filelist += [self.plottedTraceList[0].traceCollection.filename]
         self.settings.filelist = list(set(self.settings.filelist))
         self.updateNames()
-        self.onSave("text")
 
