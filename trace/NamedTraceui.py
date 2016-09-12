@@ -26,14 +26,15 @@ TraceuiForm, TraceuiBase = PyQt5.uic.loadUiType(uipath)
 class NewTraceTableModel(QtCore.QAbstractTableModel):
     def __init__(self):
         super().__init__()
-        self.childList = [["",0.0]]
-        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.childList[index.row()][index.column()] if index.column() == 0 else int(self.childList[index.row()][index.column()]),#self.displayGain(index.row()),#(self.childList[index.row()].value),
-                           (QtCore.Qt.EditRole): lambda index: self.childList[index.row()][index.column()] if index.column() == 0 else int(self.childList[index.row()][index.column()]) } #self.displayGain(self.childList[index.row()].value)}
+        self.childList = [['', 0]]
+        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.childList[index.row()][index.column()] if index.column() == 0 else int(self.childList[index.row()][index.column()]),
+                           (QtCore.Qt.EditRole): lambda index: self.childList[index.row()][index.column()] if index.column() == 0 else int(self.childList[index.row()][index.column()]) }
         self.headerDataLookup = ['Child Name', 'Length']
 
-    def init(self):
-        self.childList = [["",0.0]]
+    def init(self):#, childlist=[["",0]]):
+        #self.childList = childlist
         self.layoutChanged.emit()
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
 
     def rowCount(self, *args):
         return len(self.childList)
@@ -110,6 +111,8 @@ class Settings(Traceui.Settings):
     def __init__(self, *args, **kwargs):
         super().__init__(*args,**kwargs)
         self.filelist = []
+        self.createTraceParentName = ''
+        self.createTraceChildList = [['', 0]]
 
     def __setstate__(self, state):
         self.__dict__ = state
@@ -117,6 +120,8 @@ class Settings(Traceui.Settings):
         self.__dict__.setdefault('collapseLastTrace', False)
         self.__dict__.setdefault('expandNew', True)
         self.__dict__.setdefault('filelist', [])
+        self.__dict__.setdefault('createTraceParentName', '')
+        self.__dict__.setdefault('createTraceChildList', [['', 0]])
 
 class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
     externalUpdate = QtCore.pyqtSignal()
@@ -149,7 +154,12 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         })
         self.model.categorySetDataLookup.update({(QtCore.Qt.EditRole, self.model.column.name): self.renameTraceField})
 
-        self.createTraceOptions.setVisible(False)
+        self.createTraceOptions.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+
+        self.setDefaultTraceOptionsAction = QtWidgets.QAction("Make current settings default", self)
+        self.setDefaultTraceOptionsAction.triggered.connect(self.updateTraceCreationDefaults)
+        self.createTraceOptions.addAction(self.setDefaultTraceOptionsAction)
+
         self.childTableModel = NewTraceTableModel()
         self.childTableView.setModel(self.childTableModel)
         self.addChild.clicked.connect(self.onAddRow)
@@ -157,7 +167,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
 
         self.editData = QtWidgets.QAction("Edit Data", self)
         self.editData.triggered.connect(self.onEditData)
-        self.addAction(self.editData)
+        self.traceView.addAction(self.editData)
         self.removeButton.clicked.disconnect()
         self.removeButton.clicked.connect(self.onNamedDelete)
         self.confirmCreateTrace.clicked.connect(self.createRawData)
@@ -173,13 +183,18 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
 
         self.saveTrace =  QtWidgets.QAction("Save New Copy", self)
         self.saveTrace.triggered.connect(self.forceSave)
-        self.addAction(self.saveTrace)
+        self.traceView.addAction(self.saveTrace)
+        self.resetTraceOptions()
         try:
             for filename in self.settings.filelist:
                 self.openFile(filename)
             self.updateNames()
         except NameError:
             self.settings.filelist = []
+
+    def updateTraceCreationDefaults(self):
+        self.settings.createTraceParentName = self.parentNameField.text()
+        self.settings.createTraceChildList = copy.deepcopy(self.childTableModel.childList)
 
     def copy_to_clipboard(self):
         """ Copy the list of selected rows to the clipboard as a string. """
@@ -318,15 +333,15 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                     filename = node.children[0].content.traceCollection.filename
                     if filename in self.settings.filelist:
                         self.settings.filelist.remove(filename)
-                    #self.onDelete(a)
             self.traceView.onDelete()
         trc.NamedTraceDict = {v.id: v for k,v in self.model.nodeDict.items()}
 
     def resetTraceOptions(self):
         self.createNamedTrace.setChecked(False)
         self.createTraceOptions.setVisible(False)
-        self.parentNameField.setText("")
-        self.childTableModel.init()
+        self.parentNameField.setText(self.settings.createTraceParentName)
+        self.childTableModel.childList = self.settings.createTraceChildList
+        self.childTableModel.init()#childlist=self.settings.createTraceChildList)
 
     def createRawData(self):
         traceCollection = TraceCollection(record_timestamps=False)
@@ -354,6 +369,14 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             category = None
         else:
             category = self.plottedTraceList[0].traceCollection.name
+            cati = 1
+            basecategory = self.plottedTraceList[0].traceCollection.name
+            while category in trc.NamedTraceDict.keys():
+                category = basecategory+str(cati)
+                self.plottedTraceList[0].traceCollection.name = category
+                self.plottedTraceList[0].traceCollection.description["name"] = category
+                self.plottedTraceList[0].traceCollection.filenamePattern = category
+                cati +=1
         for plottedTrace in self.plottedTraceList:
             plottedTrace.category = category
         for index, plottedTrace in reversed(list(enumerate(self.plottedTraceList))):

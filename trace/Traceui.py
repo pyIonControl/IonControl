@@ -118,34 +118,34 @@ class TraceuiMixin:#(TraceuiForm, TraceuiBase):
         self.traceView.selectionModel().selectionChanged.connect(self.onActiveTraceChanged)
         self.measurementLogButton.clicked.connect(self.onMeasurementLog)
 
-        self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.traceView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
 
         self.unplotSettingsAction = QtWidgets.QAction( "Unplot last trace set", self )
         self.unplotSettingsAction.setCheckable(True)
         self.unplotSettingsAction.setChecked( self.settings.unplotLastTrace)
         self.unplotSettingsAction.triggered.connect( self.onUnplotSetting )
-        self.addAction( self.unplotSettingsAction )
+        self.traceView.addAction( self.unplotSettingsAction )
 
         self.collapseLastTraceAction = QtWidgets.QAction( "Collapse last trace set", self )
         self.collapseLastTraceAction.setCheckable(True)
         self.collapseLastTraceAction.setChecked( self.settings.collapseLastTrace)
         self.collapseLastTraceAction.triggered.connect(self.onCollapseLastTrace)
-        self.addAction( self.collapseLastTraceAction )
+        self.traceView.addAction( self.collapseLastTraceAction )
 
         self.expandNewAction = QtWidgets.QAction( "Expand new traces", self )
         self.expandNewAction.setCheckable(True)
         self.expandNewAction.setChecked( self.settings.expandNew)
         self.expandNewAction.triggered.connect(self.onExpandNew)
-        self.addAction( self.expandNewAction )
+        self.traceView.addAction( self.expandNewAction )
         self.measurementLogButton.setVisible(self.hasMeasurementLog)
 
         self.plotWithMatplotlib = QtWidgets.QAction("Plot with matplotlib", self)
         self.plotWithMatplotlib.triggered.connect(self.onPlotWithMatplotlib)
-        self.addAction(self.plotWithMatplotlib)
+        self.traceView.addAction(self.plotWithMatplotlib)
 
         self.plotWithGnuplot = QtWidgets.QAction("Plot with gnuplot", self)
         self.plotWithGnuplot.triggered.connect(self.onPlotWithGnuplot)
-        self.addAction(self.plotWithGnuplot)
+        self.traceView.addAction(self.plotWithGnuplot)
 
     @doprofile
     def onDelete(self, _):
