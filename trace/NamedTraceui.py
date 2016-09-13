@@ -343,6 +343,15 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.childTableModel.childList = self.settings.createTraceChildList
         self.childTableModel.init()#childlist=self.settings.createTraceChildList)
 
+    def getUniqueName(self, name):
+        basenewname = name
+        newname = copy.copy(name)
+        cati = 2
+        while newname in trc.NamedTraceDict.keys():
+            newname = basenewname+str(cati)
+            cati +=1
+        return newname
+
     def createRawData(self):
         traceCollection = TraceCollection(record_timestamps=False)
         self.plottedTraceList = list()
@@ -357,26 +366,19 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             plottedTrace.traceCollection.x = plottedTrace.x
             plottedTrace.traceCollection.y = plottedTrace.y
             self.plottedTraceList.append(plottedTrace)
-        self.plottedTraceList[0].traceCollection.name = self.parentNameField.text()
-        self.plottedTraceList[0].traceCollection.description["name"] = self.parentNameField.text()
+        parentName = self.getUniqueName(self.parentNameField.text())
+        self.plottedTraceList[0].traceCollection.name = parentName
+        self.plottedTraceList[0].traceCollection.description["name"] = parentName
         self.plottedTraceList[0].traceCollection.description["comment"] = ""
         self.plottedTraceList[0].traceCollection.description["PulseProgram"] = None
         self.plottedTraceList[0].traceCollection.description["Scan"] = None
         self.plottedTraceList[0].traceCollection.description["traceFinalized"] = datetime.now(pytz.utc)
         self.plottedTraceList[0].traceCollection.autoSave = True
-        self.plottedTraceList[0].traceCollection.filenamePattern = self.parentNameField.text()
+        self.plottedTraceList[0].traceCollection.filenamePattern = parentName
         if len(self.plottedTraceList)==1:
             category = None
         else:
-            category = self.plottedTraceList[0].traceCollection.name
-            cati = 1
-            basecategory = self.plottedTraceList[0].traceCollection.name
-            while category in trc.NamedTraceDict.keys():
-                category = basecategory+str(cati)
-                self.plottedTraceList[0].traceCollection.name = category
-                self.plottedTraceList[0].traceCollection.description["name"] = category
-                self.plottedTraceList[0].traceCollection.filenamePattern = category
-                cati +=1
+            category = parentName
         for plottedTrace in self.plottedTraceList:
             plottedTrace.category = category
         for index, plottedTrace in reversed(list(enumerate(self.plottedTraceList))):
