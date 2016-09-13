@@ -340,8 +340,9 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.createNamedTrace.setChecked(False)
         self.createTraceOptions.setVisible(False)
         self.parentNameField.setText(self.settings.createTraceParentName)
-        self.childTableModel.childList = self.settings.createTraceChildList
-        self.childTableModel.init()#childlist=self.settings.createTraceChildList)
+        self.childTableModel.childList = copy.deepcopy(self.settings.createTraceChildList)
+        self.childTableModel.init()
+
 
     def getUniqueName(self, name):
         basenewname = name
