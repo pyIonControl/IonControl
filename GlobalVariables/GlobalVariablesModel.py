@@ -66,9 +66,9 @@ class GlobalVariablesModel(CategoryTreeModel):
             })
         self.dataLookup.update({
             (QtCore.Qt.DisplayRole, self.column.name): lambda node: node.content.name,
-            (QtCore.Qt.DisplayRole, self.column.value): lambda node: node.content.value.__format__("~"),
+            (QtCore.Qt.DisplayRole, self.column.value): lambda node: format(node.content.value),
             (QtCore.Qt.EditRole, self.column.name): lambda node: node.content.name,
-            (QtCore.Qt.EditRole, self.column.value): lambda node: node.content.value.__format__("~")
+            (QtCore.Qt.EditRole, self.column.value): lambda node: format(node.content.value)
             })
         self.setDataLookup.update({
             (QtCore.Qt.EditRole, self.column.name): self.setName,

@@ -202,7 +202,7 @@ class DigitalLockControllerServer(Process):
         item = StreamDataItem()
         (errorsig, item.errorSigMax, item.errorSigMin, item.samples, freq0, freq1, freq2, item.errorSigSumSq, 
          item.externalMax, item.externalMin, item.externalCount, externalSum) = struct.unpack('QhhIQQQQHHIQ', itembuffer)
-        item.lockStatus = (externalSum >> 48) & 0x3
+        item.lockStatus = (externalSum >> 46) & 0x3
         item.externalMax &= 0xffff
         item.externalMin &= 0xffff
         if errorsig & 0xffff000000000000 != 0xfefe000000000000 or freq2 &  0xffff000000000000 != 0xefef000000000000:
@@ -212,7 +212,7 @@ class DigitalLockControllerServer(Process):
             item.freqMin = twos_comp( freq1 & 0xffffffffffff, 48 )
             item.freqMax = twos_comp( freq2 & 0xffffffffffff, 48 )
             item.freqSum = twos_comp( (freq0 <<8) | (freq1 >> 56), 72 ) 
-            item.externalSum = externalSum & 0xffffffffffff
+            item.externalSum = externalSum & 0xfffffffffff
             self.streamData.append(item)
             
      
