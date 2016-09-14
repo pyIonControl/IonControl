@@ -131,7 +131,7 @@ class Script(QtCore.QThread):
         try:
             d = dict(locals(), **globals()) #Executing in this scope allows a function defined in the script to call another function defined in the script
             while True:
-                exec(compile(open(self.fullname).read(), self.fullname, 'exec'), d, d) #run the script
+                exec(compile(open(str(self.fullname)).read(), str(self.fullname), 'exec'), d, d) #run the script
                 if not self.repeat:
                     break
         except Exception as e:
