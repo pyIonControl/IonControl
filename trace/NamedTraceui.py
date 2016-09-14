@@ -193,6 +193,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             self.settings.filelist = []
 
     def updateTraceCreationDefaults(self):
+        """save current settings in named trace generator as default"""
         self.settings.createTraceParentName = self.parentNameField.text()
         self.settings.createTraceChildList = copy.deepcopy(self.childTableModel.childList)
 
@@ -228,6 +229,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.defaultTracePlot = val
 
     def updateNames(self):
+        """updates names of loaded named traces in nodeDict and NamedTraceDict"""
         for node in self.model.root.children:
             if node.parent is not None and node.nodeType == 0:
                 nodename = node.children[0].content.traceCollection.description['name']
@@ -242,6 +244,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.model.nodeDict = {v.id: v for k,v in self.model.nodeDict.items()}
 
     def onEditData(self):
+        """open up the trace table editor"""
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         self.tableEditor = TraceTableEditor.TraceTableEditor()
@@ -251,6 +254,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         trc.NamedTraceDict = {v.id: v for k,v in self.model.nodeDict.items()}
 
     def renameTraceField(self, index, newname):
+        """updates trace information when a named trace field is renamed"""
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         for node in uniqueSelectedNodes:
@@ -276,10 +280,13 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         return True
 
     def forceSave(self):
+        """saves a new copy of a named trace, even when the named trace hasn't changed"""
         self.newData()
         self.saveAndUpdateFileList()
 
     def saveAndUpdateFileList(self, keys=set()):
+        """when data in a named trace is changed, save a new copy of the trace and
+           change the default file list to maintain settings after software is reloaded"""
         if self.newDataAvailable:
             if keys == set():
                 self.onSave(saveCopy=True)
@@ -294,6 +301,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.newDataAvailable = False
 
     def updateExternally(self, topNode, child, row, data, col, saveEvery=False):
+        """overwrites specific elements of a preexisting named trace.
+           Used in scripting when pushing results to a named trace"""
         self.newDataAvailable = True
         if col == 'x':
             self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn][row] = data
@@ -325,6 +334,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.newDataAvailable = True
 
     def onNamedDelete(self, a):
+        """Same as removing trace from the traceView, but also updates the NamedTraceDict
+           and default file list used for reloading named traces"""
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
@@ -337,14 +348,17 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         trc.NamedTraceDict = {v.id: v for k,v in self.model.nodeDict.items()}
 
     def resetTraceOptions(self):
+        """When an empty named trace is generated, hide the generator gui and reinitialize
+           to to the default parameters"""
         self.createNamedTrace.setChecked(False)
         self.createTraceOptions.setVisible(False)
         self.parentNameField.setText(self.settings.createTraceParentName)
         self.childTableModel.childList = copy.deepcopy(self.settings.createTraceChildList)
         self.childTableModel.init()
 
-
     def getUniqueName(self, name):
+        """Gets a unique name for named traces. This was added to avoid name conflicts when
+           multiple empty named traces are generated from a set of user-defined defaults"""
         basenewname = name
         newname = copy.copy(name)
         cati = 2
@@ -354,6 +368,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         return newname
 
     def createRawData(self):
+        """Creates an empty named trace based on parameters in the NamedTrace generator GUI"""
         traceCollection = TraceCollection(record_timestamps=False)
         self.plottedTraceList = list()
         for index in reversed(range(len(self.childTableModel.childList))):
