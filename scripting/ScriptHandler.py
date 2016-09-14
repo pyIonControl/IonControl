@@ -556,7 +556,7 @@ class ScriptHandler(QtCore.QObject):
         if locs:
             self.currentLines = [loc[1] for loc in locs]
             for loc in locs:
-                message = "Executing {0} in {1} at line {2}".format( loc[3], os.path.basename(loc[0]), loc[1] )
+                message = "Executing {0} in {1} at line {2}".format( loc[3], os.path.basename(str(loc[0])), loc[1] )
                 logger.debug(message)
                 self.writeToConsole(message, False)
         else: #This should never execute
