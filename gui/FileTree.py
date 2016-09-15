@@ -28,8 +28,8 @@ class OrderedList(UserList):
 
 class TreeItem(QtWidgets.QTreeWidgetItem):
     """a custom TreeWidgetItem that keeps track of full paths for loading files"""
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args):
+        super().__init__(args)
         self.path = ''
         self.isdir = True
 

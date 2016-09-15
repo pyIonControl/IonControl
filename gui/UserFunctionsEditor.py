@@ -18,15 +18,15 @@ from modules.PyqtUtility import BlockSignals
 from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions
 from inspect import isfunction
 import importlib
+import inspect
 from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
-from gui.FileTree import ensurePath, genFileTree, onExpandOrCollapse, checkTree, FileTreeMixin, OptionsWindow, OrderedList#, FileTreeModel#, expandAboveChild
-from collections import OrderedDict, UserList, UserDict, ChainMap
+from gui.FileTree import ensurePath, onExpandOrCollapse, FileTreeMixin, OptionsWindow, OrderedList
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
@@ -36,9 +36,14 @@ class EvalTableModel(QtCore.QAbstractTableModel):
         super().__init__()
         self.globalDict = globalDict
         self.exprList = [ExpressionValue(None, self.globalDict)]
-        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(self.exprList[index.row()].value),
+        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(index.row()),#(self.exprList[index.row()].value),
                            (QtCore.Qt.EditRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(self.exprList[index.row()].value)}
         self.headerDataLookup = ['Expression', 'Value']
+
+    def displayGain(self, row):
+        if isfunction(self.exprList[row].value.m):
+            return str(self.exprList[row].value.m())
+        return str(self.exprList[row].value)
 
     def rowCount(self, *args):
         return len(self.exprList)
@@ -102,12 +107,6 @@ class EvalTableModel(QtCore.QAbstractTableModel):
                 return self.headerDataLookup[section]
         return None
 
-    def displayGain(self, val):
-        """check if the object returned is a function for proper display"""
-        if isfunction(val):
-            return str(val())
-        return str(val)
-
     def copy_rows(self, rows, position):
         """creates a copy of elements in table specified by indices in the rows variable and inserts at position+1"""
         for i in reversed(rows):
@@ -148,6 +147,12 @@ class UserCode:
     def localpathname(self):
         return str(self.fullname.relative_to(self.homeDir).as_posix())
 
+class DocTreeItem(QtWidgets.QTreeWidgetItem):
+    def __init__(self, widget, text, path, line):
+        super().__init__(widget, [text])
+        self.path = Path(path)
+        self.line = line
+
 class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
     """Ui for the user function interface."""
     def __init__(self, experimentUi, globalDict):
@@ -155,6 +160,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.config = experimentUi.config
         self.experimentUi = experimentUi
         self.globalDict = globalDict
+        self.docDict = dict()
         self.configDirFolder = 'UserFunctions'
         self.configname = 'UserFunctionsEditor'
         self.defaultDir = Path(getProject().configDir + '/' + self.configDirFolder)
@@ -173,6 +179,11 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.tableView.setItemDelegateForColumn(1, self.delegate)
         self.addEvalRow.clicked.connect(self.onAddRow)
         self.removeEvalRow.clicked.connect(self.onRemoveRow)
+
+        #setup documentation list
+        self.getDocs()
+        self.docTreeWidget.setHeaderLabels(['Available Script Functions'])
+        self.docTreeWidget.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
         #initialize default options
         self.optionsWindow = OptionsWindow(self.config, 'UserFunctionsEditorOptions')
@@ -215,6 +226,11 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
         self.initLoad()
 
+        self.openFile = QtWidgets.QAction("Open Source Code", self)
+        self.openFile.triggered.connect(self.gotoCode)
+        self.docTreeWidget.addAction(self.openFile)
+        self.docTreeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
         self.actionSave.triggered.connect(self.onSave)
@@ -236,6 +252,46 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.script.dispfull = self.optionsWindow.displayPath
         self.defaultExpandAll = self.optionsWindow.defaultExpand
         self.updateFileComboBoxNames(self.displayFullPathNames)
+
+    def getDocs(self):
+        """Assemble the script function documentation into a dictionary"""
+        currentDocs = {fname: [func, inspect.getdoc(func), func.__code__.co_filename, func.__code__.co_firstlineno] for fname, func in ExpressionFunctions.items()}
+        if self.docDict != currentDocs:
+            self.docDict = currentDocs
+            self.docTreeWidget.clear()
+            for funcDef, funcAttrs in list(self.docDict.items()):
+                funcDesc = funcAttrs[1]
+                funcDisp = funcDef+inspect.formatargspec(*inspect.getfullargspec(funcAttrs[0]))
+                itemDef = DocTreeItem(self.docTreeWidget, funcDisp, *funcAttrs[2::])
+                self.docTreeWidget.addTopLevelItem(itemDef)
+                if funcDesc:
+                    DocTreeItem(itemDef, funcDesc+'\n', *funcAttrs[2::])
+                else:
+                    tempDesc = '{0}({1})'.format(funcDef,', '.join(inspect.getargspec(ExpressionFunctions[funcDef]).args))
+                    DocTreeItem(itemDef, tempDesc, *funcAttrs[2::])
+                self.docTreeWidget.setWordWrap(True)
+        self.docTreeWidget.invisibleRootItem().sortChildren(0, 0)
+
+    def markLocation(self, line):
+        """mark a specified location"""
+        self.textEdit.textEdit.markerDeleteAll()
+        self.textEdit.textEdit.markerAdd(line, self.textEdit.textEdit.ARROW_MARKER_NUM)
+        self.textEdit.textEdit.setScrollPosition(line-2)
+        self.textEdit.textEdit.setCursorPosition(line, 0)
+
+    def gotoCode(self, *args):
+        docitem = self.docTreeWidget.currentItem()
+        path = docitem.path
+        lineno = docitem.line
+        if self.defaultDir in path.parents:
+            if self.script.code != str(self.textEdit.toPlainText()):
+                if not self.confirmLoad():
+                    return False
+            self.loadFile(path)
+            self.markLocation(lineno)
+        else:
+            self.statusLabel.setText("Can only load files in UserFunctions directory!")
+            self.statusLabel.setStyleSheet('color: red')
 
     @QtCore.pyqtSlot()
     def onNew(self):
@@ -296,6 +352,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
                 w.setItemData(0, self.script.fullname)
                 w.setCurrentIndex(0)
             logger.info('{0} loaded'.format(self.script.fullname))
+            self.statusLabel.setText("")
             self.initcode = copy.copy(self.script.code)
 
     def onRemoveCurrent(self):
@@ -325,6 +382,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         except SyntaxError as e:
             self.statusLabel.setText("Failed to execute {0}: {1}".format(self.script.fullname.name, e))
             self.statusLabel.setStyleSheet('color: red')
+        self.getDocs()
 
     def saveConfig(self):
         """Save configuration."""
@@ -401,3 +459,4 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
     def onClose(self):
         self.saveConfig()
         self.hide()
+

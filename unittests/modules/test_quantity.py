@@ -24,3 +24,6 @@ class TestQuantity(QuantityTestCase):
         self.assertQuantityAlmostEqual(Q(10, 'kg') * Q(1, 'm') / Q(1000, 's**2') / Q(10, 'meter**2'), Q(1, 'mPa'))
         self.assertQuantityAlmostEqual(Q(10, 'kg') * Q(1, 'm**2') / Q(1000, 's'), Q(10, 'mJ * s'))
 
+    def test_to_compact(self):
+        print(Q(-3300, 'Hz').to_compact())
+

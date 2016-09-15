@@ -50,7 +50,7 @@ class Script(QtCore.QThread):
     
     setGlobalSignal = QtCore.pyqtSignal(str, float, str) #args: name, value, unit
     addGlobalSignal = QtCore.pyqtSignal(str, float, str) #args: name, value, unit
-    startScanSignal = QtCore.pyqtSignal(object)  # args: globalOverrides list
+    startScanSignal = QtCore.pyqtSignal(list)  # args: globalOverrides list
     setScanSignal = QtCore.pyqtSignal(str) #arg: scan name
     setEvaluationSignal = QtCore.pyqtSignal(str) #arg: evaluation name
     setAnalysisSignal = QtCore.pyqtSignal(str) #arg: analysis name
@@ -144,7 +144,7 @@ class Script(QtCore.QThread):
         frame = inspect.currentframe()
         stack_trace = traceback.extract_stack(frame) #Gets the full stack trace
         del frame #Getting rid of captured frames is recommended
-        locs = [loc for loc in stack_trace if loc[0] == self.fullname] #Find the locations that match the script name
+        locs = [loc for loc in stack_trace if loc[0] == str(self.fullname)] #Find the locations that match the script name
         self.locationSignal.emit(locs)
 
     def scriptFunction(waitForGui=True, waitForAnalysis=False, waitForData=False, waitForAllData=False,
