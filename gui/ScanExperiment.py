@@ -206,7 +206,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.timestampTraceui.setupUi(self.timestampTraceui)
             self.timestampTraceuiDock = self.setupAsDockWidget(self.timestampTraceui, "Timestamp traces", QtCore.Qt.LeftDockWidgetArea)
 
-        self.namedTraceui = NamedTraceui.NamedTraceui(self.penicons, self.config, self.experimentName, self.plotDict, hasMeasurementLog=True, highlightUnsaved=True, preferences=self.preferences)
+        self.namedTraceui = NamedTraceui.NamedTraceui(self.penicons, self.config, self.experimentName, self.plotDict, hasMeasurementLog=True, highlightUnsaved=True, preferences=self.preferences, plotsChangedSignal=self.plotsChanged)
         self.namedTraceui.setupUi(self.namedTraceui)
         self.measurementLog.addTraceui( 'Scan', self.namedTraceui )
         self.measurementLog.traceuiLookup['Script'] = self.namedTraceui

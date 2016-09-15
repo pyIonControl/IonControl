@@ -31,8 +31,7 @@ class NewTraceTableModel(QtCore.QAbstractTableModel):
                            (QtCore.Qt.EditRole): lambda index: self.childList[index.row()][index.column()] if index.column() == 0 else int(self.childList[index.row()][index.column()]) }
         self.headerDataLookup = ['Child Name', 'Length']
 
-    def init(self):#, childlist=[["",0]]):
-        #self.childList = childlist
+    def init(self):
         self.layoutChanged.emit()
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
 
@@ -113,6 +112,9 @@ class Settings(Traceui.Settings):
         self.filelist = []
         self.createTraceParentName = ''
         self.createTraceChildList = [['', 0]]
+        self.defaultPlotIndex = 0
+        self.defaultPlotName = ""
+        self.splitterVerticalState = None
 
     def __setstate__(self, state):
         self.__dict__ = state
@@ -121,11 +123,13 @@ class Settings(Traceui.Settings):
         self.__dict__.setdefault('expandNew', True)
         self.__dict__.setdefault('filelist', [])
         self.__dict__.setdefault('createTraceParentName', '')
-        self.__dict__.setdefault('createTraceChildList', [['', 0]])
+        self.__dict__.setdefault('defaultPlotIndex', 0)
+        self.__dict__.setdefault('defaultPlotName', '')
+        self.__dict__.setdefault('splitterVerticalState', 0)
 
 class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
     externalUpdate = QtCore.pyqtSignal()
-    def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
+    def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None, plotsChangedSignal=None):
         TraceuiBase.__init__(self, parent)
         TraceuiForm.__init__(self)
         super().__init__(penicons, config, experimentName, graphicsViewDict, parent, lastDir, hasMeasurementLog, highlightUnsaved, preferences=preferences)
@@ -137,6 +141,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.hasMeasurementLog = hasMeasurementLog
         self.highlightUnsaved = highlightUnsaved
         self.newDataAvailable = False
+        self.plotsChangedSignal = plotsChangedSignal
 
     def setupUi(self, *args):
         TraceuiForm.setupUi(self, *args)
@@ -172,16 +177,15 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.removeButton.clicked.connect(self.onNamedDelete)
         self.confirmCreateTrace.clicked.connect(self.createRawData)
         self.cancelCreateTrace.clicked.connect(self.resetTraceOptions)
-        self.comboBox.currentIndexChanged[int].connect(self.setDefaultPlot)
-        self.comboBox.setCurrentIndex(0)
-        self.comboBox.setInsertPolicy(1)
-        for plotname in self.graphicsViewDict:
-            self.comboBox.insertItem(0, plotname)
+
+        self.plotsChangedSignal.connect(self.initComboBox)
+        self.comboBox.setInsertPolicy(3)
+        self.initComboBox()
 
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard)
 
-        self.saveTrace =  QtWidgets.QAction("Save New Copy", self)
+        self.saveTrace = QtWidgets.QAction("Save New Copy", self)
         self.saveTrace.triggered.connect(self.forceSave)
         self.traceView.addAction(self.saveTrace)
         self.resetTraceOptions()
@@ -192,10 +196,21 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         except NameError:
             self.settings.filelist = []
 
+    def initComboBox(self):
+        """Clear and repopulate comboBox for default plots. Necessary when plot names are updated"""
+        for i in reversed(range(self.comboBox.count())):
+            self.comboBox.removeItem(i)
+        for plotname in sorted(self.graphicsViewDict):
+            self.comboBox.addItem(plotname)
+        self.resetTraceOptions()
+
     def updateTraceCreationDefaults(self):
-        """save current settings in named trace generator as default"""
+        """Save current settings in named trace generator as default"""
         self.settings.createTraceParentName = self.parentNameField.text()
         self.settings.createTraceChildList = copy.deepcopy(self.childTableModel.childList)
+        self.settings.defaultPlotIndex = self.comboBox.currentIndex()
+        self.settings.defaultPlotName = self.comboBox.currentText()
+        self.settings.splitterVerticalState = self.splitter.saveState()
 
     def copy_to_clipboard(self):
         """ Copy the list of selected rows to the clipboard as a string. """
@@ -224,9 +239,6 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                 self.settings.filelist += [fname]
                 self.settings.filelist = list(set(self.settings.filelist))
         self.updateNames()
-
-    def setDefaultPlot(self, val):
-        self.defaultTracePlot = val
 
     def updateNames(self):
         """updates names of loaded named traces in nodeDict and NamedTraceDict"""
@@ -350,6 +362,14 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
     def resetTraceOptions(self):
         """When an empty named trace is generated, hide the generator gui and reinitialize
            to to the default parameters"""
+        if self.settings.splitterVerticalState:
+            self.splitter.restoreState(self.settings.splitterVerticalState)
+        comboIndex = 0
+        if self.settings.defaultPlotName in self.graphicsViewDict:
+            comboIndex = self.comboBox.findText(self.settings.defaultPlotName)
+        elif self.settings.defaultPlotIndex < len(self.graphicsViewDict):
+            comboIndex = self.settings.defaultPlotIndex
+        self.comboBox.setCurrentIndex(comboIndex)
         self.createNamedTrace.setChecked(False)
         self.createTraceOptions.setVisible(False)
         self.parentNameField.setText(self.settings.createTraceParentName)
@@ -367,12 +387,25 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             cati +=1
         return newname
 
+    def getUniqueChildName(self, index):
+        """Gets a unique name for child traces."""
+        basenewname = self.childTableModel.childList[index][0]
+        newname = copy.copy(basenewname)
+        cati = 2
+        if index == 0:
+            return newname
+        partialChildList = [self.childTableModel.childList[cii][0] for cii in range(index)]
+        while newname in partialChildList:
+            newname = basenewname+str(cati)
+            cati +=1
+        return newname
+
     def createRawData(self):
         """Creates an empty named trace based on parameters in the NamedTrace generator GUI"""
         traceCollection = TraceCollection(record_timestamps=False)
         self.plottedTraceList = list()
         for index in reversed(range(len(self.childTableModel.childList))):
-            yColumnName = self.childTableModel.childList[index][0]
+            yColumnName = self.getUniqueChildName(index)
             rawColumnName = '{0}_raw'.format(yColumnName)
             plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
                                         pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
