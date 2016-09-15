@@ -59,7 +59,7 @@ class Settings(AttributeComparisonEquality):
         self.__dict__.setdefault('collapseLastTrace', False)
         self.__dict__.setdefault('expandNew', True)
 
-class Traceui(TraceuiForm, TraceuiBase):
+class TraceuiMixin:#(TraceuiForm, TraceuiBase):
     """
     Class for the trace interface.
     Attributes:
@@ -70,8 +70,8 @@ class Traceui(TraceuiForm, TraceuiBase):
     """
     openMeasurementLog = QtCore.pyqtSignal(list) #list of strings with trace creation dates
     def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
-        TraceuiBase.__init__(self, parent)
-        TraceuiForm.__init__(self)
+        #TraceuiBase.__init__(self, parent)
+        #TraceuiForm.__init__(self)
         self.penicons = penicons
         self.config = config
         self.configname = "Traceui."+experimentName
@@ -83,7 +83,7 @@ class Traceui(TraceuiForm, TraceuiBase):
 
     def setupUi(self, MainWindow):
         """Setup the UI. Create the model and the view. Connect all the buttons."""
-        TraceuiForm.setupUi(self, MainWindow)
+        #TraceuiForm.setupUi(self, MainWindow)
         self.model = TraceModel([], self.penicons, self.graphicsViewDict, highlightUnsaved=self.highlightUnsaved)
         self.traceView.setModel(self.model)
         self.delegate = TraceComboDelegate(self.penicons)
@@ -118,34 +118,34 @@ class Traceui(TraceuiForm, TraceuiBase):
         self.traceView.selectionModel().selectionChanged.connect(self.onActiveTraceChanged)
         self.measurementLogButton.clicked.connect(self.onMeasurementLog)
 
-        self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.traceView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
 
         self.unplotSettingsAction = QtWidgets.QAction( "Unplot last trace set", self )
         self.unplotSettingsAction.setCheckable(True)
         self.unplotSettingsAction.setChecked( self.settings.unplotLastTrace)
         self.unplotSettingsAction.triggered.connect( self.onUnplotSetting )
-        self.addAction( self.unplotSettingsAction )
+        self.traceView.addAction( self.unplotSettingsAction )
 
         self.collapseLastTraceAction = QtWidgets.QAction( "Collapse last trace set", self )
         self.collapseLastTraceAction.setCheckable(True)
         self.collapseLastTraceAction.setChecked( self.settings.collapseLastTrace)
         self.collapseLastTraceAction.triggered.connect(self.onCollapseLastTrace)
-        self.addAction( self.collapseLastTraceAction )
+        self.traceView.addAction( self.collapseLastTraceAction )
 
         self.expandNewAction = QtWidgets.QAction( "Expand new traces", self )
         self.expandNewAction.setCheckable(True)
         self.expandNewAction.setChecked( self.settings.expandNew)
         self.expandNewAction.triggered.connect(self.onExpandNew)
-        self.addAction( self.expandNewAction )
+        self.traceView.addAction( self.expandNewAction )
         self.measurementLogButton.setVisible(self.hasMeasurementLog)
 
         self.plotWithMatplotlib = QtWidgets.QAction("Plot with matplotlib", self)
         self.plotWithMatplotlib.triggered.connect(self.onPlotWithMatplotlib)
-        self.addAction(self.plotWithMatplotlib)
+        self.traceView.addAction(self.plotWithMatplotlib)
 
         self.plotWithGnuplot = QtWidgets.QAction("Plot with gnuplot", self)
         self.plotWithGnuplot.triggered.connect(self.onPlotWithGnuplot)
-        self.addAction(self.plotWithGnuplot)
+        self.traceView.addAction(self.plotWithGnuplot)
 
     @doprofile
     def onDelete(self, _):
@@ -468,6 +468,15 @@ class Traceui(TraceuiForm, TraceuiBase):
     def getUniqueCategory(self, filename):
         return self.model.getUniqueCategory(filename)
 
+class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
+    def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
+        TraceuiBase.__init__(self, parent)
+        TraceuiForm.__init__(self)
+        super().__init__(penicons, config, experimentName, graphicsViewDict, parent, lastDir, hasMeasurementLog, highlightUnsaved, preferences)
+
+    def setupUi(self, MainWindow):
+        TraceuiForm.setupUi(self, MainWindow)
+        super().setupUi(MainWindow)
 # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg
