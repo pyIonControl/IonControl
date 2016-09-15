@@ -408,7 +408,7 @@ class ScriptHandler(QtCore.QObject):
         return (error, message)
 
 
-    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(str, str, int, float, str)
     @scriptCommand
     def onPushToNamedTrace(self, topNode, child, row, data, col):
         self.namedTraceList.add(topNode)
