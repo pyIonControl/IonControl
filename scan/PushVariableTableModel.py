@@ -54,7 +54,7 @@ class PushVariableTableModel(QtCore.QAbstractTableModel):
         if index.column()==1:
             return sorted(self.pushDestinations.keys())
         elif index.column()==2:
-            return list(self.pushDestinations[self.pushVariables.at(index.row()).destinationName].keys())
+            return sorted(list(self.pushDestinations[self.pushVariables.at(index.row()).destinationName].keys()))
         return None
                          
     def setDataPush(self, row, value):

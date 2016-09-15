@@ -338,6 +338,7 @@
     </property>
     <addaction name="actionShowConsole"/>
     <addaction name="actionShowDocs"/>
+    <addaction name="actionOptions"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuScript"/>
@@ -525,6 +526,11 @@
     <string>F1</string>
    </property>
   </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options...</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="Experiment.qrc"/>
@@ -533,7 +539,7 @@
   <connection>
    <sender>actionShowDocs</sender>
    <signal>toggled(bool)</signal>
-   <receiver>fileTreeWidget</receiver>
+   <receiver>docTreeWidget</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -541,8 +547,8 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>628</x>
-     <y>361</y>
+     <x>591</x>
+     <y>370</y>
     </hint>
    </hints>
   </connection>

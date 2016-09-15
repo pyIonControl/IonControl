@@ -9,6 +9,7 @@ from PyQt5 import QtCore
 import inspect
 import traceback
 import time
+from pathlib import Path
 
 class ScriptException(Exception):
     pass
@@ -65,10 +66,12 @@ class Script(QtCore.QThread):
     namedTraceSignal = QtCore.pyqtSignal(str, str, int, float, str) #args: top node, child node, row, data and column (x or y)
     loadVoltageDefSignal = QtCore.pyqtSignal(str,str) #args: file name (sans '.txt'), path
 
-    def __init__(self, fullname='', code='', parent=None):
+    def __init__(self, fullname=Path(), code='', parent=None, homeDir=Path()):
         super(Script, self).__init__(parent)
         self.fullname = fullname
         self.code = code
+        self.dispfull = True #display local paths in filenameComboBox
+        self.homeDir = homeDir
         
         self.mutex = QtCore.QMutex() #used to control access to class variables that are accessed by ScriptHandler
         
@@ -111,14 +114,24 @@ class Script(QtCore.QThread):
 
     @QtCore.pyqtProperty(str)
     def shortname(self):
-        return os.path.basename(self.fullname)
+        if self.dispfull:
+            return self.localpathname
+        return self.filename
+
+    @QtCore.pyqtProperty(str)
+    def filename(self):
+        return str(self.fullname.name)
+
+    @QtCore.pyqtProperty(str)
+    def localpathname(self):
+        return str(self.fullname.relative_to(self.homeDir).as_posix())
 
     def run(self):
         """run the script"""
         try:
             d = dict(locals(), **globals()) #Executing in this scope allows a function defined in the script to call another function defined in the script
             while True:
-                exec(compile(open(self.fullname).read(), self.fullname, 'exec'), d, d) #run the script
+                exec(compile(open(str(self.fullname)).read(), str(self.fullname), 'exec'), d, d) #run the script
                 if not self.repeat:
                     break
         except Exception as e:

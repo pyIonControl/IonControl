@@ -53,7 +53,7 @@ class ShuttleEdge(object):
         edge._stopType = a.get('_stopType', '')
         edge.startLength = int( a.get('startLength', 0) )
         edge.stopLength = int( a.get('stopLength', 0) )
-        edge.steps = int(a.get('steps', '0'))
+        edge.steps = float(a.get('steps', '0'))
         edge.startGenerator = StartTypes[edge._startType]()
         edge.stopGenerator = StartTypes[edge._startType]()
         return edge
@@ -82,7 +82,7 @@ class ShuttleEdge(object):
 
     @property 
     def sampleCount(self):
-        return abs(self.stopLine - self.startLine)*max(self.steps, 1) + 1.0
+        return abs(self.stopLine - self.startLine)*self.steps + 1.0
 
     @property 
     def totalSampleCount(self):
@@ -98,7 +98,7 @@ class ShuttleEdge(object):
     
     @property
     def centralSteps(self):
-        return abs(self.centralStopLine - self.centralStartLine)*max(self.steps, 1) + 1
+        return abs(self.centralStopLine - self.centralStartLine)*self.steps + 1
     
     @property
     def totalTime(self):
@@ -113,7 +113,7 @@ class ShuttleEdge(object):
         return self.stopGenerator.effectiveLength(self.stopLength) if self.stopGenerator else 0 
     
     def iLines(self):
-        return chain(self.startGenerator.start(self), linspace(self.centralStartLine, self.centralStopLine, round(self.centralSteps)), self.stopGenerator.stop(self))
+        return chain(self.startGenerator.start(self), linspace(self.centralStartLine, self.centralStopLine, self.centralSteps), self.stopGenerator.stop(self))
 
 class ShuttlingGraphException(Exception):
     pass
