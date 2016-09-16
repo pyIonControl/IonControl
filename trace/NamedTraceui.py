@@ -123,6 +123,7 @@ class Settings(Traceui.Settings):
         self.__dict__.setdefault('expandNew', True)
         self.__dict__.setdefault('filelist', [])
         self.__dict__.setdefault('createTraceParentName', '')
+        self.__dict__.setdefault('createTraceChildList', [['', 0]])
         self.__dict__.setdefault('defaultPlotIndex', 0)
         self.__dict__.setdefault('defaultPlotName', '')
         self.__dict__.setdefault('splitterVerticalState', 0)
