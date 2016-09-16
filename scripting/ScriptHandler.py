@@ -181,7 +181,7 @@ class ScriptHandler(QtCore.QObject):
     def getGlobal(self, name):
         return self.globalVariablesUi.globalDict[name]
 
-    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(list)
     @scriptCommand
     def onStartScan(self, globalOverrides=list()):
         """Start the scan
@@ -408,7 +408,7 @@ class ScriptHandler(QtCore.QObject):
         return (error, message)
 
 
-    @QtCore.pyqtSlot()
+    @QtCore.pyqtSlot(str, str, int, float, str)
     @scriptCommand
     def onPushToNamedTrace(self, topNode, child, row, data, col):
         self.namedTraceList.add(topNode)
