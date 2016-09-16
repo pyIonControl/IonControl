@@ -51,7 +51,7 @@ class GlobalVariable(QtCore.QObject):
             v, o = newvalue
         else:
             v, o = newvalue, None
-        if self._value != v or not isinstance(self._value.m, type(v.m)):
+        if self._value != v or not (type(self._value) is type(v)) or (is_Q(v) and (type(self._value.m) is type(v.m))):
             self._value = v
             self.valueChanged.emit(self.name, v, o)
             self.history.appendleft((v, time.time(), o))

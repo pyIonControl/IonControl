@@ -22,17 +22,12 @@ class VoltageLocalAdjustTableModel(QtCore.QAbstractTableModel):
         textBG = QtGui.QColor(QtCore.Qt.green).lighter(175)
         self.backgroundLookup = { True:textBG, False:defaultBG}
         self.dataLookup = {  (QtCore.Qt.DisplayRole, 0): lambda row: self.localAdjustList[row].name,
-                             (QtCore.Qt.DisplayRole, 1): self.displayGain,
+                             (QtCore.Qt.DisplayRole, 1): lambda row: str(self.localAdjustList[row].gainValue),
                              (QtCore.Qt.DisplayRole, 2): lambda row: str(self.localAdjustList[row].path),
                              (QtCore.Qt.EditRole, 2): lambda row: str(self.localAdjustList[row].path),
                              (QtCore.Qt.EditRole, 1): lambda row: self.localAdjustList[row].gain.string,                            
                              (QtCore.Qt.BackgroundColorRole, 1): lambda row: self.backgroundLookup[self.localAdjustList[row].gain.hasDependency],
                               }
-
-    def displayGain(self, row):
-        if isfunction(self.localAdjustList[row].gain.value):
-            return str(self.localAdjustList[row].gain.value())
-        return str(self.localAdjustList[row].gain.value)
 
     def add(self, record ):
         offset = 0
@@ -65,7 +60,7 @@ class VoltageLocalAdjustTableModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role):
         if index.column()==1:
             if role==QtCore.Qt.EditRole:
-                self.localAdjustList[index.row()].gain.value = float(value)
+                self.localAdjustList[index.row()].gain.value = float(value) if not callable(value.m) else value.m
                 return True
             if role==QtCore.Qt.UserRole:
                 self.localAdjustList[index.row()].gain.string = value

@@ -60,7 +60,7 @@ class ParameterScanGenerator:
         if not is_Q(value):
             return value
         if (not self.scan.xUnit and not value.dimensionless) or not value.dimensionality == Q(1, self.scan.xUnit).dimensionality:
-            self.scan.xUnit = value.to_compact()
+            self.scan.xUnit = str(value.to_compact().units)
         return value.m_as(self.scan.xUnit)
         
     def dataNextCode(self, experiment ):

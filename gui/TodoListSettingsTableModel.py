@@ -112,7 +112,7 @@ class TodoListSettingsTableModel(QtCore.QAbstractTableModel):
     
     def choice(self, index):
         if index.column()==0:
-            return list(self.globalDict.keys())
+            return sorted(list(self.globalDict.keys()))
         return None
     
     def setSettings(self, settings):
