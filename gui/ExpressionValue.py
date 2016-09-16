@@ -8,7 +8,7 @@ from pint import DimensionalityError
 import logging
 
 from modules.Expression import Expression
-from modules.quantity import Q
+from modules.quantity import Q, is_Q
 from modules import WeakMethod
 from PyQt5 import QtCore
 from copy import deepcopy
@@ -37,6 +37,13 @@ class ExpressionValue(QtCore.QObject):
             self.floatValue = None
 
     def __getstate__(self):
+        # if statements used when pickling function objects to avoid errors that occur when
+        # user functions haven't already been imported.
+        if is_Q(self._value):
+            if callable(self._value.m):
+                return self.name, self._string, Q(self._value.m(), self._value.u)
+        elif callable(self._value):
+            return self.name, self._string, self._value()
         return self.name, self._string, self._value
     
     def __setstate__(self, state):
@@ -110,12 +117,12 @@ class ExpressionValue(QtCore.QObject):
     def data(self, val):
         self.name, self.value, self.string = val
     
-    def recalculate(self, name=None, value=None, origin=None):
+    def recalculate(self, name=None, value=None, origin=None, forceUpdate=False):
         if self._globalDict is None:
             raise ExpressionValueException("Global dictionary is not set in {0}".format(self.name))
         if self._string:
             newValue = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
-        if newValue != self._value:
+        if newValue != self._value or forceUpdate:
             self._value = newValue
             self._updateFloatValue()
             self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')

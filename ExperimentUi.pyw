@@ -115,7 +115,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         localpath = getProject().configDir+'/UserFunctions/'
         for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
             try:
-                importlib.machinery.SourceFileLoader("CustomFunctions", str(filename).replace('\\','/')).load_module()
+                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
             except SyntaxError as e:
                 SyntaxError('Failed to load {0}'.format(str(filename)))
 
@@ -455,7 +455,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         localpath = getProject().configDir+'/UserFunctions/'
         for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
             try:
-                importlib.machinery.SourceFileLoader("CustomFunctions", str(filename).replace('\\','/')).load_module()
+                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
             except SyntaxError as e:
                 SyntaxError('Failed to load {0}'.format(str(filename)))
 

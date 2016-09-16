@@ -59,7 +59,7 @@ class Settings(AttributeComparisonEquality):
         self.__dict__.setdefault('collapseLastTrace', False)
         self.__dict__.setdefault('expandNew', True)
 
-class TraceuiMixin:#(TraceuiForm, TraceuiBase):
+class TraceuiMixin:
     """
     Class for the trace interface.
     Attributes:
@@ -70,8 +70,6 @@ class TraceuiMixin:#(TraceuiForm, TraceuiBase):
     """
     openMeasurementLog = QtCore.pyqtSignal(list) #list of strings with trace creation dates
     def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
-        #TraceuiBase.__init__(self, parent)
-        #TraceuiForm.__init__(self)
         self.penicons = penicons
         self.config = config
         self.configname = "Traceui."+experimentName
@@ -83,7 +81,6 @@ class TraceuiMixin:#(TraceuiForm, TraceuiBase):
 
     def setupUi(self, MainWindow):
         """Setup the UI. Create the model and the view. Connect all the buttons."""
-        #TraceuiForm.setupUi(self, MainWindow)
         self.model = TraceModel([], self.penicons, self.graphicsViewDict, highlightUnsaved=self.highlightUnsaved)
         self.traceView.setModel(self.model)
         self.delegate = TraceComboDelegate(self.penicons)
@@ -111,7 +108,6 @@ class TraceuiMixin:#(TraceuiForm, TraceuiBase):
         self.saveButtonMenu.addAction(saveAsTextAction)
         self.saveButtonMenu.addAction(saveAsHdf5Action)
 
-        self.showOnlyLastButton.clicked.connect(self.onShowOnlyLast)
         self.selectAllButton.clicked.connect(self.traceView.selectAll)
         self.collapseAllButton.clicked.connect(self.traceView.collapseAll)
         self.expandAllButton.clicked.connect(self.traceView.expandAll)
@@ -241,7 +237,7 @@ class TraceuiMixin:#(TraceuiForm, TraceuiBase):
                 else:
                     ylabel = ''
 
-                # some custom line types since gnuplot standards annoy me, started at a higher index so
+                # some custom line types started at a higher index so
                 # as not to conflict with lower index line styles if people prefer them
                 # line styles exceed color list by 1 so point types and colors will go through every combination
                 proc.stdin.write(b" set style line 11 lt 1 pt 5 lw 2 ps 1.25\n")  # blue
@@ -477,6 +473,8 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
     def setupUi(self, MainWindow):
         TraceuiForm.setupUi(self, MainWindow)
         super().setupUi(MainWindow)
+        self.showOnlyLastButton.clicked.connect(self.onShowOnlyLast)
+
 # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg

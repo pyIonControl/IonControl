@@ -35,7 +35,7 @@
            <enum>QTabWidget::Rounded</enum>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <property name="documentMode">
            <bool>true</bool>
@@ -243,7 +243,6 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionNew"/>
    </widget>
@@ -267,7 +266,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen"/>
    <addaction name="actionSave"/>
    <addaction name="actionNew"/>
   </widget>
@@ -317,6 +315,9 @@
    </property>
   </action>
   <action name="actionOpen">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="Experiment.qrc">
      <normaloff>:/openicon/icons/document-open-5.png</normaloff>:/openicon/icons/document-open-5.png</iconset>

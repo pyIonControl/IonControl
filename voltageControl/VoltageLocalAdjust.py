@@ -46,7 +46,7 @@ class LocalAdjustRecord(object):
         
     def __getstate__(self):
         return (self.name, self.path, self.gain)
-    
+
     def __setstate__(self, state):
         self.name, self.path, self.gain = state
         self.solution = None
@@ -68,7 +68,7 @@ class LocalAdjustRecord(object):
                 else:
                     self.gainValue = float(self.gain._value())
         except:
-            self.gainValue = 0
+            pass
 
     @property
     def filename(self):
@@ -115,7 +115,7 @@ class VoltageLocalAdjust(Form, Base ):
         self.localAdjustList = self.config.get( self.configname+".local", list() )
         for record in self.localAdjustList:
             record.globalDict = globalDict
-            record._updateGainValue()
+            record.gain.recalculate(forceUpdate=True)
             try:
                 record.gain.valueChanged.connect( partial( self.onValueChanged, record ), QtCore.Qt.UniqueConnection)
             except:
