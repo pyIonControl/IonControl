@@ -5,7 +5,7 @@
 # *****************************************************************
 
 import PyQt5.uic
-from PyQt5 import QtCore
+from PyQt5 import QtCore, QtWidgets
 from functools import partial
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
@@ -33,15 +33,18 @@ class Parameters(AttributeComparisonEquality):
         self.spaceParamCache = dict()
 
 class ValueHistoryUi(Form, Base):
-    def __init__(self, config, dbConnection, parent=None):
+    def __init__(self, config, dbConnection, parent=None, globaldict=None):
         Base.__init__(self, parent)
         Form.__init__(self)
         self.config = config
+        self.globalDict = globaldict
         self.parameters = self.config.get("ValueHistory.parameters", Parameters())
         self.dbConnection = dbConnection
         self.connection = ValueHistoryStore(dbConnection)
         self.connection.open_session()
         self.cache = dict()
+        self.currentSpace = None
+        self.currentGlobal = None
     
     def setupUi(self, MainWindow):
         Form.setupUi(self, MainWindow)
@@ -62,6 +65,10 @@ class ValueHistoryUi(Form, Base):
         self.onSpaceChanged(self.parameters.space)
         self.dataModel = GenericTableModel(self.config, list(), "ValueHistory", ["Date", "Value"], [lambda t: t.astimezone(tzlocal()).strftime('%Y-%m-%d %H:%M:%S'), str])
         self.tableView.setModel( self.dataModel )
+        self.tableView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.pushAction = QtWidgets.QAction("Push to global", self)
+        self.pushAction.triggered.connect(self.pushToGlobal)
+        self.tableView.addAction(self.pushAction)
         restoreGuiState( self, self.config.get('ValueHistory.guiState'))
         
     def onNamedTimespan(self, name):
@@ -108,5 +115,12 @@ class ValueHistoryUi(Form, Base):
         elif len(result)>0:
             self.data = [(e.upd_date, Q(e.value, e.unit)) for e in reversed(result)]
             self.dataModel.setDataTable(self.data)
-                
-           
+            self.currentSpace = space
+            self.currentGlobal = parameter
+            self.pushAction.setText("Push to {0}".format(self.currentGlobal))
+
+    def pushToGlobal(self):
+        index = self.tableView.selectedIndexes()[0]
+        if self.currentSpace == 'globalVar' and self.currentGlobal is not None:
+            self.globalDict[self.currentGlobal] = self.dataModel.data[index.row()][1]
+
