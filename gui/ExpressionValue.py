@@ -6,7 +6,7 @@
 from pint import DimensionalityError
 
 import logging
-
+import expressionFunctions.ExprFuncDecorator as trc# NamedTraceDict
 from modules.Expression import Expression
 from modules.quantity import Q, is_Q
 from modules import WeakMethod
@@ -16,7 +16,6 @@ from copy import deepcopy
 class ExpressionValueException(Exception):
     pass
 
-
 class ExpressionValue(QtCore.QObject):
     expression = Expression()
     valueChanged = QtCore.pyqtSignal(object, object, object, object)
@@ -25,6 +24,7 @@ class ExpressionValue(QtCore.QObject):
         super(ExpressionValue, self).__init__()
         self._globalDict = globalDict
         self.name = name
+        self.func = self._returnVal
         self._string = None
         self._value = value
         self._updateFloatValue()
@@ -37,13 +37,6 @@ class ExpressionValue(QtCore.QObject):
             self.floatValue = None
 
     def __getstate__(self):
-        # if statements used when pickling function objects to avoid errors that occur when
-        # user functions haven't already been imported.
-        if is_Q(self._value):
-            if callable(self._value.m):
-                return self.name, self._string, Q(self._value.m(), self._value.u)
-        elif callable(self._value):
-            return self.name, self._string, self._value()
         return self.name, self._string, self._value
     
     def __setstate__(self, state):
@@ -57,7 +50,10 @@ class ExpressionValue(QtCore.QObject):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-        
+
+    def _returnVal(self, *args):
+        return self._value
+
     @property
     def globalDict(self):
         return self._globalDict
@@ -70,17 +66,18 @@ class ExpressionValue(QtCore.QObject):
     @property
     def value(self):
         return self._value
-    
+
     @value.setter
     def value(self, v):
         if isinstance(v, ExpressionValue):
             self._value = v._value
             self.string = v._string
-            #raise ExpressionValueException('cannot assign ExpressionValue value to ExpressionValue')
-            #logging.getLogger(__name__).error('cannot assign ExpressionValue value to ExpressionValue')
-            #v = mg(0)
         else:
-            self._value = v
+            if callable(v):
+                self._value = v()
+                self.func = deepcopy(v)
+            else:
+                self._value = v
         self._updateFloatValue()
         self.valueChanged.emit(self.name, self._value, self._string, 'value')
         
@@ -97,13 +94,22 @@ class ExpressionValue(QtCore.QObject):
             self._globalDict.valueChanged(name).disconnect(reference)
         self.registrations[:] = []
         if self._string:
-            self._value, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
+            val, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
+            if callable(val.m):
+                self.func = deepcopy(val.m)
+                if any('NamedTraceDict' in key for key in val.m.__globals__.keys()):
+                    dependencies.add('__namedtrace__')
+                    if trc.NamedTraceDict:
+                        self._value = Q(val.m(), val.u)
+            else:
+                self._value = val
+                self.func = self._returnVal
             self._updateFloatValue()
             for dep in dependencies:
                 reference = WeakMethod.ref(self.recalculate)
                 self._globalDict.valueChanged(dep).connect(reference)
                 self.registrations.append((dep, reference))
-                       
+
     @property
     def hasDependency(self):
         #return self._string is not None
@@ -121,11 +127,19 @@ class ExpressionValue(QtCore.QObject):
         if self._globalDict is None:
             raise ExpressionValueException("Global dictionary is not set in {0}".format(self.name))
         if self._string:
-            newValue = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
-        if newValue != self._value or forceUpdate:
-            self._value = newValue
-            self._updateFloatValue()
-            self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
+            newValue  = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
+            if callable(newValue.m):
+                if not (not trc.NamedTraceDict and '__namedtrace__' in (dep[0] for dep in self.registrations)):
+                    self.func = deepcopy(newValue.m)
+                    self._value = Q(newValue.m(), newValue.u)
+                self._updateFloatValue()
+                self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
+            else:
+                self.func = self._returnVal
+                if newValue != self._value or forceUpdate:
+                    self._value = newValue
+                    self._updateFloatValue()
+                    self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
 
     def __hash__(self):
         return hash(self._value)

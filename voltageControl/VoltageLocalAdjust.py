@@ -56,19 +56,7 @@ class LocalAdjustRecord(object):
         self._updateGainValue()
 
     def _updateGainValue(self):
-        try:
-            if is_Q(self.gain._value):
-                if not callable(self.gain._value.m):
-                    self.gainValue = float(self.gain._value)
-                else:
-                    self.gainValue = float(self.gain._value.m())
-            else:
-                if not callable(self.gain._value):
-                    self.gainValue = float(self.gain._value)
-                else:
-                    self.gainValue = float(self.gain._value())
-        except:
-            pass
+        self.gainValue = float(self.gain.value)
 
     @property
     def filename(self):
@@ -115,7 +103,7 @@ class VoltageLocalAdjust(Form, Base ):
         self.localAdjustList = self.config.get( self.configname+".local", list() )
         for record in self.localAdjustList:
             record.globalDict = globalDict
-            record.gain.recalculate(forceUpdate=True)
+            #record.gain.recalculate(forceUpdate=True)
             try:
                 record.gain.valueChanged.connect( partial( self.onValueChanged, record ), QtCore.Qt.UniqueConnection)
             except:
@@ -141,16 +129,7 @@ class VoltageLocalAdjust(Form, Base ):
     def onValueChanged(self, record, name, value, string, origin):
         if origin=='recalculate':
             self.tableModel.valueRecalcualted(record)
-        if is_Q(record.gain._value):
-            if not callable(record.gain._value.m):
-                record.gain._value = float(record.gain._value)
-            else:
-                record.gain._value = record.gain._value.m
-        else:
-            if not callable(record.gain._value):
-                record.gain._value = float(record.gain._value)
-            else:
-                record.gain._value = record.gain._value
+        record.gain._value = float( record.gain._value )
         self.updateOutput.emit(self.localAdjustList, 0)
 
     def onAdd(self):
