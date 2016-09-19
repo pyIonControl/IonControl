@@ -60,8 +60,9 @@ class DACController( OKBase ):
             if minimum<-10:
                 #raise DACControllerException("voltage {0} out of range V < -10V".format(minimum))
                 logging.getLogger(__name__).warning("voltage {0} out of range V < -10V. Clipping to -10V!".format(minimum))
-            odata *= 0x7fff/10.0          
-            outdata = bytearray(numpy.clip(odata,-10.0,9.999999).astype(numpy.int16).view(dtype=numpy.int8))
+            odata = numpy.clip(odata,-10.0,9.999999)
+            odata *= 0x7fff/10.0
+            outdata = bytearray(odata.astype(numpy.int16).view(dtype=numpy.int8))
             logging.getLogger(__name__).info("uploading {0} bytes to DAC controller, {1} voltage samples".format(len(outdata), len(outdata)/self.channelCount/2))
             self.xem.WriteToPipeIn( 0x83, outdata )
             return outdata
