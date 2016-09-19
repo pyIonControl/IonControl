@@ -21,6 +21,7 @@ from uiModules.ImportErrorPopup import importErrorPopup
 from Chassis.itfParser import itfParser
 from pulser.DACController import DACControllerException
 from inspect import isfunction
+from modules.quantity import is_Q
 
 project = getProject()
 #only one voltage controller is currently allowed, so we can just take the first (and only) value in the software voltages dictionary
@@ -335,8 +336,10 @@ class VoltageBlender(QtCore.QObject):
         result = numpy.zeros(channelCount)
         for record in self.localAdjustVoltages:
             if record.solution:
-                if isfunction(record.gain.value):
-                    result = numpy.add(result, (record.solution[left]*(1-convexc)*record.gain.value(left) + record.solution[right]*convexc*record.gain.value(right)))
+                if is_Q(record.gain._value) and callable(record.gain._value.m):
+                    result = numpy.add(result, (record.solution[left]*(1-convexc)*float(record.gain._value.m(left)) + record.solution[right]*convexc*float(record.gain._value.m(right))))
+                elif not is_Q(record.gain._value) and callable(record.gain._value):
+                    result = numpy.add(result, (record.solution[left]*(1-convexc)*float(record.gain._value(left)) + record.solution[right]*convexc*float(record.gain._value(right))))
                 else:
                     result = numpy.add(result, (record.solution[left]*(1-convexc) + record.solution[right]*convexc)*record.gainValue)
         return result
