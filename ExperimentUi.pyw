@@ -293,7 +293,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         #self.tabDict['Scan'].NeedsDDSRewrite.connect( self.DDSUi9910.onWriteAll )
         self.instantiateAuxiliaryPulsers()
 
-        self.valueHistoryUi = ValueHistoryUi(self.config, self.dbConnection)
+        self.valueHistoryUi = ValueHistoryUi(self.config, self.dbConnection, globaldict=self.globalVariablesUi.globalDict)
         self.valueHistoryUi.setupUi( self.valueHistoryUi )
         self.valueHistoryDock = QtWidgets.QDockWidget("Value History")
         self.valueHistoryDock.setWidget( self.valueHistoryUi )
