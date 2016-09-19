@@ -335,7 +335,7 @@ class VoltageBlender(QtCore.QObject):
         result = numpy.zeros(channelCount)
         for record in self.localAdjustVoltages:
             if record.solution:
-                result = numpy.add(result, (record.solution[left]*(1-convexc) + record.solution[right]*convexc)*record.gain.func(lineno))
+                result = numpy.add(result, (record.solution[left]*(1-convexc) + record.solution[right]*convexc)*float(record.gain.func(lineno)))
         return result
             
     def close(self):

@@ -99,8 +99,10 @@ class ExpressionValue(QtCore.QObject):
                 self.func = deepcopy(val.m)
                 if any('NamedTraceDict' in key for key in val.m.__globals__.keys()):
                     dependencies.add('__namedtrace__')
-                    if trc.NamedTraceDict:
-                        self._value = Q(val.m(), val.u)
+                    if trc.NamedTraceDict: #hold off if function depends on NamedTraceDict and NamedTraces haven't been loaded
+                        self._value = Q(val.m())
+                else:
+                    self._value = Q(val.m())
             else:
                 self._value = val
                 self.func = self._returnVal
