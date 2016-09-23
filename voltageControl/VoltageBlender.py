@@ -285,7 +285,7 @@ class VoltageBlender(QtCore.QObject):
         self.lineGain = lineGain
         self.globalGain = globalGain
         #self.lineno = lineno
-        line = self.adjustLine( line )
+        line = self.adjustLine(line, lineno)
         if len(localadjustline) > 0:
             line = numpy.add( line, localadjustline )
         line *= self.globalGain
@@ -304,7 +304,7 @@ class VoltageBlender(QtCore.QObject):
             if definition:
                 logger.info( "Starting finite shuttling" )
                 globaladjust = [0]*len(self.lines[0])
-                self.adjustLine(globaladjust)
+                #self.adjustLine(globaladjust)
                 self.hardware.shuttlePath( [(index, start!=edge.startName, True) for start, _, edge, index in definition] )
                 start, _, edge, _ = definition[-1]
                 self.shuttleTo = edge.startLine if start!=edge.startName else edge.stopLine
@@ -312,12 +312,12 @@ class VoltageBlender(QtCore.QObject):
                 self.outputVoltage = line = self.calculateLine( float(self.shuttleTo), float(self.lineGain), float(self.globalGain) )
                 self.dataChanged.emit(0, 1, len(self.electrodes)-1, 1)
                         
-    def adjustLine(self, line):
-        offset = numpy.zeros(len(line))
+    def adjustLine(self, lineData, lineno):
+        offset = numpy.zeros(len(lineData))
         for adjust in self.adjustDict.values():
-            offset += self.adjustLines[adjust.line] * float(adjust.floatValue)
+            offset += self.adjustLines[adjust.line] * float(adjust.func(lineno))
         offset *= self.adjustGain
-        return (line+offset)
+        return (lineData + offset)
             
     def blendLines(self, lineno, lineGain):
         if self.lines:

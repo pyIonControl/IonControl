@@ -54,6 +54,9 @@ class ExpressionValue(QtCore.QObject):
     def _returnVal(self, *args):
         return self._value
 
+    def setDefaultFunc(self):
+        self.func = self._returnVal
+
     @property
     def globalDict(self):
         return self._globalDict
@@ -78,6 +81,7 @@ class ExpressionValue(QtCore.QObject):
                 self.func = deepcopy(v)
             else:
                 self._value = v
+                self.func = self._returnVal
         self._updateFloatValue()
         self.valueChanged.emit(self.name, self._value, self._string, 'value')
         
@@ -97,7 +101,7 @@ class ExpressionValue(QtCore.QObject):
             val, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
             if callable(val.m):
                 self.func = deepcopy(val.m)
-                if any('NamedTraceDict' in key for key in val.m.__globals__.keys()):
+                if any('NamedTraceDict' in key for key in val.m.__code__.co_names):
                     dependencies.add('__namedtrace__')
                     if trc.NamedTraceDict: #hold off if function depends on NamedTraceDict and NamedTraces haven't been loaded
                         self._value = Q(val.m())
@@ -133,7 +137,7 @@ class ExpressionValue(QtCore.QObject):
             if callable(newValue.m):
                 if not (not trc.NamedTraceDict and '__namedtrace__' in (dep[0] for dep in self.registrations)):
                     self.func = deepcopy(newValue.m)
-                    self._value = Q(newValue.m(), newValue.u)
+                    self._value = Q(newValue.m())
                 self._updateFloatValue()
                 self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
             else:

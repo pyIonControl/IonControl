@@ -19,6 +19,7 @@ from modules.Utility import unique
 import hashlib
 import numpy
 from _functools import partial
+import copy
 from modules.quantity import is_Q
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/VoltageLocalAdjust.ui')
@@ -149,6 +150,7 @@ class VoltageLocalAdjust(Form, Base ):
         
     def setValue(self, channel, value):
         self.channelDict[channel].gain.value = value
+        self.channelDict[channel].gain.setDefaultFunc()
         return True
 
     def getValue(self, channel):
@@ -158,11 +160,11 @@ class VoltageLocalAdjust(Form, Base ):
         return self.channelDict[channel].gain.value
     
     def saveValue(self, channel):
-        self.savedValue[channel] = self.channelDict[channel].gain.value
-    
+        self.savedValue[channel] = copy.deepcopy(self.channelDict[channel].gain)
+
     def restoreValue(self, channel):
         if self.savedValue[channel] is not None:
-            self.channelDict[channel].gain.value = self.savedValue[channel]
+            self.channelDict[channel].gain = self.savedValue[channel]
         return True
     
     def strValue(self, channel):
