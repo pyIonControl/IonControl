@@ -311,6 +311,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             for k,v in self.model.nodeDict.items():
                 if v.parent is not None and v.nodeType == 0:
                     self.settings.filelist.append(self.model.nodeDict[k].children[0].content.traceCollection.filename)
+            trc.NamedTraceUpdate.dataChanged.emit('__namedtrace__')
         self.newDataAvailable = False
 
     def updateExternally(self, topNode, child, row, data, col, saveEvery=False):

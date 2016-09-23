@@ -21,7 +21,6 @@ from uiModules.ImportErrorPopup import importErrorPopup
 from Chassis.itfParser import itfParser
 from pulser.DACController import DACControllerException
 from inspect import isfunction
-from modules.quantity import is_Q
 
 project = getProject()
 #only one voltage controller is currently allowed, so we can just take the first (and only) value in the software voltages dictionary
@@ -286,7 +285,7 @@ class VoltageBlender(QtCore.QObject):
         self.lineGain = lineGain
         self.globalGain = globalGain
         #self.lineno = lineno
-        line = self.adjustLine( line )
+        line = self.adjustLine(line, lineno)
         if len(localadjustline) > 0:
             line = numpy.add( line, localadjustline )
         line *= self.globalGain
@@ -305,7 +304,7 @@ class VoltageBlender(QtCore.QObject):
             if definition:
                 logger.info( "Starting finite shuttling" )
                 globaladjust = [0]*len(self.lines[0])
-                self.adjustLine(globaladjust)
+                #self.adjustLine(globaladjust)
                 self.hardware.shuttlePath( [(index, start!=edge.startName, True) for start, _, edge, index in definition] )
                 start, _, edge, _ = definition[-1]
                 self.shuttleTo = edge.startLine if start!=edge.startName else edge.stopLine
@@ -313,12 +312,12 @@ class VoltageBlender(QtCore.QObject):
                 self.outputVoltage = line = self.calculateLine( float(self.shuttleTo), float(self.lineGain), float(self.globalGain) )
                 self.dataChanged.emit(0, 1, len(self.electrodes)-1, 1)
                         
-    def adjustLine(self, line):
-        offset = numpy.zeros(len(line))
+    def adjustLine(self, lineData, lineno):
+        offset = numpy.zeros(len(lineData))
         for adjust in self.adjustDict.values():
-            offset += self.adjustLines[adjust.line] * float(adjust.floatValue)
+            offset += self.adjustLines[adjust.line] * float(adjust.func(lineno))
         offset *= self.adjustGain
-        return (line+offset)
+        return (lineData + offset)
             
     def blendLines(self, lineno, lineGain):
         if self.lines:
@@ -336,12 +335,7 @@ class VoltageBlender(QtCore.QObject):
         result = numpy.zeros(channelCount)
         for record in self.localAdjustVoltages:
             if record.solution:
-                if is_Q(record.gain._value) and callable(record.gain._value.m):
-                    result = numpy.add(result, (record.solution[left]*(1-convexc)*float(record.gain._value.m(left)) + record.solution[right]*convexc*float(record.gain._value.m(right))))
-                elif not is_Q(record.gain._value) and callable(record.gain._value):
-                    result = numpy.add(result, (record.solution[left]*(1-convexc)*float(record.gain._value(left)) + record.solution[right]*convexc*float(record.gain._value(right))))
-                else:
-                    result = numpy.add(result, (record.solution[left]*(1-convexc) + record.solution[right]*convexc)*record.gainValue)
+                result = numpy.add(result, (record.solution[left]*(1-convexc) + record.solution[right]*convexc)*float(record.gain.func(lineno)))
         return result
             
     def close(self):

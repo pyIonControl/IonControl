@@ -10,7 +10,7 @@ from modules.quantity import is_Q, Q
 from collections import deque, MutableMapping
 import xml.etree.ElementTree as ElementTree
 from modules.MagnitudeParser import parse
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, NamedTraceUpdate
 import time
 
 class GlobalVariablesException(Exception):
@@ -128,4 +128,6 @@ class GlobalVariablesLookup(MutableMapping):
     def valueChanged(self, key):
         if key == '__exprfunc__':
             return ExprFunUpdate.dataChanged
+        elif key == '__namedtrace__':
+            return NamedTraceUpdate.dataChanged
         return self.globalDict[key].valueChanged

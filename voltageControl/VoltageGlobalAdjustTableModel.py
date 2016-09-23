@@ -36,7 +36,7 @@ class VoltageGlobalAdjustTableModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role):
         if index.column()==1:
             if role==QtCore.Qt.EditRole:
-                self.globalAdjustDict.at(index.row()).value = float(value)
+                self.globalAdjustDict.at(index.row()).value = float(value) if not callable(value.m) else value.m
                 return True
             if role==QtCore.Qt.UserRole:
                 self.globalAdjustDict.at(index.row()).string = value
