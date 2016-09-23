@@ -328,12 +328,6 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
                 return False
         self.loadFile(self.filenameComboBox.itemData(ind))
 
-    def onLoad(self):
-        """The load button is clicked. Open file prompt for file."""
-        fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', self.defaultDir, 'Python scripts (*.py *.pyw)')
-        if fullname!="":
-            self.loadFile(fullname)
-
     def loadFile(self, fullname):
         """Load in a file."""
         logger = logging.getLogger(__name__)

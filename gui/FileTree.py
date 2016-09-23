@@ -53,11 +53,12 @@ def checkTree(widget, pathobj, fileChanges=[]):
     for childind in childrange:
         oldpath = Path(widget.child(childind).path)
         if pathobj != oldpath.parent:
-            newpath = pathobj.joinpath(oldpath.name)
+            newpath = sequenceFile(pathobj.joinpath(oldpath.name))
             fileChanges.append((oldpath, newpath))
             if oldpath.exists(): #check if file has already been moved
                 oldpath.rename(newpath)
             widget.child(childind).path = str(newpath)
+            widget.child(childind).setText(0, newpath.name)
         if widget.child(childind).isdir:
             checkTree(widget.child(childind), Path(widget.child(childind).path), fileChanges)
 
@@ -77,9 +78,9 @@ def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPy
                     if path.is_dir():
                         genFileTree(widget.child(childind), path, expandAbovePathName)
         else: #otherwise make a new tree item.
-            if path.parts[-1].split('.')[-1] == 'py':
+            if path.suffix == '.py':
                 child = TreeItem()
-                child.setText(0, str(path.parts[-1]))
+                child.setText(0, path.name)
                 child.path = str(path)
                 child.isdir = False
                 child.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
@@ -89,7 +90,7 @@ def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPy
                     expandAboveChild(widget)
             elif path.is_dir() and not path.match('*/__*__*') and (not onlyIncludeDirsWithPyFiles or len(list(path.glob('**/*.py')))):
                 child = TreeItem()
-                child.setText(0, str(path.parts[-1]))
+                child.setText(0, path.name)
                 child.path = str(path)
                 child.setFlags(QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 child.setIcon(0,QtGui.QIcon( ":/openicon/icons/document-open-5.png"))
@@ -122,6 +123,19 @@ def recurseExpand(node, expand=True):
     for childind in range(node.childCount()):
         node.child(childind).setExpanded(expand)
         recurseExpand(node.child(childind), expand)
+
+def sequenceFile(filename:Path):
+    if filename.exists():
+        import re
+        n = re.compile('\(\d+\)')
+        m = n.search(filename.name)
+        if m:
+            newname = re.sub('\(\d+\)','({0})'.format(int(m.group()[1:-1])+1),filename.stem)
+        else:
+            newname = filename.stem+'(1)'
+        newname += '.py'
+        return sequenceFile(filename.with_name(newname))
+    return filename
 
 class OptionsWindow(OptionsWidget, OptionsBase):
     OptionsChangedSignal = QtCore.pyqtSignal()
@@ -263,19 +277,19 @@ class FileTreeMixin:
     def onItemChanged(self, item):
         """checks to see if file or directory name was changed by the user"""
         if item.isdir and item.text(0) != Path(item.path).stem:
-            newpath = Path(item.path).parent.joinpath(item.text(0))
+            newpath = sequenceFile(Path(item.path).parent.joinpath(item.text(0)))
             Path(item.path).rename(newpath)
             item.path = str(newpath)
-            item.setText(0, str(newpath.parts[-1]))
+            item.setText(0, newpath.stem)
             changedFiles = []
             checkTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), changedFiles)
             self.updatePathChanges(changedFiles)
         elif item.text(0) != Path(item.path).name:
             oldpath = Path(item.path)
-            newpath = Path(item.path).with_name(item.text(0)).with_suffix('.py')
+            newpath = sequenceFile(Path(item.path).with_name(item.text(0)).with_suffix('.py'))
             Path(item.path).rename(newpath)
             item.path = str(newpath)
-            item.setText(0, str(newpath.parts[-1]))
+            item.setText(0, newpath.name)
             self.updatePathChanges([(oldpath, newpath)])
 
     def rightClickMenu(self, pos):
@@ -313,7 +327,7 @@ class FileTreeMixin:
         self.updatePathChanges(changedFiles)
         for oldName, newName in changedFiles:
             if oldName == self.script.fullname:
-                self.script.fullname = newName
+                self.script.fullname = sequenceFile(newName)
 
     def updatePathChanges(self, changedFiles):
         """updates path information in file tree, combo box, recentFiles,
@@ -333,6 +347,30 @@ class FileTreeMixin:
         """pop up window to confirm loss of unsaved changes when loading new file"""
         reply = QtWidgets.QMessageBox.question(self, 'Message',
                                                "Are you sure you want to discard changes?", QtWidgets.QMessageBox.Yes |
+                                               QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
+        if reply == QtWidgets.QMessageBox.Yes:
+            return True
+        return False
+
+    def onLoad(self):
+        """The load button is clicked. Open file prompt for file."""
+        fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', str(self.defaultDir), 'Python scripts (*.py *.pyw)')
+        fullPath = Path(fullname)
+        if fullname!="":
+            if self.defaultDir not in fullPath.parents:
+                if self.copyToDir(self.defaultDir.stem):
+                    newpath = sequenceFile(self.defaultDir.joinpath(fullPath.name))
+                    newpath.write_bytes(fullPath.read_bytes())
+                    fullPath = newpath
+                    self.populateTree(fullPath)
+                    self.loadFile(fullPath)
+            else:
+                self.loadFile(fullPath)
+
+    def copyToDir(self, dirname):
+        """when loading a file from outside Scripting directory"""
+        reply = QtWidgets.QMessageBox.question(self, 'Message',
+                                               "Files must be in {} directory, make a local copy?".format(dirname), QtWidgets.QMessageBox.Yes |
                                                QtWidgets.QMessageBox.No, QtWidgets.QMessageBox.No)
         if reply == QtWidgets.QMessageBox.Yes:
             return True
