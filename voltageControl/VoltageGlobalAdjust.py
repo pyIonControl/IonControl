@@ -3,10 +3,12 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import copy
 
 from PyQt5 import QtCore
 import PyQt5.uic
 
+from gui.ExpressionValue import ExpressionValue
 from modules.SequenceDict import SequenceDict
 from .VoltageGlobalAdjustTableModel import VoltageGlobalAdjustTableModel   #@UnresolvedImport
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
@@ -95,7 +97,8 @@ class VoltageGlobalAdjust(VoltageGlobalAdjustForm, VoltageGlobalAdjustBase ):
         self.config[self.configname+".cache"] = self.adjustCache
         
     def setValue(self, channel, value):
-        self.globalAdjustDict[channel].value = value 
+        self.globalAdjustDict[channel].value = value
+        self.globalAdjustDict[channel].setDefaultFunc()
         return value
 
     def getValue(self, channel):
@@ -105,11 +108,11 @@ class VoltageGlobalAdjust(VoltageGlobalAdjustForm, VoltageGlobalAdjustBase ):
         return self.globalAdjustDict[channel].value
     
     def saveValue(self, channel):
-        self.savedValue[channel] = self.globalAdjustDict[channel].value
+        self.savedValue[channel] = copy.deepcopy(self.globalAdjustDict[channel])
     
     def restoreValue(self, channel):
         if self.savedValue[channel] is not None:
-            self.globalAdjustDict[channel].value = self.savedValue[channel]
+            self.globalAdjustDict[channel] = self.savedValue[channel]
         return True
     
     def strValue(self, channel):

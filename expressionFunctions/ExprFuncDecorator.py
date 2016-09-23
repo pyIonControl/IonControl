@@ -9,6 +9,7 @@ from modules.DataChanged import DataChangedS
 ExpressionFunctions = dict()
 NamedTraceDict = dict()
 ExprFunUpdate = DataChangedS()
+NamedTraceUpdate = DataChangedS()
 
 def exprfunc(wrapped):
     fname = wrapped.__name__

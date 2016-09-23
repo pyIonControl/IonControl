@@ -64,7 +64,7 @@ class CosFit(FitFunctionBase):
 
 class SinCosFit(FitFunctionBase):
     name = "SinCos"
-    functionString =  'A*sin(2*pi*k*x)+B*sin(2*pi*k*x)+O'
+    functionString =  'A*sin(2*pi*k*x)+B*cos(2*pi*k*x)+O'
     parameterNames = [ 'A', 'B', 'k', 'O' ]
     def __init__(self):
         FitFunctionBase.__init__(self)
