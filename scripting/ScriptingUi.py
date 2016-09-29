@@ -283,8 +283,9 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
 
     def onLoad(self):
         """The load button is clicked. Open file prompt for file."""
-        fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', self.defaultDir, 'Python scripts (*.py *.pyw)')
-        if fullname!="":
+        fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', str(self.defaultDir), 'Python scripts (*.py *.pyw)')
+        if fullname != "":
+            fullname = Path(fullname)
             self.loadFile(fullname)
 
     def loadFile(self, fullname):
