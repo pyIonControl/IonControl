@@ -70,13 +70,12 @@ def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPy
     :param expandAbovePathName: Specifies path of a new file so directories can be expanded to reveal the file
     :return:
     """
-    childrange = range(widget.childCount())
     for path in pathobj.iterdir():
-        if str(path) in [widget.child(p).path for p in childrange]: #check if tree item already exists
-            for childind in childrange:
-                if widget.child(childind).path == str(path):
-                    if path.is_dir():
-                        genFileTree(widget.child(childind), path, expandAbovePathName)
+        childpaths = [widget.child(p).path for p in range(widget.childCount())]
+        if str(path) in childpaths:
+            if path.is_dir():
+                childind = childpaths.index(str(path))
+                genFileTree(widget.child(childind), path, expandAbovePathName)
         else: #otherwise make a new tree item.
             if path.suffix == '.py':
                 child = TreeItem()
