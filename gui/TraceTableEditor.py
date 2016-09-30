@@ -24,14 +24,28 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         self.arraylen = 0
         self.model = model
         self.dataLookup = {
-            (QtCore.Qt.DisplayRole): lambda index: str(self.nodelookup[index.column()]['data'][index.row()]),
-            (QtCore.Qt.EditRole): lambda index: self.nodelookup[index.column()]['data'][index.row()]
+            (QtCore.Qt.DisplayRole): self.customDisplay,
+            (QtCore.Qt.EditRole): lambda index: self.nodelookup[index.column()]['data'][index.row()],
+            (QtCore.Qt.BackgroundRole): self.bgLookup
             }
+
         for node in uniqueSelectedNodes:
             dataNodes = model.getDataNodes(node)
             for dataNode in dataNodes:
                 self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
+
+    def bgLookup(self, index):
+        if not index.isValid() or len(self.nodelookup[index.column()]['data']) < index.row() or str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan':
+            return QtGui.QColor(215, 215, 215, 255)
+        else:
+            return QtGui.QColor(255, 255, 255, 255)
+
+    def customDisplay(self, index):
+        if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row():
+            retstr = str(self.nodelookup[index.column()]['data'][index.row()])
+            return retstr if retstr != 'nan' else ''
+        return ''
 
     def rowCount(self, parent):
         return len(self.nodelookup[0]['data'])
@@ -40,7 +54,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         return len(self.nodelookup)
 
     def data(self, index, role):
-        if index.isValid():
+        if index.isValid() and len(self.nodelookup[index.column()]['data']) >= index.row():
             return self.dataLookup.get(role, lambda index: None)(index)
 
     def setData(self, index, value, role):
@@ -59,7 +73,9 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         self.setData(index, value, QtCore.Qt.EditRole)
 
     def flags(self, index):
-        return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+        if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row() and not str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan':
+            return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+        return QtCore.Qt.ItemIsSelectable
 
     def constructArray(self, datain):
         if self.arraylen == 0 or not numpy.array_equal(self.nodelookup[self.arraylen-1]['parent'].traceCollection[self.nodelookup[self.arraylen-1]['parent']._xColumn], datain.traceCollection[datain._xColumn]):#datain.trace.x):
@@ -78,14 +94,14 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
 
     def insertRow(self, position, index=QtCore.QModelIndex()):
         numRows = len(self.nodelookup[0]['data'])
-        for k, v in self.nodelookup[0]['parent'].traceCollection.items():
+        for k, v in self.nodelookup[position[0].column()]['parent'].traceCollection.items():
             if type(v) is numpy.ndarray and len(v) > 0:
-                self.nodelookup[0]['parent'].traceCollection[k] = numpy.insert(v, position+1, 0.0)
+                self.nodelookup[position[0].column()]['parent'].traceCollection[k] = numpy.insert(v, position[0].row()+1, 0.0 if str(v[position[0].row()]) != 'nan' else 'nan')
         for k, v in self.nodelookup.items():
             self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         self.layoutChanged.emit()
-        return range(position, numRows)
+        return range(position[0].row(), numRows)
 
     def copy_rows(self, rows, position):
         for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -122,6 +138,12 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
             return True
         return False
+
+    def onSetBackgroundColor(self):
+        color = QtWidgets.QColorDialog.getColor()
+        if not color.isValid():
+            color = None
+        self.setBackgroundColor(color)
 
 class TraceTableEditor(QtWidgets.QWidget):
     finishedEditing = QtCore.pyqtSignal()
@@ -168,7 +190,7 @@ class TraceTableEditor(QtWidgets.QWidget):
 
     def onAddRow(self):
         zeroColSelInd = self.tableview.selectedIndexes()
-        self.tablemodel.insertRow(zeroColSelInd[0].row())
+        self.tablemodel.insertRow(zeroColSelInd)
 
     def onRemoveRow(self):
         zeroColSelInd = self.tableview.selectedIndexes()
