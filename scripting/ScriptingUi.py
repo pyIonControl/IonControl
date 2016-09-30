@@ -48,7 +48,7 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         super(ScriptingUi, self).setupUi(parent)
         self.configname = 'Scripting'
 
-        self.setCorner(QtCore.Qt.BottomRightCorner,QtCore.Qt.RightDockWidgetArea)
+
         #initialize default options
         self.optionsWindow = OptionsWindow(self.config, 'ScriptingEditorOptions')
         self.optionsWindow.setupUi(self.optionsWindow)
@@ -124,6 +124,10 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         windowState = self.config.get(self.configname+".guiState")
         if windowState:
             self.restoreState(windowState)
+        self.setCorner(QtCore.Qt.BottomRightCorner,QtCore.Qt.RightDockWidgetArea)
+        self.setCorner(QtCore.Qt.TopRightCorner,QtCore.Qt.RightDockWidgetArea)
+        self.setCorner(QtCore.Qt.TopLeftCorner,QtCore.Qt.LeftDockWidgetArea)
+        self.setCorner(QtCore.Qt.BottomLeftCorner,QtCore.Qt.LeftDockWidgetArea)
 
     def onOpenOptions(self):
         self.optionsWindow.show()
