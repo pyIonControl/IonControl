@@ -301,21 +301,25 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         if ok:
             shortname = str(shortname)
             shortname = shortname.replace(' ', '_') #Replace spaces with underscores
-            shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
-            fullname = self.defaultDir.joinpath(shortname)
-            ensurePath(fullname.parent)
-            if not fullname.exists():
-                try:
-                    with fullname.open('w') as f:
-                        newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
-                        f.write(newFileText)
-                        defaultImportText = 'from expressionFunctions.ExprFuncDecorator import userfunc\n\n'
-                        f.write(defaultImportText)
-                except Exception as e:
-                    message = "Unable to create new file {0}: {1}".format(shortname, e)
-                    logger.error(message)
-                    return
-            self.loadFile(fullname)
+            if shortname[-1] == '/':
+                fullname = self.defaultDir.joinpath(shortname)
+                ensurePath(fullname)
+            else:
+                shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
+                fullname = self.defaultDir.joinpath(shortname)
+                ensurePath(fullname.parent)
+                if not fullname.exists():
+                    try:
+                        with fullname.open('w') as f:
+                            newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
+                            f.write(newFileText)
+                            defaultImportText = 'from expressionFunctions.ExprFuncDecorator import userfunc\n\n'
+                            f.write(defaultImportText)
+                    except Exception as e:
+                        message = "Unable to create new file {0}: {1}".format(shortname, e)
+                        logger.error(message)
+                        return
+                self.loadFile(fullname)
             self.populateTree(fullname)
 
     def onComboIndexChange(self, ind):
