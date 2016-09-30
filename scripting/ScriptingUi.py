@@ -48,6 +48,7 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         super(ScriptingUi, self).setupUi(parent)
         self.configname = 'Scripting'
 
+        self.setCorner(QtCore.Qt.BottomRightCorner,QtCore.Qt.RightDockWidgetArea)
         #initialize default options
         self.optionsWindow = OptionsWindow(self.config, 'ScriptingEditorOptions')
         self.optionsWindow.setupUi(self.optionsWindow)
@@ -120,6 +121,9 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.setWindowTitle(self.configname)
         self.setWindowIcon(QtGui.QIcon(":/other/icons/Terminal-icon.png"))
         self.statusLabel.setText("Idle")
+        windowState = self.config.get(self.configname+".guiState")
+        if windowState:
+            self.restoreState(windowState)
 
     def onOpenOptions(self):
         self.optionsWindow.show()
@@ -332,26 +336,10 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.config[self.configname+'.slow'] = self.script.slow
         self.config[self.configname+'.repeat'] = self.script.repeat
         self.config[self.configname+'.isVisible'] = self.isVisible()
-        self.config[self.configname+'.ScriptingUi.pos'] = self.pos()
-        self.config[self.configname+'.ScriptingUi.size'] = self.size()
-        self.config[self.configname+".splitterHorizontal"] = self.splitterHorizontal.saveState()
-        self.config[self.configname+".splitterVertical"] = self.splitterVertical.saveState()
         self.config[self.configname+'.consoleMaximumLinesNew'] = self.consoleMaximumLines
-        self.config[self.configname+'.consoleEnable'] = self.consoleEnable
-       
+        self.config[self.configname+'.guiState'] = self.saveState()
+
     def show(self):
-        pos = self.config.get(self.configname+'.ScriptingUi.pos')
-        size = self.config.get(self.configname+'.ScriptingUi.size')
-        splitterHorizontalState = self.config.get(self.configname+".splitterHorizontal")
-        splitterVerticalState = self.config.get(self.configname+".splitterVertical")
-        if pos:
-            self.move(pos)
-        if size:
-            self.resize(size)
-        if splitterHorizontalState:
-            self.splitterHorizontal.restoreState(splitterHorizontalState)
-        if splitterVerticalState:
-            self.splitterVertical.restoreState(splitterVerticalState)
         QtWidgets.QDialog.show(self)
 
     def onClose(self):
