@@ -8,6 +8,7 @@ import os.path
 import shutil
 from functools import partial
 
+import logging
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 from PyQt5.Qsci import QsciScintilla
@@ -36,7 +37,7 @@ class EvalTableModel(QtCore.QAbstractTableModel):
         super().__init__()
         self.globalDict = globalDict
         self.exprList = [ExpressionValue(None, self.globalDict)]
-        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(index.row()),#(self.exprList[index.row()].value),
+        self.dataLookup = {(QtCore.Qt.DisplayRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(index.row()),
                            (QtCore.Qt.EditRole): lambda index: self.exprList[index.row()].string if index.column() == 0 else self.displayGain(self.exprList[index.row()].value)}
         self.headerDataLookup = ['Expression', 'Value']
 
@@ -87,9 +88,12 @@ class EvalTableModel(QtCore.QAbstractTableModel):
     def connectAllExprVals(self):
         """connect all ExpressionValue objects to rest of GUI for updating values when global dependencies change"""
         for i in range(len(self.exprList)):
-            self.exprList[i]._globalDict = self.globalDict
-            self.exprList[i].valueChanged.connect(partial(self.valueChanged, i), QtCore.Qt.UniqueConnection)
-            self.exprList[i].string = copy.copy(self.exprList[i].string)
+            try:
+                self.exprList[i]._globalDict = self.globalDict
+                self.exprList[i].valueChanged.connect(partial(self.valueChanged, i), QtCore.Qt.UniqueConnection)
+                self.exprList[i].string = copy.copy(self.exprList[i].string)
+            except KeyError as e:
+                logging.getLogger(__name__).error("Unable to load test expression in User Function Editor: {} is undefined!".format(e))
 
     def valueChanged(self, ind):
         index = self.createIndex(ind, 1)
@@ -241,6 +245,14 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.statusLabel.setText("")
         self.tableModel.updateData()
 
+        windowState = self.config.get(self.configname+".guiState")
+        if windowState:
+            self.restoreState(windowState)
+        self.setCorner(QtCore.Qt.BottomRightCorner, QtCore.Qt.RightDockWidgetArea)
+        self.setCorner(QtCore.Qt.TopRightCorner, QtCore.Qt.RightDockWidgetArea)
+        self.setCorner(QtCore.Qt.TopLeftCorner, QtCore.Qt.LeftDockWidgetArea)
+        self.setCorner(QtCore.Qt.BottomLeftCorner, QtCore.Qt.LeftDockWidgetArea)
+
     def onOpenOptions(self):
         self.optionsWindow.show()
         self.optionsWindow.setWindowState(QtCore.Qt.WindowActive)
@@ -387,25 +399,10 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.config[self.configname+'.recentFiles'] = self.recentFiles
         self.config[self.configname+'.script.fullname'] = self.script.fullname
         self.config[self.configname+'.isVisible'] = self.isVisible()
-        self.config[self.configname+'.ScriptingUi.pos'] = self.pos()
-        self.config[self.configname+'.ScriptingUi.size'] = self.size()
-        self.config[self.configname+".splitterHorizontal"] = self.splitterHorizontal.saveState()
-        self.config[self.configname+".splitterVertical"] = self.splitterVertical.saveState()
         self.config[self.configname+".evalstr"] = self.tableModel.exprList
+        self.config[self.configname+'.guiState'] = self.saveState()
 
     def show(self):
-        pos = self.config.get(self.configname+'.ScriptingUi.pos')
-        size = self.config.get(self.configname+'.ScriptingUi.size')
-        splitterHorizontalState = self.config.get(self.configname+".splitterHorizontal")
-        splitterVerticalState = self.config.get(self.configname+".splitterVertical")
-        if pos:
-            self.move(pos)
-        if size:
-            self.resize(size)
-        if splitterHorizontalState:
-            self.splitterHorizontal.restoreState(splitterHorizontalState)
-        if splitterVerticalState:
-            self.splitterVertical.restoreState(splitterVerticalState)
         QtWidgets.QDialog.show(self)
 
     def onAddRow(self):
