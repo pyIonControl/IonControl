@@ -419,7 +419,7 @@ class TraceuiMixin:
             for fname in fnames:
                 self.openFile(fname)
 
-    def openFile(self, filename):
+    def openFile(self, filename, defaultpen=-1):
         filename = str(filename)
         traceCollection = TraceCollection()
         traceCollection.filename = filename
@@ -443,7 +443,7 @@ class TraceuiMixin:
             plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
             plottedTrace.category = category
             plottedTraceList.append(plottedTrace)
-            self.addTrace(plottedTrace, -1)
+            self.addTrace(plottedTrace, defaultpen)
         if self.expandNew:
             self.expand(plottedTraceList[0])
         self.resizeColumnsToContents()

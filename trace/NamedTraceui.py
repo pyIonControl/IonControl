@@ -192,10 +192,11 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.resetTraceOptions()
         try:
             for filename in self.settings.filelist:
-                self.openFile(filename)
+                self.openFile(filename, defaultpen=0)
             self.updateNames()
         except NameError:
             self.settings.filelist = []
+        self.traceView.collapseAll()
 
     def initComboBox(self):
         """Clear and repopulate comboBox for default plots. Necessary when plot names are updated"""
