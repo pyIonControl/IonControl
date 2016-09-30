@@ -46,6 +46,11 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
     def setData(self, index, value, role):
         if role == QtCore.Qt.EditRole:
             self.nodelookup[index.column()]['data'][index.row()] = float(value)
+            if self.nodelookup[index.column()]['xy'] == 'x':
+                parentx = self.nodelookup[index.column()]['xparent']
+                for i in range(len(self.nodelookup)):
+                    if self.nodelookup[i]['xparent'] == parentx:
+                        self.nodelookup[i]['parent'].traceCollection[self.nodelookup[i]['parent']._xColumn][index.row()] = float(value)
             self.dataChanged.emit(index, index)
             return True
         return False
@@ -57,10 +62,11 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
 
     def constructArray(self, datain):
-        if self.arraylen == 0 or not numpy.array_equal(self.nodelookup[self.arraylen-1]['parent'].trace.x, datain.trace.x):
-            self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'x', 'data': datain.traceCollection[datain._xColumn], 'column': datain._xColumn, 'parent': datain}
+        if self.arraylen == 0 or not numpy.array_equal(self.nodelookup[self.arraylen-1]['parent'].traceCollection[self.nodelookup[self.arraylen-1]['parent']._xColumn], datain.traceCollection[datain._xColumn]):#datain.trace.x):
+            self.currx = self.arraylen
+            self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'x', 'data': datain.traceCollection[datain._xColumn], 'column': datain._xColumn, 'parent': datain, 'xparent': self.currx}
             self.arraylen += 1
-        self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'y', 'data': datain.traceCollection[datain._yColumn], 'column': datain._yColumn, 'parent': datain}
+        self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'y', 'data': datain.traceCollection[datain._yColumn], 'column': datain._yColumn, 'parent': datain, 'xparent': self.currx}
         self.arraylen += 1
 
     def headerData(self, column, orientation, role=QtCore.Qt.DisplayRole):
