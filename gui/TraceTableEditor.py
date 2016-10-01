@@ -28,18 +28,28 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             (QtCore.Qt.EditRole): lambda index: self.nodelookup[index.column()]['data'][index.row()],
             (QtCore.Qt.BackgroundRole): self.bgLookup
             }
-
         for node in uniqueSelectedNodes:
             dataNodes = model.getDataNodes(node)
             for dataNode in dataNodes:
                 self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
+        maxlen = max([len(self.nodelookup[i]['data']) for i in range(len(self.nodelookup))])
+        self.padwithNaN(maxlen)
+
+    def padwithNaN(self, maxlen):
+        for k, v in self.nodelookup[0]['parent'].traceCollection.items():
+            if type(v) is numpy.ndarray and len(v) > 0:
+                self.nodelookup[0]['parent'].traceCollection[k] = numpy.append(v, [numpy.nan]*(maxlen-len(v)))
+        for k, v in self.nodelookup.items():
+            self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
 
     def bgLookup(self, index):
-        if not index.isValid() or len(self.nodelookup[index.column()]['data']) < index.row() or str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan':
-            return QtGui.QColor(215, 215, 215, 255)
-        else:
+        if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row() and \
+                str(self.nodelookup[index.column()]['data'][index.row()]) != 'nan' and \
+                isinstance(self.nodelookup[index.column()]['data'][index.row()], float):
             return QtGui.QColor(255, 255, 255, 255)
+        else:
+            return QtGui.QColor(215, 215, 215, 255)
 
     def customDisplay(self, index):
         if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row():
@@ -48,7 +58,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         return ''
 
     def rowCount(self, parent):
-        return len(self.nodelookup[0]['data'])
+        return max([len(self.nodelookup[i]['data']) for i in range(len(self.nodelookup))])
 
     def columnCount(self, parent):
         return len(self.nodelookup)
@@ -73,7 +83,9 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         self.setData(index, value, QtCore.Qt.EditRole)
 
     def flags(self, index):
-        if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row() and not str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan':
+        if index.isValid() and len(self.nodelookup[index.column()]['data']) > index.row() and \
+                not str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan' and \
+                not str(self.nodelookup[index.column()]['data'][index.row()]) == '':
             return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
         return QtCore.Qt.ItemIsSelectable
 
@@ -138,12 +150,6 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
             return True
         return False
-
-    def onSetBackgroundColor(self):
-        color = QtWidgets.QColorDialog.getColor()
-        if not color.isValid():
-            color = None
-        self.setBackgroundColor(color)
 
 class TraceTableEditor(QtWidgets.QWidget):
     finishedEditing = QtCore.pyqtSignal()
