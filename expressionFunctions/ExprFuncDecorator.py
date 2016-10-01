@@ -5,21 +5,25 @@
 # *****************************************************************
 import logging
 from modules.DataChanged import DataChangedS
+from collections import ChainMap
 
-ExpressionFunctions = dict()
+SystemExprFuncs = dict()
+UserExprFuncs = dict()
+#ExpressionFunctions = dict()
+ExpressionFunctions = ChainMap(UserExprFuncs, SystemExprFuncs)
 NamedTraceDict = dict()
 ExprFunUpdate = DataChangedS()
 NamedTraceUpdate = DataChangedS()
 
 def exprfunc(wrapped):
     fname = wrapped.__name__
-    if fname in ExpressionFunctions:
+    if fname in SystemExprFuncs:
         logging.getLogger(__name__).error("Function '{0}' is already defined as an expression function!".format(fname))
     else:
-        ExpressionFunctions[fname] = wrapped
+        SystemExprFuncs[fname] = wrapped
     return wrapped
 
 def userfunc(wrapped):
     fname = wrapped.__name__
-    ExpressionFunctions[fname] = wrapped
+    UserExprFuncs[fname] = wrapped
     return wrapped

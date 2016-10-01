@@ -19,7 +19,7 @@ from modules.PyqtUtility import BlockSignals
 from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs
 from expressionFunctions.UserFunctions import constLookup, localFunctions
 from inspect import isfunction
 import importlib
@@ -268,7 +268,8 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
 
     def getDocs(self):
         """Assemble the script function documentation into a dictionary"""
-        currentDocs = {fname: [func, inspect.getdoc(func), func.__code__.co_filename, func.__code__.co_firstlineno] for fname, func in ExpressionFunctions.items()}
+        currentDocs = {fname: [func, inspect.getdoc(func), func.__code__.co_filename, func.__code__.co_firstlineno] for fname, func in UserExprFuncs.items()}
+        systemDocs = {fname: [func, inspect.getdoc(func), func.__code__.co_filename, func.__code__.co_firstlineno] for fname, func in SystemExprFuncs.items()}
         baseDocs = {fname: [func, inspect.getdoc(func), None, None] for fname, func in localFunctions.items()}
         if self.docDict != currentDocs:
             self.docDict = currentDocs
@@ -281,8 +282,22 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
             for funcDef, funcAttrs in list(baseDocs.items()):
                 funcDesc = funcAttrs[1]
                 funcDisp = funcDef
+                splitDesc = funcDesc.splitlines()
+                if funcDisp == splitDesc[0]:
+                    if splitDesc[1] == '':
+                        funcDesc = '\n'.join(splitDesc[2:])
                 itemDef = DocTreeItem(baseFuncItems, funcDisp, None, None)
                 DocTreeItem(itemDef, funcDesc, None, None)
+            for funcDef, funcAttrs in list(systemDocs.items()):
+                funcDesc = funcAttrs[1]
+                funcDisp = funcDef+inspect.formatargspec(*inspect.getfullargspec(funcAttrs[0]))
+                itemDef = DocTreeItem(baseFuncItems, funcDisp, *funcAttrs[2::])
+                if funcDesc:
+                    DocTreeItem(itemDef, funcDesc+'\n', *funcAttrs[2::])
+                else:
+                    tempDesc = '{0}({1})'.format(funcDef,', '.join(inspect.getargspec(ExpressionFunctions[funcDef]).args))
+                    DocTreeItem(itemDef, tempDesc, *funcAttrs[2::])
+                self.docTreeWidget.setWordWrap(True)
             for funcDef, funcAttrs in list(self.docDict.items()):
                 funcDesc = funcAttrs[1]
                 funcDisp = funcDef+inspect.formatargspec(*inspect.getfullargspec(funcAttrs[0]))
