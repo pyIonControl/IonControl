@@ -19,6 +19,7 @@ import copy
 from modules.Utility import unique
 from datetime import datetime
 import pytz
+from pathlib import Path
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/NamedTraceui.ui')
 TraceuiForm, TraceuiBase = PyQt5.uic.loadUiType(uipath)
@@ -191,7 +192,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.saveTrace)
         self.resetTraceOptions()
         try:
-            for filename in self.settings.filelist:
+            for filename in sorted(self.settings.filelist, key=lambda x: Path(x).stem):
                 self.openFile(filename, defaultpen=0)
             self.updateNames()
         except NameError:
@@ -407,7 +408,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         """Creates an empty named trace based on parameters in the NamedTrace generator GUI"""
         traceCollection = TraceCollection(record_timestamps=False)
         self.plottedTraceList = list()
-        for index in reversed(range(len(self.childTableModel.childList))):
+        for index in range(len(self.childTableModel.childList)):
             yColumnName = self.getUniqueChildName(index)
             rawColumnName = '{0}_raw'.format(yColumnName)
             plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],

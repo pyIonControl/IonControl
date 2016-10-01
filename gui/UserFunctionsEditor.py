@@ -20,6 +20,7 @@ from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions
+from expressionFunctions.UserFunctions import constLookup, localFunctions
 from inspect import isfunction
 import importlib
 import inspect
@@ -154,7 +155,7 @@ class UserCode:
 class DocTreeItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, widget, text, path, line):
         super().__init__(widget, [text])
-        self.path = Path(path)
+        self.path = Path(path) if path is not None else None
         self.line = line
 
 class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
@@ -268,14 +269,24 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
     def getDocs(self):
         """Assemble the script function documentation into a dictionary"""
         currentDocs = {fname: [func, inspect.getdoc(func), func.__code__.co_filename, func.__code__.co_firstlineno] for fname, func in ExpressionFunctions.items()}
+        baseDocs = {fname: [func, inspect.getdoc(func), None, None] for fname, func in localFunctions.items()}
         if self.docDict != currentDocs:
             self.docDict = currentDocs
             self.docTreeWidget.clear()
+            constItems = DocTreeItem(self.docTreeWidget, 'Constants', None, None)
+            baseFuncItems = DocTreeItem(self.docTreeWidget, 'Builtins', None, None)
+            userFuncItems = DocTreeItem(self.docTreeWidget, 'User Defined Functions', None, None)
+            for name in constLookup:
+                DocTreeItem(constItems, name, None, None)
+            for funcDef, funcAttrs in list(baseDocs.items()):
+                funcDesc = funcAttrs[1]
+                funcDisp = funcDef
+                itemDef = DocTreeItem(baseFuncItems, funcDisp, None, None)
+                DocTreeItem(itemDef, funcDesc, None, None)
             for funcDef, funcAttrs in list(self.docDict.items()):
                 funcDesc = funcAttrs[1]
                 funcDisp = funcDef+inspect.formatargspec(*inspect.getfullargspec(funcAttrs[0]))
-                itemDef = DocTreeItem(self.docTreeWidget, funcDisp, *funcAttrs[2::])
-                self.docTreeWidget.addTopLevelItem(itemDef)
+                itemDef = DocTreeItem(userFuncItems, funcDisp, *funcAttrs[2::])
                 if funcDesc:
                     DocTreeItem(itemDef, funcDesc+'\n', *funcAttrs[2::])
                 else:
@@ -294,6 +305,8 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
     def gotoCode(self, *args):
         docitem = self.docTreeWidget.currentItem()
         path = docitem.path
+        if path is None:
+            return False
         lineno = docitem.line
         if self.defaultDir in path.parents:
             if self.script.code != str(self.textEdit.toPlainText()):
