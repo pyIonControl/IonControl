@@ -27,6 +27,8 @@ from functools import partial
 from dateutil.tz import tzlocal
 from modules.doProfile import doprofile
 import subprocess
+from pathlib import Path
+import ctypes
 from functools import reduce
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
@@ -123,6 +125,8 @@ class TraceuiMixin:
 
         self.plotWithGnuplot = QtWidgets.QAction("Plot with gnuplot", self)
         self.plotWithGnuplot.triggered.connect(self.onPlotWithGnuplot)
+        self.openDirectory = QtWidgets.QAction("Open containing directory", self)
+        self.openDirectory.triggered.connect(self.openContainingDirectory)
 
     @doprofile
     def onDelete(self, _):
@@ -430,6 +434,19 @@ class TraceuiMixin:
         self.resizeColumnsToContents()
         return plottedTraceList
 
+    def openContainingDirectory(self):
+        """Opens the parent directory of a file, selecting the file if possible."""
+        selectedNodes = self.traceView.selectedNodes()
+        uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
+        dataNodes = self.model.getDataNodes(uniqueSelectedNodes[0])
+        path = dataNodes[0].content.traceCollection.filename.replace('\\', '/')
+        ctypes.windll.ole32.CoInitialize(None)
+        upath = str(Path(path))
+        pidl = ctypes.windll.shell32.ILCreateFromPathW(upath)
+        ctypes.windll.shell32.SHOpenFolderAndSelectItems(pidl, 0, None, 0)
+        ctypes.windll.shell32.ILFree(pidl)
+        ctypes.windll.ole32.CoUninitialize()
+
     def saveConfig(self):
         """Execute when the UI is closed. Save the settings to the config file."""
         self.config[self.configname+".settings"] = self.settings
@@ -474,7 +491,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction( self.expandNewAction )
         self.traceView.addAction(self.plotWithMatplotlib)
         self.traceView.addAction(self.plotWithGnuplot)
-
+        self.traceView.addAction(self.openDirectory)
 # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg
