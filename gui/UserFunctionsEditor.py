@@ -231,10 +231,9 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.script.fullname = self.config.get( self.configname+'.script.fullname', '' )
         self.initLoad()
 
-        self.openFile = QtWidgets.QAction("Open Source Code", self)
-        self.openFile.triggered.connect(self.gotoCode)
-        self.docTreeWidget.addAction(self.openFile)
-        self.docTreeWidget.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        #custom context menu for docs
+        self.docTreeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.docTreeWidget.customContextMenuRequested.connect(self.docRightClickMenu)
 
         #connect buttons
         self.actionOpen.triggered.connect(self.onLoad)
@@ -253,6 +252,17 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.setCorner(QtCore.Qt.TopRightCorner, QtCore.Qt.RightDockWidgetArea)
         self.setCorner(QtCore.Qt.TopLeftCorner, QtCore.Qt.LeftDockWidgetArea)
         self.setCorner(QtCore.Qt.BottomLeftCorner, QtCore.Qt.LeftDockWidgetArea)
+
+    def docRightClickMenu(self, pos):
+        """a CustomContextMenu for right click, if code is defined in
+           UserFunctions directory, allows user to jump to source code"""
+        items = self.docTreeWidget.selectedItems()
+        menu = QtWidgets.QMenu()
+        self.openFile = QtWidgets.QAction("Open Source Code", self)
+        self.openFile.triggered.connect(self.gotoCode)
+        if items[0].path != None:
+            menu.addAction(self.openFile)
+        menu.exec_(self.docTreeWidget.mapToGlobal(pos))
 
     def onOpenOptions(self):
         self.optionsWindow.show()
