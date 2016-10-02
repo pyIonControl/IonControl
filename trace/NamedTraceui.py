@@ -175,6 +175,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.editData = QtWidgets.QAction("Edit Data", self)
         self.editData.triggered.connect(self.onEditData)
         self.traceView.addAction(self.editData)
+
         self.removeButton.clicked.disconnect()
         self.removeButton.clicked.connect(self.onNamedDelete)
         self.confirmCreateTrace.clicked.connect(self.createRawData)
@@ -190,6 +191,9 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.saveTrace = QtWidgets.QAction("Save New Copy", self)
         self.saveTrace.triggered.connect(self.forceSave)
         self.traceView.addAction(self.saveTrace)
+        self.traceView.addAction(self.plotWithMatplotlib)
+        self.traceView.addAction(self.plotWithGnuplot)
+
         self.resetTraceOptions()
         try:
             for filename in sorted(self.settings.filelist, key=lambda x: Path(x).stem):
