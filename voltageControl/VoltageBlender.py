@@ -300,11 +300,9 @@ class VoltageBlender(QtCore.QObject):
                     self.applyLine(line, self.lineGain, self.globalGain)
                     logger.debug( "shuttling applied line {0}".format( line ) )
             self.shuttlingOnLine.emit(line)
-        else:  # this stuff does not work yet
+        else:
             if definition:
                 logger.info( "Starting finite shuttling" )
-                globaladjust = [0]*len(self.lines[0])
-                #self.adjustLine(globaladjust)
                 self.hardware.shuttlePath( [(index, start!=edge.startName, True) for start, _, edge, index in definition] )
                 start, _, edge, _ = definition[-1]
                 self.shuttleTo = edge.startLine if start!=edge.startName else edge.stopLine
