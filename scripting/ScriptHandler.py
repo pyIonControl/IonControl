@@ -366,9 +366,9 @@ class ScriptHandler(QtCore.QObject):
         error, message = self.plotList([x], [y], traceName, plotStyle=plotStyle)
         return (error, message) 
         
-    @QtCore.pyqtSlot(list, list, str)
+    @QtCore.pyqtSlot(list, list, str, bool, int)
     @scriptCommand
-    def onPlotList(self, xList, yList, traceName, overwrite, plotStyle=-1):
+    def onPlotList(self, xList, yList, traceName, overwrite=False, plotStyle=-1):
         """Plot [x1, x2,...], [y1, y2,...] to traceName"""
         traceName = str(traceName)
         error, message = self.plotList(xList, yList, traceName, overwrite, plotStyle=plotStyle)
