@@ -425,7 +425,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
             importlib.machinery.SourceFileLoader("UserFunctions", str(self.script.fullname)).load_module()
             self.tableModel.updateData()
             ExprFunUpdate.dataChanged.emit('__exprfunc__')
-            self.statusLabel.setText("Successfully updated {0}".format(self.script.fullname.name))
+            self.statusLabel.setText("Successfully updated {0} at {1}".format(self.script.fullname.name, str(datetime.now())))
             self.statusLabel.setStyleSheet('color: green')
         except SyntaxError as e:
             self.statusLabel.setText("Failed to execute {0}: {1}".format(self.script.fullname.name, e))
