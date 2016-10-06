@@ -339,7 +339,7 @@ class ScriptHandler(QtCore.QObject):
     def onFit(self, fitName, traceName):
         fitName = str(fitName)
         traceName = str(traceName)
-        fitAnalysisIndex = self.fitWidget.analysisNameComboBox.findText(fitName)
+        fitAnalysisIndex = self.fitWidget.fitSelectionComboBox.findText(fitName)
         if fitAnalysisIndex < 0:
             message = "Fit '{0}' does not exist.".format(fitName)
             error = True
@@ -348,10 +348,11 @@ class ScriptHandler(QtCore.QObject):
             error = True
         else:
             plottedTrace = self.scriptTraces[traceName]
-            self.fitWidget.analysisNameComboBox.setCurrentIndex(fitAnalysisIndex)
+            self.fitWidget.fitSelectionComboBox.setCurrentIndex(fitAnalysisIndex)
             message = "Fitting trace '{0}' using fit '{1}'".format(traceName, fitName)
             self.fitWidget.fit(plottedTrace)
             with QtCore.QMutexLocker(self.script.mutex):
+                self.script.fitResults.clear()
                 for index, parameter in enumerate(plottedTrace.fitFunction.parameterNames):
                     self.script.fitResults[parameter] = plottedTrace.fitFunction.parameters[index]
             error = False
