@@ -181,13 +181,16 @@ class Parser:
         if len(t) == 7:
             t[0] = self.functionCM[t[1]](*t[3], **t[5])
             self.dependencies.add('__exprfunc__')
+            self.dependencies.add(t[1])
         elif len(t) == 5:
             if type(t[3]) is dict:
                 t[0] = self.functionCM[t[1]](**t[3])
                 self.dependencies.add('__exprfunc__')
+                self.dependencies.add(t[1])
             else:
                 t[0] = self.functionCM[t[1]](*t[3])
                 self.dependencies.add('__exprfunc__')
+                self.dependencies.add(t[1])
 
     def p_expression_name(self, t):
         'expression : NAME'

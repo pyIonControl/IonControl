@@ -6,6 +6,7 @@
 
 import os.path
 import shutil
+import ast
 from functools import partial
 
 import logging
@@ -29,6 +30,7 @@ from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
 from gui.FileTree import ensurePath, onExpandOrCollapse, FileTreeMixin, OptionsWindow, OrderedList
+from expressionFunctions.UserFuncASTWalker import CodeAnalyzer
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
@@ -166,6 +168,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.experimentUi = experimentUi
         self.globalDict = globalDict
         self.docDict = dict()
+        #self.ASTWalker = CodeAnalyzer()
         self.configDirFolder = 'UserFunctions'
         self.configname = 'UserFunctionsEditor'
         self.defaultDir = Path(getProject().configDir + '/' + self.configDirFolder)
@@ -424,7 +427,14 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         try:
             importlib.machinery.SourceFileLoader("UserFunctions", str(self.script.fullname)).load_module()
             self.tableModel.updateData()
-            ExprFunUpdate.dataChanged.emit('__exprfunc__')
+            top = ast.parse(self.script.fullname.read_text())
+            analyzer = CodeAnalyzer()
+            analyzer.visit(top)
+            upd_func_list = analyzer.upd_funcs
+            print(upd_func_list)
+            for fname in upd_func_list:
+                #ExprFunUpdate.dataChanged.emit('__exprfunc__')
+                ExprFunUpdate.dataChanged.emit(fname)
             self.statusLabel.setText("Successfully updated {0} at {1}".format(self.script.fullname.name, str(datetime.now())))
             self.statusLabel.setStyleSheet('color: green')
         except SyntaxError as e:
