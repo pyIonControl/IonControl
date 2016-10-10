@@ -11,7 +11,7 @@ from modules.Expression import Expression
 from modules.quantity import Q, is_Q
 from modules import WeakMethod
 from PyQt5 import QtCore
-from copy import deepcopy
+from copy import deepcopy, copy
 
 class ExpressionValueException(Exception):
     pass
@@ -29,6 +29,7 @@ class ExpressionValue(QtCore.QObject):
         self._value = value
         self._updateFloatValue()
         self.registrations = list()        # subscriptions to global variable values
+        self.dependencies = set()
 
     def _updateFloatValue(self):
         try:
@@ -111,6 +112,7 @@ class ExpressionValue(QtCore.QObject):
                 self._value = val
                 self.func = self._returnVal
             self._updateFloatValue()
+            self.dependencies = copy(dependencies)
             for dep in dependencies:
                 reference = WeakMethod.ref(self.recalculate)
                 self._globalDict.valueChanged(dep).connect(reference)
@@ -132,20 +134,23 @@ class ExpressionValue(QtCore.QObject):
     def recalculate(self, name=None, value=None, origin=None, forceUpdate=False):
         if self._globalDict is None:
             raise ExpressionValueException("Global dictionary is not set in {0}".format(self.name))
-        if self._string:
-            newValue  = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
-            if callable(newValue.m):
-                if not (not trc.NamedTraceDict and '__namedtrace__' in (dep[0] for dep in self.registrations)):
-                    self.func = deepcopy(newValue.m)
-                    self._value = Q(newValue.m())
-                self._updateFloatValue()
-                self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
-            else:
-                self.func = self._returnVal
-                if newValue != self._value or forceUpdate:
-                    self._value = newValue
+        if name is None or name in self.dependencies:
+            if name is not None:
+                print("Updating: ", name)
+            if self._string:
+                newValue  = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
+                if callable(newValue.m):
+                    if not (not trc.NamedTraceDict and '__namedtrace__' in (dep[0] for dep in self.registrations)):
+                        self.func = deepcopy(newValue.m)
+                        self._value = Q(newValue.m())
                     self._updateFloatValue()
                     self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
+                else:
+                    self.func = self._returnVal
+                    if newValue != self._value or forceUpdate:
+                        self._value = newValue
+                        self._updateFloatValue()
+                        self.valueChanged.emit(self.name, self._value, self._string, 'recalculate')
 
     def __hash__(self):
         return hash(self._value)

@@ -20,7 +20,7 @@ from modules.PyqtUtility import BlockSignals
 from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs#, ExprFuncSignals
 from expressionFunctions.UserFunctions import constLookup, localFunctions
 from inspect import isfunction
 import importlib
@@ -431,9 +431,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
             analyzer = CodeAnalyzer()
             analyzer.visit(top)
             upd_func_list = analyzer.upd_funcs
-            print(upd_func_list)
             for fname in upd_func_list:
-                #ExprFunUpdate.dataChanged.emit('__exprfunc__')
                 ExprFunUpdate.dataChanged.emit(fname)
             self.statusLabel.setText("Successfully updated {0} at {1}".format(self.script.fullname.name, str(datetime.now())))
             self.statusLabel.setStyleSheet('color: green')
