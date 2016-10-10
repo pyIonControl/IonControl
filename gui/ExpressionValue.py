@@ -102,7 +102,8 @@ class ExpressionValue(QtCore.QObject):
             val, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
             if callable(val.m):
                 self.func = deepcopy(val.m)
-                if any('NamedTraceDict' in key for key in val.m.__code__.co_names):
+                if any('NamedTraceDict' in key for key in val.m.__code__.co_names) or \
+                   'NamedTrace' in val.m.__code__.co_names:
                     dependencies.add('__namedtrace__')
                     if trc.NamedTraceDict: #hold off if function depends on NamedTraceDict and NamedTraces haven't been loaded
                         self._value = Q(val.m())
@@ -111,6 +112,12 @@ class ExpressionValue(QtCore.QObject):
             else:
                 self._value = val
                 self.func = self._returnVal
+                for dep in dependencies:
+                    if dep in trc.ExpressionFunctions:
+                        if 'NamedTrace' in trc.ExpressionFunctions[dep].__code__.co_names or \
+                                any('NamedTraceDict' in key for key in trc.ExpressionFunctions[dep].__code__.co_names):
+                            dependencies.add('__namedtrace__')
+                            break
             self._updateFloatValue()
             self.dependencies = copy(dependencies)
             for dep in dependencies:
@@ -135,8 +142,6 @@ class ExpressionValue(QtCore.QObject):
         if self._globalDict is None:
             raise ExpressionValueException("Global dictionary is not set in {0}".format(self.name))
         if name is None or name in self.dependencies:
-            if name is not None:
-                print("Updating: ", name)
             if self._string:
                 newValue  = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
                 if callable(newValue.m):
