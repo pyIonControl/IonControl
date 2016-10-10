@@ -54,8 +54,8 @@ class Script(QtCore.QThread):
     setScanSignal = QtCore.pyqtSignal(str) #arg: scan name
     setEvaluationSignal = QtCore.pyqtSignal(str) #arg: evaluation name
     setAnalysisSignal = QtCore.pyqtSignal(str) #arg: analysis name
-    plotPointSignal = QtCore.pyqtSignal(float, float, str, int) #args: x, y, tracename
-    plotListSignal = QtCore.pyqtSignal(list, list, str, bool, int) #args: xList, yList, tracename, overwrite
+    plotPointSignal = QtCore.pyqtSignal(float, float, str, int) #args: x, y, tracename, plotStyle
+    plotListSignal = QtCore.pyqtSignal(list, list, str, bool, int) #args: xList, yList, tracename, overwrite, plotStyle
     addPlotSignal = QtCore.pyqtSignal(str) #arg: plot name
     abortScanSignal = QtCore.pyqtSignal()
     createTraceSignal = QtCore.pyqtSignal(list) #arg: trace creation data

@@ -887,7 +887,7 @@ class PulseProgramSetUi(QtWidgets.QDialog):
         self.tabWidget = QtWidgets.QTabWidget(parent)
         self.horizontalLayout.addWidget(self.tabWidget)
         self.setWindowTitle('Pulse Program')
-        self.setWindowFlags(QtCore.Qt.WindowMinMaxButtonsHint)
+        self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint | QtCore.Qt.WindowMinMaxButtonsHint)
         self.setWindowIcon(QtGui.QIcon(":/petersIcons/icons/pulser1.png"))
 
     def addExperiment(self, experiment, globalDict=dict(), globalVariablesChanged=None):
