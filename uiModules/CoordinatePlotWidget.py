@@ -16,7 +16,7 @@ from pyqtgraph.graphicsItems.LabelItem import LabelItem
 from pyqtgraph.graphicsItems.ButtonItem import ButtonItem
 from pyqtgraph.graphicsItems.PlotItem.PlotItem import PlotItem
 from pyqtgraph.graphicsItems.ViewBox import ViewBox
-from PyQt5 import QtWidgets, QtCore
+from PyQt5 import QtWidgets, QtCore, QtGui
 import math
 import numpy
 from modules.round import roundToNDigits
@@ -202,14 +202,73 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self.mousePoint = None
         self.mousePointList = list()
         self._graphicsView.showGrid(x = True, y = True, alpha = grid_opacity) #grid defaults to on
+
+        # add option to set plot title to pyqtgraph's Plot Options context menu
+        titleMenu = QtWidgets.QMenu(self._graphicsView.ctrlMenu)
+        titleMenu.setTitle("Set Title")
+        tlbl = QtWidgets.QLabel('Title:', self)
+        thbox = QtWidgets.QHBoxLayout()
+        titleMenuItem = QtGui.QWidgetAction(self._graphicsView.vb.menu.axes[0])
+        titleWidget = QtWidgets.QLineEdit()
+        titleWidget.textEdited.connect(self.onSetTitle)
+        thbox.addWidget(tlbl)
+        thbox.addWidget(titleWidget)
+        twidgetContainer = QtWidgets.QWidget()
+        twidgetContainer.setLayout(thbox)
+        titleMenuItem.setDefaultWidget(twidgetContainer)
+        titleMenu.addAction(titleMenuItem)
+        self._graphicsView.ctrlMenu.titleMenuItem = titleMenuItem
+        self._graphicsView.ctrlMenu.titleWidget = titleWidget
+        self._graphicsView.ctrlMenu.addMenu(titleMenu)
+
+        # modify pyqtgraph's X Axis context menu to allow for changes in xlabel
+        xlbl = QtWidgets.QLabel('xLabel:', self)
+        xhbox = QtWidgets.QHBoxLayout()
+        xlabelMenuItem = QtGui.QWidgetAction(self._graphicsView.vb.menu.axes[0])
+        xlabelWidget = QtWidgets.QLineEdit()
+        xlabelWidget.textEdited.connect(self.onRelabelXAxis)
+        xhbox.addWidget(xlbl)
+        xhbox.addWidget(xlabelWidget)
+        xwidgetContainer = QtWidgets.QWidget()
+        xwidgetContainer.setLayout(xhbox)
+        xlabelMenuItem.setDefaultWidget(xwidgetContainer)
+        self._graphicsView.vb.menu.axes[0].addAction(xlabelMenuItem)
+        self._graphicsView.vb.menu.axes[0].xlabelMenuItem = xlabelMenuItem
+        self._graphicsView.vb.menu.axes[0].xlabelWidget = xlabelWidget
+
+        # modify pyqtgraph's Y Axis context menu to allow for changes in ylabel
+        ylbl = QtWidgets.QLabel('yLabel:', self)
+        yhbox = QtWidgets.QHBoxLayout()
+        ylabelMenuItem = QtGui.QWidgetAction(self._graphicsView.vb.menu.axes[0])
+        ylabelWidget = QtWidgets.QLineEdit()
+        ylabelWidget.textEdited.connect(self.onRelabelYAxis)
+        yhbox.addWidget(ylbl)
+        yhbox.addWidget(ylabelWidget)
+        ywidgetContainer = QtWidgets.QWidget()
+        ywidgetContainer.setLayout(yhbox)
+        ylabelMenuItem.setDefaultWidget(ywidgetContainer)
+        self._graphicsView.vb.menu.axes[1].addAction(ylabelMenuItem)
+        self._graphicsView.vb.menu.axes[1].ylabelMenuItem = ylabelMenuItem
+        self._graphicsView.vb.menu.axes[1].ylabelWidget = ylabelWidget
+
         action = QtWidgets.QAction("toggle time axis", self._graphicsView.ctrlMenu)
         action.triggered.connect( self.onToggleTimeAxis )
         self._graphicsView.ctrlMenu.addAction(action)
         self.timeAxis = False
-        
+
+
     def onToggleTimeAxis(self):
         self.setTimeAxis( not self.timeAxis )
-        
+
+    def onSetTitle(self, title):
+        self._graphicsView.setTitle(title)
+
+    def onRelabelXAxis(self, xlabel):
+        self._graphicsView.setLabel('bottom', text = "{0}".format(xlabel))
+
+    def onRelabelYAxis(self, ylabel):
+        self._graphicsView.setLabel('left', text = "{0}".format(ylabel))
+
     def setTimeAxis(self, timeAxis=False):
         if timeAxis:
             dateAxisItem = DateAxisItem(orientation='bottom') 
