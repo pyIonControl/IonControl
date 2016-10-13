@@ -41,13 +41,14 @@ class ExpressionValue(QtCore.QObject):
         return self.name, self._string, self._value
     
     def __setstate__(self, state):
-        self.__init__( state[0] )
+        self.__init__(state[0])
         self._string = state[1]
         self._value = state[2]
         self._updateFloatValue()
 
     def __eq__(self, other):
-        return other is not None and isinstance(other, ExpressionValue) and (self.name, self._string, self._value) == (other.name, other._string, other._value)
+        return other is not None and isinstance(other, ExpressionValue) and \
+               (self.name, self._string, self._value) == (other.name, other._string, other._value)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -127,7 +128,6 @@ class ExpressionValue(QtCore.QObject):
 
     @property
     def hasDependency(self):
-        #return self._string is not None
         return len(self.registrations)>0
     
     @property
@@ -145,7 +145,8 @@ class ExpressionValue(QtCore.QObject):
             if self._string:
                 newValue  = self.expression.evaluateAsMagnitude(self._string, self._globalDict)
                 if callable(newValue.m):
-                    if not (not trc.NamedTraceDict and '__namedtrace__' in (dep[0] for dep in self.registrations)):
+                    if not (not trc.NamedTraceDict and ('__namedtrace__' in (dep[0] for dep in self.registrations)
+                                                            or '_NT_' in (dep[0] for dep in self.registrations))):
                         self.func = deepcopy(newValue.m)
                         self._value = Q(newValue.m())
                     self._updateFloatValue()

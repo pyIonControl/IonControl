@@ -10,7 +10,8 @@ from modules.quantity import is_Q, Q
 from collections import deque, MutableMapping
 import xml.etree.ElementTree as ElementTree
 from modules.MagnitudeParser import parse
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, NamedTraceUpdate, SystemExprFuncs, UserExprFuncs#, ExprFuncSignals
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, NamedTraceUpdate, SystemExprFuncs, \
+                                                  UserExprFuncs, NamedTraceDict
 import time
 
 class GlobalVariablesException(Exception):
@@ -128,6 +129,6 @@ class GlobalVariablesLookup(MutableMapping):
     def valueChanged(self, key):
         if key in UserExprFuncs or key in SystemExprFuncs:
             return ExprFunUpdate.dataChanged
-        elif key == '__namedtrace__':
+        elif key == '__namedtrace__' or '_NT_' in key or key in NamedTraceDict:
             return NamedTraceUpdate.dataChanged
         return self.globalDict[key].valueChanged

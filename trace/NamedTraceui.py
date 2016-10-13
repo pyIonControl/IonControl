@@ -309,16 +309,18 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
            change the default file list to maintain settings after software is reloaded"""
         if self.newDataAvailable:
             if keys == set():
-                self.onSave(saveCopy=True)
+                _, updatedNodes = self.onSave(saveCopy=True, returnTraceNodeNames=True)
+                for node in updatedNodes:
+                    trc.NamedTraceUpdate.dataChanged.emit('_NT_'+node)
             else:
                 for k in keys:
                     tc = self.model.nodeDict[k].children[0].content.traceCollection
                     tc.save(tc._fileType, saveCopy=True)
+                    trc.NamedTraceUpdate.dataChanged.emit('_NT_'+k.split('_'))
             self.settings.filelist = []
             for k,v in self.model.nodeDict.items():
                 if v.parent is not None and v.nodeType == 0:
                     self.settings.filelist.append(self.model.nodeDict[k].children[0].content.traceCollection.filename)
-            trc.NamedTraceUpdate.dataChanged.emit('__namedtrace__')
         self.newDataAvailable = False
 
     def updateExternally(self, topNode, child, row, data, col, saveEvery=False):

@@ -7,7 +7,7 @@
 3rd generation of Expression, used for parsing arithmetic, units and custom functions in combo boxes
 this version uses PLY and is modeled off of http://www.dabeaz.com/ply/example.html
 """
-
+import inspect
 import math
 from collections import ChainMap
 
@@ -16,7 +16,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 import expressionFunctions.UserFunctions as UserFunctions
-from expressionFunctions.ExprFuncDecorator import ExpressionFunctions
+from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc
 from modules.quantity import Q, is_Q
 
 
@@ -182,15 +182,30 @@ class Parser:
             t[0] = self.functionCM[t[1]](*t[3], **t[5])
             if t[1] in ExpressionFunctions:
                 self.dependencies.add(t[1])
+                self.getNTDeps(t[1], *t[3], **t[5])
         elif len(t) == 5:
             if type(t[3]) is dict:
                 t[0] = self.functionCM[t[1]](**t[3])
                 if t[1] in ExpressionFunctions:
                     self.dependencies.add(t[1])
+                    self.getNTDeps(t[1], **t[3])
             else:
                 t[0] = self.functionCM[t[1]](*t[3])
                 if t[1] in ExpressionFunctions:
                     self.dependencies.add(t[1])
+                    self.getNTDeps(t[1], *t[3])
+
+    def getNTDeps(self, key, *args, **kwargs):
+        if isinstance(self.functionCM[key], userfunc):
+            if self.functionCM[key].deps:
+                fn = self.functionCM[key]
+                for d in fn.deps:
+                    if d[1] == 'str':
+                        self.dependencies.add('_NT_'+d[2].split('_')[0])
+                    elif d[1] == 'arg':
+                        boundSig = fn.sig.bind(*args, **kwargs)
+                        boundSig.apply_defaults()
+                        self.dependencies.add('_NT_'+boundSig.arguments[d[2][0]])
 
     def p_expression_name(self, t):
         'expression : NAME'

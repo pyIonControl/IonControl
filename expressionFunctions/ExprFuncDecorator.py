@@ -6,11 +6,12 @@
 import logging
 from modules.DataChanged import DataChangedS
 from collections import ChainMap
-import functools
+import ast
+import inspect
+from .UserFuncASTWalker import CodeAnalyzer
 
 SystemExprFuncs = dict()
 UserExprFuncs = dict()
-#ExpressionFunctions = dict()
 ExpressionFunctions = ChainMap(UserExprFuncs, SystemExprFuncs)
 NamedTraceDict = dict()
 ExprFunUpdate = DataChangedS()
@@ -53,10 +54,25 @@ def NamedTrace(*args, col='y'):
         return NamedTraceDict[tracename].content.x[Line]
     return NamedTraceDict[tracename].content.y[Line]
 
-def userfunc(wrapped):
-    fname = wrapped.__name__
-    g = wrapped.__globals__
-    g['NamedTrace'] = NamedTrace
-    UserExprFuncs[fname] = wrapped
-    return wrapped
+class userfunc:
+    def __init__(self, func):
+        self.__name__ = func.__name__
+        self._default = func
+        self.__doc__ = func.__doc__
+        self.__code__ = func.__code__
+        self.__globals__ = func.__globals__
+        g = self.__globals__
+        g['NamedTrace'] = NamedTrace
+        self.deps = self.findDeps()
+        self.sig = inspect.signature(func)
+        UserExprFuncs[func.__name__] = self
+
+    def findDeps(self):
+        top = ast.parse(inspect.getsource(self._default))
+        analyzer = CodeAnalyzer()
+        analyzer.walkNode(top)
+        return analyzer.ntvar
+
+    def __call__(self, *args, **kwargs):
+        return self._default(*args, **kwargs)
 

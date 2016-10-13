@@ -20,7 +20,7 @@ from modules.PyqtUtility import BlockSignals
 from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs#, ExprFuncSignals
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs, NamedTraceDict#, ExprFuncSignals
 from expressionFunctions.UserFunctions import constLookup, localFunctions
 from inspect import isfunction
 import importlib
