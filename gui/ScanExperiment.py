@@ -17,9 +17,11 @@ from datetime import datetime, timedelta
 import functools
 import logging
 import time
+from pathlib import Path
 
 import itertools
 
+from modules.InkscapeConversion import addPdfMetaData
 from persist.StringTable import DataStore
 from trace import Traceui
 from trace import NamedTraceui
@@ -864,11 +866,19 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 painter = QtGui.QPainter(pdfPrinter)
                 widget.render( painter )
                 del painter
-        
+        filenames = set()
+        for nodeDict in [self.namedTraceui.model.nodeDict, self.traceui.model.nodeDict]:
+            for nname, node in nodeDict.items():
+                if isinstance(node.content, PlottedTrace):
+                    if node.content.windowName == target:
+                        if node.content.isPlotted:
+                            if node.content.traceCollection.saved:
+                                filenames.add(str(Path(node.content.traceCollection.filename)))
         with SceneToPrint(widget, 1, 1):
             exporter = SVGExporter(widget._graphicsView.scene())
             emfFilename = DataDirectory.DataDirectory().sequencefile(target+".svg")[0]
-            exporter.export(fileName = emfFilename)
+            exporter.export(fileName=emfFilename)
+            InkscapeConversion.addSvgMetaData(emfFilename, filenames)
             if preferences.exportEmf:
                 if os.path.exists(preferences.inkscapeExecutable):
                     InkscapeConversion.convertSvgEmf(preferences.inkscapeExecutable, emfFilename)
@@ -876,7 +886,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
             if preferences.exportPdf:
                 if os.path.exists(preferences.inkscapeExecutable):
-                    InkscapeConversion.convertSvgPdf(preferences.inkscapeExecutable, emfFilename)
+                    InkscapeConversion.convertSvgPdf(preferences.inkscapeExecutable, emfFilename, filenames)
                 else:
                     logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
         # create an exporter instance, as an argument give it

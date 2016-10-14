@@ -29,6 +29,7 @@ from modules.doProfile import doprofile
 import subprocess
 from pathlib import Path
 import ctypes
+from modules.InkscapeConversion import getPdfMetaData, getSvgMetaData
 from functools import reduce
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
@@ -406,7 +407,18 @@ class TraceuiMixin:
         fnames, _ = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open files', self.settings.lastDir)
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             for fname in fnames:
-                self.openFile(fname)
+                if Path(fname).suffix == '.pdf':
+                    pdfnames = getPdfMetaData(fname)
+                    if pdfnames:
+                        for pdfname in pdfnames:
+                            self.openFile(pdfname)
+                elif Path(fname).suffix == '.svg':
+                    svgnames = getSvgMetaData(fname)
+                    if svgnames:
+                        for svgname in svgnames:
+                            self.openFile(svgname)
+                else:
+                    self.openFile(fname)
 
     def openFile(self, filename, defaultpen=-1):
         filename = str(filename)
