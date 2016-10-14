@@ -32,8 +32,11 @@ def addPdfMetaData(pdfname, outname, filenames):
 def getPdfMetaData(pdfname):
     pdf = PdfReader(pdfname)
     kw = pdf.Info.Keywords
-    kwlist = kw[1:-1].splitlines()
-    return kwlist
+    if kw is not None:
+        kwlist = kw[1:-1].splitlines()
+        return kwlist
+    else:
+        return []
 
 def addSvgMetaData(svgname, filenames):
     ln = 0
