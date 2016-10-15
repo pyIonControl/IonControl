@@ -56,16 +56,17 @@ def NamedTrace(*args, col='y'):
 
 class userfunc:
     def __init__(self, func):
-        self.__name__ = func.__name__
+        self.setMissingAttributes(func)
         self._default = func
-        self.__doc__ = func.__doc__
-        self.__code__ = func.__code__
-        self.__globals__ = func.__globals__
-        g = self.__globals__
-        g['NamedTrace'] = NamedTrace
+        self.__globals__['NamedTrace'] = NamedTrace
         self.deps = self.findDeps()
         self.sig = inspect.signature(func)
         UserExprFuncs[func.__name__] = self
+
+    def setMissingAttributes(self, func):
+        attrlist = set(dir(func))-set(dir(self))
+        for attr in attrlist:
+            setattr(self, attr, getattr(func, attr))
 
     def findDeps(self):
         top = ast.parse(inspect.getsource(self._default))

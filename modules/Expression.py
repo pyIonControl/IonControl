@@ -205,7 +205,7 @@ class Parser:
                     elif d[1] == 'arg':
                         boundSig = fn.sig.bind(*args, **kwargs)
                         boundSig.apply_defaults()
-                        self.dependencies.add('_NT_'+boundSig.arguments[d[2][0]])
+                        self.dependencies.add('_NT_'+boundSig.arguments[d[2][0]].split('_')[0])
 
     def p_expression_name(self, t):
         'expression : NAME'
