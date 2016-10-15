@@ -64,7 +64,8 @@ class userfunc:
         UserExprFuncs[func.__name__] = self
 
     def setMissingAttributes(self, func):
-        attrlist = set(dir(func))-set(dir(self))
+        overwrittenAttrs = {'__doc__'}
+        attrlist = set(dir(func)) - set(dir(self)) | overwrittenAttrs
         for attr in attrlist:
             setattr(self, attr, getattr(func, attr))
 
