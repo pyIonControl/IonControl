@@ -30,7 +30,7 @@ from gui.ExpressionValue import ExpressionValue
 import copy
 from modules.Utility import unique
 from gui.FileTree import ensurePath, onExpandOrCollapse, FileTreeMixin, OptionsWindow, OrderedList
-from expressionFunctions.UserFuncASTWalker import CodeAnalyzer
+from expressionFunctions.UserFuncASTWalker import UserFuncAnalyzer
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/UserFunctionsEditor.ui')
 EditorWidget, EditorBase = PyQt5.uic.loadUiType(uipath)
@@ -428,7 +428,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
             importlib.machinery.SourceFileLoader("UserFunctions", str(self.script.fullname)).load_module()
             self.tableModel.updateData()
             top = ast.parse(self.script.fullname.read_text())
-            analyzer = CodeAnalyzer()
+            analyzer = UserFuncAnalyzer()
             analyzer.visit(top)
             upd_func_list = analyzer.upd_funcs
             for fname in upd_func_list:

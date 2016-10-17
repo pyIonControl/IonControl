@@ -17,6 +17,7 @@ from modules.Expression import Expression
 from modules.Observable import Observable
 from modules.quantity import Q
 from leastsqbound import leastsqbound
+from modules.DataChanged import DataChangedS
 
 
 class FitFunctionException(Exception):
@@ -39,15 +40,17 @@ class ResultRecord(object):
     def __hash__(self):
         return hash(tuple(getattr(self, field) for field in self.stateFields))
     
-fitFunctionMap = dict()    
-   
+fitFunctionMap = dict()
+fitFunUpdate = DataChangedS()
+
 class FitFunctionMeta(type):
     def __new__(self, name, bases, dct):
         if 'name' not in dct:
             raise FitFunctionException("Fitfunction class needs to have class attribute 'name'")
         instrclass = super(FitFunctionMeta, self).__new__(self, name, bases, dct)
         if name!='FitFunctionBase':
-            fitFunctionMap[dct['name']] = instrclass
+            fitFunctionMap[str(dct['name'])] = instrclass
+            fitFunUpdate.dataChanged.emit(str(dct['name']))
         return instrclass
     
 def native(method):

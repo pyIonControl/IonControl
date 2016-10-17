@@ -8,7 +8,7 @@ from modules.DataChanged import DataChangedS
 from collections import ChainMap
 import ast
 import inspect
-from .UserFuncASTWalker import CodeAnalyzer
+from .UserFuncASTWalker import UserFuncAnalyzer
 
 SystemExprFuncs = dict()
 UserExprFuncs = dict()
@@ -71,7 +71,7 @@ class userfunc:
 
     def findDeps(self):
         top = ast.parse(inspect.getsource(self._default))
-        analyzer = CodeAnalyzer()
+        analyzer = UserFuncAnalyzer()
         analyzer.walkNode(top)
         return analyzer.ntvar
 

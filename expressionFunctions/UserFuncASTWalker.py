@@ -5,7 +5,7 @@
 # *****************************************************************
 import ast
 
-class CodeAnalyzer(ast.NodeTransformer):
+class UserFuncAnalyzer(ast.NodeTransformer):
     def __init__(self):
         self.upd_funcs = set()
         self.varnames = set()
@@ -13,8 +13,11 @@ class CodeAnalyzer(ast.NodeTransformer):
 
     def visit_FunctionDef(self, node):
         if len(node.decorator_list):
-            if 'userfunc' in map(lambda x: x.id, node.decorator_list):
-                self.upd_funcs.add(node.name)
+            try:
+                if 'userfunc' in map(lambda x: x.id, node.decorator_list):
+                    self.upd_funcs.add(node.name)
+            except:
+                pass
 
     def visit_Name(self, node):
         if isinstance(node.ctx, ast.Load):
@@ -51,4 +54,22 @@ class CodeAnalyzer(ast.NodeTransformer):
                                 self.ntvar.add((node.name, 'str', item.value.args[0].s))
                             else:
                                 self.ntvar.add((node.name, 'arg', item.value.args[0].id))
+
+class FitFuncAnalyzer(ast.NodeTransformer):
+    def __init__(self):
+        self.retlines = set()
+        self.declist = list()
+
+    def visit_Return(self, node):
+        self.retlines.add(node.lineno)
+
+    def visit_FunctionDef(self, node):
+        if len(node.decorator_list):
+            for dec in node.decorator_list:
+                if isinstance(dec, ast.Attribute):
+                    self.declist.append(dec.value.id)
+                if isinstance(dec, ast.Call):
+                    if hasattr(dec, 'func'):
+                        self.declist.append(dec.func.value.id)
+
 

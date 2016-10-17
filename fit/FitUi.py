@@ -9,7 +9,7 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
-from fit.FitFunctionBase import fitFunctionMap
+from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate
 from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitUiTableModel import FitUiTableModel
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
@@ -62,6 +62,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.reloadButton.clicked.connect( self.onLoadAnalysis )
         self.fitSelectionComboBox.addItems( sorted(fitFunctionMap.keys()) )
         self.fitSelectionComboBox.currentIndexChanged[str].connect( self.onFitfunctionChanged )
+        fitFunUpdate.dataChanged.connect(self.onFitFunctionsUpdated)
         self.fitfunctionTableModel = FitUiTableModel(self.config)
         self.fitfunctionTableModel.parametersChanged.connect( self.autoSave )
         self.parameterTableView.setModel(self.fitfunctionTableModel)
@@ -79,7 +80,8 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if lastAnalysisName and lastAnalysisName in self.analysisDefinitions:
             self.analysisNameComboBox.setCurrentIndex( self.analysisNameComboBox.findText(lastAnalysisName))
         try:
-            fitfunction = self.config.get(self.configname+"LastFitfunction", None)
+            #fitfunction = self.config.get(self.configname+"LastFitfunction", None)
+            fitfunction = fitFunctionMap[lastAnalysisName]()
         except Exception:
             fitfunction = None
         if fitfunction:
@@ -120,11 +122,26 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if self.fitfunction:
             self.fitfunctionCache[self.fitfunction.name] = self.fitfunction
         if name in self.fitfunctionCache:
-            self.setFitfunction( self.fitfunctionCache[name] )
+            self.setFitfunction(self.fitfunctionCache[name])
         else:
-            self.setFitfunction( fitFunctionMap[name]() )
+            self.fitfunctionCache[name] = fitFunctionMap[name]() #self.fitfunction
+            self.setFitfunction(self.fitfunctionCache[name])
+            #self.setFitfunction( fitFunctionMap[name]() )
         self.autoSave()
-        
+
+    def onFitFunctionsUpdated(self, name):
+        self.fitfunctionCache[name] = fitFunctionMap[name]()
+        with BlockSignals(self.fitSelectionComboBox) as cmb:
+            currenttext = cmb.currentText()
+            updatedind = cmb.findText(name)
+            if updatedind != -1:
+                cmb.removeItem(updatedind)
+            cmb.addItem(name)
+            revertind = cmb.findText(currenttext)
+            cmb.setCurrentIndex(revertind)
+            if currenttext in self.fitfunctionCache:
+                self.setFitfunction(self.fitfunctionCache[currenttext])
+
     def setFitfunction(self, fitfunction):
         self.fitfunction = fitfunction
         self.fitfunctionTableModel.setFitfunction(self.fitfunction)
@@ -187,7 +204,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
         logger.debug( "onExtractFit {0} plots selected".format(len(plots) ) )
         if plots:
             plot = plots[0]
-            self.setFitfunction( copy.deepcopy(plot.fitFunction))
+            self.setFitfunction(copy.deepcopy(plot.fitFunction))
             self.fitSelectionComboBox.setCurrentIndex( self.fitSelectionComboBox.findText(self.fitfunction.name))
     
     def onCopy(self):
@@ -197,10 +214,10 @@ class FitUi(fitForm, QtWidgets.QWidget):
     def saveConfig(self):
         if self.fitfunction is not None:
             self.fitfunctionCache[self.fitfunction.name] = self.fitfunction
-        self.config[self.configname+"FitfunctionCache"] = self.fitfunctionCache
+        #self.config[self.configname+"FitfunctionCache"] = self.fitfunctionCache
         self.config[self.configname+"AnalysisDefinitions"] = self.analysisDefinitions
         self.config[self.configname+"LastAnalysis"] = str(self.analysisNameComboBox.currentText()) 
-        self.config[self.configname+"LastFitfunction"] = self.fitfunction
+        self.config[self.configname+"LastFitfunction"] = self.fitfunction.name
         self.config[self.configname+".Parameters"] = self.parameters
         self.config[self.configname+".guiState"] = saveGuiState( self )
                 
