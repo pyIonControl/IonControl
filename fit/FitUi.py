@@ -9,7 +9,7 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
-from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate
+from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate, fitFunctionParameterDict
 from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitUiTableModel import FitUiTableModel
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
@@ -17,6 +17,7 @@ from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.PyqtUtility import BlockSignals
 from modules.GuiAppearance import restoreGuiState, saveGuiState   #@UnresolvedImport
 from fit.StoredFitFunction import StoredFitFunction               #@UnresolvedImport
+import collections
 
 import os
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/FitUi.ui')
@@ -25,9 +26,11 @@ fitForm, fitBase = PyQt5.uic.loadUiType(uipath)
 
 class Parameters(AttributeComparisonEquality):
     def __init__(self):
-        self.autoSave = False       
+        self.autoSave = False
 
-            
+Tree = lambda: collections.defaultdict(Tree)
+Tree = collections.defaultdict(None)
+
 class FitUi(fitForm, QtWidgets.QWidget):
     analysisNamesChanged = QtCore.pyqtSignal(object)
     def __init__(self, traceui, config, parentname, globalDict=None, parent=None):
@@ -39,13 +42,23 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.traceui = traceui
         self.configname = "FitUi.{0}.".format(parentname)
         try:
-            self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
+            #self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
+            #fitFunctionParameterDict = self.config.get(self.configname+"FitfunctionCache", dict() )
+            #self.fitfunctionCache = fitFunctionParameterDict
+            self.fitfunctionCache = dict()
         except Exception:
             self.fitfunctionCache = dict()
+            #self.fitfunctionCache = fitFunctionParameterDict
         try:
             self.analysisDefinitions = self.config.get(self.configname+"AnalysisDefinitions", dict())
+            #if not isinstance(self.analysisDefinitions, collections.defaultdict):
+                #self.analysisDefinitions = Tree
+                #self.initializeAnalysisDefinitions('Default')
         except Exception:
+            #print('Analysis Definitions not loaded')
             self.analysisDefinitions = dict()
+            #self.initializeAnalysisDefinitions('Default')
+        #self.initializeAnalysisDefinitions('Default')
         self.parameters = self.config.get(self.configname+".Parameters", Parameters())
         self.globalDict = globalDict
             
@@ -80,13 +93,18 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if lastAnalysisName and lastAnalysisName in self.analysisDefinitions:
             self.analysisNameComboBox.setCurrentIndex( self.analysisNameComboBox.findText(lastAnalysisName))
         try:
-            #fitfunction = self.config.get(self.configname+"LastFitfunction", None)
-            fitfunction = fitFunctionMap[lastAnalysisName]()
+            fitfunction = self.config.get(self.configname+"LastFitfunction", None)
+            #fitfunction = fitFunctionMap[lastAnalysisName]()
         except Exception:
             fitfunction = None
         if fitfunction:
-            self.setFitfunction( fitfunction )
-            self.fitSelectionComboBox.setCurrentIndex( self.fitSelectionComboBox.findText(self.fitfunction.name) )
+            if isinstance(fitfunction, str):
+                if fitfunction in fitFunctionMap.keys():
+                    self.setFitfunction(fitFunctionMap[fitfunction]())
+                    self.fitSelectionComboBox.setCurrentIndex(self.fitSelectionComboBox.findText(self.fitfunction.name))
+            else:
+                self.setFitfunction(fitfunction)
+                self.fitSelectionComboBox.setCurrentIndex(self.fitSelectionComboBox.findText(self.fitfunction.name))
         self.checkBoxUseSmartStartValues.stateChanged.connect( self.onUseSmartStartValues )
         self.useErrorBarsCheckBox.stateChanged.connect( self.onUseErrorBars )
         # Context Menu
@@ -144,6 +162,33 @@ class FitUi(fitForm, QtWidgets.QWidget):
 
     def setFitfunction(self, fitfunction):
         self.fitfunction = fitfunction
+        #aname = self.analysisNameComboBox.currentText()
+        #if aname in self.analysisDefinitions.keys() and self.fitfunction.name in self.analysisDefinitions[aname].keys():
+        if self.fitfunction.name in self.analysisDefinitions.keys():
+            for field in StoredFitFunction.stateFields:
+                setattr(self.fitfunction, field, getattr(self.analysisDefinitions[self.fitfunction.name], field))
+            #instance = cls( name=None, fitfunctionName=fitfunctionName )
+        #instance.startParameters = tuple(fitfunction.startParameters)
+        #instance.parameterEnabled = tuple(fitfunction.parameterEnabled)
+        #instance.startParameterExpressions = tuple(fitfunction.startParameterExpressions) if fitfunction.startParameterExpressions is not None else tuple([None]*len(fitfunction.startParameters))
+        #instance.parameters = fitFunctionParameterDict.get(fitfunctionName, fitfunction.parameters)
+        #instance.parametersConfidence = tuple(fitfunction.parametersConfidence)
+        #instance.useSmartStartValues = fitfunction.useSmartStartValues
+        #instance.useErrorBars = fitfunction.useErrorBars
+        #for result in list(fitfunction.results.values()):
+            #instance.results[result.name] = ResultRecord(name=result.name, definition=result.definition, value=result.value)
+        #instance.parameterBounds = tuple( (tuple(bound) for bound in fitfunction.parameterBounds) ) if fitfunction.parameterBounds else  tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
+        #instance.parameterBoundsExpressions = tuple( (tuple(bound) for bound in fitfunction.parameterBoundsExpressions) ) if fitfunction.parameterBoundsExpressions else tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
+        #return instance
+
+        #stateFields = ['name', 'fitfunctionName', 'startParameters', 'parameterEnabled', 'results', 'useSmartStartValues', 'startParameterExpressions', 'parameters', 'parametersConfidence',
+                   #'parameterBounds', 'parameterBoundsExpressions', 'useErrorBars']
+        #
+
+        #self.analysisDefinitions[name] = definition
+        #if self.fitfunction.name in fitFunctionParameterDict.keys() and \
+                        #fitFunctionParameterDict[self.fitfunction.name] is not None:
+            #self.fitfunction.parameters = fitFunctionParameterDict[self.fitfunction.name]
         self.fitfunctionTableModel.setFitfunction(self.fitfunction)
         self.fitResultsTableModel.setFitfunction(self.fitfunction)
         self.descriptionLabel.setText( self.fitfunction.functionString )
@@ -215,7 +260,9 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if self.fitfunction is not None:
             self.fitfunctionCache[self.fitfunction.name] = self.fitfunction
         #self.config[self.configname+"FitfunctionCache"] = self.fitfunctionCache
-        self.config[self.configname+"AnalysisDefinitions"] = self.analysisDefinitions
+        #self.config[self.configname+"FitfunctionCache"] = fitFunctionParameterDict
+        self.config[self.configname+"FitfunctionCache"] = dict()
+        self.config[self.configname+"AnalysisDefinitions"] = copy.deepcopy(self.analysisDefinitions)
         self.config[self.configname+"LastAnalysis"] = str(self.analysisNameComboBox.currentText()) 
         self.config[self.configname+"LastFitfunction"] = self.fitfunction.name
         self.config[self.configname+".Parameters"] = self.parameters

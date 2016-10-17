@@ -41,6 +41,7 @@ class ResultRecord(object):
         return hash(tuple(getattr(self, field) for field in self.stateFields))
     
 fitFunctionMap = dict()
+fitFunctionParameterDict = dict()
 fitFunUpdate = DataChangedS()
 
 class FitFunctionMeta(type):
@@ -50,6 +51,9 @@ class FitFunctionMeta(type):
         instrclass = super(FitFunctionMeta, self).__new__(self, name, bases, dct)
         if name!='FitFunctionBase':
             fitFunctionMap[str(dct['name'])] = instrclass
+            #globals()[str(dct['name'])] = instrclass
+            if str(dct['name']) not in fitFunctionParameterDict.keys():
+                fitFunctionParameterDict[str(dct['name'])] = dct.get('parameters', None)
             fitFunUpdate.dataChanged.emit(str(dct['name']))
         return instrclass
     
