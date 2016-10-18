@@ -39,8 +39,14 @@ if sys.platform.startswith('win'):
             if os.path.exists(r'C:\Program Files (x86)'):
                 lib_directory = r'C:\Program Files (x86)\IVI Foundation\VISA\WinNT\Bin'
                 lib_directory += "\\"
-        
+
     lib_name = "niSync"
+
+    # if the DLL is not found, try the Windows\System32 directory (works on Windows 10 x64)
+    if not os.path.isfile(os.path.join(lib_directory,lib_name+'.dll')):
+        lib_directory = r'C:\Windows\System32'
+        if not os.path.isfile(os.path.join(lib_directory, lib_name + '.dll')):
+            raise FileNotFoundError
 
 else:
     raise NotImplementedError("Location of niSync library unknown on %s." % (sys.platform))
