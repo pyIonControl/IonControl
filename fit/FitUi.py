@@ -9,7 +9,7 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
-from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate, fitFunctionParameterDict
+from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate
 from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitUiTableModel import FitUiTableModel
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
@@ -28,9 +28,6 @@ class Parameters(AttributeComparisonEquality):
     def __init__(self):
         self.autoSave = False
 
-Tree = lambda: collections.defaultdict(Tree)
-Tree = collections.defaultdict(None)
-
 class FitUi(fitForm, QtWidgets.QWidget):
     analysisNamesChanged = QtCore.pyqtSignal(object)
     def __init__(self, traceui, config, parentname, globalDict=None, parent=None):
@@ -42,23 +39,19 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.traceui = traceui
         self.configname = "FitUi.{0}.".format(parentname)
         try:
-            #self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
-            #fitFunctionParameterDict = self.config.get(self.configname+"FitfunctionCache", dict() )
-            #self.fitfunctionCache = fitFunctionParameterDict
-            self.fitfunctionCache = dict()
+            self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
         except Exception:
             self.fitfunctionCache = dict()
-            #self.fitfunctionCache = fitFunctionParameterDict
         try:
             self.analysisDefinitions = self.config.get(self.configname+"AnalysisDefinitions", dict())
-            #if not isinstance(self.analysisDefinitions, collections.defaultdict):
-                #self.analysisDefinitions = Tree
-                #self.initializeAnalysisDefinitions('Default')
         except Exception:
-            #print('Analysis Definitions not loaded')
             self.analysisDefinitions = dict()
-            #self.initializeAnalysisDefinitions('Default')
-        #self.initializeAnalysisDefinitions('Default')
+        try:
+            self.parameterDefinitions = self.config.get(self.configname+"parameterDefinitions", dict())
+        except Exception:
+            self.parameterDefinitions = dict()
+        if self.fitfunctionCache:
+            self.initializeParameterDefs()
         self.parameters = self.config.get(self.configname+".Parameters", Parameters())
         self.globalDict = globalDict
             
@@ -89,12 +82,11 @@ class FitUi(fitForm, QtWidgets.QWidget):
         # Analysis stuff
         lastAnalysisName = self.config.get(self.configname+"LastAnalysis", None)
         self.analysisNameComboBox.addItems( list(self.analysisDefinitions.keys()) )
-        self.analysisNameComboBox.currentIndexChanged[str].connect( self.onLoadAnalysis )
+        self.analysisNameComboBox.currentTextChanged[str].connect( self.onLoadAnalysis )
         if lastAnalysisName and lastAnalysisName in self.analysisDefinitions:
             self.analysisNameComboBox.setCurrentIndex( self.analysisNameComboBox.findText(lastAnalysisName))
         try:
             fitfunction = self.config.get(self.configname+"LastFitfunction", None)
-            #fitfunction = fitFunctionMap[lastAnalysisName]()
         except Exception:
             fitfunction = None
         if fitfunction:
@@ -135,16 +127,16 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.fitfunction.useErrorBars = state==QtCore.Qt.Checked
         self.autoSave()
 
-    def onFitfunctionChanged(self, name):
+    def onFitfunctionChanged(self, name, reload=False):
         name = str(name)
-        if self.fitfunction:
+        if self.fitfunction and not reload:
             self.fitfunctionCache[self.fitfunction.name] = self.fitfunction
         if name in self.fitfunctionCache:
             self.setFitfunction(self.fitfunctionCache[name])
         else:
-            self.fitfunctionCache[name] = fitFunctionMap[name]() #self.fitfunction
+            self.fitfunctionCache[name] = fitFunctionMap[name]()
             self.setFitfunction(self.fitfunctionCache[name])
-            #self.setFitfunction( fitFunctionMap[name]() )
+        self.analysisNameComboBox.setCurrentText('')
         self.autoSave()
 
     def onFitFunctionsUpdated(self, name):
@@ -154,20 +146,31 @@ class FitUi(fitForm, QtWidgets.QWidget):
             if updatedind != -1:
                 cmb.removeItem(updatedind)
             if name in fitFunctionMap.keys():
-                self.fitfunctionCache[name] = fitFunctionMap[name]()
                 cmb.addItem(name)
-            elif name in self.fitfunctionCache.keys():
+            if name in self.fitfunctionCache.keys():
                 del self.fitfunctionCache[name]
-            revertind = cmb.findText(currenttext)
+            if currenttext:
+                revertind = cmb.findText(currenttext)
+            else:
+                revertind = cmb.findText(self.fitfunction.name)
+                currenttext = self.fitfunction.name
+            if revertind == -1:
+                revertind = cmb.findText(name)
+                currenttext = name
             cmb.setCurrentIndex(revertind)
-            if currenttext in self.fitfunctionCache:
-                self.setFitfunction(self.fitfunctionCache[currenttext])
+            if currenttext in fitFunctionMap.keys():
+                self.onFitfunctionChanged(currenttext, True)
 
-    def setFitfunction(self, fitfunction):
+    def setFitfunction(self, fitfunction, applyParamDef=True):
         self.fitfunction = fitfunction
-        if self.fitfunction.name in self.analysisDefinitions.keys():
-            for field in StoredFitFunction.stateFields:
-                setattr(self.fitfunction, field, getattr(self.analysisDefinitions[self.fitfunction.name], field))
+        if applyParamDef:
+            if self.fitfunction.name in self.parameterDefinitions.keys():
+                for field in StoredFitFunction.stateFields:
+                    try:
+                        if field != 'name' and field != 'results':
+                            setattr(self.fitfunction, field, getattr(self.parameterDefinitions[self.fitfunction.name], field))
+                    except:
+                        continue
         self.fitfunctionTableModel.setFitfunction(self.fitfunction)
         self.fitResultsTableModel.setFitfunction(self.fitfunction)
         self.descriptionLabel.setText( self.fitfunction.functionString )
@@ -238,8 +241,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
     def saveConfig(self):
         if self.fitfunction is not None:
             self.fitfunctionCache[self.fitfunction.name] = self.fitfunction
-        #self.config[self.configname+"FitfunctionCache"] = self.fitfunctionCache
-        #self.config[self.configname+"FitfunctionCache"] = fitFunctionParameterDict
+        self.config[self.configname+"parameterDefinitions"] = self.parameterDefinitions
         self.config[self.configname+"FitfunctionCache"] = dict()
         self.config[self.configname+"AnalysisDefinitions"] = copy.deepcopy(self.analysisDefinitions)
         self.config[self.configname+"LastAnalysis"] = str(self.analysisNameComboBox.currentText()) 
@@ -258,6 +260,8 @@ class FitUi(fitForm, QtWidgets.QWidget):
 
     def onSaveAnalysis(self):
         name = str(self.analysisNameComboBox.currentText())
+        pdefinition = StoredFitFunction.fromFitfunction(self.fitfunction)
+        self.parameterDefinitions[pdefinition.fitfunctionName] = pdefinition
         if name:
             definition = StoredFitFunction.fromFitfunction(self.fitfunction)
             definition.name = name
@@ -270,6 +274,8 @@ class FitUi(fitForm, QtWidgets.QWidget):
             self.saveButton.setEnabled( False )
         
     def autoSave(self):
+        pdefinition = StoredFitFunction.fromFitfunction(self.fitfunction)
+        self.parameterDefinitions[pdefinition.fitfunctionName] = pdefinition
         if self.parameters.autoSave:
             self.onSaveAnalysis()
             self.saveButton.setEnabled( False )
@@ -280,14 +286,16 @@ class FitUi(fitForm, QtWidgets.QWidget):
         name = str(self.analysisNameComboBox.currentText())       
         definition = StoredFitFunction.fromFitfunction(self.fitfunction)
         definition.name = name
-        return name != '' and ( name not in self.analysisDefinitions or not (self.analysisDefinitions[name] == definition) )             
+        return name != '' and ( name not in self.analysisDefinitions or not (self.analysisDefinitions[name] == definition) )
                        
     def onLoadAnalysis(self, name=None):
         name = str(name) if name is not None else str(self.analysisNameComboBox.currentText())
         if name in self.analysisDefinitions:
+            self.analysisDefinitions
             if StoredFitFunction.fromFitfunction(self.fitfunction) != self.analysisDefinitions[name]:
-                self.setFitfunction( self.analysisDefinitions[name].fitfunction() )
-        
+                self.setFitfunction(self.analysisDefinitions[name].fitfunction(), False)
+                self.analysisNameComboBox.setCurrentText(name)
+
     def analysisNames(self):
         return list(self.analysisDefinitions.keys())
     
@@ -298,4 +306,10 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.fitfunction.evaluate( self.globalDict )
         self.fitfunctionTableModel.update()
         self.parameterTableView.viewport().repaint()
-            
+
+    def initializeParameterDefs(self):
+        for k, v in self.fitfunctionCache.items():
+            definition = StoredFitFunction.fromFitfunction(self.fitfunctionCache[k])
+            definition.name = k
+            self.parameterDefinitions[k] = definition
+
