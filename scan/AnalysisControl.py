@@ -24,6 +24,8 @@ from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitFunctionBase import fitFunctionMap
 from fit.StoredFitFunction import StoredFitFunction                #@UnresolvedImport
 from modules.PyqtUtility import BlockSignals, Override, updateComboBoxItems
+from itertools import cycle
+from modules.flatten import flattenAll
 
 import os
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/AnalysisControl.ui')
@@ -408,7 +410,7 @@ class AnalysisControl(ControlForm, ControlBase ):
         if self.currentEvaluation is not None:
             plot = self.plottedTraceDict.get( self.currentEvaluation.evaluation )
             fitfunction = copy.deepcopy(self.fitfunction)
-            fitfunction.parameters = [float(param) for param in fitfunction.startParameters]
+            fitfunction.parameters = [float(param) if unit is None else param.m_as(unit) for unit, param in zip(cycle(flattenAll([fitfunction.units])), fitfunction.startParameters)]
             plot.fitFunction = fitfunction
             plot.plot(-2)
             fitfunction.update()

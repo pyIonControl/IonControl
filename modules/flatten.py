@@ -15,7 +15,7 @@ def flatten(listOfLists):
 def flattenAll(l):
     for el in l:
         if isinstance(el, collections.Iterable) and not isinstance(el, str):
-            for sub in flatten(el):
+            for sub in flattenAll(el):
                 yield sub
         else:
             yield el
