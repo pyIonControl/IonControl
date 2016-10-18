@@ -17,7 +17,7 @@ from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.PyqtUtility import BlockSignals
 from modules.GuiAppearance import restoreGuiState, saveGuiState   #@UnresolvedImport
 from fit.StoredFitFunction import StoredFitFunction               #@UnresolvedImport
-import collections
+from itertools import cycle
 
 import os
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/FitUi.ui')
@@ -215,7 +215,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
     def onPlot(self):
         for plot in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             fitfunction = copy.deepcopy(self.fitfunction)
-            fitfunction.parameters = [float(param) for param in fitfunction.startParameters]
+            fitfunction.parameters = [float(param) if unit is None else param.m_as(unit) for unit, param in zip(cycle(fitfunction.units if isinstance(fitfunction.units, list) else [fitfunction.units]), fitfunction.startParameters)]
             plot.fitFunction = fitfunction
             plot.plot(-2)
             fitfunction.update()

@@ -10,7 +10,7 @@ from scipy.special import genlaguerre
 
 from .FitFunctionBase import ResultRecord
 from fit.FitFunctionBase import FitFunctionBase
-from modules.quantity import Q
+from modules.quantity import Q, is_Q
 import logging
 from functools import lru_cache
 
@@ -70,22 +70,30 @@ class MotionalRabiFlopping(FitFunctionBase):
     def update(self,parameters=None):
         A, n, omega, mass, angle, trapFrequency, wavelength, delta_n = self.parameters if parameters is None else parameters #@UnusedVariable
         m = mass * constants.m_p
-        secfreq = trapFrequency*10**6
-        eta = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
-                     * sqrt(constants.hbar/(2*m*2*pi*secfreq)) )
+        if not is_Q(trapFrequency):
+            trapFrequency = Q(trapFrequency, 'MHz')
+        if not is_Q(wavelength):
+            wavelength = Q(wavelength, 'nm')
+        secfreq = trapFrequency.m_as('Hz')
+        eta = (2 * pi / wavelength.m_as('m') * cos(angle * pi / 180)
+               * sqrt(constants.hbar / (2 * m * 2 * pi * secfreq)))
         self.results['eta'] = ResultRecord( name='eta', value=eta )
                
     def updateTables(self, nBar):
-        A, n, omega, mass, angle, trapFrequency, wavelength, delta_n = self.parameters #@UnusedVariable
-        secfreq = trapFrequency.m_as('Hz') * 10**6
+        _, _, _, mass, angle, trapFrequency, wavelength, delta_n = self.parameters #@UnusedVariable
+        if not is_Q(trapFrequency):
+            trapFrequency = Q(trapFrequency, 'MHz')
+        if not is_Q(wavelength):
+            wavelength = Q(wavelength, 'nm')
+        secfreq = trapFrequency.m_as('Hz')
         m = mass * constants.m_p
-        eta = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
-                     * sqrt(constants.hbar/(2*m*2*pi*secfreq)) )
+        eta = (2 * pi / wavelength.m_as('m') * cos(angle * pi / 180)
+               * sqrt(constants.hbar / (2 * m * 2 * pi * secfreq)))
         self.laguerreTable = laguerreTable(eta, delta_n)
         self.pnTable = probabilityTable(nBar)
             
     def residuals(self, p, y, x, sigma):
-        A, n, omega, mass, angle, trapFrequency, wavelength, delta_n = self.allFitParameters(self.parameters if p is None else p) #@UnusedVariable
+        A, n, omega, _, _, _, _, _ = self.allFitParameters(self.parameters if p is None else p) #@UnusedVariable
         self.updateTables(n)
         if hasattr(x, '__iter__'):
             result = list()
