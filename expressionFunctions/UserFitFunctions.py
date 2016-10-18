@@ -7,14 +7,17 @@ import sys
 from expressionFunctions.UserFuncASTWalker import FitFuncAnalyzer
 from fit.FitFunctionBase import FitFunctionBase, ResultRecord, fitFunctionMap
 #import fit.FitFunctionBase
-from functools import wraps
+from functools import wraps, partial
 
 class fitfunc:
-    def __init__(self, func):
+    def __init__(self, func):#=None, *, name=None):
+        #if func is None:
+            #return partial(self.__init__, name=name)
         self.fitfunc = func
-        self.ndefs = self.getOccurences(func)
+        self.ndefs = 0#self.getOccurences(func)
         self._functionString = None
         self._name = None
+        self.origin = func.__name__
         self.parameterNames = self.getFuncParameters(func)
         self.smartStartFunc = lambda *args: tuple([0]*len(self.parameterNames))
         self.resultDict = dict()
@@ -30,6 +33,7 @@ class fitfunc:
         functionString = self.getFuncDesc(func)
         parameterNames = self.parameterNames
         parameters = [0]*self.nparams
+        origin = self.origin
         slots = []
 
         def __init__(cls):
@@ -60,7 +64,8 @@ class fitfunc:
                      functionEval=functionEval,
                      parameterNames=parameterNames,
                      functionString=functionString,
-                     parameters=parameters)
+                     parameters=parameters,
+                     origin=origin)
 
         if self.smartstartEnabled:
             attrs.update(dict(smartStartValues=smartStartValues))

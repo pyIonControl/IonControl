@@ -18,6 +18,7 @@ from modules.Observable import Observable
 from modules.quantity import Q
 from leastsqbound import leastsqbound
 from modules.DataChanged import DataChangedS
+import collections
 
 
 class FitFunctionException(Exception):
@@ -44,16 +45,42 @@ fitFunctionMap = dict()
 fitFunctionParameterDict = dict()
 fitFunUpdate = DataChangedS()
 
+#class UniqueOriginDict(collections.UserDict):
+    ##def __missing__(self, key):
+        ##raise KeyError(key)
+    ##return self[str(key)]
+   #origins = dict()
+#
+    #def __setitem__(self, key, item):
+        #if 'origin' in item.keys():
+            #if item['origin'] in self.origins:
+                #del self.origins[item['origin']]
+            #else:
+                #self.origins.append(item['origin'])
+        #for k, v in vars(item).items():
+            #if k == 'origin':
+                #if origins
+        #self.data[key] = item
+
 class FitFunctionMeta(type):
     def __new__(self, name, bases, dct):
         if 'name' not in dct:
             raise FitFunctionException("Fitfunction class needs to have class attribute 'name'")
         instrclass = super(FitFunctionMeta, self).__new__(self, name, bases, dct)
         if name!='FitFunctionBase':
+#            if 'origin' in dct.keys():
+                #for k, v in fitFunctionMap.items():
+                    #if 'origin' in v.__dict__ and v.origin == str(dct['origin']):
+                        #del fitFunctionMap[k]
+                        #break
             fitFunctionMap[str(dct['name'])] = instrclass
             #globals()[str(dct['name'])] = instrclass
-            if str(dct['name']) not in fitFunctionParameterDict.keys():
-                fitFunctionParameterDict[str(dct['name'])] = dct.get('parameters', None)
+#            if str(dct['name']) not in fitFunctionParameterDict.keys():
+                #fitFunctionParameterDict[str(dct['name'])] = dct.get('parameters', None)
+            if 'origin' in dct.keys() and dct['name'] != dct['origin'] and dct['origin'] in fitFunctionMap.keys():
+                print('deleting:', str(dct['origin']))
+                del fitFunctionMap[str(dct['origin'])]
+                fitFunUpdate.dataChanged.emit(str(dct['origin']))
             fitFunUpdate.dataChanged.emit(str(dct['name']))
         return instrclass
     

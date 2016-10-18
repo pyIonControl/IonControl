@@ -148,13 +148,16 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.autoSave()
 
     def onFitFunctionsUpdated(self, name):
-        self.fitfunctionCache[name] = fitFunctionMap[name]()
         with BlockSignals(self.fitSelectionComboBox) as cmb:
             currenttext = cmb.currentText()
             updatedind = cmb.findText(name)
             if updatedind != -1:
                 cmb.removeItem(updatedind)
-            cmb.addItem(name)
+            if name in fitFunctionMap.keys():
+                self.fitfunctionCache[name] = fitFunctionMap[name]()
+                cmb.addItem(name)
+            elif name in self.fitfunctionCache.keys():
+                del self.fitfunctionCache[name]
             revertind = cmb.findText(currenttext)
             cmb.setCurrentIndex(revertind)
             if currenttext in self.fitfunctionCache:
@@ -162,33 +165,9 @@ class FitUi(fitForm, QtWidgets.QWidget):
 
     def setFitfunction(self, fitfunction):
         self.fitfunction = fitfunction
-        #aname = self.analysisNameComboBox.currentText()
-        #if aname in self.analysisDefinitions.keys() and self.fitfunction.name in self.analysisDefinitions[aname].keys():
         if self.fitfunction.name in self.analysisDefinitions.keys():
             for field in StoredFitFunction.stateFields:
                 setattr(self.fitfunction, field, getattr(self.analysisDefinitions[self.fitfunction.name], field))
-            #instance = cls( name=None, fitfunctionName=fitfunctionName )
-        #instance.startParameters = tuple(fitfunction.startParameters)
-        #instance.parameterEnabled = tuple(fitfunction.parameterEnabled)
-        #instance.startParameterExpressions = tuple(fitfunction.startParameterExpressions) if fitfunction.startParameterExpressions is not None else tuple([None]*len(fitfunction.startParameters))
-        #instance.parameters = fitFunctionParameterDict.get(fitfunctionName, fitfunction.parameters)
-        #instance.parametersConfidence = tuple(fitfunction.parametersConfidence)
-        #instance.useSmartStartValues = fitfunction.useSmartStartValues
-        #instance.useErrorBars = fitfunction.useErrorBars
-        #for result in list(fitfunction.results.values()):
-            #instance.results[result.name] = ResultRecord(name=result.name, definition=result.definition, value=result.value)
-        #instance.parameterBounds = tuple( (tuple(bound) for bound in fitfunction.parameterBounds) ) if fitfunction.parameterBounds else  tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
-        #instance.parameterBoundsExpressions = tuple( (tuple(bound) for bound in fitfunction.parameterBoundsExpressions) ) if fitfunction.parameterBoundsExpressions else tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
-        #return instance
-
-        #stateFields = ['name', 'fitfunctionName', 'startParameters', 'parameterEnabled', 'results', 'useSmartStartValues', 'startParameterExpressions', 'parameters', 'parametersConfidence',
-                   #'parameterBounds', 'parameterBoundsExpressions', 'useErrorBars']
-        #
-
-        #self.analysisDefinitions[name] = definition
-        #if self.fitfunction.name in fitFunctionParameterDict.keys() and \
-                        #fitFunctionParameterDict[self.fitfunction.name] is not None:
-            #self.fitfunction.parameters = fitFunctionParameterDict[self.fitfunction.name]
         self.fitfunctionTableModel.setFitfunction(self.fitfunction)
         self.fitResultsTableModel.setFitfunction(self.fitfunction)
         self.descriptionLabel.setText( self.fitfunction.functionString )
