@@ -70,7 +70,8 @@ class FitFuncAnalyzer(ast.NodeTransformer):
                     self.declist.append(dec.value.id)
                 if isinstance(dec, ast.Call):
                     if hasattr(dec, 'func'):
-                        self.declist.append(dec.func.value.id)
+                        if hasattr(dec.func, 'value'):
+                            self.declist.append(dec.func.value.id)
         self.generic_visit(node)
 
 

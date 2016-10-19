@@ -17,7 +17,7 @@ from modules.Expression import Expression
 from modules.Observable import Observable
 from modules.quantity import Q
 from leastsqbound import leastsqbound
-from modules.DataChanged import DataChangedS
+from modules.DataChanged import DataChanged
 import collections
 
 
@@ -41,7 +41,7 @@ class ResultRecord(object):
     def __hash__(self):
         return hash(tuple(getattr(self, field) for field in self.stateFields))
 
-fitFunUpdate = DataChangedS()
+fitFunUpdate = DataChanged()
 
 class UniqueOriginDict(collections.UserDict):
     """A custom dictionary for proper updating of user-defined fit functions"""
@@ -55,7 +55,7 @@ class UniqueOriginDict(collections.UserDict):
                 repname = self.origins[item.__dict__['origin']]
                 del self.origins[item.__dict__['origin']]
                 del self.data[repname]
-                fitFunUpdate.dataChanged.emit(repname)
+                fitFunUpdate.dataChanged.emit(repname, False)
             self.origins[item.__dict__['origin']] = key
         self.data[key] = item
 
@@ -68,7 +68,8 @@ class FitFunctionMeta(type):
         instrclass = super(FitFunctionMeta, self).__new__(self, name, bases, dct)
         if name!='FitFunctionBase':
             fitFunctionMap[str(dct['name'])] = instrclass
-            fitFunUpdate.dataChanged.emit(str(dct['name']))
+            overwriteParams = dct.get('overwrite', False)
+            fitFunUpdate.dataChanged.emit(str(dct['name']), overwriteParams)
         return instrclass
     
 def native(method):

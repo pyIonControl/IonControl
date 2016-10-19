@@ -6,32 +6,44 @@ import sys
 
 from expressionFunctions.UserFuncASTWalker import FitFuncAnalyzer
 from fit.FitFunctionBase import FitFunctionBase, ResultRecord, fitFunctionMap
-#import fit.FitFunctionBase
 from functools import wraps, partial
 
-class fitfunc:
-    def __init__(self, func):
+def fitfunc(func=None, *, name=None, description=None, parameterNames=None, units=None, enabledParameters=None,
+            parameterConfidence=None, overwriteDefaults=False):
+    """Delegate decorator for FitFunctionFactory. By defining a separate decorator function, decorator can be called
+       with or without optional arguments in order to simplify @fitfunc implementation on the user side. This separate
+       function is necessary because decorating with the FitFunctionFactory class directly requires a static number
+       of input arguments since __init__ must return None"""
+    if func is None:
+        return partial(fitfunc, name=name, description=description, parameterNames=parameterNames, units=units,
+                       enabledParameters=enabledParameters, parameterConfidence=parameterConfidence, overwriteDefaults=overwriteDefaults)
+    return FitFunctionFactory(name, description, parameterNames, units, enabledParameters, parameterConfidence, overwriteDefaults, func)
+
+class FitFunctionFactory:
+    def __init__(self, name, description, parameterNames, units, enabledParameters, parameterConfidence, overwrite, func):
         self.fitfunc = func
-        self.ndefs = 0#self.getOccurences(func)
-        self._functionString = None
-        self._name = None
+        self.ndefs = self.getOccurences(func)
+        self._functionString = description
+        self._name = name
         self.origin = func.__name__
-        self.parameterNames = self.getFuncParameters(func)
+        self.parameterNames = parameterNames
         self.smartStartFunc = lambda *args: tuple([0]*len(self.parameterNames))
         self.resultDict = dict()
-        self.nparams = len(self.parameterNames)
-        self.units = [None]*self.nparams
-        self._parameterEnabled = [True]*self.nparams
-        self.parametersConfidence = [None]*self.nparams
+        self.nparams = func.__code__.co_argcount-1
+        self.units = units if units is not None else [None]*self.nparams
+        self._parameterEnabled = enabledParameters if enabledParameters is not None else [True]*self.nparams
+        self.parametersConfidence = parameterConfidence if parameterConfidence is not None else [None]*self.nparams
         self.smartstartEnabled = False
+        self.overwrite = overwrite
         self.constructClass(self.fitfunc)
 
     def constructClass(self, func):
         name = self.getName(func)
         functionString = self.getFuncDesc(func)
-        parameterNames = self.parameterNames
+        parameterNames = self.parameterNames if self.parameterNames is not None else self.getFuncParameters(func)
         parameters = [0]*self.nparams
         origin = self.origin
+        overwrite = self.overwrite
         slots = []
 
         def __init__(cls):
@@ -62,7 +74,8 @@ class fitfunc:
                      parameterNames=parameterNames,
                      functionString=functionString,
                      parameters=parameters,
-                     origin=origin)
+                     origin=origin,
+                     overwrite=overwrite)
 
         if self.smartstartEnabled:
             attrs.update(dict(smartStartValues=smartStartValues))

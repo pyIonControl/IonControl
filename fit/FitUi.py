@@ -82,7 +82,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
         # Analysis stuff
         lastAnalysisName = self.config.get(self.configname+"LastAnalysis", None)
         self.analysisNameComboBox.addItems( list(self.analysisDefinitions.keys()) )
-        self.analysisNameComboBox.currentTextChanged[str].connect( self.onLoadAnalysis )
+        self.analysisNameComboBox.activated[str].connect( self.onLoadAnalysis )
         if lastAnalysisName and lastAnalysisName in self.analysisDefinitions:
             self.analysisNameComboBox.setCurrentIndex( self.analysisNameComboBox.findText(lastAnalysisName))
         try:
@@ -136,10 +136,12 @@ class FitUi(fitForm, QtWidgets.QWidget):
         else:
             self.fitfunctionCache[name] = fitFunctionMap[name]()
             self.setFitfunction(self.fitfunctionCache[name])
-        self.analysisNameComboBox.setCurrentText('')
         self.autoSave()
 
-    def onFitFunctionsUpdated(self, name):
+    def onFitFunctionsUpdated(self, name, overwrite=False):
+        if overwrite:
+            if name in self.parameterDefinitions.keys():
+                del self.parameterDefinitions[name]
         with BlockSignals(self.fitSelectionComboBox) as cmb:
             currenttext = cmb.currentText()
             updatedind = cmb.findText(name)
@@ -175,13 +177,16 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.fitResultsTableModel.setFitfunction(self.fitfunction)
         self.descriptionLabel.setText( self.fitfunction.functionString )
         if str(self.fitSelectionComboBox.currentText())!= self.fitfunction.name:
-            self.fitSelectionComboBox.setCurrentIndex(self.fitSelectionComboBox.findText(self.fitfunction.name))
+            with BlockSignals(self.fitSelectionComboBox):
+                self.fitSelectionComboBox.setCurrentIndex(self.fitSelectionComboBox.findText(self.fitfunction.name))
         self.fitfunction.useSmartStartValues = self.fitfunction.useSmartStartValues and self.fitfunction.hasSmartStart
         self.checkBoxUseSmartStartValues.setChecked( self.fitfunction.useSmartStartValues )
         self.checkBoxUseSmartStartValues.setEnabled( self.fitfunction.hasSmartStart )
         self.useErrorBarsCheckBox.setChecked( self.fitfunction.useErrorBars )
         self.evaluate()
-        
+        if applyParamDef:
+            self.analysisNameComboBox.setCurrentText('')
+
     def onGetSmartStart(self):
         for plot in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             smartParameters = self.fitfunction.enabledSmartStartValues(plot.x, plot.y, self.fitfunction.parameters)
@@ -291,10 +296,8 @@ class FitUi(fitForm, QtWidgets.QWidget):
     def onLoadAnalysis(self, name=None):
         name = str(name) if name is not None else str(self.analysisNameComboBox.currentText())
         if name in self.analysisDefinitions:
-            self.analysisDefinitions
             if StoredFitFunction.fromFitfunction(self.fitfunction) != self.analysisDefinitions[name]:
                 self.setFitfunction(self.analysisDefinitions[name].fitfunction(), False)
-                self.analysisNameComboBox.setCurrentText(name)
 
     def analysisNames(self):
         return list(self.analysisDefinitions.keys())
