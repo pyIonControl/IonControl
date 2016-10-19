@@ -41,7 +41,6 @@ class FitFunctionFactory:
         name = self.getName(func)
         functionString = self.getFuncDesc(func)
         parameterNames = self.parameterNames if self.parameterNames is not None else self.getFuncParameters(func)
-        parameters = [0]*self.nparams
         origin = self.origin
         overwrite = self.overwrite
         slots = []
@@ -50,8 +49,10 @@ class FitFunctionFactory:
             FitFunctionBase.__init__(cls)
             cls.resultDict = self.resultDict
             cls.units = self.units
+            cls.parameters = [0]*self.nparams
             cls.parameterEnabled = self.parameterEnabled
             cls.parametersConfidence = self.parametersConfidence
+            cls.startParameters = self.getDefaults(func)
             for resn, resd in cls.resultDict.items():
                 cls.results[resn] = ResultRecord(name=resn, definition=resd['def'])
 
@@ -73,7 +74,6 @@ class FitFunctionFactory:
                      functionEval=functionEval,
                      parameterNames=parameterNames,
                      functionString=functionString,
-                     parameters=parameters,
                      origin=origin,
                      overwrite=overwrite)
 
@@ -131,6 +131,10 @@ class FitFunctionFactory:
             return returnStatement.lstrip('return ').split('#')[0]
         else:
             return ""
+
+    def getDefaults(self, func):
+        sg = inspect.signature(func)
+        return list(map(lambda x: x.default if x.default is not inspect._empty else None, sg.parameters.values()))[1:]
 
     def getFuncParameters(self, func):
         return func.__code__.co_varnames[slice(1, func.__code__.co_argcount)]
