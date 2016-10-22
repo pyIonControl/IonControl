@@ -47,6 +47,7 @@ from pulser.PulserHardwareServer import PulserHardwareException
 from gui.FPGASettings import FPGASettings
 from gui.StashButton import StashButtonControl
 from expressionFunctions import UserFunctions
+from expressionFunctions.UserFuncImporter import userFuncLoader
 from ProjectConfig.Project import getProject
 from pathlib import Path
 import importlib
@@ -113,11 +114,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.voltageControlWindow = None
 
         localpath = getProject().configDir+'/UserFunctions/'
-        for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
-            try:
-                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
-            except SyntaxError as e:
-                SyntaxError('Failed to load {0}'.format(str(filename)))
+        userFuncLoader(localpath)
 
     def __enter__(self):
         self.pulser = PulserHardware()
@@ -453,11 +450,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
 
         # this is redundant in __init__ but this resolves issues with user-defined functions that reference NamedTraces
         localpath = getProject().configDir+'/UserFunctions/'
-        for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
-            try:
-                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
-            except SyntaxError as e:
-                SyntaxError('Failed to load {0}'.format(str(filename)))
+        userFuncLoader(localpath)
 
         # initialize NamedTraceUi
         self.userFunctionsEditor = UserFunctionsEditor(self, self.globalVariablesUi.globalDict)

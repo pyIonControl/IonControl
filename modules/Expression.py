@@ -16,7 +16,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 import expressionFunctions.UserFunctions as UserFunctions
-from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc
+from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc, UserFuncCls
 from modules.quantity import Q, is_Q
 
 
@@ -196,7 +196,7 @@ class Parser:
                     self.getNTDeps(t[1], *t[3])
 
     def getNTDeps(self, key, *args, **kwargs):
-        if isinstance(self.functionCM[key], userfunc):
+        if isinstance(self.functionCM[key], UserFuncCls):
             if self.functionCM[key].deps:
                 fn = self.functionCM[key]
                 for d in fn.deps:
@@ -205,7 +205,7 @@ class Parser:
                     elif d[1] == 'arg':
                         boundSig = fn.sig.bind(*args, **kwargs)
                         boundSig.apply_defaults()
-                        self.dependencies.add('_NT_'+boundSig.arguments[d[2][0]].split('_')[0])
+                        self.dependencies.add('_NT_'+boundSig.arguments[d[2]].split('_')[0])
 
     def p_expression_name(self, t):
         'expression : NAME'

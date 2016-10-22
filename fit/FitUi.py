@@ -9,6 +9,8 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
+#from trace.Traceui import traceFocus
+import trace
 from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate
 from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitUiTableModel import FitUiTableModel
@@ -30,13 +32,14 @@ class Parameters(AttributeComparisonEquality):
 
 class FitUi(fitForm, QtWidgets.QWidget):
     analysisNamesChanged = QtCore.pyqtSignal(object)
-    def __init__(self, traceui, config, parentname, globalDict=None, parent=None):
+    def __init__(self, traceui, config, parentname, globalDict=None, parent=None, namedtraceui=None):
         QtWidgets.QWidget.__init__(self, parent)
         fitForm.__init__(self)
         self.config = config
         self.parentname = parentname
         self.fitfunction = None
         self.traceui = traceui
+        self.namedtraceui = namedtraceui
         self.configname = "FitUi.{0}.".format(parentname)
         try:
             self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
@@ -195,7 +198,11 @@ class FitUi(fitForm, QtWidgets.QWidget):
         
     def onFit(self):
         """Fit the selected traces using the current fit settings"""
-        for plottedTrace in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
+        if trace.Traceui.traceFocus == 'namedtrace' and self.namedtraceui is not None:
+            focusui = self.namedtraceui
+        else:
+            focusui = self.traceui
+        for plottedTrace in focusui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             self.fit(plottedTrace)
 
     def fit(self, plottedTrace):
