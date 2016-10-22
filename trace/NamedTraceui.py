@@ -146,6 +146,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.highlightUnsaved = highlightUnsaved
         self.newDataAvailable = False
         self.plotsChangedSignal = plotsChangedSignal
+        self.classIndicator = 'namedtrace'
 
     def setupUi(self, *args):
         TraceuiForm.setupUi(self, *args)

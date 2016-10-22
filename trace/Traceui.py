@@ -35,6 +35,8 @@ from functools import reduce
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
 TraceuiForm, TraceuiBase = PyQt5.uic.loadUiType(uipath)
 
+traceFocus = None
+
 class Settings(AttributeComparisonEquality):
     """
     Class to hold Traceui settings
@@ -81,6 +83,7 @@ class TraceuiMixin:
         self.hasMeasurementLog = hasMeasurementLog
         self.highlightUnsaved = highlightUnsaved
         self.preferences = preferences #these are really print preferences used to find gnuplot path
+        self.classIndicator = 'trace'
 
     def setupUi(self, MainWindow):
         """Setup the UI. Create the model and the view. Connect all the buttons."""
@@ -295,6 +298,10 @@ class TraceuiMixin:
             return filename, parentids
         return filename
 
+    def updateFocus(self):
+        global traceFocus
+        traceFocus = self.classIndicator
+
     def onActiveTraceChanged(self):
         """Display trace creation/finalized date/time when a trace is selected"""
         nodes=self.traceView.selectedNodes()
@@ -396,6 +403,7 @@ class TraceuiMixin:
         
     def onViewClicked(self, index):
         """If one of the editable columns is clicked, begin to edit it."""
+        self.updateFocus()
         if self.model.isDataNode(index):
             if index.column() in [self.model.column.pen, self.model.column.window, self.model.column.comment]:
                 self.traceView.edit(index)
