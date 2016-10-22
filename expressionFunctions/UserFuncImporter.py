@@ -22,5 +22,4 @@ def userFuncLoader(ParentPath):
             runpy.run_path(str(ppath), globs)
         except SyntaxError as e:
             logger.error('Failed to load {0}, because {1}'.format(str(ppath), e))
-            #print('Failed to load {0}, because {1}'.format(str(ppath), e))
 
