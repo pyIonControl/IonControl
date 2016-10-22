@@ -831,6 +831,7 @@ class AutoLoad(UiForm, UiBase):
         self.trappingTime = firstNotNone(self.loadingHistory.lastEvent().trappingTime, now())
         self.timerNullTime = self.trappingTime
         self.trappingTime = self.trappingTime
+        self.numFailedAutoload = 0
         # self.checkStarted = self.trappingTime
         self.ionReappeared.emit()
 
