@@ -235,21 +235,20 @@ class AutoLoad(UiForm, UiBase):
         self.wavemeterAvailable = wavemeterHardwareSetting.get('enabled', False) and bool(self.wavemeterAddress)
         logging.getLogger(__name__).info("Wavemeter URI: {0} {1}".format(self.wavemeterAddress, "available" if self.wavemeterAvailable else "not available"))
 
-
     def constructStatemachine(self):
         self.statemachine = Statemachine('AutoLoad', now=now )
-        self.statemachine.addState( 'Idle' , self.setIdle, self.exitIdle )
-        self.statemachine.addState( 'Preheat', self.setPreheat )
-        self.statemachine.addState( 'Load', self.setLoad )
-        self.statemachine.addState( 'PeriodicCheck', self.setPeriodicCheck )
-        self.statemachine.addState( 'Check', self.setCheck )
-        self.statemachine.addState( 'Trapped', self.setTrapped, self.exitTrapped )
-        self.statemachine.addState( 'Frozen', self.setFrozen )
-        self.statemachine.addState( 'WaitingForComeback', self.setWaitingForComeback )
-        self.statemachine.addState( 'AutoReloadFailed', self.setAutoReloadFailed )
-        self.statemachine.addState( 'PostSequenceWait', self.setPostSequenceWait )
-        self.statemachine.addState('BeyondThreshold', self.setBeyondThreshold)
-        self.statemachine.addState('Dump', self.setDump)
+        self.statemachine.addState('Idle', self.setIdle, self.exitIdle)
+        self.statemachine.addState('Preheat', self.setPreheat, needsConfirmation=True)
+        self.statemachine.addState('Load', self.setLoad, needsConfirmation=True)
+        self.statemachine.addState('PeriodicCheck', self.setPeriodicCheck, needsConfirmation=True)
+        self.statemachine.addState('Check', self.setCheck, needsConfirmation=True)
+        self.statemachine.addState('Trapped', self.setTrapped, self.exitTrapped, needsConfirmation=True)
+        self.statemachine.addState('Frozen', self.setFrozen, needsConfirmation=True)
+        self.statemachine.addState('WaitingForComeback', self.setWaitingForComeback, needsConfirmation=True)
+        self.statemachine.addState('AutoReloadFailed', self.setAutoReloadFailed, needsConfirmation=True)
+        self.statemachine.addState('PostSequenceWait', self.setPostSequenceWait, needsConfirmation=True)
+        self.statemachine.addState('BeyondThreshold', self.setBeyondThreshold, needsConfirmation=True)
+        self.statemachine.addState('Dump', self.setDump, needsConfirmation=True)
 
         self.statemachine.addTransitionList( 'startButton', ['Idle', 'AutoReloadFailed'], 'Preheat',
                                          description="startButton" )
@@ -735,7 +734,6 @@ class AutoLoad(UiForm, UiBase):
                               self.shutterUi.dataContainer[0], self.pulser,
                               self.voltageControl)
         self.revertRecord = newrevert
-        # self.externalInstrumentObservable( lambda: self.statemachine.processEvent('doneAdjusting') )
 
     def setIdle(self):
         """Execute when the loading process is set to idle. Disable timer, do not
@@ -758,6 +756,7 @@ class AutoLoad(UiForm, UiBase):
     def setPreheat(self):
         """Execute when the loading process begins. Turn on timer, turn on oven."""
         self.changeSettings('Preheat')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:red; }")
@@ -770,6 +769,7 @@ class AutoLoad(UiForm, UiBase):
         """Execute after preheating. Turn on ionization laser, and begin
            monitoring count rate."""
         self.changeSettings('Load')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:purple; }")
@@ -778,6 +778,7 @@ class AutoLoad(UiForm, UiBase):
     def setPeriodicCheck(self):
         """Execute when periodicly checking for an ion."""
         self.changeSettings('PeriodicCheck')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:darkCyan; }")
@@ -786,6 +787,7 @@ class AutoLoad(UiForm, UiBase):
     def setCheck(self):
         """Execute when count rate goes over threshold."""
         self.changeSettings('Check')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:blue; }")
@@ -794,14 +796,17 @@ class AutoLoad(UiForm, UiBase):
 
     def setPostSequenceWait(self):
         self.changeSettings('PostSequenceWait')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Waiting after sequence finished.")
 
     def setBeyondThreshold(self):
         self.changeSettings('BeyondThreshold')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Too many ions, waiting to make sure.")
 
     def setDump(self):
         self.changeSettings('Dump')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Too many ions, dumping the trap.")
 
     def loadingToTrapped(self, check,trapped):
@@ -818,6 +823,7 @@ class AutoLoad(UiForm, UiBase):
 
     def setTrapped(self):
         self.changeSettings('Trapped')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:green; }")
@@ -838,6 +844,7 @@ class AutoLoad(UiForm, UiBase):
 
     def setFrozen(self):
         self.changeSettings( 'Frozen')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( False )
         self.stopButton.setEnabled( False )
         self.elapsedLabel.setStyleSheet("QLabel { color:grey; }")
@@ -845,11 +852,13 @@ class AutoLoad(UiForm, UiBase):
 
     def setWaitingForComeback(self):
         self.changeSettings( 'WaitingForComeback')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Waiting to see if ion comes back")
         self.timerNullTime = now()
 
     def setAutoReloadFailed(self):
         self.changeSettings( 'AutoReloadFailed')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.timer = None

@@ -9,9 +9,7 @@ from datetime import datetime
 import logging
 from modules.quantity import Q
 import networkx as nx
-# import pygraphviz
-from networkx.drawing.nx_agraph import to_agraph
-
+from functools import partial
 
 def timedeltaToMagnitude(timedelta):
     return Q((timedelta).total_seconds(), 's')
@@ -22,7 +20,8 @@ class StatemachineException(Exception):
 
 
 class State(object):
-    def __init__(self, name, enterfunc=None, exitfunc=None, now=None, enterObservable=None, exitObservable=None):
+    def __init__(self, name, enterfunc=None, exitfunc=None, now=None, enterObservable=None, exitObservable=None,
+                 needsConfirmation=False):
         self.name = name
         self.enterfunc = enterfunc
         self.exitfunc = exitfunc
@@ -31,6 +30,7 @@ class State(object):
         self.enterObservable = enterObservable
         self.exitObservable = exitObservable
         self.now = now if now is not None else datetime.now
+        self.needsConfirmation = needsConfirmation
         
     def enterState(self):
         logging.getLogger(__name__).log(25, "Entering state {0}".format(self.name))
@@ -72,6 +72,7 @@ class Statemachine:
         self.stateGroups = dict()
         self.stateGroupLookup = defaultdict( set )
         self.currentState = None
+        self.currentStateReached = True
         self.graph = nx.MultiDiGraph()
         self.name=name
         self.now = now if now is not None else datetime.now 
@@ -82,8 +83,8 @@ class Statemachine:
         self.currentState = state
         # self.generateDiagram()
                 
-    def addState(self, name, enterfunc=None, exitfunc=None):
-        self.states[name] = State( name, enterfunc, exitfunc, now=self.now )
+    def addState(self, name, enterfunc=None, exitfunc=None, needsConfirmation=False):
+        self.states[name] = State( name, enterfunc, exitfunc, now=self.now, needsConfirmation=needsConfirmation)
         self.graph.add_node(name)
         
     def addStateGroup(self, name, states, enterfunc=None, exitfunc=None ):
@@ -99,7 +100,7 @@ class Statemachine:
         
     def addTransitionList(self, eventType, fromstates, tostate, condition=None, description=None):
         for state in fromstates:
-            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description))            
+            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description))
         
     def addTransitionObj(self, eventType, transition):
         if transition.fromstate not in self.states:
@@ -130,6 +131,7 @@ class Statemachine:
         transition.transitionState(fromStateObj, toStateObj)
         for stategroup in enteredStateGroups:
             stategroup.enterState()
+        self.currentStateReached = not toStateObj.needsConfirmation
         toStateObj.enterState()
         if toStateObj.enterObservable is None:
             self._makeTransition_enter(transition)
@@ -141,12 +143,16 @@ class Statemachine:
         logging.getLogger(__name__).debug("Now in state {0}".format(self.currentState))
         
     def processEvent(self, eventType, *args, **kwargs ):
-        for thistransition in self.transitions[(eventType, self.currentState)]:
-            if thistransition.condition( self.states[self.currentState], *args, **kwargs ):
-                logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
-                self.makeTransition( thistransition )
-                break
-        return self.currentState
+        if self.currentStateReached:
+            for thistransition in self.transitions[(eventType, self.currentState)]:
+                if thistransition.condition( self.states[self.currentState], *args, **kwargs ):
+                    logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
+                    self.makeTransition( thistransition )
+                    break
+            return self.currentState
+
+    def confirmStateReached(self):
+        self.currentStateReached = True
                 
     # def generateDiagram(self):
     #     try:
