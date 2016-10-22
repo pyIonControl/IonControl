@@ -34,6 +34,15 @@ def value(q, unit=None):
     raise ValueError("no defined value for {0} in units '{1}'".format(q, unit))
 
 
+def chop(q, unit=None):
+    if not is_Q(q):
+        return q
+    try:
+        return q.m_as(unit)
+    except Exception:
+        return q.m
+
+
 def mag_unit(q):
     return q.m, "{:~}".format(q.units)
 

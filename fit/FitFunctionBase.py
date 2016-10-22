@@ -4,7 +4,7 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 
-from itertools import zip_longest
+from itertools import zip_longest, cycle
 import logging
 from math import sqrt
 
@@ -97,12 +97,12 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
         """return a list where the disabled parameters are added to the enabled parameters given in p"""
         pindex = 0
         params = list()
-        for index, enabled in enumerate(self.parameterEnabled):
+        for index, (unit, enabled) in enumerate(zip(cycle(self.units if isinstance(self.units, list) else [self.units]), self.parameterEnabled)):
             if enabled:
                 params.append(p[pindex])
                 pindex += 1
             else:
-                params.append(float(self.startParameters[index]))
+                params.append(float(self.startParameters[index]) if unit is None else self.startParameters[index].m_as(unit))
         return params
     
     @staticmethod
@@ -123,9 +123,9 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
                 if enabled:
                     params.append(self.coercedValue(float(param), bounds))
         else:
-            for enabled, param in zip(self.parameterEnabled, parameters):
+            for enabled, unit, param in zip(self.parameterEnabled, cycle(self.units if isinstance(self.units, list) else [self.units]), parameters):
                 if enabled:
-                    params.append(float(param))
+                    params.append(float(param) if unit is None else param.m_as(unit))
         return params
 
     def enabledFitParameters(self, parameters=None):
@@ -149,12 +149,12 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
     def setEnabledFitParameters(self, parameters):
         """set the fitted parameters if enabled"""
         pindex = 0
-        for index, enabled in enumerate(self.parameterEnabled):
+        for index, (unit, enabled) in enumerate(zip(cycle(self.units if isinstance(self.units, list) else [self.units]), self.parameterEnabled)):
             if enabled:
                 self.parameters[index] = parameters[pindex]
                 pindex += 1
             else:
-                self.parameters[index] = float(self.startParameters[index])
+                self.parameters[index] = float(self.startParameters[index]) if unit is None else self.startParameters[index].m_as(unit)
     
     def setEnabledConfidenceParameters(self, confidence):
         """set the parameter confidence values for the enabled parameters"""
@@ -200,7 +200,7 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
         else:
             sigma = None 
         if parameters is None:
-            parameters = [float(param) for param in self.startParameters]
+            parameters = [float(param) if unit is None else param.m_as(unit) for unit, param in zip(cycle(self.units if isinstance(self.units, list) else [self.units]), self.startParameters)]
         if self.useSmartStartValues:
             smartParameters = self.smartStartValues(x, y, parameters, self.parameterEnabled)
             if smartParameters is not None:

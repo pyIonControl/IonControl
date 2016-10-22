@@ -113,6 +113,7 @@ class LockSettings(object):
         self.mode = 0
         self.dcThreshold = Q(0, 'V')
         self.enableDCThreshold = False
+        self.refGTcombLine = False #True if the reference frequency is greater than the comb line it is mixed with
         self.coreMode = 0
         
     def __setstate__(self, d):
@@ -125,6 +126,7 @@ class LockSettings(object):
         self.__dict__.setdefault( 'harmonicReferenceFrequency', Q(0, 'MHz') )
         self.__dict__.setdefault( 'dcThreshold', Q(0, 'V') )
         self.__dict__.setdefault( 'enableDCThreshold', False )
+        self.__dict__.setdefault( 'refGTcombLine', False )
         self.__dict__.setdefault( 'coreMode', 0 )
         self.__dict__.setdefault( 'errorsigHarmonic', Q(1) )
         self.mode &= ~1  # clear the lock enable bit
@@ -183,6 +185,8 @@ class LockControl(Form, Base):
         self.dataChanged.emit( self.lockSettings )
         self.dcThresholdBox.setChecked( self.lockSettings.enableDCThreshold )
         self.dcThresholdBox.stateChanged.connect( self.onDCThresholdEnable )
+        self.refGTcombLineBox.setChecked( self.lockSettings.refGTcombLine  )
+        self.refGTcombLineBox.stateChanged.connect( self.onSetRefGTcombLine )
         self._setHarmonics()
         self.lockServer = LockServer(("", 16888), b"yb171", self)
         self.lockServer.start()
@@ -190,7 +194,12 @@ class LockControl(Form, Base):
     def setharmonicReferenceFrequency(self, value):
         self.lockSettings.harmonicReferenceFrequency = value
         self.calculateOffset()
-                      
+
+    def onSetRefGTcombLine(self, state):
+        self.lockSettings.refGTcombLine = state == QtCore.Qt.Checked
+        self.dataChanged.emit( self.lockSettings )
+        self.calculateOffset()
+
     def onDCThresholdEnable(self, state):
         self.lockSettings.enableDCThreshold = state == QtCore.Qt.Checked
         self.onDCThreshold(self.lockSettings.dcThreshold)
@@ -238,15 +247,13 @@ class LockControl(Form, Base):
         self.calculateOffset()
         
     def calculateOffset(self):
-        refGTcombLine = True #True if the reference frequency is greater than the comb line it is mixed with
-
         fhf = self.lockSettings.resonanceFrequency
         n = self.lockSettings.harmonic #e.g. 105
         error_n = self.lockSettings.errorsigHarmonic #e.g. 32
         fref_uwave = self.lockSettings.harmonicReferenceFrequency
         fref_rf = self.lockSettings.referenceFrequency
         f_out = self.lockSettings.outputFrequency
-        f_rep = (fref_uwave - fref_rf)/error_n if refGTcombLine else (fref_uwave + fref_rf)/error_n
+        f_rep = (fref_uwave - fref_rf)/error_n if self.lockSettings.refGTcombLine else (fref_uwave + fref_rf)/error_n
 
         offsetFrequency = abs( fhf - abs(n)*f_rep + (-1 if n<0 else 1) * f_out )
         self.magOffsetFreq.setValue(offsetFrequency)
