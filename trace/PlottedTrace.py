@@ -90,6 +90,7 @@ class PlottedTrace(object):
         if graphicsView!=self._graphicsView:
             self.removePlots()
             self._graphicsView = graphicsView
+            self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('aa')#self._graphicsView.getLabel('bottom'))
             self.windowName = name
             self.tracePlotting.windowName = name
             self.plot()
@@ -264,7 +265,18 @@ class PlottedTrace(object):
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
                 else:
                     self._graphicsView.setLabel('bottom', text = "{0}".format(self.xAxisLabel))
-    
+            else:
+                self._graphicsView.setLabel('bottom', text='')
+                self._graphicsView.showLabel('bottom', show=False)
+            if self.yAxisLabel:
+                if self.yAxisUnit:
+                    self._graphicsView.setLabel('left', text = "{0} ({1})".format(self.yAxisLabel, self.yAxisUnit))
+                else:
+                    self._graphicsView.setLabel('left', text = "{0}".format(self.yAxisLabel))
+            else:
+                self._graphicsView.setLabel('left', text='')
+                self._graphicsView.showLabel('left', show=False)
+
     def plotPoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
             if errorbars:
@@ -276,6 +288,17 @@ class PlottedTrace(object):
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
                 else:
                     self._graphicsView.setLabel('bottom', text = "{0}".format(self.xAxisLabel))
+            else:
+                self._graphicsView.setLabel('bottom', text='')
+                self._graphicsView.showLabel('bottom', show=False)
+            if self.yAxisLabel:
+                if self.yAxisUnit:
+                    self._graphicsView.setLabel('left', text = "{0} ({1})".format(self.yAxisLabel, self.yAxisUnit))
+                else:
+                    self._graphicsView.setLabel('left', text = "{0}".format(self.yAxisLabel))
+            else:
+                self._graphicsView.setLabel('left', text='')
+                self._graphicsView.showLabel('left', show=False)
 
     def plotLinespoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
@@ -289,7 +312,18 @@ class PlottedTrace(object):
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
                 else:
                     self._graphicsView.setLabel('bottom', text = "{0}".format(self.xAxisLabel))
-                
+            else:
+                self._graphicsView.setLabel('bottom', text='')
+                self._graphicsView.showLabel('bottom', show=False)
+            if self.yAxisLabel:
+                if self.yAxisUnit:
+                    self._graphicsView.setLabel('left', text = "{0} ({1})".format(self.yAxisLabel, self.yAxisUnit))
+                else:
+                    self._graphicsView.setLabel('left', text = "{0}".format(self.yAxisLabel))
+            else:
+                self._graphicsView.setLabel('left', text='')
+                self._graphicsView.showLabel('left', show=False)
+
     def plotSteps(self, penindex):
         if self._graphicsView is not None:
             mycolor = list(self.penList[penindex][4])
@@ -300,6 +334,17 @@ class PlottedTrace(object):
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
                 else:
                     self._graphicsView.setLabel('bottom', text = "{0}".format(self.xAxisLabel))
+            else:
+                self._graphicsView.setLabel('bottom', text='')
+                self._graphicsView.showLabel('bottom', show=False)
+            if self.yAxisLabel:
+                if self.yAxisUnit:
+                    self._graphicsView.setLabel('left', text = "{0} ({1})".format(self.yAxisLabel, self.yAxisUnit))
+                else:
+                    self._graphicsView.setLabel('left', text = "{0}".format(self.yAxisLabel))
+            else:
+                self._graphicsView.setLabel('left', text='')
+                self._graphicsView.showLabel('left', show=False)
             self._graphicsView.addItem( self.curve )
             self.curvePen = penindex
     
@@ -316,6 +361,22 @@ class PlottedTrace(object):
                 elif self.type ==self.Types.steps:
                     self.plotStepsFitfunction(penindex+1)
                     self.plotSteps(penindex)
+                if self.xAxisLabel:
+                    if self.xAxisUnit:
+                        self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('{0} ({1})'.format(self.xAxisLabel, self.xAxisUnit))#self._graphicsView.getLabel('bottom'))
+                    else:
+                        self._graphicsView.vb.menu.axes[0].xlabelWidget.setText(self.xAxisLabel)
+                else:
+                    self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('')
+                if self.yAxisLabel:
+                    if self.yAxisUnit:
+                        self._graphicsView.vb.menu.axes[1].ylabelWidget.setText('{0} ({1})'.format(self.yAxisLabel, self.yAxisUnit))#self._graphicsView.getLabel('bottom'))
+                    else:
+                        self._graphicsView.vb.menu.axes[1].ylabelWidget.setText(self.yAxisLabel)
+                else:
+                    self._graphicsView.vb.menu.axes[1].ylabelWidget.setText('')
+                self._graphicsView.ctrlMenu.titleWidget.setText('')
+                self._graphicsView.setTitle()
                 self.penUsageDict[penindex] += 1
             self.curvePen = penindex
         
