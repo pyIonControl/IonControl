@@ -9,18 +9,20 @@ from fit.FitFunctionBase import FitFunctionBase, ResultRecord, fitFunctionMap
 from functools import wraps, partial
 
 def fitfunc(func=None, *, name=None, description=None, parameterNames=None, units=None, enabledParameters=None,
-            parameterConfidence=None, overwriteDefaults=False):
+            parameterConfidence=None, parameterBounds=None, overwriteDefaults=False):
     """Delegate decorator for FitFunctionFactory. By defining a separate decorator function, decorator can be called
        with or without optional arguments in order to simplify @fitfunc implementation on the user side. This separate
        function is necessary because decorating with the FitFunctionFactory class directly requires a static number
        of input arguments since __init__ must return None"""
     if func is None:
         return partial(fitfunc, name=name, description=description, parameterNames=parameterNames, units=units,
-                       enabledParameters=enabledParameters, parameterConfidence=parameterConfidence, overwriteDefaults=overwriteDefaults)
-    return FitFunctionFactory(name, description, parameterNames, units, enabledParameters, parameterConfidence, overwriteDefaults, func)
+                       enabledParameters=enabledParameters, parameterConfidence=parameterConfidence,
+                       parameterBounds=parameterBounds, overwriteDefaults=overwriteDefaults)
+    return FitFunctionFactory(name, description, parameterNames, units, enabledParameters, parameterConfidence,
+                              parameterBounds, overwriteDefaults, func)
 
 class FitFunctionFactory:
-    def __init__(self, name, description, parameterNames, units, enabledParameters, parameterConfidence, overwrite, func):
+    def __init__(self, name, description, parameterNames, units, enabledParameters, parameterConfidence, parameterBounds, overwrite, func):
         self.fitfunc = func
         self.ndefs = self.getOccurences(func)
         self._functionString = description
@@ -33,6 +35,7 @@ class FitFunctionFactory:
         self.units = units if units is not None else [None]*self.nparams
         self._parameterEnabled = enabledParameters if enabledParameters is not None else [True]*self.nparams
         self.parametersConfidence = parameterConfidence if parameterConfidence is not None else [None]*self.nparams
+        self.parameterBounds = parameterBounds if parameterBounds is not None else[[None, None] for _ in range(self.nparams)]
         self.smartstartEnabled = False
         self.overwrite = overwrite
         self.constructClass(self.fitfunc)
@@ -52,6 +55,7 @@ class FitFunctionFactory:
             cls.parameters = [0]*self.nparams
             cls.parameterEnabled = self.parameterEnabled
             cls.parametersConfidence = self.parametersConfidence
+            cls.parameterBounds = self.parameterBounds
             cls.startParameters = self.getDefaults(func)
             for resn, resd in cls.resultDict.items():
                 cls.results[resn] = ResultRecord(name=resn, definition=resd['def'])
@@ -134,7 +138,7 @@ class FitFunctionFactory:
 
     def getDefaults(self, func):
         sg = inspect.signature(func)
-        return list(map(lambda x: x.default if x.default is not inspect._empty else None, sg.parameters.values()))[1:]
+        return list(map(lambda x: x.default if x.default is not inspect._empty else 0, sg.parameters.values()))[1:]
 
     def getFuncParameters(self, func):
         return func.__code__.co_varnames[slice(1, func.__code__.co_argcount)]
