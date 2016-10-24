@@ -51,17 +51,17 @@ class StoredFitFunction(object):
     def fromFitfunction(cls, fitfunction):
         fitfunctionName = fitfunction.name if fitfunction else None
         instance = cls( name=None, fitfunctionName=fitfunctionName )
-        instance.startParameters = tuple(fitfunction.startParameters)
-        instance.parameterEnabled = tuple(fitfunction.parameterEnabled)
-        instance.startParameterExpressions = tuple(fitfunction.startParameterExpressions) if fitfunction.startParameterExpressions is not None else tuple([None]*len(fitfunction.startParameters))
-        instance.parameters = tuple(fitfunction.parameters)
-        instance.parametersConfidence = tuple(fitfunction.parametersConfidence)
+        instance.startParameters = list(fitfunction.startParameters)
+        instance.parameterEnabled = list(fitfunction.parameterEnabled)
+        instance.startParameterExpressions = list(fitfunction.startParameterExpressions) if fitfunction.startParameterExpressions is not None else list([None]*len(fitfunction.startParameters))
+        instance.parameters = list(fitfunction.parameters)
+        instance.parametersConfidence = list(fitfunction.parametersConfidence)
         instance.useSmartStartValues = fitfunction.useSmartStartValues
         instance.useErrorBars = fitfunction.useErrorBars
         for result in list(fitfunction.results.values()):
             instance.results[result.name] = ResultRecord(name=result.name, definition=result.definition, value=result.value)
-        instance.parameterBounds = tuple( (tuple(bound) for bound in fitfunction.parameterBounds) ) if fitfunction.parameterBounds else  tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
-        instance.parameterBoundsExpressions = tuple( (tuple(bound) for bound in fitfunction.parameterBoundsExpressions) ) if fitfunction.parameterBoundsExpressions else tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
+        instance.parameterBounds = list( (list(bound) for bound in fitfunction.parameterBounds) ) if fitfunction.parameterBounds else  tuple((None, None) for _ in range(len(fitfunction.parameterNames)))
+        instance.parameterBoundsExpressions = list( (list(bound) for bound in fitfunction.parameterBoundsExpressions) ) if fitfunction.parameterBoundsExpressions else list((None, None) for _ in range(len(fitfunction.parameterNames)))
         return instance
      
     stateFields = ['name', 'fitfunctionName', 'startParameters', 'parameterEnabled', 'results', 'useSmartStartValues', 'startParameterExpressions', 'parameters', 'parametersConfidence',
