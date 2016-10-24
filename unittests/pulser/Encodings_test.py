@@ -109,5 +109,9 @@ class EncodingsTest(unittest.TestCase):
     def testNoneEncoding(self):
         self.assertEqual(encode(Q(-5, 'MHz')), 18446744073709551611)
 
+    def testPhase(self):
+        self.assertEqual(encode(Q(0), 'AD9912_PHASE'), 0)
+        self.assertEqual(encode(Q(360), 'AD9912_PHASE'), 0)
+
 if __name__ == "__main__":
     unittest.main()
