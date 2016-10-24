@@ -16,10 +16,11 @@ import numpy
 from PyQt5 import QtCore
 
 from modules.quantity import Q
-from .PulserHardwareServer import FinishException
+from .ServerProcess import FinishException
 from pulser.OKBase import ErrorMessages, FPGAException
 from .PulserHardwareServer import PulserHardwareServer
 from pulser.PulserHardwareServer import PulserHardwareException
+from pulser.LoggingReader import LoggingReader
 
 
 def check(number, command):
@@ -59,31 +60,6 @@ class QueueReader(QtCore.QThread):
                 logger.exception("Exception in QueueReader")
         logger.info( "QueueReader thread finished." )
 
-class LoggingReader(QtCore.QThread):
-    def __init__(self, loggingQueue, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.running = False
-        self.loggingQueue = loggingQueue
-        
-    def run(self):
-        logger = logging.getLogger(__name__)
-        logger.debug("LoggingReader Thread running")
-        while True:
-            try:
-                record = self.loggingQueue.get()
-                if record is None: # We send this as a sentinel to tell the listener to quit.
-                    logger.debug("LoggingReader Thread shutdown requested")
-                    break
-                clientlogger = logging.getLogger(record.name)
-                if record.levelno>=clientlogger.getEffectiveLevel():
-                    clientlogger.handle(record) # No level or filter logic applied - just do it!
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except:
-                logger.exception("Exception in Logging Reader Thread")
-        logger.info("LoggingReader Thread finished")
-
-                
 
 class PulserHardware(QtCore.QObject):
     serverClass = PulserHardwareServer
