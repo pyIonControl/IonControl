@@ -6,6 +6,8 @@
 
 import os.path
 import PyQt5.uic
+
+from modules.InkscapeConversion import getSvgMetaData, getPdfMetaData
 from trace import Traceui
 from trace import pens
 from gui import TraceTableEditor
@@ -243,9 +245,22 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         fnames, _ = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open files', self.settings.lastDir)
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             for fname in fnames:
-                self.openFile(fname)
-                self.settings.filelist += [fname]
-                self.settings.filelist = list(set(self.settings.filelist))
+                if Path(fname).suffix == '.pdf':
+                    pdfnames = getPdfMetaData(fname)
+                    if pdfnames:
+                        for pdfname in pdfnames:
+                            self.openFile(pdfname)
+                            self.settings.filelist += [pdfname]
+                elif Path(fname).suffix == '.svg':
+                    svgnames = getSvgMetaData(fname)
+                    if svgnames:
+                        for svgname in svgnames:
+                            self.openFile(svgname)
+                            self.settings.filelist += [svgname]
+                else:
+                    self.openFile(fname)
+                    self.settings.filelist += [fname]
+        self.settings.filelist = list(set(self.settings.filelist))
         self.updateNames()
 
     def updateNames(self):
@@ -309,16 +324,18 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
            change the default file list to maintain settings after software is reloaded"""
         if self.newDataAvailable:
             if keys == set():
-                self.onSave(saveCopy=True)
+                _, updatedNodes = self.onSave(saveCopy=True, returnTraceNodeNames=True)
+                for node in updatedNodes:
+                    trc.NamedTraceUpdate.dataChanged.emit('_NT_'+node)
             else:
                 for k in keys:
                     tc = self.model.nodeDict[k].children[0].content.traceCollection
                     tc.save(tc._fileType, saveCopy=True)
+                    trc.NamedTraceUpdate.dataChanged.emit('_NT_'+k.split('_'))
             self.settings.filelist = []
             for k,v in self.model.nodeDict.items():
                 if v.parent is not None and v.nodeType == 0:
                     self.settings.filelist.append(self.model.nodeDict[k].children[0].content.traceCollection.filename)
-            trc.NamedTraceUpdate.dataChanged.emit('__namedtrace__')
         self.newDataAvailable = False
 
     def updateExternally(self, topNode, child, row, data, col, saveEvery=False):
