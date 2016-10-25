@@ -161,9 +161,6 @@ class PulserHardwareServer(ServerProcess, OKBase):
             logging.getLogger(__name__).error("No time synchronization because FPGA is not available")
         self.timeTickOffset = time_time()        
             
-    def finish(self):
-        self.running = False
-        return True
 
     analyzingState = enum.enum('normal', 'scanparameter', 'dependentscanparameter')
     def readDataFifo(self):

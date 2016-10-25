@@ -717,6 +717,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         #map(lambda x: x.shutdown(), self.auxiliaryPulsers)
         for p in self.auxiliaryPulsers:
             p.shutdown()
+        self.dac.shutdown()
 
     def saveConfig(self):
         self.config['MainWindow.State'] = self.parent.saveState()

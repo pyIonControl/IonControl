@@ -40,3 +40,6 @@ class ServerProcess(Process):
         self.loggingQueue.put(None)
         self.loggingQueue.close()
 
+    def finish(self):
+        self.running = False
+        return True
