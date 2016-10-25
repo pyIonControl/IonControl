@@ -33,9 +33,9 @@ class ServerProcess(Process):
                         self.commandPipe.send(e)
                 self.readDataFifo()
             self.dataQueue.put(FinishException())
-            logger.info("Pulser Hardware Server Process finished.")
+            logger.info("Server Process {0} finished.".format(self.__class__.__name__))
         except Exception as e:
-            logger.error("Pulser Hardware Server Process exception {0}".format(e))
+            logger.error("Server Process {0} exception {1}".format(self.__class__.__name__, e))
         self.dataQueue.close()
         self.loggingQueue.put(None)
         self.loggingQueue.close()
