@@ -51,19 +51,27 @@ class StateGroup(State):
     def __init__(self, name, states, enterfunc=None, exitfunc=None ):
         super( StateGroup, self ).__init__(name, enterfunc, exitfunc)
         self.states = set(states)
-    
-        
+
+
 class Transition:
-    def __init__(self, fromstate, tostate, condition=None, transitionfunc=None, description=None):
+    def __init__(self, fromstate, tostate, condition=None, transitionfunc=None, description=None, eventType=None,
+                 refValueFunc=None):
         self.fromstate = fromstate
         self.tostate = tostate
         self.condition = condition if condition is not None else lambda *args: True
         self.transitionfunc = transitionfunc
         self.description = description
-        
-    def transitionState(self, fromObj, toObj ):
+        self.refValueFunc = refValueFunc
+        self.eventType =eventType
+
+    def transitionState(self, fromObj, toObj):
         if self.transitionfunc is not None:
-            self.transitionfunc( fromObj, toObj )
+            self.transitionfunc(fromObj, toObj)
+        if self.description is not None:
+            if self.refValueFunc is None:
+                logging.getLogger(__name__).log(25, "{0} transition {1}".format(self.eventType, self.description))
+            else:
+                logging.getLogger(__name__).log(25, "{0} transition {1} value {2}".format(self.eventType, self.description, self.refValueFunc()))
 
 class Statemachine:
     def __init__(self, name="Statemachine", now=None ):
@@ -96,11 +104,13 @@ class Statemachine:
         self.states[state.name] = state
         
     def addTransition(self, eventType, fromstate, tostate, condition=None, transitionfunc=None, description=None):
-        self.addTransitionObj(eventType, Transition(fromstate, tostate, condition, transitionfunc, description=description))
+        self.addTransitionObj(eventType, Transition(fromstate, tostate, condition, transitionfunc,
+                                                    description=description, eventType=eventType))
         
     def addTransitionList(self, eventType, fromstates, tostate, condition=None, description=None):
         for state in fromstates:
-            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description))
+            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description,
+                                                        eventType=eventType))
         
     def addTransitionObj(self, eventType, transition):
         if transition.fromstate not in self.states:
