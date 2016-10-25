@@ -25,10 +25,10 @@ class ServerProcess(Process):
             while self.running:
                 if self.commandPipe.poll(0.01):
                     try:
-                        commandstring, argument = self.commandPipe.recv()
+                        commandstring, argument, kwargs = self.commandPipe.recv()
                         command = getattr(self, commandstring)
-                        logger.debug("ProcessServer {0}".format(commandstring))
-                        self.commandPipe.send(command(*argument))
+                        logger.debug("ProcessServer {0} {0}".format(self.__class__.__name__, commandstring))
+                        self.commandPipe.send(command(*argument, **kwargs))
                     except Exception as e:
                         self.commandPipe.send(e)
                 self.readDataFifo()

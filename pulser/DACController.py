@@ -41,7 +41,7 @@ class QueueReader(QtCore.QThread):
         while True:
             try:
                 data = self.dataQueue.get()
-                self.dataHandler[data.__class__.__name__](data, self.dataQueue.qsize())
+                self.dataHandler[data.__class__.__name__](data)
             except (KeyboardInterrupt, SystemExit, FinishException):
                 break
             except Exception:
@@ -74,7 +74,7 @@ class DACController(QtCore.QObject):
         self.loggingReader.start()
 
     def shutdown(self):
-        self.clientPipe.send(('finish', ()))
+        self.clientPipe.send(('finish', (), {}))
         self.serverProcess.join()
         self.queueReader.wait()
         self.loggingReader.wait()
@@ -84,8 +84,8 @@ class DACController(QtCore.QObject):
         if name.startswith('__') and name.endswith('__'):
             return super().__getattr__(name)
 
-        def wrapper(*args):
-            self.clientPipe.send((name, args))
+        def wrapper(*args, **kwargs):
+            self.clientPipe.send((name, args, kwargs))
             return processReturn(self.clientPipe.recv())
 
         setattr(self, name, wrapper)
