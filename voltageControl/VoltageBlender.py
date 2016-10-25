@@ -341,7 +341,7 @@ class VoltageBlender(QtCore.QObject):
 
     def writeShuttleLookup(self, edgeList, address=0):
         if(self.dacController.isOpen):
-            self.dacController.writeShuttleLookup(edgeList, address)
+            self.dacController.writeShuttleLookup(list(edgeList), address)  # list() removes extra fields of ShuttlingGraph
     
     def writeData(self, shuttlingGraph):
         towrite = list()

@@ -10,7 +10,7 @@ from pulser.OKBase import OKBase, check
 from pulser.ServerProcess import ServerProcess
 
 
-CRCData = namedtuple('CRCData', 'last shuttling')
+CRCData = namedtuple('CRCData', 'shuttling last')
 
 
 class DACControllerException(Exception):
