@@ -6,7 +6,6 @@ from itertools import chain
 
 import numpy
 
-from pulser.DACController import DACControllerException
 from pulser.OKBase import OKBase, check
 from pulser.ServerProcess import ServerProcess
 
@@ -14,8 +13,16 @@ from pulser.ServerProcess import ServerProcess
 CRCData = namedtuple('CRCData', 'last shuttling')
 
 
+class DACControllerException(Exception):
+    pass
+
+
 class DACControllerServer(ServerProcess, OKBase):
     channelCount = 112
+
+    def __init__(self, dataQueue=None, commandPipe=None, loggingQueue=None, sharedMemoryArray=None):
+        ServerProcess.__init__(self, dataQueue, commandPipe, loggingQueue, sharedMemoryArray)
+        OKBase.__init__(self)
 
     def readDataFifo(self):
         data, overrun = self.ppReadData(8)

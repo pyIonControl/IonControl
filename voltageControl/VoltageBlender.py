@@ -19,7 +19,7 @@ from .AdjustValue import AdjustValue
 from ProjectConfig.Project import getProject
 from uiModules.ImportErrorPopup import importErrorPopup
 from Chassis.itfParser import itfParser
-from pulser.DACController import DACControllerException
+from pulser.DACControllerServer import DACControllerException
 from inspect import isfunction
 
 project = getProject()

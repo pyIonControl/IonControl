@@ -12,13 +12,10 @@ from multiprocessing.sharedctypes import Array
 from PyQt5 import QtCore
 
 import logging
-from pulser.DacControllerServer import DACControllerServer
+from pulser.DACControllerServer import DACControllerServer, DACControllerException
 from pulser.LoggingReader import LoggingReader
 from pulser.ServerProcess import FinishException
 
-
-class DACControllerException(Exception):
-    pass
 
 
 class QueueReader(QtCore.QThread):
