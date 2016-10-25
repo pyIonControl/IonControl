@@ -26,8 +26,11 @@ class DACControllerServer(ServerProcess, OKBase):
 
     def readDataFifo(self):
         data, overrun = self.ppReadData(8)
-        for s in sliceview(data, 8):
-            self.dataQueue.put(CRCData(*struct.unpack('II', s)))
+        if data is not None:
+            for s in sliceview(data, 8):
+                d = CRCData(*struct.unpack('II', s))
+                print("CRC info:", d)
+                self.dataQueue.put(d)
 
     def writeVoltage(self, address, line):
         if self.xem:
@@ -179,6 +182,24 @@ class DACControllerServer(ServerProcess, OKBase):
                 return data, overrun
             return None, False
         return None, False
+
+    def toInteger(self, iterable):
+        result = list()
+        for value in chain(iterable[0::4], iterable[1::4], iterable[2::4], iterable[3::4]):
+            if not -10 <= value < 10:
+                raise DACControllerException("voltage {0} out of range -10V <= V < 10V".format(value))
+            result.append(int(value / 10.0 * 0x7fff))
+        return result  # list(chain(range(96)[0::4], range(96)[1::4], range(96)[2::4], range(96)[3::4])) # list( [0x000 for _ in range(96)]) #result #
+
+    @staticmethod
+    def boolToCode(b, bit=0):
+        return 1 << bit if b else 0
+
+    @classmethod
+    def shuttleLookupCode(cls, edge, channelCount):
+        return struct.pack('=IIII', edge.interpolStopLine * 2 * channelCount,
+                           edge.interpolStartLine * 2 * cls.channelCount,
+                           int(edge.idleCount), 0x0)
 
 
 def sliceview(view, length):
