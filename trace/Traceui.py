@@ -29,6 +29,7 @@ from modules.doProfile import doprofile
 import subprocess
 from pathlib import Path
 import ctypes
+from modules.InkscapeConversion import getPdfMetaData, getSvgMetaData
 from functools import reduce
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
@@ -265,18 +266,20 @@ class TraceuiMixin:
                 trace = dataNode.content
                 trace.plot(-2, self.settings.plotstyle)
 
-    def onSave(self, fileType=None, saveCopy=False):
+    def onSave(self, fileType=None, saveCopy=False, returnTraceNodeNames=False):
         """Save button is clicked. Save selected traces. If a trace has never been saved before, update model."""
         leftCol = 0
         rightCol = self.model.numColumns-1
         selectedTopNodes = self.traceView.selectedTopNodes()
         filename = ''
+        parentids = []
         for node in selectedTopNodes:
             dataNode=self.model.getFirstDataNode(node)
             if dataNode:
                 traceCollection = dataNode.content.traceCollection
                 alreadySaved = traceCollection.saved
-                filename = traceCollection.save(fileType,saveCopy)
+                filename = traceCollection.save(fileType, saveCopy)
+                parentids.append(dataNode.parent.id)
                 if not alreadySaved:
                     self.model.onSaveUnsavedTrace(dataNode)
                     self.model.traceModelDataChanged.emit(str(traceCollection.traceCreation), 'filename', traceCollection.filename)
@@ -288,6 +291,8 @@ class TraceuiMixin:
                         bottomRightInd = self.model.indexFromNode(dataNode.parent.children[-1], rightCol)
                     self.model.dataChanged.emit(topLeftInd, bottomRightInd)
                     self.model.emitParentDataChanged(dataNode, leftCol, rightCol)
+        if returnTraceNodeNames:
+            return filename, parentids
         return filename
 
     def onActiveTraceChanged(self):
@@ -402,7 +407,18 @@ class TraceuiMixin:
         fnames, _ = QtWidgets.QFileDialog.getOpenFileNames(self, 'Open files', self.settings.lastDir)
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             for fname in fnames:
-                self.openFile(fname)
+                if Path(fname).suffix == '.pdf':
+                    pdfnames = getPdfMetaData(fname)
+                    if pdfnames:
+                        for pdfname in pdfnames:
+                            self.openFile(pdfname)
+                elif Path(fname).suffix == '.svg':
+                    svgnames = getSvgMetaData(fname)
+                    if svgnames:
+                        for svgname in svgnames:
+                            self.openFile(svgname)
+                else:
+                    self.openFile(fname)
 
     def openFile(self, filename, defaultpen=-1):
         filename = str(filename)

@@ -235,109 +235,110 @@ class AutoLoad(UiForm, UiBase):
         self.wavemeterAvailable = wavemeterHardwareSetting.get('enabled', False) and bool(self.wavemeterAddress)
         logging.getLogger(__name__).info("Wavemeter URI: {0} {1}".format(self.wavemeterAddress, "available" if self.wavemeterAvailable else "not available"))
 
-
     def constructStatemachine(self):
         self.statemachine = Statemachine('AutoLoad', now=now )
-        self.statemachine.addState( 'Idle' , self.setIdle, self.exitIdle )
-        self.statemachine.addState( 'Preheat', self.setPreheat )
-        self.statemachine.addState( 'Load', self.setLoad )
-        self.statemachine.addState( 'PeriodicCheck', self.setPeriodicCheck )
-        self.statemachine.addState( 'Check', self.setCheck )
-        self.statemachine.addState( 'Trapped', self.setTrapped, self.exitTrapped )
-        self.statemachine.addState( 'Frozen', self.setFrozen )
-        self.statemachine.addState( 'WaitingForComeback', self.setWaitingForComeback )
-        self.statemachine.addState( 'AutoReloadFailed', self.setAutoReloadFailed )
-        self.statemachine.addState( 'PostSequenceWait', self.setPostSequenceWait )
-        self.statemachine.addState('BeyondThreshold', self.setBeyondThreshold)
-        self.statemachine.addState('Dump', self.setDump)
+        self.statemachine.addState('Idle', self.setIdle, self.exitIdle)
+        self.statemachine.addState('Preheat', self.setPreheat, needsConfirmation=True)
+        self.statemachine.addState('Load', self.setLoad, needsConfirmation=True)
+        self.statemachine.addState('PeriodicCheck', self.setPeriodicCheck, needsConfirmation=True)
+        self.statemachine.addState('Check', self.setCheck, needsConfirmation=True)
+        self.statemachine.addState('Trapped', self.setTrapped, self.exitTrapped, needsConfirmation=True)
+        self.statemachine.addState('Frozen', self.setFrozen, needsConfirmation=True)
+        self.statemachine.addState('WaitingForComeback', self.setWaitingForComeback, needsConfirmation=True)
+        self.statemachine.addState('AutoReloadFailed', self.setAutoReloadFailed, needsConfirmation=True)
+        self.statemachine.addState('PostSequenceWait', self.setPostSequenceWait, needsConfirmation=True)
+        self.statemachine.addState('BeyondThreshold', self.setBeyondThreshold, needsConfirmation=True)
+        self.statemachine.addState('Dump', self.setDump, needsConfirmation=True)
 
-        self.statemachine.addTransitionList( 'startButton', ['Idle', 'AutoReloadFailed'], 'Preheat',
-                                         description="startButton" )
-        self.statemachine.addTransition( 'timer', 'Preheat', 'Load',
-                                         lambda state: state.timeInState() > self.settings.preheatTime
-                                         , description="preheatOven" )
-        self.statemachine.addTransition( 'timer', 'Load', 'AutoReloadFailed',
-                                         lambda state: self.ovenLimitReached() and self.settings.autoReload and
-                                                       self.numFailedAutoload>=self.settings.maxFailedAutoload,
-                                         description="maxTime" )
-        self.statemachine.addTransition( 'timer', 'Load', 'Idle',
-                                         lambda state: self.ovenLimitReached() and not self.settings.autoReload,
-                                         description="maxTime" )
-        self.statemachine.addTransition( 'timer', 'Load', 'PeriodicCheck',
-                                         lambda state: state.timeInState() > self.settings.periodicCheck,
-                                         description="periodicCheck" )
-        self.statemachine.addTransition( 'data', 'Load', 'Check',
-                                         self.countsConditionSatisfied,
-                                         description="checkLoad"  )
+        self.statemachine.addTransitionList('startButton', ['Idle', 'AutoReloadFailed'], 'Preheat',
+                                            description="Start Button")
+        self.statemachine.addTransition('timer', 'Preheat', 'Load',
+                                        lambda state: state.timeInState() > self.settings.preheatTime
+                                        , description="Preheat time reached")
+        self.statemachine.addTransition('timer', 'Load', 'AutoReloadFailed',
+                                        lambda state: self.ovenLimitReached() and self.settings.autoReload and
+                                                      self.numFailedAutoload >= self.settings.maxFailedAutoload,
+                                        description="maximum auto load parameter reached")
+        self.statemachine.addTransition('timer', 'Load', 'Idle',
+                                        lambda state: self.ovenLimitReached() and not self.settings.autoReload,
+                                        description="maximum loading time reached")
+        self.statemachine.addTransition('timer', 'Load', 'PeriodicCheck',
+                                        lambda state: state.timeInState() > self.settings.periodicCheck,
+                                        description="periodic check")
+        self.statemachine.addTransition('data', 'Load', 'Check',
+                                        self.countsConditionSatisfied,
+                                        description="load condition reached, checking")
         self.statemachine.addTransition('data', 'Load', 'BeyondThreshold',
-                                        self.countsOverRange, description='Over range')
-        self.statemachine.addTransition( 'timer', 'PeriodicCheck', 'Load',
-                                         lambda state: state.timeInState() > self.settings.periodicLoad,
-                                         description="periodicLoad" )
-        self.statemachine.addTransition( 'data', 'PeriodicCheck', 'Check',
-                                         self.countsConditionSatisfied,
-                                         description="checkPeriodicCheck" )
+                                        self.countsOverRange, description='load signal over range')
+        self.statemachine.addTransition('timer', 'PeriodicCheck', 'Load',
+                                        lambda state: state.timeInState() > self.settings.periodicLoad,
+                                        description="back from periodic check")
+        self.statemachine.addTransition('data', 'PeriodicCheck', 'Check',
+                                        self.countsConditionSatisfied,
+                                        description="periodic check condition reached")
         self.statemachine.addTransition('data', 'PeriodicCheck', 'BeyondThreshold',
                                         self.countsOverRange,
                                         description="periodic check over range")
-        self.statemachine.addTransition( 'timer', 'Check', 'Trapped',
-                                         lambda state: state.timeInState()> self.settings.checkTime,
-                                         self.loadingToTrapped,
-                                         description="Success!")
+        self.statemachine.addTransition('timer', 'Check', 'Trapped',
+                                        lambda state: state.timeInState() > self.settings.checkTime,
+                                        self.loadingToTrapped,
+                                        description="Success!")
         self.statemachine.addTransition('data', 'Check', 'Load',
                                         self.countsUnderRange,
-                                        description="backToLoading" )
+                                        description="lost ion during check")
         self.statemachine.addTransition('data', 'Check', 'BeyondThreshold',
                                         self.countsOverRange,
-                                        description="backToLoading")
+                                        description="signal over range back to loading")
         self.statemachine.addTransition('data', 'BeyondThreshold', 'Check',
                                         self.countsConditionSatisfied,
-                                        description="backToCheck")
-        self.statemachine.addTransition( 'data', 'Trapped', 'WaitingForComeback',
-                                         self.countsConditionNotSatisfied,
-                                         description="waitForIonToReAppear" )
-        self.statemachine.addTransition( 'timer', 'WaitingForComeback', 'Idle',
-                                         lambda state: state.timeInState() > self.settings.waitForComebackTime and
-                                                        ( not self.settings.autoReload or
-                                                        self.numFailedAutoload >=self.settings.maxFailedAutoload),
-                                         description="waitForComebackTimeExceeded")
-        self.statemachine.addTransition( 'timer', 'WaitingForComeback', 'Preheat',
-                                         lambda state: state.timeInState() > self.settings.waitForComebackTime and
-                                                       self.settings.autoReload and
-                                                       self.numFailedAutoload< self.settings.maxFailedAutoload,
-                                         description="waitForComebackTimeExceeded")
-        self.statemachine.addTransition( 'data', 'WaitingForComeback', 'Trapped', self.countsConditionSatisfied,
-                                         description="ionCameBack" )
-        self.statemachine.addTransition( 'ppStopped', 'Frozen', 'PostSequenceWait' ,
-                                         description="ppStopped" )
-        self.statemachine.addTransition( 'timer', 'PostSequenceWait', 'Idle',
-                                         lambda state: state.timeInState() > self.settings.postSequenceWaitTime and
-                                                        (not self.settings.autoReload or
-                                                        self.numFailedAutoload >= self.settings.maxFailedAutoload),
-                                         description="postSequenceWaitTimeExceeded" )
-        self.statemachine.addTransition( 'timer', 'PostSequenceWait', 'Preheat',
-                                         lambda state: state.timeInState() > self.settings.postSequenceWaitTime and
-                                                        self.settings.autoReload and
-                                                        self.numFailedAutoload < self.settings.maxFailedAutoload,
-                                         description="postSequenceWaitTimeExceeded" )
-        self.statemachine.addTransition( 'data', 'PostSequenceWait', 'Trapped',
-                                         self.countsConditionSatisfied,
-                                         description="postSequenceWaitTime" )
+                                        description="back to check")
+        self.statemachine.addTransition('data', 'Trapped', 'WaitingForComeback',
+                                        self.countsConditionNotSatisfied,
+                                        description="wait for ion to reappear")
+        self.statemachine.addTransition('timer', 'WaitingForComeback', 'Idle',
+                                        lambda state: state.timeInState() > self.settings.waitForComebackTime and
+                                                      (not self.settings.autoReload or
+                                                       self.numFailedAutoload >= self.settings.maxFailedAutoload),
+                                        description="wait for comeback time exceeded")
+        self.statemachine.addTransition('timer', 'WaitingForComeback', 'Preheat',
+                                        lambda state: state.timeInState() > self.settings.waitForComebackTime and
+                                                      self.settings.autoReload and
+                                                      self.numFailedAutoload < self.settings.maxFailedAutoload,
+                                        description="wait for comeback time exceeded")
+        self.statemachine.addTransition('data', 'WaitingForComeback', 'Trapped', self.countsConditionSatisfied,
+                                        description="ionCameBack")
+        self.statemachine.addTransition('ppStopped', 'Frozen', 'PostSequenceWait',
+                                        description="pulse program stopped")
+        self.statemachine.addTransition('timer', 'PostSequenceWait', 'Idle',
+                                        lambda state: state.timeInState() > self.settings.postSequenceWaitTime and
+                                                      (not self.settings.autoReload or
+                                                       self.numFailedAutoload >= self.settings.maxFailedAutoload),
+                                        description="post Sequence wait time exceeded")
+        self.statemachine.addTransition('timer', 'PostSequenceWait', 'Preheat',
+                                        lambda state: state.timeInState() > self.settings.postSequenceWaitTime and
+                                                      self.settings.autoReload and
+                                                      self.numFailedAutoload < self.settings.maxFailedAutoload,
+                                        description="post sequence wait time exceeded")
+        self.statemachine.addTransition('data', 'PostSequenceWait', 'Trapped',
+                                        self.countsConditionSatisfied,
+                                        description="post sequence condition satisfied")
         self.statemachine.addTransitionList('stopButton', ['Preheat', 'Load', 'PeriodicCheck', 'Check', 'Trapped',
                                                            'Frozen', 'WaitingForComeback', 'AutoReloadFailed',
                                                            'PostSequenceWait', 'BeyondThreshold', 'Dump'], 'Idle',
-                                            description="stopButton" )
-        self.statemachine.addTransition( 'ionTrapped', 'Idle', 'Trapped',
-                                         transitionfunc = self.idleToTrapped,
-                                         description="ionTrappedManually"  )
+                                            description="stop Button")
+        self.statemachine.addTransition('ionTrapped', 'Idle', 'Trapped',
+                                        transitionfunc=self.idleToTrapped,
+                                        description="ion trapped manually")
         self.statemachine.addTransitionList('ppStarted', ['Preheat', 'Load', 'PeriodicCheck', 'Check', 'Trapped',
                                                           'BeyondThreshold', 'WaitingForComeback', 'AutoReloadFailed',
                                                           'PostSequenceWait', 'Dump'], 'Frozen',
-                                            description="ppStarted")
-        self.statemachine.addTransition( 'ionStillTrapped', 'Idle', 'Trapped', lambda state: len(self.historyTableModel.history)>0 and not self.pulser.ppActive ,
-                                         description="ionStillTrapped" )
-        self.statemachine.addTransition( 'ionStillTrapped', 'Idle', 'Frozen', lambda state: len(self.historyTableModel.history)>0 and self.pulser.ppActive,
-                                         description="ionStillTrapped" )
+                                            description="pulse program started")
+        self.statemachine.addTransition('ionStillTrapped', 'Idle', 'Trapped', lambda state: len(
+            self.historyTableModel.history) > 0 and not self.pulser.ppActive,
+                                        description="ion still trapped (manually)")
+        self.statemachine.addTransition('ionStillTrapped', 'Idle', 'Frozen',
+                                        lambda state: len(self.historyTableModel.history) > 0 and self.pulser.ppActive,
+                                        description="ion still trapped (manually)")
         self.statemachine.addTransition('timer', 'BeyondThreshold', 'Dump',
                                         lambda state: state.timeInState() > self.settings.beyondThresholdTime,
                                         description="end beyond threshold")
@@ -735,7 +736,6 @@ class AutoLoad(UiForm, UiBase):
                               self.shutterUi.dataContainer[0], self.pulser,
                               self.voltageControl)
         self.revertRecord = newrevert
-        # self.externalInstrumentObservable( lambda: self.statemachine.processEvent('doneAdjusting') )
 
     def setIdle(self):
         """Execute when the loading process is set to idle. Disable timer, do not
@@ -758,6 +758,7 @@ class AutoLoad(UiForm, UiBase):
     def setPreheat(self):
         """Execute when the loading process begins. Turn on timer, turn on oven."""
         self.changeSettings('Preheat')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:red; }")
@@ -770,6 +771,7 @@ class AutoLoad(UiForm, UiBase):
         """Execute after preheating. Turn on ionization laser, and begin
            monitoring count rate."""
         self.changeSettings('Load')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:purple; }")
@@ -778,6 +780,7 @@ class AutoLoad(UiForm, UiBase):
     def setPeriodicCheck(self):
         """Execute when periodicly checking for an ion."""
         self.changeSettings('PeriodicCheck')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:darkCyan; }")
@@ -786,6 +789,7 @@ class AutoLoad(UiForm, UiBase):
     def setCheck(self):
         """Execute when count rate goes over threshold."""
         self.changeSettings('Check')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:blue; }")
@@ -794,14 +798,17 @@ class AutoLoad(UiForm, UiBase):
 
     def setPostSequenceWait(self):
         self.changeSettings('PostSequenceWait')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Waiting after sequence finished.")
 
     def setBeyondThreshold(self):
         self.changeSettings('BeyondThreshold')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Too many ions, waiting to make sure.")
 
     def setDump(self):
         self.changeSettings('Dump')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Too many ions, dumping the trap.")
 
     def loadingToTrapped(self, check,trapped):
@@ -818,6 +825,7 @@ class AutoLoad(UiForm, UiBase):
 
     def setTrapped(self):
         self.changeSettings('Trapped')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:green; }")
@@ -825,6 +833,7 @@ class AutoLoad(UiForm, UiBase):
         self.trappingTime = firstNotNone(self.loadingHistory.lastEvent().trappingTime, now())
         self.timerNullTime = self.trappingTime
         self.trappingTime = self.trappingTime
+        self.numFailedAutoload = 0
         # self.checkStarted = self.trappingTime
         self.ionReappeared.emit()
 
@@ -838,6 +847,7 @@ class AutoLoad(UiForm, UiBase):
 
     def setFrozen(self):
         self.changeSettings( 'Frozen')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( False )
         self.stopButton.setEnabled( False )
         self.elapsedLabel.setStyleSheet("QLabel { color:grey; }")
@@ -845,11 +855,13 @@ class AutoLoad(UiForm, UiBase):
 
     def setWaitingForComeback(self):
         self.changeSettings( 'WaitingForComeback')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.statusLabel.setText("Waiting to see if ion comes back")
         self.timerNullTime = now()
 
     def setAutoReloadFailed(self):
         self.changeSettings( 'AutoReloadFailed')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
         self.startButton.setEnabled( True )
         self.stopButton.setEnabled( True )
         self.timer = None
