@@ -347,6 +347,7 @@ class AutoLoad(UiForm, UiBase):
                                         lambda state: state.timeInState() > self.settings.dumpTime,
                                         description="end dump threshold")
         self.statemachine.ignoreEventTypes.add('data')
+        self.statemachine.immediateActionEventTypes.update(['stopButton'])
 
     def parameter(self):
         # re-create the parameters each time to prevent a exception that says the signal is not connected

@@ -86,6 +86,7 @@ class Statemachine:
         self.name=name
         self.now = now if now is not None else datetime.now
         self.ignoreEventTypes = set()  # these event types are ignored while a state is not confirmed, others are stacked
+        self.immediateActionEventTypes = set()  # these event types will be acted upon immediately, independent of the state being reached
         self.eventQueue = list()
         
     def initialize(self, state, enter=True):
@@ -159,7 +160,7 @@ class Statemachine:
         logging.getLogger(__name__).debug("Now in state {0}".format(self.currentState))
         
     def processEvent(self, eventType, *args, **kwargs ):
-        if self.currentStateReached:
+        if self.currentStateReached or eventType in self.immediateActionEventTypes:
             for thistransition in self.transitions[(eventType, self.currentState)]:
                 if thistransition.condition( self.states[self.currentState], *args, **kwargs ):
                     logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
@@ -176,6 +177,7 @@ class Statemachine:
             self.confirmationFunction = None
         for eventType, args, kwargs in self.eventQueue:
             self.processEvent(eventType, *args, **kwargs)
+        self.eventQueue.clear()
 
 
     # def generateDiagram(self):
