@@ -21,7 +21,7 @@ class StatemachineException(Exception):
 
 class State(object):
     def __init__(self, name, enterfunc=None, exitfunc=None, now=None, enterObservable=None, exitObservable=None,
-                 needsConfirmation=False):
+                 needsConfirmation=False, confirmedFunc=None):
         self.name = name
         self.enterfunc = enterfunc
         self.exitfunc = exitfunc
@@ -31,6 +31,7 @@ class State(object):
         self.exitObservable = exitObservable
         self.now = now if now is not None else datetime.now
         self.needsConfirmation = needsConfirmation
+        self.confirmedFunc = confirmedFunc
         
     def enterState(self):
         logging.getLogger(__name__).log(25, "Entering state {0}".format(self.name))
@@ -62,7 +63,7 @@ class Transition:
         self.transitionfunc = transitionfunc
         self.description = description
         self.refValueFunc = refValueFunc
-        self.eventType =eventType
+        self.eventType = eventType
 
     def transitionState(self, fromObj, toObj):
         if self.transitionfunc is not None:
@@ -83,7 +84,9 @@ class Statemachine:
         self.currentStateReached = True
         self.graph = nx.MultiDiGraph()
         self.name=name
-        self.now = now if now is not None else datetime.now 
+        self.now = now if now is not None else datetime.now
+        self.ignoreEventTypes = set()  # these event types are ignored while a state is not confirmed, others are stacked
+        self.eventQueue = list()
         
     def initialize(self, state, enter=True):
         if enter:
@@ -91,8 +94,9 @@ class Statemachine:
         self.currentState = state
         # self.generateDiagram()
                 
-    def addState(self, name, enterfunc=None, exitfunc=None, needsConfirmation=False):
-        self.states[name] = State( name, enterfunc, exitfunc, now=self.now, needsConfirmation=needsConfirmation)
+    def addState(self, name, enterfunc=None, exitfunc=None, needsConfirmation=False, confirmedFunc=None):
+        self.states[name] = State( name, enterfunc, exitfunc, now=self.now, needsConfirmation=needsConfirmation,
+                                   confirmedFunc=confirmedFunc)
         self.graph.add_node(name)
         
     def addStateGroup(self, name, states, enterfunc=None, exitfunc=None ):
@@ -142,6 +146,8 @@ class Statemachine:
         for stategroup in enteredStateGroups:
             stategroup.enterState()
         self.currentStateReached = not toStateObj.needsConfirmation
+        if not self.currentStateReached:
+            self.confirmationFunction = toStateObj.confirmedFunc
         toStateObj.enterState()
         if toStateObj.enterObservable is None:
             self._makeTransition_enter(transition)
@@ -159,11 +165,19 @@ class Statemachine:
                     logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
                     self.makeTransition( thistransition )
                     break
-            return self.currentState
+        elif eventType not in self.ignoreEventTypes:
+            self.eventQueue.append((eventType, args, kwargs))
+        return self.currentState
 
     def confirmStateReached(self):
         self.currentStateReached = True
-                
+        if self.confirmationFunction is not None:
+            self.confirmationFunction()
+            self.confirmationFunction = None
+        for eventType, args, kwargs in self.eventQueue:
+            self.processEvent(eventType, *args, **kwargs)
+
+
     # def generateDiagram(self):
     #     try:
     #         # convert from networkx -> pydot
