@@ -89,8 +89,7 @@ class AWGWaveform(object):
     def updateSegmentDependencies(self, nodeList):
         for node in nodeList:
             if node.nodeType==nodeTypes.segment:
-                node.stack = node.expression._parse_expression(node.equation)
-                nodeDependencies = node.expression.findDependencies(node.stack)
+                _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True)
                 self.dependencies.update(nodeDependencies)
                 if isIdentifier(node.duration):
                     self.dependencies.add(node.duration)
@@ -162,7 +161,7 @@ class AWGWaveform(object):
         try:
             node.expression.variabledict = {varName:varValueTextDict['value'] for varName, varValueTextDict in self.settings.varDict.items()}
             node.expression.variabledict.update({'t':Q(1, 'us')})
-            node.expression.evaluateWithStack(node.stack[:])  # TODO: does not exist anymore
+            node.expression.evaluate(node.equation, variabledict=node.expression.variabledict)
             error = False
         except ValueError:
             logging.getLogger(__name__).warning("Must be dimensionless!")
