@@ -347,6 +347,8 @@ class AutoLoad(UiForm, UiBase):
                                         lambda state: state.timeInState() > self.settings.dumpTime,
                                         description="end dump threshold")
         self.statemachine.ignoreEventTypes.add('data')
+        self.statemachine.ignoreEventTypes.add('timer')
+
         self.statemachine.immediateActionEventTypes.update(['stopButton'])
 
     def parameter(self):
