@@ -36,7 +36,7 @@ def VoltageOscillation(amp, frequency, phase, offset, Line):
     return osc
 
 @userfunc
-def userVoltageArray(tracename, Line):
+def userVoltageArray(parentname, childname, Line):
     """Example of the voltageArray function for use in localAdjustVoltage fields.
        A function is passed to the gui which looks up the appropriate line when
        calculating shuttling data. The default display value is determined from
@@ -47,8 +47,8 @@ def userVoltageArray(tracename, Line):
         left = int(math.floor(line))
         right = int(math.ceil(line))
         convexc = line - left
-        return NamedTrace(tracename, left)*(1-convexc) + \
-               NamedTrace(tracename, right)*convexc
+        return NamedTrace(parentname, childname, left)*(1-convexc) + \
+               NamedTrace(parentname, childname, right)*convexc
     return va
 
 
