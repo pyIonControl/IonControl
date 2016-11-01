@@ -135,7 +135,7 @@ class FeedbackEvaluation(EvaluationBase):
         pOut = self.settings['P'] * errorval
         self.integrator = self.integrator + errorval * self.settings['I'] 
         totalOut = pOut + self.integrator
-        globalDict[globalName] = totalOut
+        globalDict[globalName] = totalOut.to(globalDict[globalName])
         return float(totalOut.m), (0.0, 0.0), raw
 
     def parameters(self):
