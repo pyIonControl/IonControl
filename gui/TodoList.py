@@ -23,6 +23,7 @@ from uiModules.ComboBoxDelegate import ComboBoxDelegate
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.GuiAppearance import saveGuiState, restoreGuiState   #@UnresolvedImport
 from modules.firstNotNone import firstNotNone
+from collections import defaultdict
 
 Form, Base = uic.loadUiType('ui/TodoList.ui')
 
@@ -106,7 +107,7 @@ class MasterSettings(AttributeComparisonEquality):
         self.__dict__.setdefault( 'autoSave', False )
 
 class TodoList(Form, Base):
-    def __init__(self,scanModules,config,currentScan,setCurrentScan,globalVariablesUi,parent=None):
+    def __init__(self,scanModules,config,currentScan,setCurrentScan,globalVariablesUi,scriptingUi,parent=None):
         Base.__init__(self, parent)    
         Form.__init__(self)
         self.config = config
@@ -114,9 +115,13 @@ class TodoList(Form, Base):
         self.settingsCache = config.get( 'TodolistSettings.Cache', dict())
         self.masterSettings = config.get( 'Todolist.MasterSettings', MasterSettings())
         self.scanModules = scanModules
-        self.scanModuleMeasurements = dict()
-        self.scanModuleEvaluations = dict()
-        self.scanModuleAnalysis = dict()
+        self.scripting = scriptingUi
+        self.scriptFiles = dict()
+        for i in self.scripting.recentFiles:
+            self.scriptFiles[str(i.stem)] = str(i.stem)
+        self.scanModuleMeasurements = {'Script': self.scriptFiles}#defaultdict(lambda *a: [])#dict()
+        self.scanModuleEvaluations = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
+        self.scanModuleAnalysis = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
         self.currentMeasurementsDisplayedForScan = None
         self.currentScan = currentScan
         self.setCurrentScan = setCurrentScan
@@ -146,10 +151,14 @@ class TodoList(Form, Base):
         super(TodoList, self).setupUi(self)
         self.setupStatemachine()
         self.populateMeasurements()
-        self.scanSelectionBox.addItems( list(self.scanModuleMeasurements.keys()) )
+        #self.scanSelectionBox.addItems( list(self.scanModuleMeasurements.keys()) )
+        self.scanSelectionBox.addItems( ['Scan', 'Script'])#list(self.scanModuleMeasurements.keys()) )
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
         self.tableModel = TodoListTableModel( self.settings.todoList )
+        self.tableModel.measurementSelection = self.scanModuleMeasurements
+        self.tableModel.evaluationSelection = self.scanModuleEvaluations
+        self.tableModel.analysisSelection = self.scanModuleAnalysis
         self.tableModel.valueChanged.connect( self.checkSettingsSavable )
         self.tableView.setModel( self.tableModel )
         self.comboBoxDelegate = ComboBoxDelegate()
@@ -299,44 +308,54 @@ class TodoList(Form, Base):
         newscan = str(newscan)
         if self.currentMeasurementsDisplayedForScan != newscan:
             self.currentMeasurementsDisplayedForScan = newscan
-            updateComboBoxItems(self.measurementSelectionBox, self.scanModuleMeasurements[newscan] )
-            updateComboBoxItems(self.evaluationSelectionBox, self.scanModuleEvaluations[newscan] )
-            updateComboBoxItems(self.analysisSelectionBox, self.scanModuleAnalysis[newscan] )
-        
+            if newscan == 'Scan':
+                updateComboBoxItems(self.measurementSelectionBox, self.scanModuleMeasurements[newscan] )
+                updateComboBoxItems(self.evaluationSelectionBox, self.scanModuleEvaluations[newscan] )
+                updateComboBoxItems(self.analysisSelectionBox, self.scanModuleAnalysis[newscan] )
+            elif newscan == 'Script':
+                updateComboBoxItems(self.measurementSelectionBox, self.scriptFiles)#self.scanModuleMeasurements[newscan] )
+                updateComboBoxItems(self.evaluationSelectionBox, {})#self.scanModuleEvaluations[newscan] )
+                updateComboBoxItems(self.analysisSelectionBox, {})#self.scanModuleAnalysis[newscan] )
+
     def populateMeasurements(self):
         self.scanModuleMeasurements = dict()
         for name, widget in self.scanModules.items():
-            if hasattr(widget, 'scanControlWidget' ):
-                self.populateMeasurementsItem( name, widget.scanControlWidget.settingsDict )
-            else:
-                self.populateMeasurementsItem( name, {} )                
-            if hasattr(widget, 'evaluationControlWidget' ):
-                self.populateEvaluationItem( name, widget.evaluationControlWidget.settingsDict )
-            else:
+            if name == 'Scan':
+                if hasattr(widget, 'scanControlWidget' ):
+                    self.populateMeasurementsItem( name, widget.scanControlWidget.settingsDict )
+                else:
+                    self.populateMeasurementsItem( name, {} )
+                if hasattr(widget, 'evaluationControlWidget' ):
+                    self.populateEvaluationItem( name, widget.evaluationControlWidget.settingsDict )
+                else:
+                    self.populateEvaluationItem( name, {} )
+                if hasattr(widget, 'analysisControlWidget' ):
+                    self.populateAnalysisItem( name, widget.analysisControlWidget.analysisDefinitionDict )
+                else:
+                    self.populateAnalysisItem( name, {} )
+            elif name == 'Script':
+                self.populateMeasurementsItem(name, self.scriptFiles)#ing.recentFiles)
                 self.populateEvaluationItem( name, {} )
-            if hasattr(widget, 'analysisControlWidget' ):
-                self.populateAnalysisItem( name, widget.analysisControlWidget.analysisDefinitionDict )
-            else:
                 self.populateAnalysisItem( name, {} )
         if hasattr(self, 'tableModel'):
             self.tableModel.measurementSelection = self.scanModuleMeasurements
-            self.tableModel.evaluationSelection = self.scanModuleEvaluations     
-            self.tableModel.analysisSelection = self.scanModuleAnalysis     
-                
+            self.tableModel.evaluationSelection = self.scanModuleEvaluations
+            self.tableModel.analysisSelection = self.scanModuleAnalysis
+
     def populateMeasurementsItem(self, name, settingsDict ):
         self.scanModuleMeasurements[name] = sorted(settingsDict.keys())
-        if name == self.currentMeasurementsDisplayedForScan:
-            updateComboBoxItems( self.measurementSelectionBox, self.scanModuleMeasurements[name] )            
+        #if name == self.currentMeasurementsDisplayedForScan:
+        updateComboBoxItems( self.measurementSelectionBox, self.scanModuleMeasurements[name] )
 
     def populateEvaluationItem(self, name, settingsDict ):
         self.scanModuleEvaluations[name] = sorted(settingsDict.keys())
-        if name == self.currentMeasurementsDisplayedForScan:
-            updateComboBoxItems( self.evaluationSelectionBox, self.scanModuleEvaluations[name] )            
+        #if name == self.currentMeasurementsDisplayedForScan:
+        updateComboBoxItems( self.evaluationSelectionBox, self.scanModuleEvaluations[name] )
 
     def populateAnalysisItem(self, name, settingsDict ):
         self.scanModuleAnalysis[name] = sorted(settingsDict.keys())
-        if name == self.currentMeasurementsDisplayedForScan:
-            updateComboBoxItems( self.analysisSelectionBox, self.scanModuleAnalysis[name] )            
+        #if name == self.currentMeasurementsDisplayedForScan:
+        updateComboBoxItems( self.analysisSelectionBox, self.scanModuleAnalysis[name] )
 
     def onReorder(self, key):
         if key in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
