@@ -15,7 +15,7 @@ from modules.MagnitudeParser import isIdentifier, isValueExpression
 from modules.quantity import Q
 from modules.enum import enum
 from .AWGSegmentModel import nodeTypes
-
+from collections import defaultdict
 
 class AWGWaveform(object):
     """waveform object for AWG channels. Responsible for parsing and evaluating waveforms.
@@ -89,7 +89,7 @@ class AWGWaveform(object):
     def updateSegmentDependencies(self, nodeList):
         for node in nodeList:
             if node.nodeType==nodeTypes.segment:
-                _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True)
+                _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True, variabledict=defaultdict(int))
                 self.dependencies.update(nodeDependencies)
                 if isIdentifier(node.duration):
                     self.dependencies.add(node.duration)
@@ -152,8 +152,12 @@ class AWGWaveform(object):
             sampleList: list of values to program to the AWG.
         """
         #calculate number of samples
-        numSamples = duration*self.sampleRate
-        numSamples = int(round(numSamples)) #convert to float, then to integer
+        if duration:
+            numSamples = duration*self.sampleRate
+            numSamples = numSamples.to_base_units()
+            numSamples = int(round(numSamples)) #convert to float, then to integer
+        else:
+            numSamples = Q(0)
         numSamples = max(0, min(numSamples, self.maxSamples-startStep)) #cap at maxSamples-startStep, so that the last sample does not exceed maxSamples
         stopStep = numSamples + startStep - 1
         nextSegmentStartStep = stopStep + 1
@@ -169,7 +173,7 @@ class AWGWaveform(object):
             nextSegmentStartStep = startStep
             sampleList = numpy.array([])
         if not error:
-            varValueDict = {varName:varValueTextDict['value'].to_base_units().val for varName, varValueTextDict in self.settings.varDict.items()}
+            varValueDict = {varName:varValueTextDict['value'].to_base_units().magnitude for varName, varValueTextDict in self.settings.varDict.items()}
             varValueDict['t'] = sympy.Symbol('t')
             sympyExpr = parse_expr(node.equation, varValueDict) #parse the equation
             key = str(sympyExpr)
