@@ -118,7 +118,7 @@ class TodoList(Form, Base):
         self.scripting = scriptingUi
         self.scriptFiles = dict()
         for i in self.scripting.recentFiles:
-            self.scriptFiles[str(i.stem)] = str(i.stem)
+            self.scriptFiles[str(i.stem)] = i
         self.scanModuleMeasurements = {'Script': self.scriptFiles}#defaultdict(lambda *a: [])#dict()
         self.scanModuleEvaluations = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
         self.scanModuleAnalysis = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
@@ -128,6 +128,7 @@ class TodoList(Form, Base):
         self.globalVariablesUi = globalVariablesUi
         self.revertGlobalsList = list()
         self.idleConfiguration = None
+        self.scriptconnected = False
 
     def setupStatemachine(self):
         self.statemachine = Statemachine()        
@@ -451,20 +452,35 @@ class TodoList(Form, Base):
         return False
                 
     def enterMeasurementRunning(self):
-        entry = self.settings.todoList[ self.settings.currentIndex ]            
-        self.statusLabel.setText('Measurement Running')
-        _, currentwidget = self.currentScan()
-        self.loadLine( entry )
-        # set the global variables
-        #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
-        #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
-        # start
-        currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
-        self.tableModel.setActiveRow(self.settings.currentIndex, True)
+        entry = self.settings.todoList[ self.settings.currentIndex ]
+        if entry.scan == 'Scan':
+            self.statusLabel.setText('Measurement Running')
+            _, currentwidget = self.currentScan()
+            self.loadLine( entry )
+            # set the global variables
+            #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
+            #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
+            # start
+            currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
+            self.tableModel.setActiveRow(self.settings.currentIndex, True)
+        elif entry.scan == 'Script':
+            self.statusLabel.setText('Script Running')
+            #self.statusLabel.setText('Measurement Running')
+            self.scripting.loadFile(self.scriptFiles[entry.measurement])
+            self.scripting.onStartScript()
+            self.scripting.script.finished.connect(self.exitMeasurementRunning)
+            self.scriptconnected = True
+            self.tableModel.setActiveRow(self.settings.currentIndex, True)
+
         
     def exitMeasurementRunning(self):
-        self.settings.currentIndex = (self.settings.currentIndex+1) % len(self.settings.todoList)
-        self.tableModel.setActiveRow(self.settings.currentIndex, False)
+        if self.scriptconnected:
+            self.scripting.script.finished.disconnect(self.exitMeasurementRunning)
+            self.scriptconnected = False
+            self.onStateChanged('idle')
+        else:
+            self.settings.currentIndex = (self.settings.currentIndex+1) % len(self.settings.todoList)
+            self.tableModel.setActiveRow(self.settings.currentIndex, False)
         #self.globalVariablesUi.update(self.revertGlobalsList)
         
     def enterPaused(self):
