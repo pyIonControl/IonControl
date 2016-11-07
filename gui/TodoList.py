@@ -116,12 +116,10 @@ class TodoList(Form, Base):
         self.masterSettings = config.get( 'Todolist.MasterSettings', MasterSettings())
         self.scanModules = scanModules
         self.scripting = scriptingUi
-        self.scriptFiles = dict()
-        for i in self.scripting.recentFiles:
-            self.scriptFiles[str(i.stem)] = i
-        self.scanModuleMeasurements = {'Script': self.scriptFiles}#defaultdict(lambda *a: [])#dict()
-        self.scanModuleEvaluations = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
-        self.scanModuleAnalysis = {'Script': dict()}#defaultdict(lambda *a: [])#dict()
+        self.scriptFiles = self.scripting.allFiles
+        self.scanModuleMeasurements = {'Script': sorted(self.scriptFiles.keys())}
+        self.scanModuleEvaluations = {'Script': dict()}
+        self.scanModuleAnalysis = {'Script': dict()}
         self.currentMeasurementsDisplayedForScan = None
         self.currentScan = currentScan
         self.setCurrentScan = setCurrentScan
@@ -154,8 +152,7 @@ class TodoList(Form, Base):
         super(TodoList, self).setupUi(self)
         self.setupStatemachine()
         self.populateMeasurements()
-        #self.scanSelectionBox.addItems( list(self.scanModuleMeasurements.keys()) )
-        self.scanSelectionBox.addItems(['Scan', 'Script'])#list(self.scanModuleMeasurements.keys()) )
+        self.scanSelectionBox.addItems(['Scan', 'Script'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
         self.tableModel = TodoListTableModel( self.settings.todoList )
@@ -312,17 +309,20 @@ class TodoList(Form, Base):
         if self.currentMeasurementsDisplayedForScan != newscan:
             self.currentMeasurementsDisplayedForScan = newscan
             if newscan == 'Scan':
+                self.evaluationSelectionBox.show()
+                self.analysisSelectionBox.show()
                 updateComboBoxItems(self.measurementSelectionBox, self.scanModuleMeasurements[newscan] )
                 updateComboBoxItems(self.evaluationSelectionBox, self.scanModuleEvaluations[newscan] )
                 updateComboBoxItems(self.analysisSelectionBox, self.scanModuleAnalysis[newscan] )
             elif newscan == 'Script':
-                updateComboBoxItems(self.measurementSelectionBox, self.scriptFiles)#self.scanModuleMeasurements[newscan] )
-                updateComboBoxItems(self.evaluationSelectionBox, {})#self.scanModuleEvaluations[newscan] )
-                updateComboBoxItems(self.analysisSelectionBox, {})#self.scanModuleAnalysis[newscan] )
+                self.evaluationSelectionBox.hide()
+                self.analysisSelectionBox.hide()
+                updateComboBoxItems(self.measurementSelectionBox, sorted(self.scriptFiles.keys()))
+                updateComboBoxItems(self.evaluationSelectionBox, {})
+                updateComboBoxItems(self.analysisSelectionBox, {})
 
     def populateMeasurements(self):
-        #self.scanModuleMeasurements = dict()
-        self.scanModuleMeasurements = {'Script': self.scriptFiles}#defaultdict(lambda *a: [])#dict()
+        self.scanModuleMeasurements = {'Script': sorted(self.scriptFiles.keys())}
         for name, widget in self.scanModules.items():
             if name == 'Scan':
                 if hasattr(widget, 'scanControlWidget' ):
@@ -338,7 +338,7 @@ class TodoList(Form, Base):
                 else:
                     self.populateAnalysisItem( name, {} )
             elif name == 'Script':
-                self.populateMeasurementsItem(name, self.scriptFiles)#ing.recentFiles)
+                self.populateMeasurementsItem(name, self.scriptFiles)
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
         if hasattr(self, 'tableModel'):

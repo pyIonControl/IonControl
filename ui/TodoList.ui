@@ -188,8 +188,17 @@
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QComboBox" name="scanSelectionBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maxVisibleItems">
         <number>100</number>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
        </property>
       </widget>
      </item>
@@ -197,6 +206,9 @@
       <widget class="QComboBox" name="measurementSelectionBox">
        <property name="maxVisibleItems">
         <number>100</number>
+       </property>
+       <property name="insertPolicy">
+        <enum>QComboBox::InsertAtTop</enum>
        </property>
       </widget>
      </item>
