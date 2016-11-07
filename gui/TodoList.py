@@ -42,6 +42,8 @@ class TodoListEntry(object):
         self.scanSegment = ScanSegmentDefinition()
         self.settings = SequenceDict()
         self.revertSettings = False
+        self.conditionEnabled = False
+        self.condition = ''
         
     def __setstate__(self, s):
         self.__dict__ = s
@@ -54,6 +56,8 @@ class TodoListEntry(object):
         self.__dict__.setdefault('settings', SequenceDict())
         self.__dict__.setdefault('revertSettings', False)
         self.__dict__.setdefault('analysis', None)
+        self.__dict__.setdefault('conditionEnabled', False)
+        self.__dict__.setdefault('condition', '')
         self.scan = str(self.scan) if self.scan is not None else None
 
     stateFields = ['scan', 'measurement', 'scanParameter', 'evaluation', 'analysis', 'settings', 'enabled', 'stopFlag' ]
@@ -449,8 +453,18 @@ class TodoList(Form, Base):
     def isSomethingTodo(self):
         for index in list(range( self.settings.currentIndex, len(self.settings.todoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat else []):
             if self.settings.todoList[ index ].enabled:
-                self.settings.currentIndex = index
-                return True
+                if self.settings.todoList[index].condition != '':
+                    if eval(self.settings.todoList[index].condition):
+                        self.settings.currentIndex = index
+                        return True
+                    elif self.settings.todoList[index].stopFlag:
+                        self.settings.currentIndex = index+1
+                        self.tableModel.setActiveRow(self.settings.currentIndex, False)
+                        self.enterIdle()
+                        return False
+                else:
+                    self.settings.currentIndex = index
+                    return True
         return False
                 
     def enterMeasurementRunning(self):

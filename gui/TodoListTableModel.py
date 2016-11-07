@@ -9,7 +9,7 @@ import copy
 
 class TodoListTableModel(QtCore.QAbstractTableModel):
     valueChanged = QtCore.pyqtSignal( object )
-    headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis']
+    headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
     def __init__(self, todolist, parent=None, *args): 
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
@@ -21,12 +21,15 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
                              (QtCore.Qt.DisplayRole, 2): lambda row: self.todolist[row].measurement,
                              (QtCore.Qt.DisplayRole, 3): lambda row: self.todolist[row].evaluation if self.todolist[row].scan == 'Scan' else '',
                              (QtCore.Qt.DisplayRole, 4): lambda row: self.todolist[row].analysis if self.todolist[row].scan == 'Scan' else '',
+                             (QtCore.Qt.DisplayRole, 5): lambda row: self.todolist[row].condition,
                              (QtCore.Qt.BackgroundRole, 3): lambda row: self.bgLookup(row),
                              (QtCore.Qt.BackgroundRole, 4): lambda row: self.bgLookup(row),
+                             (QtCore.Qt.BackgroundRole, 5): lambda row: QtGui.QColor(255, 255, 255, 255) if self.todolist[row].condition != '' else QtGui.QColor(215, 215, 215, 255),
                              (QtCore.Qt.EditRole, 1): lambda row: self.todolist[row].scan,
                              (QtCore.Qt.EditRole, 2): lambda row: self.todolist[row].measurement,
                              (QtCore.Qt.EditRole, 3): lambda row: self.todolist[row].evaluation,
                              (QtCore.Qt.EditRole, 4): lambda row: self.todolist[row].analysis,
+                             (QtCore.Qt.EditRole, 5): lambda row: self.todolist[row].condition,
                              (QtCore.Qt.BackgroundColorRole, 1): lambda row: self.colorLookup[self.running] if self.activeRow==row else QtCore.Qt.white,
                              (QtCore.Qt.BackgroundColorRole, 0): lambda row: self.colorStopFlagLookup[self.todolist[row].stopFlag]
                              }
@@ -34,7 +37,8 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
                              (QtCore.Qt.EditRole, 1): partial( self.setString, 'scan' ),
                              (QtCore.Qt.EditRole, 2): partial( self.setString, 'measurement' ),
                              (QtCore.Qt.EditRole, 3): partial( self.setString, 'evaluation' ),
-                             (QtCore.Qt.EditRole, 4): partial( self.setString, 'analysis' )
+                             (QtCore.Qt.EditRole, 4): partial( self.setString, 'analysis' ),
+                             (QtCore.Qt.EditRole, 5): partial( self.setString, 'condition' )
                              }
         self.colorLookup = { True: QtGui.QColor(0xd0, 0xff, 0xd0), False: QtGui.QColor(0xff, 0xd0, 0xd0) }
         self.colorStopFlagLookup = {True: QtGui.QColor( 0xcb, 0x4e, 0x28), False: QtCore.Qt.white}
@@ -75,7 +79,7 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
         return len(self.todolist) 
         
     def columnCount(self, parent=QtCore.QModelIndex()): 
-        return 5
+        return 6
  
     def data(self, index, role): 
         if index.isValid():
@@ -97,7 +101,7 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
         elif self.todolist[index.row()].scan == 'Script':
             if index.column()==0:
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
-            elif index.column()==1 or index.column()==2:
+            elif index.column()==1 or index.column()==2 or index.column()==5:
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
             else:
                 return QtCore.Qt.ItemIsSelectable
