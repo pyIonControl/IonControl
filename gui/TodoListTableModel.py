@@ -21,6 +21,8 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
                              (QtCore.Qt.DisplayRole, 2): lambda row: self.todolist[row].measurement,
                              (QtCore.Qt.DisplayRole, 3): lambda row: self.todolist[row].evaluation,
                              (QtCore.Qt.DisplayRole, 4): lambda row: self.todolist[row].analysis,
+                             (QtCore.Qt.BackgroundRole, 3): lambda row: self.bgLookup(row),
+                             (QtCore.Qt.BackgroundRole, 4): lambda row: self.bgLookup(row),
                              (QtCore.Qt.EditRole, 1): lambda row: self.todolist[row].scan,
                              (QtCore.Qt.EditRole, 2): lambda row: self.todolist[row].measurement,
                              (QtCore.Qt.EditRole, 3): lambda row: self.todolist[row].evaluation,
@@ -45,6 +47,12 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
                               2: lambda row: self.measurementSelection[self.todolist[row].scan],
                               3: lambda row: self.evaluationSelection[self.todolist[row].scan],
                               4: lambda row: self.analysisSelection[self.todolist[row].scan]}
+
+    def bgLookup(self, row):
+        if self.todolist[row].scan == 'Scan':
+            return QtGui.QColor(255, 255, 255, 255)
+        elif self.todolist[row].scan == 'Script':
+            return QtGui.QColor(215, 215, 215, 255)
 
     def setString(self, attr, index, value):
         setattr( self.todolist[index.row()], attr, str(value) )
@@ -81,10 +89,18 @@ class TodoListTableModel(QtCore.QAbstractTableModel):
                 self.valueChanged.emit( None )
             return value
         return False
-       
-    def flags(self, index ):
-        return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else 
-                QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
+
+    def flags(self, index):
+        if self.todolist[index.row()].scan == 'Scan':
+            return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
+                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
+        elif self.todolist[index.row()].scan == 'Script':
+            if index.column()==0:
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+            elif index.column()==1 or index.column()==2:
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+            else:
+                return QtCore.Qt.ItemIsSelectable
 
     def headerData(self, section, orientation, role ):
         if (role == QtCore.Qt.DisplayRole):

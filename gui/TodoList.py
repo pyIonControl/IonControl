@@ -129,6 +129,8 @@ class TodoList(Form, Base):
         self.revertGlobalsList = list()
         self.idleConfiguration = None
         self.scriptconnected = False
+        self.currentScript = None
+        self.currentScriptCode = None
 
     def setupStatemachine(self):
         self.statemachine = Statemachine()        
@@ -465,18 +467,21 @@ class TodoList(Form, Base):
             self.tableModel.setActiveRow(self.settings.currentIndex, True)
         elif entry.scan == 'Script':
             self.statusLabel.setText('Script Running')
-            #self.statusLabel.setText('Measurement Running')
+            self.currentScript = self.scripting.script.fullname
+            self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
             self.scripting.loadFile(self.scriptFiles[entry.measurement])
             self.scripting.onStartScript()
             self.scripting.script.finished.connect(self.exitMeasurementRunning)
             self.scriptconnected = True
             self.tableModel.setActiveRow(self.settings.currentIndex, True)
 
-        
     def exitMeasurementRunning(self):
         if self.scriptconnected:
             self.scripting.script.finished.disconnect(self.exitMeasurementRunning)
             self.scriptconnected = False
+            if self.currentScript is not None:
+                self.scripting.loadFile(self.currentScript)
+                self.scripting.textEdit.setPlainText(self.currentScriptCode)
             self.onStateChanged('idle')
         else:
             self.settings.currentIndex = (self.settings.currentIndex+1) % len(self.settings.todoList)
