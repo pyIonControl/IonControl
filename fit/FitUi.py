@@ -9,6 +9,8 @@ import logging
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
+#from trace.Traceui import traceFocus
+import trace
 from fit.FitFunctionBase import fitFunctionMap, fitFunUpdate
 from fit.FitResultsTableModel import FitResultsTableModel
 from fit.FitUiTableModel import FitUiTableModel
@@ -30,13 +32,15 @@ class Parameters(AttributeComparisonEquality):
 
 class FitUi(fitForm, QtWidgets.QWidget):
     analysisNamesChanged = QtCore.pyqtSignal(object)
-    def __init__(self, traceui, config, parentname, globalDict=None, parent=None):
+    def __init__(self, traceui, config, parentname, globalDict=None, parent=None, namedtraceui=None):
         QtWidgets.QWidget.__init__(self, parent)
         fitForm.__init__(self)
         self.config = config
         self.parentname = parentname
         self.fitfunction = None
         self.traceui = traceui
+        self.namedtraceui = namedtraceui
+        self.focusui = self.traceui
         self.configname = "FitUi.{0}.".format(parentname)
         try:
             self.fitfunctionCache = self.config.get(self.configname+"FitfunctionCache", dict() )
@@ -187,15 +191,23 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if applyParamDef:
             self.analysisNameComboBox.setCurrentText('')
 
+    def getFocus(self):
+        if trace.Traceui.traceFocus == 'namedtrace' and self.namedtraceui is not None:
+            self.focusui = self.namedtraceui
+        else:
+            self.focusui = self.traceui
+
     def onGetSmartStart(self):
-        for plot in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
+        self.getFocus()
+        for plot in self.focusui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             smartParameters = self.fitfunction.enabledSmartStartValues(plot.x, plot.y, self.fitfunction.parameters)
             self.fitfunction.startParameters = list(smartParameters)
             self.fitfunctionTableModel.startDataChanged()     
         
     def onFit(self):
         """Fit the selected traces using the current fit settings"""
-        for plottedTrace in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
+        self.getFocus()
+        for plottedTrace in self.focusui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             self.fit(plottedTrace)
 
     def fit(self, plottedTrace):
@@ -218,7 +230,8 @@ class FitUi(fitForm, QtWidgets.QWidget):
             self.setFitfunction( fitfunction )
                 
     def onPlot(self):
-        for plot in self.traceui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
+        self.getFocus()
+        for plot in self.focusui.selectedTraces(useLastIfNoSelection=True, allowUnplotted=False):
             fitfunction = copy.deepcopy(self.fitfunction)
             fitfunction.parameters = [float(param) if unit is None else param.m_as(unit) for unit, param in zip(cycle(fitfunction.units if isinstance(fitfunction.units, list) else [fitfunction.units]), fitfunction.startParameters)]
             plot.fitFunction = fitfunction
@@ -226,13 +239,15 @@ class FitUi(fitForm, QtWidgets.QWidget):
             fitfunction.update()
                 
     def onRemoveFit(self):
-        for plot in self.traceui.selectedTraces(useLastIfNoSelection=True):
+        self.getFocus()
+        for plot in self.focusui.selectedTraces(useLastIfNoSelection=True):
             plot.fitFunction = None
             plot.plot(-2)
     
     def onExtractFit(self):
         logger = logging.getLogger(__name__)
-        plots = self.traceui.selectedTraces(useLastIfNoSelection=True)
+        self.getFocus()
+        plots = self.focusui.selectedTraces(useLastIfNoSelection=True)
         logger.debug( "onExtractFit {0} plots selected".format(len(plots) ) )
         if plots:
             plot = plots[0]

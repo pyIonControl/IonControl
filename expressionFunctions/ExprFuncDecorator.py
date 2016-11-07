@@ -44,21 +44,39 @@ def NamedTrace(*args, col='y'):
         float
 
     """
-    if len(args) == 2:
-        tracename = args[0]
-        Line = args[1]
-    elif len(args) == 3:
+    argmapping = list(map(type, args))
+    if argmapping == [str, str, int]:
         tracename = args[0]+'_'+args[1]
         Line = args[2]
-    if col == 'x':
-        return NamedTraceDict[tracename].content.x[Line]
-    return NamedTraceDict[tracename].content.y[Line]
+        if col == 'x':
+            return NamedTraceDict[tracename].content.x[Line]
+        return NamedTraceDict[tracename].content.y[Line]
+    if argmapping == [str, int]:
+        tracename = args[0]
+        Line = args[1]
+        if col == 'x':
+            return NamedTraceDict[tracename].content.x[Line]
+        return NamedTraceDict[tracename].content.y[Line]
+    if argmapping == [str] or argmapping == [str, type(None)]:
+        tracename = args[0]
+        if col == 'x':
+            return NamedTraceDict[tracename].content.x
+        return NamedTraceDict[tracename].content.y
+    if argmapping == [str, str] or argmapping == [str, str, type(None)]:
+        tracename = args[0]+'_'+args[1]
+        if col == 'x':
+            return NamedTraceDict[tracename].content.x
+        return NamedTraceDict[tracename].content.y
 
-class userfunc:
+def userfunc(func):
+    func.__globals__['NamedTrace'] = NamedTrace
+    UserFuncCls(func)
+    return func
+
+class UserFuncCls:
     def __init__(self, func):
         self.setMissingAttributes(func)
         self._default = func
-        self.__globals__['NamedTrace'] = NamedTrace
         self.deps = self.findDeps()
         self.sig = inspect.signature(func)
         UserExprFuncs[func.__name__] = self
@@ -72,7 +90,7 @@ class userfunc:
     def findDeps(self):
         top = ast.parse(inspect.getsource(self._default))
         analyzer = UserFuncAnalyzer()
-        analyzer.walkNode(top)
+        analyzer.visit(top)
         return analyzer.ntvar
 
     def __call__(self, *args, **kwargs):
