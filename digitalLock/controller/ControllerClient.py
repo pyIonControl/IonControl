@@ -132,7 +132,7 @@ class Controller(QtCore.QObject):
 
 
     def shutdown(self):
-        self.clientPipe.send( ('finish', () ) )
+        self.clientPipe.send(('finish', (), {}))
         self.serverProcess.join()
         self.queueReader.wait()
         self.loggingReader.wait()
@@ -141,8 +141,8 @@ class Controller(QtCore.QObject):
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             return super(Controller, self).__getattr__(name)
-        def wrapper(*args):
-            self.clientPipe.send( (name, args) )
+        def wrapper(*args, **kwargs):
+            self.clientPipe.send((name, args, kwargs))
             return processReturn( self.clientPipe.recv() )
         setattr(self, name, wrapper)
         return wrapper      

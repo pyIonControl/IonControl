@@ -242,7 +242,8 @@ class AutoLoad(UiForm, UiBase):
         self.statemachine.addState('Load', self.setLoad, needsConfirmation=True)
         self.statemachine.addState('PeriodicCheck', self.setPeriodicCheck, needsConfirmation=True)
         self.statemachine.addState('Check', self.setCheck, needsConfirmation=True)
-        self.statemachine.addState('Trapped', self.setTrapped, self.exitTrapped, needsConfirmation=True)
+        self.statemachine.addState('Trapped', self.setTrapped, self.exitTrapped, needsConfirmation=True,
+                                   confirmedFunc=self.setTrappedConfirmed)
         self.statemachine.addState('Frozen', self.setFrozen, needsConfirmation=True)
         self.statemachine.addState('WaitingForComeback', self.setWaitingForComeback, needsConfirmation=True)
         self.statemachine.addState('AutoReloadFailed', self.setAutoReloadFailed, needsConfirmation=True)
@@ -345,6 +346,10 @@ class AutoLoad(UiForm, UiBase):
         self.statemachine.addTransition('timer', 'Dump', 'Load',
                                         lambda state: state.timeInState() > self.settings.dumpTime,
                                         description="end dump threshold")
+        self.statemachine.ignoreEventTypes.add('data')
+        self.statemachine.ignoreEventTypes.add('timer')
+
+        self.statemachine.immediateActionEventTypes.update(['stopButton'])
 
     def parameter(self):
         # re-create the parameters each time to prevent a exception that says the signal is not connected
@@ -835,6 +840,8 @@ class AutoLoad(UiForm, UiBase):
         self.trappingTime = self.trappingTime
         self.numFailedAutoload = 0
         # self.checkStarted = self.trappingTime
+
+    def setTrappedConfirmed(self):
         self.ionReappeared.emit()
 
     def exitTrapped(self):

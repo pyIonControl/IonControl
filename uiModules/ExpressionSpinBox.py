@@ -57,7 +57,7 @@ class ExpressionSpinBox(MagnitudeSpinBox):
         self.updateStyleSheet()
 
     def onStepBy(self, newvalue ):
-        if newvalue:
+        if newvalue is not None:
             self.expressionValue.value = newvalue
             self.expressionValue.string = None
             self.expressionChanged.emit( self.expressionValue )

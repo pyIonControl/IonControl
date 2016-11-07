@@ -16,10 +16,11 @@ import numpy
 from PyQt5 import QtCore
 
 from modules.quantity import Q
-from .PulserHardwareServer import FinishException
+from .ServerProcess import FinishException
 from pulser.OKBase import ErrorMessages, FPGAException
 from .PulserHardwareServer import PulserHardwareServer
 from pulser.PulserHardwareServer import PulserHardwareException
+from pulser.LoggingReader import LoggingReader
 
 
 def check(number, command):
@@ -59,31 +60,6 @@ class QueueReader(QtCore.QThread):
                 logger.exception("Exception in QueueReader")
         logger.info( "QueueReader thread finished." )
 
-class LoggingReader(QtCore.QThread):
-    def __init__(self, loggingQueue, parent=None):
-        QtCore.QThread.__init__(self, parent)
-        self.running = False
-        self.loggingQueue = loggingQueue
-        
-    def run(self):
-        logger = logging.getLogger(__name__)
-        logger.debug("LoggingReader Thread running")
-        while True:
-            try:
-                record = self.loggingQueue.get()
-                if record is None: # We send this as a sentinel to tell the listener to quit.
-                    logger.debug("LoggingReader Thread shutdown requested")
-                    break
-                clientlogger = logging.getLogger(record.name)
-                if record.levelno>=clientlogger.getEffectiveLevel():
-                    clientlogger.handle(record) # No level or filter logic applied - just do it!
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except:
-                logger.exception("Exception in Logging Reader Thread")
-        logger.info("LoggingReader Thread finished")
-
-                
 
 class PulserHardware(QtCore.QObject):
     serverClass = PulserHardwareServer
@@ -124,7 +100,7 @@ class PulserHardware(QtCore.QObject):
         self._pulserConfiguration = None
         
     def shutdown(self):
-        self.clientPipe.send( ('finish', () ) )
+        self.clientPipe.send(('finish', (), {}))
         self.serverProcess.join()
         self.queueReader.wait()
         self.loggingReader.wait()
@@ -133,84 +109,84 @@ class PulserHardware(QtCore.QObject):
     def __getattr__(self, name):
         if name.startswith('__') and name.endswith('__'):
             return super(PulserHardware, self).__getattr__(name)
-        def wrapper(*args):
-            self.clientPipe.send( (name, args) )
+        def wrapper(*args, **kwargs):
+            self.clientPipe.send((name, args, kwargs))
             return processReturn( self.clientPipe.recv() )
         setattr(self, name, wrapper)
         return wrapper      
         
     @property
     def shutter(self):
-        self.clientPipe.send( ('getShutter', () ) )
+        self.clientPipe.send(('getShutter', (), {}))
         return processReturn( self.clientPipe.recv() )
          
     @shutter.setter
     def shutter(self, value):
-        self.clientPipe.send( ('setShutter', (value,) ) )      
+        self.clientPipe.send(('setShutter', (value,), {}))
         _shutter = processReturn( self.clientPipe.recv() )
         self.shutterChanged.emit( _shutter )          
         
     @property
     def trigger(self):
-        self.clientPipe.send( ('getTrigger', () ) )
+        self.clientPipe.send(('getTrigger', (), {}))
         return processReturn( self.clientPipe.recv() )
             
     @trigger.setter
     def trigger(self, value):
-        self.clientPipe.send( ('setTrigger', (value,) ) )        
+        self.clientPipe.send(('setTrigger', (value,), {}))
         return processReturn( self.clientPipe.recv() )
             
     @property
     def counterMask(self):
-        self.clientPipe.send( ('getCounterMask', () ) )
+        self.clientPipe.send(('getCounterMask', (), {}))
         return processReturn( self.clientPipe.recv() )
         
     @counterMask.setter
     def counterMask(self, value):
-        self.clientPipe.send( ('setCounterMask', (value,) ) )        
+        self.clientPipe.send(('setCounterMask', (value,), {}))
         return processReturn( self.clientPipe.recv() )
 
     @property
     def adcMask(self):
-        self.clientPipe.send( ('getAdcMask', () ) )
+        self.clientPipe.send(('getAdcMask', (), {}))
         return processReturn( self.clientPipe.recv() )
         
     @adcMask.setter
     def adcMask(self, value):
-        self.clientPipe.send( ('setAdcMask', (value,) ) )        
+        self.clientPipe.send(('setAdcMask', (value,), {}))
         return processReturn( self.clientPipe.recv() )
         
     @property
     def integrationTime(self):
-        self.clientPipe.send( ('getIntegrationTime', () ) )
+        self.clientPipe.send(('getIntegrationTime', (), {}))
         return processReturn( self.clientPipe.recv() )
 
     @property
     def openModule(self):
-        self.clientPipe.send(('getOpenModule', ()))
+        self.clientPipe.send(('getOpenModule', (), {}))
         return processReturn(self.clientPipe.recv())
 
     @integrationTime.setter
     def integrationTime(self, value):
-        self.clientPipe.send( ('setIntegrationTime', (value,) ) )        
+        self.clientPipe.send(('setIntegrationTime', (value,), {}))
         return processReturn( self.clientPipe.recv() )
             
     def ppStart(self):
-        self.clientPipe.send( ('ppStart', () ) )
+        self.clientPipe.send(('ppStart', (), {}))
         value = processReturn( self.clientPipe.recv() )
         self.ppActive = True
         self.ppActiveChanged.emit(True)
         return value
             
     def ppStop(self):
-        self.clientPipe.send( ('ppStop', () ) )
+        self.clientPipe.send(('ppStop', (), {}))
         value = processReturn( self.clientPipe.recv() )
         self.ppActive = False
         self.ppActiveChanged.emit(False)
         return value
             
     def setShutterBit(self, bit, value):
-        self.clientPipe.send( ('setShutterBit', (bit, value) ) )  
+        self.clientPipe.send(('setShutterBit', (bit, value), {}))
         _shutter = processReturn( self.clientPipe.recv() )
         self.shutterChanged.emit( _shutter )
         return _shutter 
@@ -229,14 +205,14 @@ class PulserHardware(QtCore.QObject):
         for start in range(0, len(wordlist), self.sharedMemorySize ):
             length = min( self.sharedMemorySize, len(wordlist)-start )
             self.sharedMemoryArray[0:length] = wordlist[start:start+length]
-            self.clientPipe.send( ('ppWriteRamWordListShared', (length, address+8*start, check) ) )
+            self.clientPipe.send(('ppWriteRamWordListShared', (length, address + 8 * start, check), {}))
             processReturn( self.clientPipe.recv() )
         return True
             
     def ppReadRamWordList(self, wordlist, address):
         for start in range(0, len(wordlist), self.sharedMemorySize ):
             length = min( self.sharedMemorySize, len(wordlist)-start )
-            self.clientPipe.send( ('ppReadRamWordListShared', (length, address+8*start) ) )
+            self.clientPipe.send(('ppReadRamWordListShared', (length, address + 8 * start), {}))
             processReturn( self.clientPipe.recv() )
             wordlist[start:start+length] =  self.sharedMemoryArray[0:length] 
         return wordlist
