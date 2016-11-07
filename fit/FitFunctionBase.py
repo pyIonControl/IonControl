@@ -17,6 +17,8 @@ from modules.Expression import Expression
 from modules.Observable import Observable
 from modules.quantity import Q
 from leastsqbound import leastsqbound
+from modules.DataChanged import DataChanged
+import collections
 
 
 class FitFunctionException(Exception):
@@ -38,16 +40,36 @@ class ResultRecord(object):
 
     def __hash__(self):
         return hash(tuple(getattr(self, field) for field in self.stateFields))
-    
-fitFunctionMap = dict()    
-   
+
+fitFunUpdate = DataChanged()
+
+class UniqueOriginDict(collections.UserDict):
+    """A custom dictionary for proper updating of user-defined fit functions"""
+    def __init__(self):
+        super().__init__()
+        self.origins = dict()
+
+    def __setitem__(self, key, item):
+        if 'origin' in vars(item).keys():
+            if item.__dict__['origin'] in self.origins.keys():
+                repname = self.origins[item.__dict__['origin']]
+                del self.origins[item.__dict__['origin']]
+                del self.data[repname]
+                fitFunUpdate.dataChanged.emit(repname, False)
+            self.origins[item.__dict__['origin']] = key
+        self.data[key] = item
+
+fitFunctionMap = UniqueOriginDict()
+
 class FitFunctionMeta(type):
     def __new__(self, name, bases, dct):
         if 'name' not in dct:
             raise FitFunctionException("Fitfunction class needs to have class attribute 'name'")
         instrclass = super(FitFunctionMeta, self).__new__(self, name, bases, dct)
         if name!='FitFunctionBase':
-            fitFunctionMap[dct['name']] = instrclass
+            fitFunctionMap[str(dct['name'])] = instrclass
+            overwriteParams = dct.get('overwrite', False)
+            fitFunUpdate.dataChanged.emit(str(dct['name']), overwriteParams)
         return instrclass
     
 def native(method):

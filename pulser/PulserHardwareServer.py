@@ -21,10 +21,12 @@ from modules.quantity import Q
 from mylogging.ServerLogging import configureServerLogging
 from pulser.OKBase import OKBase, check
 from pulser.PulserConfig import getPulserConfiguration
+from pulser.ServerProcess import ServerProcess
 
 
 class PulserHardwareException(Exception):
     pass
+
 
 class Data(object):
     def __init__(self):
@@ -74,6 +76,7 @@ class Data(object):
         (data.count, data.timestamp, data.timestampZero, data.scanvalue, data.final, data.other, data.overrun,
          data.exitcode, data.dependentValues, data.result, data.externalStatus, data._creationTime, data.timeTickOffset) = json.loads(string)
 
+
 class DedicatedData(object):
     def __init__(self, timeTickOffset=0):
         self.data = [None]*34
@@ -99,6 +102,7 @@ class DedicatedData(object):
     def timestamp(self, ts):
         self._timestamp = ts
 
+
 class LogicAnalyzerData:
     def __init__(self):
         self.data = list()
@@ -120,22 +124,15 @@ class LogicAnalyzerData:
         return "data: {0} auxdata: {1} trigger: {2} gate: {3} stopMarker: {4} countOffset: {5}".format(self.dataToStr(self.data), self.dataToStr(self.auxData), self.dataToStr(self.trigger), 
                                                                                                        self.dataToStr(self.gateData), self.stopMarker, self.countOffset)
 
-class FinishException(Exception):
-    pass
 
-class PulserHardwareServer(Process, OKBase):
+class PulserHardwareServer(ServerProcess, OKBase):
     timestep = Q(5, 'ns')
     integrationTimestep = Q(20, 'ns')
     dedicatedDataClass = DedicatedData
     def __init__(self, dataQueue=None, commandPipe=None, loggingQueue=None, sharedMemoryArray=None):
-        Process.__init__(self)
+        ServerProcess.__init__(self, dataQueue, commandPipe, loggingQueue, sharedMemoryArray)
         OKBase.__init__(self)
-        self.dataQueue = dataQueue
-        self.commandPipe = commandPipe
-        self.running = True
-        self.loggingQueue = loggingQueue
-        self.sharedMemoryArray = sharedMemoryArray
-        
+
         # PipeReader stuff
         self.state = self.analyzingState.normal
         self.data = Data()
@@ -156,29 +153,6 @@ class PulserHardwareServer(Process, OKBase):
         self.logicAnalyzerReadStatus = 0      #
         self._pulserConfiguration = None
         
-    def run(self):
-        try:
-            configureServerLogging(self.loggingQueue)
-            logger = logging.getLogger(__name__)
-            while (self.running):
-                if self.commandPipe.poll(0.01):
-                    try:
-                        commandstring, argument = self.commandPipe.recv()
-                        command = getattr(self, commandstring)
-                        logger.debug( "PulserHardwareServer {0}".format(commandstring) )
-                        self.commandPipe.send(command(*argument))
-                    except Exception as e:
-                        self.commandPipe.send(e)
-                self.readDataFifo()
-            self.dataQueue.put(FinishException())
-            logger.info( "Pulser Hardware Server Process finished." )
-        except Exception as e:
-            logger.error("Pulser Hardware Server Process exception {0}".format(e))
-        self.dataQueue.close()
-        self.loggingQueue.put(None)
-        self.loggingQueue.close()
-#         self.loggingQueue.join_thread()
-            
     def syncTime(self):
         if self.xem:
             self.xem.ActivateTriggerIn(0x40, 15)
@@ -187,9 +161,6 @@ class PulserHardwareServer(Process, OKBase):
             logging.getLogger(__name__).error("No time synchronization because FPGA is not available")
         self.timeTickOffset = time_time()        
             
-    def finish(self):
-        self.running = False
-        return True
 
     analyzingState = enum.enum('normal', 'scanparameter', 'dependentscanparameter')
     def readDataFifo(self):
