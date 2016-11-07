@@ -152,7 +152,7 @@ class TodoList(Form, Base):
         self.setupStatemachine()
         self.populateMeasurements()
         #self.scanSelectionBox.addItems( list(self.scanModuleMeasurements.keys()) )
-        self.scanSelectionBox.addItems( ['Scan', 'Script'])#list(self.scanModuleMeasurements.keys()) )
+        self.scanSelectionBox.addItems(['Scan', 'Script'])#list(self.scanModuleMeasurements.keys()) )
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
         self.tableModel = TodoListTableModel( self.settings.todoList )
@@ -318,7 +318,8 @@ class TodoList(Form, Base):
                 updateComboBoxItems(self.analysisSelectionBox, {})#self.scanModuleAnalysis[newscan] )
 
     def populateMeasurements(self):
-        self.scanModuleMeasurements = dict()
+        #self.scanModuleMeasurements = dict()
+        self.scanModuleMeasurements = {'Script': self.scriptFiles}#defaultdict(lambda *a: [])#dict()
         for name, widget in self.scanModules.items():
             if name == 'Scan':
                 if hasattr(widget, 'scanControlWidget' ):
