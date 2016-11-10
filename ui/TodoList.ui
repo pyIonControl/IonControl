@@ -189,7 +189,7 @@
      <item>
       <widget class="QComboBox" name="scanSelectionBox">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -198,12 +198,18 @@
         <number>100</number>
        </property>
        <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+        <enum>QComboBox::AdjustToContents</enum>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QComboBox" name="measurementSelectionBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maxVisibleItems">
         <number>100</number>
        </property>
@@ -214,6 +220,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="evaluationSelectionBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maxVisibleItems">
         <number>100</number>
        </property>
@@ -221,6 +233,12 @@
      </item>
      <item>
       <widget class="QComboBox" name="analysisSelectionBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>1</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="maxVisibleItems">
         <number>100</number>
        </property>
@@ -261,7 +279,17 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QTableView" name="tableView"/>
+     <widget class="QTreeView" name="tableView">
+      <property name="itemsExpandable">
+       <bool>true</bool>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
+      </property>
+      <property name="expandsOnDoubleClick">
+       <bool>false</bool>
+      </property>
+     </widget>
      <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
