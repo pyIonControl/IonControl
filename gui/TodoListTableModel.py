@@ -3,26 +3,82 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import weakref
+
 from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
 import copy
 
-from uiModules.CategoryTree import CategoryTreeModel
+class BaseNode(object):
+    def __init__(self, parent, row):
+        self.parent = parent
+        self.row = row
+        self.childNodes = self._children()
+
+    def _children(self):
+        raise NotImplementedError()
+
+class TodoListNode(BaseNode):
+    def __init__(self, entry, parent, row):
+        self.entry = entry
+        BaseNode.__init__(self, parent, row)
+
+    def _children(self):
+        return [TodoListNode(elem, self, index) for index, elem in enumerate(self.entry.children)]
+
+    #def verifyEntry(self):
+        #if isinstance(self.entry, TodoListNode):
+            #self.entry = self.entry.entry
+            #self.verifyEntry()
 
 
-class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel):
+class TodoListBaseModel(QtCore.QAbstractItemModel):
+    def __init__(self):
+        QtCore.QAbstractItemModel.__init__(self)
+        self.rootNodes = self._rootNodes()
+        #self.todolist = self._rootNodes()#self._todolist()
+
+    def _rootNodes(self):
+        raise NotImplementedError()
+
+    def index(self, row, column, parent):
+        if not parent.isValid():
+            return self.createIndex(row, column, self.rootNodes[row])
+            #return self.createIndex(row, column, self.todolist[row])
+        parentNode = parent.internalPointer()
+        return self.createIndex(row, column, parentNode.childNodes[row])
+
+    def parent(self, index):
+        if not index.isValid():
+            return QtCore.QModelIndex()
+        node = index.internalPointer()
+        if not hasattr(node, 'parent') or node.parent is None:
+            return QtCore.QModelIndex()
+        else:
+            return self.createIndex(node.parent.row, 0, node.parent)
+
+    def reset(self):
+        self.rootNodes = self._rootNodes()
+        #self.todolist = self._rootNodes()
+        QtCore.QAbstractItemModel.reset(self)
+
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        if not parent.isValid():
+            return len(self.rootNodes)
+            #return len(self.todolist)
+        node = parent.internalPointer()
+        return len(node.childNodes)
+
+
+class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
     def __init__(self, todolist, settingsCache, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
         """
-        #QtCore.QAbstractTableModel.__init__(self, parent, *args)
-        QtCore.QAbstractItemModel.__init__(self, parent, *args)
-        #super().__init__(self, parent, *args)
-        #CategoryTreeModel.__init__(self, [], self, self.headerDataLookup)
-        #super().__init__()#[] , parent, self.headerDataLookup)
         self.todolist = todolist
+        TodoListBaseModel.__init__(self)
         self.settingsCache = settingsCache
         self.dataLookup =  { (QtCore.Qt.CheckStateRole, 0): lambda row: QtCore.Qt.Checked if self.todolist[row].enabled else QtCore.Qt.Unchecked,
                              (QtCore.Qt.DisplayRole, 1): lambda row: self.todolist[row].scan,
@@ -85,13 +141,11 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
                               2: lambda row: self.measurementSelection[self.todolist[row].scan],
                               3: lambda row: self.evaluationSelection[self.todolist[row].scan],
                               4: lambda row: self.analysisSelection[self.todolist[row].scan]}
-        #self.selectionModel().
-        #self.rootNodes = self._getRootNodes()
 
-    #def _getRootNodes(self):
-        #return self.todolist
-        #raise NotImplementedError()
-
+    def _rootNodes(self):
+        #if len(self.todolist) > 0 and isinstance(self.todolist[0], TodoListNode):
+            #return self.todolist
+        return [TodoListNode(elem, None, index) for index, elem in enumerate(self.todolist)]
 
     def bgLookup(self, row):
         if self.todolist[row].scan == 'Scan':
@@ -115,17 +169,18 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
             self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
         if oldactive is not None and oldactive!=row:
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
-
+    '''
     def rowCount(self, parent=QtCore.QModelIndex()):
         if not parent.isValid():
             return len(self.todolist)
         node = parent.internalPointer()
-        if hasattr(node, 'children'):
-            return len(node.children)#+len(self.todolist)
+        #if hasattr(node, 'children'):
+        return len(node.children)#+len(self.todolist)
         #else:
         #return len(self.todolist)
             #return 0
         #return len(self.todolist)
+    '''
         
     def columnCount(self, parent=QtCore.QModelIndex()): 
         return 6
@@ -147,22 +202,21 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
             return self.dataLookup.get((role, index.column()), lambda row: None)(index.row())
         return None
 
-    #def data(self, index, role):
-        #if not index.isValid():
-            #return None
-        #node = index.internalPointer()
-        #if role
-    
     def setData(self, index, value, role):
         if index.isValid():
             value = self.setDataLookup.get((role, index.column()), lambda index, value: None)(index, value)
             if self.todolist[index.row()].scan == 'Todo List':
                 #for i in list(self.settingsCache[self.todolist[index.row()].measurement].todoList):
                 self.todolist[index.row()].children = copy.deepcopy(self.settingsCache[self.todolist[index.row()].measurement].todoList)
+                #self.todolist[index.row()].children = weakref.ref(self.settingsCache[self.todolist[index.row()].measurement].todoList)
                 #self.todolist[index.row()].parentInd = index.row()
                 for childind in range(len(self.todolist[index.row()].children)):
-                    self.todolist[index.row()].children[childind].parent = self.todolist[index.row()]
+                    #self.todolist[index.row()].children[childind].parent = weakref.ref(self.todolist[index.row()])
+                    self.todolist[index.row()].children[childind].parent = copy.deepcopy(self.todolist[index.row()])
                     self.todolist[index.row()].children[childind].parentInd = index.row()
+            self.beginResetModel()
+            self.rootNodes = self._rootNodes()
+            self.endResetModel()
             if value:
                 self.valueChanged.emit( None )
             return value
@@ -192,12 +246,14 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
                 for row in rows:
                     self.todolist[row], self.todolist[row-1] = self.todolist[row-1], self.todolist[row]
                     self.dataChanged.emit( self.createIndex(row-1, 0), self.createIndex(row, 3) )
+                #self.rootNodes = self._rootNodes()
                 return True
         else:
             if len(rows)>0 and rows[0]<len(self.todolist)-1:
                 for row in rows:
                     self.todolist[row], self.todolist[row+1] = self.todolist[row+1], self.todolist[row]
                     self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
+                #self.rootNodes = self._rootNodes()
                 return True
         return False
 
@@ -205,16 +261,19 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
         self.beginInsertRows(QtCore.QModelIndex(), len(self.todolist), len(self.todolist))
         self.todolist.append( todoListElement )
         self.endInsertRows()
+        #self.rootNodes = self._rootNodes()
         return len(self.todolist)-1
         
     def dropMeasurement (self, row):
         self.beginRemoveRows(QtCore.QModelIndex(), row, row )
         self.todolist.pop(row)
+        #self.rootNodes = self._rootNodes()
         self.endRemoveRows()
     
     def setTodolist(self, todolist):
         self.beginResetModel()
         self.todolist = todolist
+        self.rootNodes = self._rootNodes()
         self.endResetModel()
         
     def choice(self, index):
@@ -230,7 +289,8 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
         for row_index in row_list:
             row_data = self.todolist[row_index]
             self.addMeasurement(copy.deepcopy(row_data))
-
+        self.rootNodes = self._rootNodes()
+'''
     def index(self, row, column, parent):
         #if not parent.parent().isValid():
         if not parent.isValid():
@@ -244,12 +304,12 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
         if not index.isValid() or index.row() == -1:
             return QtCore.QModelIndex()
         node = index.internalPointer()
-        if node is None or not hasattr(node, 'parent') or (hasattr(node, 'parentInd') and node.parent is None):
+        if node is None or not hasattr(node, 'parent') or not hasattr(node, 'parentInd') or (hasattr(node, 'parentInd') and node.parent is None):
         #if not index.parent().isValid():
             return QtCore.QModelIndex()
         else:
-            #return self.createIndex(node.parent.parentInd, 0, node.parent)
-            return self.createIndex(self.todolist.index(node.parent), 0, node.parent)
+            return self.createIndex(node.parentInd, 0, node.parent)
+            #return self.createIndex(self.todolist.index(node.parent), 0, node.parent)
             #return self.createIndex(index.parent.row(), 0, node.parent)
             #return self.createIndex(index.parent.index.row(), 0, node.parent)
 #    def index(self, row, column, parentIndex):
@@ -261,4 +321,4 @@ class TodoListTableModel(QtCore.QAbstractItemModel):#QtCore.QAbstractTableModel)
             #node = parentNode.child(row)
             #ind = self.createIndex(row, column, node) if node else QtCore.QModelIndex()
         #return ind
-
+'''

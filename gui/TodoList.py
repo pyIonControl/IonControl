@@ -30,6 +30,7 @@ Form, Base = uic.loadUiType('ui/TodoList.ui')
 def FlattenTodoList(todolist):
     pass
 
+
 class TodoListEntry(object):#QtCore.QAbstractItemModel):#object):
     def __init__(self, scan=None, measurement=None, evaluation=None, analysis=None):
         super().__init__()
@@ -49,21 +50,21 @@ class TodoListEntry(object):#QtCore.QAbstractItemModel):#object):
         self.conditionEnabled = False
         self.condition = ''
 
-    def _getChildren(self):
-        return self.children
-
-    def hasChildren(self):
-        if self.children is not None:
-            return True
-        return False
-
-    def childCount(self):
-        if self.children is not None:
-            return len(self.children)
-        return 0
-
-    def child(self, ind):
-        return self.children[ind]
+    #def _getChildren(self):
+        #return self.children
+#
+    #def hasChildren(self):
+        #if self.children is not None:
+            #return True
+        #return False
+#
+    #def childCount(self):
+        #if self.children is not None:
+            #return len(self.children)
+        #return 0
+#
+    #def child(self, ind):
+        #return self.children[ind]
 
     def __setstate__(self, s):
         self.__dict__ = s
