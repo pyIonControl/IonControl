@@ -262,8 +262,8 @@ class TodoList(Form, Base):
         self.indexStack.extendleft(self.populateIndexStack(idx))
         self.currentTodoList = self.settings.todoList
         for index in self.indexStack:
-            self.todoStack.append(deepcopy(self.currentTodoList))
-            #self.todoStack.append(self.currentTodoList)
+            #self.todoStack.append(deepcopy(self.currentTodoList))
+            self.todoStack.append(self.currentTodoList)
             self.currentTodoList = self.currentTodoList[index].children
         self.currentTodoList = self.todoStack.pop()
         self.settings.currentIndex = self.indexStack.pop()
@@ -297,6 +297,7 @@ class TodoList(Form, Base):
             self.checkSettingsSavable()
         
     def checkSettingsSavable(self, savable=None):
+        self.tableView.expandAll()
         if savable is None:
             text = str(self.comboBoxListCache.currentText())
             savable = False
@@ -335,7 +336,6 @@ class TodoList(Form, Base):
     def setSettings(self, newSettings):
         self.settings = newSettings
         self.tableModel.setTodolist(self.settings.todoList)
-        #self.tableModel.setTodolist(self.currentTodoList)
         self.currentTodoList = self.settings.todoList
         self.indexStack.clear()
         self.todoStack.clear()
@@ -343,19 +343,15 @@ class TodoList(Form, Base):
         self.repeatButton.setChecked( self.settings.repeat )
         
     def setCurrentIndex(self, index):
-        #if self.currentTodoList[index.row()].scan != 'Todo List':
         self.settings.currentIndex = index.row()
         self.currentTodoList = self.settings.todoList
         self.populateStacks(self.settings.todoList, index)
         while self.currentTodoList[self.settings.currentIndex].scan == 'Todo List':
+            self.settings.currentIndex -= 1
             self.incrementIndex(overrideRepeat=True)
-        #self.tableModel.setActiveEntry(self.currentTodoList[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
         self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
-        #if
         self.checkSettingsSavable()
-        #else:
-            #self.tableView.collapse(index)#, False)
-        
+
     def updateMeasurementSelectionBox(self, newscan ):
         newscan = str(newscan)
         if self.currentMeasurementsDisplayedForScan != newscan:
@@ -376,7 +372,6 @@ class TodoList(Form, Base):
                 self.evaluationSelectionBox.hide()
                 self.analysisSelectionBox.hide()
                 updateComboBoxItems(self.measurementSelectionBox, sorted(self.settingsCache.keys()))
-                #self.populateMeasurementsItem(name, self.settingsCache)
                 updateComboBoxItems(self.evaluationSelectionBox, {})
                 updateComboBoxItems(self.analysisSelectionBox, {})
 
@@ -523,8 +518,8 @@ class TodoList(Form, Base):
         else:
             if self.currentTodoList[modindex].enabled:
                 self.indexStack.append(modindex)
-                self.todoStack.append(deepcopy(self.currentTodoList))
-                #self.todoStack.append(self.currentTodoList)
+                #self.todoStack.append(deepcopy(self.currentTodoList))
+                self.todoStack.append(self.currentTodoList)
                 self.currentTodoList = self.currentTodoList[modindex].children
                 self.settings.currentIndex = 0
             else:
