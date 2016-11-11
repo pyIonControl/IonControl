@@ -24,26 +24,12 @@ class TodoListNode(BaseNode):
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
-        #return [TodoListNode(elem, self, index) for index, elem in enumerate(self.entry.children)]
         return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
 
     def recursiveLookup(self, rowlist):
-        #irowlist = rowlist
-        #if isinstance(rowlist, QtCore.QModelIndex):
-            #irowlist = self.generateRowList(rowlist)
         if len(rowlist) == 1:
             return self.childNodes[rowlist[0]]
         return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
-
-    #def generateRowList(self, index, initList=None):
-        #if initList is None:
-            #initList = []
-        #initList.append(index.row())
-        #if index.parent().isValid():
-            #return self.generateRowList(index.parent(), initList)
-        #return reversed(initList)
-
-
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self):
@@ -79,20 +65,9 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         return len(node.childNodes)
 
     def recursiveLookup(self, rowlist):
-        # irowlist = rowlist
-        #if isinstance(rowlist, QtCore.QModelIndex):
-            #irowlist = self.generateRowList(rowlist)
         if len(rowlist) == 1:
             return self.rootNodes[rowlist[0]]
         return self.rootNodes[rowlist[0]].recursiveLookup(rowlist[1:])
-
-    #def generateRowList(self, index, initList=None):
-        #if initList is None:
-            #initList = []
-        #initList.append(index.row())
-        #if index.parent().isValid():
-            #return self.generateRowList(index.parent(), initList)
-        #return reversed(initList)
 
 class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
@@ -104,50 +79,39 @@ class TodoListTableModel(TodoListBaseModel):
         self.todolist = todolist
         self.settingsCache = settingsCache
         TodoListBaseModel.__init__(self)
-        self.dataLookup =  { (QtCore.Qt.CheckStateRole, 0): lambda row: QtCore.Qt.Checked if self.todolist[row].enabled else QtCore.Qt.Unchecked,
-                             (QtCore.Qt.DisplayRole, 1): lambda row: self.todolist[row].scan,
-                             (QtCore.Qt.DisplayRole, 2): lambda row: self.todolist[row].measurement,
-                             (QtCore.Qt.DisplayRole, 3): lambda row: self.todolist[row].evaluation if (self.todolist[row].scan == 'Scan' or
-                                                                                                       self.todolist[row].scan == 'Todo List')
-                                                                                                   else '',
-                             (QtCore.Qt.DisplayRole, 4): lambda row: self.todolist[row].analysis if (self.todolist[row].scan == 'Scan' or
-                                                                                                     self.todolist[row].scan == 'Todo List')
-                                                                                                 else '',
-
-                             (QtCore.Qt.DisplayRole, 5): lambda row: self.todolist[row].condition,
-                             (QtCore.Qt.BackgroundRole, 3): lambda row: self.bgLookup(row),
-                             (QtCore.Qt.BackgroundRole, 4): lambda row: self.bgLookup(row),
-                             (QtCore.Qt.BackgroundRole, 5): lambda row: QtGui.QColor(255, 255, 255, 255) if self.todolist[row].condition != '' else QtGui.QColor(215, 215, 215, 255),
-                             (QtCore.Qt.EditRole, 1): lambda row: self.todolist[row].scan,
-                             (QtCore.Qt.EditRole, 2): lambda row: self.todolist[row].measurement,
-                             (QtCore.Qt.EditRole, 3): lambda row: self.todolist[row].evaluation,
-                             (QtCore.Qt.EditRole, 4): lambda row: self.todolist[row].analysis,
-                             (QtCore.Qt.EditRole, 5): lambda row: self.todolist[row].condition,
-                             (QtCore.Qt.BackgroundColorRole, 1): lambda row: self.colorLookup[self.running] if self.rootNodes[row].highlighted else QtCore.Qt.white,
-                             (QtCore.Qt.BackgroundColorRole, 0): lambda row: self.colorStopFlagLookup[self.todolist[row].stopFlag]
-                             }
-        self.childDataLookup =  { (QtCore.Qt.CheckStateRole, 0): lambda row, parentind: QtCore.Qt.Checked if self.rootNodes[parentind].childNodes[row].entry.enabled else QtCore.Qt.Unchecked,
-                                  (QtCore.Qt.DisplayRole, 1): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.scan,
-                                  (QtCore.Qt.DisplayRole, 2): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.measurement,
-                                  (QtCore.Qt.DisplayRole, 3): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.evaluation if (self.rootNodes[parentind].childNodes[row].entry.scan == 'Scan' or
-                                                                                                                                           self.rootNodes[parentind].childNodes[row].entry.scan == 'Todo List')
-                                                                                                                                          else '',
-                                  (QtCore.Qt.DisplayRole, 4): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.analysis if (self.rootNodes[parentind].childNodes[row].entry.scan == 'Scan' or
-                                                                                                                                         self.rootNodes[parentind].childNodes[row].entry.scan == 'Todo List')
-                                                                                                                                        else '',
-                                  (QtCore.Qt.DisplayRole, 5): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.condition,
-                                  (QtCore.Qt.BackgroundRole, 3): lambda row, parentind: self.bgLookup(row),
-                                  (QtCore.Qt.BackgroundRole, 4): lambda row, parentind: self.bgLookup(row),
-                                  (QtCore.Qt.BackgroundRole, 5): lambda row, parentind: QtGui.QColor(255, 255, 255, 255) if self.rootNodes[row].entry.condition != '' else QtGui.QColor(215, 215, 215, 255),
-                                  (QtCore.Qt.EditRole, 1): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.scan,
-                                  (QtCore.Qt.EditRole, 2): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.measurement,
-                                  (QtCore.Qt.EditRole, 3): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.evaluation,
-                                  (QtCore.Qt.EditRole, 4): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.analysis,
-                                  (QtCore.Qt.EditRole, 5): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.condition,
-                                  (QtCore.Qt.BackgroundColorRole, 1): lambda row, parentind: self.colorLookup[self.running] if self.rootNodes[parentind].childNodes[row].highlighted else QtCore.Qt.white,
-                                  (QtCore.Qt.BackgroundColorRole, 0): lambda row, parentind: self.colorStopFlagLookup[self.rootNodes[parentind].childNodes[row].entry.stopFlag]
-                                  }
-        self.setDataLookup ={ (QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
+        self.nodeDataLookup = {
+             (QtCore.Qt.CheckStateRole, 0): lambda node: QtCore.Qt.Checked
+                                                         if node.entry.enabled
+                                                         else QtCore.Qt.Unchecked,
+             (QtCore.Qt.DisplayRole,    1): lambda node: node.entry.scan,
+             (QtCore.Qt.DisplayRole,    2): lambda node: node.entry.measurement,
+             (QtCore.Qt.DisplayRole,    3): lambda node: node.entry.evaluation
+                                                         if (node.entry.scan == 'Scan' or
+                                                             node.entry.scan == 'Todo List')
+                                                         else '',
+             (QtCore.Qt.DisplayRole,    4): lambda node: node.entry.analysis
+                                                         if (node.entry.scan == 'Scan' or
+                                                             node.entry.scan == 'Todo List')
+                                                         else '',
+             (QtCore.Qt.DisplayRole,    5): lambda node: node.entry.condition,
+             (QtCore.Qt.EditRole,       1): lambda node: node.entry.scan,
+             (QtCore.Qt.EditRole,       2): lambda node: node.entry.measurement,
+             (QtCore.Qt.EditRole,       3): lambda node: node.entry.evaluation,
+             (QtCore.Qt.EditRole,       4): lambda node: node.entry.analysis,
+             (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition
+             }
+        self.colorDataLookup = {
+             (QtCore.Qt.BackgroundRole, 0): lambda node: self.colorStopFlagLookup[node.entry.stopFlag],
+             (QtCore.Qt.BackgroundRole, 1): lambda node: self.colorLookup[self.running]
+                                                         if node.highlighted else QtCore.Qt.white,
+             (QtCore.Qt.BackgroundRole, 2): lambda node: QtCore.Qt.white,
+             (QtCore.Qt.BackgroundRole, 3): lambda node: self.bgLookup(node),
+             (QtCore.Qt.BackgroundRole, 4): lambda node: self.bgLookup(node),
+             (QtCore.Qt.BackgroundRole, 5): lambda node: QtGui.QColor(255, 255, 255, 255)
+                                                         if node.entry.condition != ''
+                                                         else QtGui.QColor(215, 215, 215, 255)
+        }
+        self.setDataLookup ={(QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
                              (QtCore.Qt.EditRole, 1): partial( self.setString, 'scan' ),
                              (QtCore.Qt.EditRole, 2): partial( self.setString, 'measurement' ),
                              (QtCore.Qt.EditRole, 3): partial( self.setString, 'evaluation' ),
@@ -179,10 +143,10 @@ class TodoListTableModel(TodoListBaseModel):
         self.rootNodes = self._rootNodes()
         self.endResetModel()
 
-    def bgLookup(self, row):
-        if self.todolist[row].scan == 'Scan':
+    def bgLookup(self, node):
+        if node.entry.scan == 'Scan':
             return QtGui.QColor(255, 255, 255, 255)
-        elif self.todolist[row].scan == 'Script' or self.todolist[row].scan == 'Todo List':
+        elif node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
             return QtGui.QColor(215, 215, 215, 255)
 
     def setString(self, attr, index, value):
@@ -218,11 +182,14 @@ class TodoListTableModel(TodoListBaseModel):
 
     def data(self, index, role):
         if index.isValid():
-            node = self.nodeFromIndex(index)
-            if node is not None and node.parent is not None:
-                return self.childDataLookup.get((role, index.column()), lambda row, parentind: None)(index.row(), index.parent().row())#node.parentInd)
-            return self.dataLookup.get((role, index.column()), lambda row: None)(index.row())
+            return self.nodeDataLookup.get((role, index.column()), lambda row: None)(self.nodeFromIndex(index))
         return None
+
+    def colorData(self, index):
+        if index.isValid():
+            return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: None)(self.nodeFromIndex(index))
+        return None
+
 
     def setData(self, index, value, role):
         if index.isValid():

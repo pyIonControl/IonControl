@@ -6,6 +6,7 @@
 
 from PyQt5 import uic, QtCore, QtGui, QtWidgets
 
+from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.statemachine import Statemachine
 from .TodoListTableModel import TodoListTableModel
@@ -19,7 +20,7 @@ from copy import deepcopy
 from modules.PyqtUtility import updateComboBoxItems
 from modules.SequenceDict import SequenceDict
 from gui.TodoListSettingsTableModel import TodoListSettingsTableModel 
-from uiModules.ComboBoxDelegate import ComboBoxDelegate
+from uiModules.ComboBoxDelegate import ComboBoxDelegate, ComboBoxGridDelegate, PlainGridDelegate
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.GuiAppearance import saveGuiState, restoreGuiState   #@UnresolvedImport
 from modules.firstNotNone import firstNotNone
@@ -171,7 +172,10 @@ class TodoList(Form, Base):
         self.tableModel.valueChanged.connect( self.checkSettingsSavable )
         self.tableView.setModel( self.tableModel )
         self.tableView.setExpandsOnDoubleClick(False)
-        self.comboBoxDelegate = ComboBoxDelegate()
+        self.comboBoxDelegate = ComboBoxGridDelegate()
+        self.gridDelegate = PlainGridDelegate()
+        self.tableView.setItemDelegateForColumn(0, self.gridDelegate)
+        self.tableView.setItemDelegateForColumn(5, self.gridDelegate)
         for column in range(1, 5):
             self.tableView.setItemDelegateForColumn(column, self.comboBoxDelegate)
         self.tableModel.measurementSelection = self.scanModuleMeasurements
@@ -231,6 +235,13 @@ class TodoList(Form, Base):
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         #QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Delete), self, self.delete_row)
+
+        self.tableView.setStyleSheet("""
+            QTreeView::item::selected {
+                background-color: rgb(255,255,165);
+                color: rgb(40,40,40);
+            }
+        """)
 
     def copy_to_clipboard(self):
         """ Copy the list of selected rows to the clipboard as a string. """
@@ -525,7 +536,6 @@ class TodoList(Form, Base):
             else:
                 self.settings.currentIndex = modindex
                 self.incrementIndex(overrideRepeat)
-
 
 
     def isSomethingTodo(self):
