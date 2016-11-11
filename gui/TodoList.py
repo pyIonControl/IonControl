@@ -27,11 +27,7 @@ from collections import defaultdict, deque
 
 Form, Base = uic.loadUiType('ui/TodoList.ui')
 
-def FlattenTodoList(todolist):
-    pass
-
-
-class TodoListEntry(object):#QtCore.QAbstractItemModel):#object):
+class TodoListEntry(object):
     def __init__(self, scan=None, measurement=None, evaluation=None, analysis=None):
         super().__init__()
         self.parent = None
@@ -49,22 +45,6 @@ class TodoListEntry(object):#QtCore.QAbstractItemModel):#object):
         self.revertSettings = False
         self.conditionEnabled = False
         self.condition = ''
-
-    #def _getChildren(self):
-        #return self.children
-#
-    #def hasChildren(self):
-        #if self.children is not None:
-            #return True
-        #return False
-#
-    #def childCount(self):
-        #if self.children is not None:
-            #return len(self.children)
-        #return 0
-#
-    #def child(self, ind):
-        #return self.children[ind]
 
     def __setstate__(self, s):
         self.__dict__ = s
@@ -155,8 +135,6 @@ class TodoList(Form, Base):
         self.scriptconnected = False
         self.currentScript = None
         self.currentScriptCode = None
-        #self.flattenedTodoList = FlattenTodoList(self.settings.todoList)
-        #self.nestedIndices = list()
         self.indexStack = deque()
         self.todoStack = deque()
         self.currentTodoList = self.settings.todoList
@@ -192,10 +170,7 @@ class TodoList(Form, Base):
         self.tableModel.analysisSelection = self.scanModuleAnalysis
         self.tableModel.valueChanged.connect( self.checkSettingsSavable )
         self.tableView.setModel( self.tableModel )
-        #self.tableView.setChildIndicatorPolicy(QtWidgets.QTreeWidgetItem.DontShowIndicatorWhenChildless)
         self.tableView.setExpandsOnDoubleClick(False)
-        #self.tableView.setItemsExpandable(False)
-        #self.tableView.setRootIsDecorated(False)
         self.comboBoxDelegate = ComboBoxDelegate()
         for column in range(1, 5):
             self.tableView.setItemDelegateForColumn(column, self.comboBoxDelegate)
@@ -211,7 +186,7 @@ class TodoList(Form, Base):
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
         self.filter.keyPressed.connect( self.onReorder )
         self.tableView.installEventFilter(self.filter)
-        self.tableModel.setActiveRow(self.settings.currentIndex, False)
+        self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
         self.tableView.doubleClicked.connect( self.setCurrentIndex )
         # naming and saving of todo lists
         self.toolButtonDelete.clicked.connect( self.onDeleteSaveTodoList )
@@ -277,20 +252,9 @@ class TodoList(Form, Base):
         self.tableModel.copy_rows(row_list)
 
     def onActiveItemChanged(self, modelIndex, modelIndex2 ):
-        #print("Selected Indices: ", self.tableView.selectedIndexes()[0].row())
-        #modelIndex.parent().row()
-        #self.settingTableModel.setSettings( self.settings.todoList[modelIndex.row()].settings )
-        #self.currentlySelectedLabel.setText( "{0} - {1}".format( self.settings.todoList[modelIndex.row()].measurement, self.settings.todoList[modelIndex.row()].evaluation) )
         todoListElement = self.refineTodoListElement(modelIndex)
         self.settingTableModel.setSettings( todoListElement.settings )
         self.currentlySelectedLabel.setText( "{0} - {1}".format( todoListElement.measurement, todoListElement.evaluation) )
-        #if self.settings.todoList[modelIndex.row()].parent is not None:
-        #self.indexStack.clear()
-        #self.todoStack.clear()
-        #self.currentTodoList = self.settings.todoList
-        #self.populateStacks(self.settings.todoList, modelIndex)
-        #self.settingTableModel.setSettings( self.currentTodoList[modelIndex.row()].settings )
-        #self.currentlySelectedLabel.setText( "{0} - {1}".format( self.currentTodoList[modelIndex.row()].measurement, self.currentTodoList[modelIndex.row()].evaluation) )
 
     def populateStacks(self, todolist, idx):
         self.indexStack.clear()
@@ -303,21 +267,6 @@ class TodoList(Form, Base):
             self.currentTodoList = self.currentTodoList[index].children
         self.currentTodoList = self.todoStack.pop()
         self.settings.currentIndex = self.indexStack.pop()
-
-
-        #if idx.parent().row() != -1:
-            #return [], []
-        #idxList, tdList = self.populateStacks()
-      #
-        #if todolist[idx.row()].parent is not None:
-            #self.todoStack.appendleft(todolist[idx.row()].parent.children)
-            #self.indexStack.appendleft(idx.parent().row())
-            #self.populateStacks(todolist[idx.row()].parent.children, idx.parent())
-        #else:
-            #if len(self.indexStack) > 0:
-                #self.todoStack.appendleft(self.settings.todoList)
-                ##self.indexStack.append(row)
-                #self.currentTodoList = self.todoStack.pop()
 
     def populateIndexStack(self, idx, lst=None):
         if lst is None:
@@ -390,7 +339,7 @@ class TodoList(Form, Base):
         self.currentTodoList = self.settings.todoList
         self.indexStack.clear()
         self.todoStack.clear()
-        self.tableModel.setActiveRow( self.settings.currentIndex, self.statemachine.currentState=='MeasurementRunning' )
+        self.tableModel.setActiveRow( list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning' )
         self.repeatButton.setChecked( self.settings.repeat )
         
     def setCurrentIndex(self, index):
@@ -400,7 +349,8 @@ class TodoList(Form, Base):
         self.populateStacks(self.settings.todoList, index)
         while self.currentTodoList[self.settings.currentIndex].scan == 'Todo List':
             self.incrementIndex(overrideRepeat=True)
-        self.tableModel.setActiveRow(self.settings.currentIndex, self.statemachine.currentState=='MeasurementRunning')
+        #self.tableModel.setActiveEntry(self.currentTodoList[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
+        self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
         #if
         self.checkSettingsSavable()
         #else:
@@ -507,7 +457,6 @@ class TodoList(Form, Base):
         return current.state()==0 and self.isSomethingTodo()
 
     def checkStopFlag(self, state):
-        #return self.settings.todoList[self.settings.currentIndex].stopFlag
         return self.currentTodoList[self.settings.currentIndex].stopFlag
 
     def onStateChanged(self, newstate ):
@@ -540,7 +489,6 @@ class TodoList(Form, Base):
     def onLoadLine(self):
         allrows = sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]))
         if len(allrows)==1: 
-            #self.loadLine(self.settings.todoList[ allrows[0] ])
             self.loadLine(self.currentTodoList[ allrows[0] ])
 
     def loadLine(self, entry ):
@@ -556,7 +504,6 @@ class TodoList(Form, Base):
     def onEnableStopFlag(self):
         allrows = sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]))
         if len(allrows)==1:
-            #self.enableStopFlag(self.settings.todoList[ allrows[0] ])
             self.enableStopFlag(self.currentTodoList[ allrows[0] ])
 
     def enableStopFlag(self, entry ):
@@ -565,10 +512,12 @@ class TodoList(Form, Base):
     def incrementIndex(self, overrideRepeat=False):
         modindex = (self.settings.currentIndex+1) % len(self.currentTodoList)
         if self.currentTodoList[modindex].scan != 'Todo List':
-            if modindex == 0 and len(self.indexStack) > 0 and not overrideRepeat:
+            if modindex == 0 and len(self.indexStack) > 0:# and not overrideRepeat:
                 modindex = self.indexStack.pop()
                 self.currentTodoList = self.todoStack.pop()
-                modindex = (modindex + 1) % len(self.currentTodoList)
+                self.settings.currentIndex = modindex
+                self.incrementIndex(overrideRepeat)
+                return modindex
             self.settings.currentIndex = modindex
             return modindex
         else:
@@ -582,26 +531,18 @@ class TodoList(Form, Base):
                 self.settings.currentIndex = modindex
                 self.incrementIndex(overrideRepeat)
 
-        #if self.settings.todoList[self.settings.currentIndex+1] is
-        #self.settings.currentIndex = (self.settings.currentIndex+1) % len(self.settings.todoList)
 
 
     def isSomethingTodo(self):
-        #for index in list(range( self.settings.currentIndex, len(self.settings.todoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat else []):
         for index in list(range( self.settings.currentIndex, len(self.currentTodoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat or len(self.indexStack) > 0 else []):
-            #if self.settings.todoList[ index ].enabled:
             if self.currentTodoList[ index ].enabled:
-                #if self.settings.todoList[index].condition != '':
                 if self.currentTodoList[index].condition != '':
-                    #if eval(self.settings.todoList[index].condition):
                     if eval(self.currentTodoList[index].condition):
                         self.settings.currentIndex = index
                         return True
-                    #elif self.settings.todoList[index].stopFlag:
                     elif self.currentTodoList[index].stopFlag:
-                        #self.settings.currentIndex = index+1
                         self.incrementIndex()
-                        self.tableModel.setActiveRow(self.settings.currentIndex, False)
+                        self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
                         self.enterIdle()
                         return False
                 else:
@@ -610,11 +551,7 @@ class TodoList(Form, Base):
         return False
                 
     def enterMeasurementRunning(self):
-        #entry = self.settings.todoList[ self.settings.currentIndex ]
         entry = self.currentTodoList[ self.settings.currentIndex ]
-        #if entry.parent is not None:
-            ##entry = self.settings.todoList[entry.parentInd].children[self.settings.currentIndex-entry.parentInd]
-            #entry = self.currentTodoList[entry.parentInd].children[self.settings.currentIndex-entry.parentInd]
         if entry.scan == 'Scan':
             self.statusLabel.setText('Measurement Running')
             _, currentwidget = self.currentScan()
@@ -624,7 +561,8 @@ class TodoList(Form, Base):
             #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
             # start
             currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
-            self.tableModel.setActiveRow(self.settings.currentIndex, True)
+            #self.tableModel.setActiveEntry(self.currentTodoList[self.settings.currentIndex], True)
+            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
         elif entry.scan == 'Script':
             self.statusLabel.setText('Script Running')
             self.currentScript = self.scripting.script.fullname
@@ -633,7 +571,7 @@ class TodoList(Form, Base):
             self.scripting.onStartScript()
             self.scripting.script.finished.connect(self.exitMeasurementRunning)
             self.scriptconnected = True
-            self.tableModel.setActiveRow(self.settings.currentIndex, True)
+            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
 
     def exitMeasurementRunning(self):
         if self.scriptconnected:
@@ -645,8 +583,7 @@ class TodoList(Form, Base):
             self.onStateChanged('idle')
         else:
             self.incrementIndex()
-            #self.settings.currentIndex = (self.settings.currentIndex+1) % len(self.settings.todoList)
-            self.tableModel.setActiveRow(self.settings.currentIndex, False)
+            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
         #self.globalVariablesUi.update(self.revertGlobalsList)
         
     def enterPaused(self):

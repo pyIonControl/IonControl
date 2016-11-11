@@ -3,7 +3,6 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-import weakref
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
@@ -21,22 +20,21 @@ class BaseNode(object):
 class TodoListNode(BaseNode):
     def __init__(self, entry, parent, row):
         self.entry = entry
+        self.highlighted = False
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
         return [TodoListNode(elem, self, index) for index, elem in enumerate(self.entry.children)]
 
-    #def verifyEntry(self):
-        #if isinstance(self.entry, TodoListNode):
-            #self.entry = self.entry.entry
-            #self.verifyEntry()
-
+    def recursiveLookup(self, rowlist):
+        if len(rowlist) == 1:
+            return self.childNodes[rowlist[0]]
+        return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self):
         QtCore.QAbstractItemModel.__init__(self)
         self.rootNodes = self._rootNodes()
-        #self.todolist = self._rootNodes()#self._todolist()
 
     def _rootNodes(self):
         raise NotImplementedError()
@@ -44,7 +42,6 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
     def index(self, row, column, parent):
         if not parent.isValid():
             return self.createIndex(row, column, self.rootNodes[row])
-            #return self.createIndex(row, column, self.todolist[row])
         parentNode = parent.internalPointer()
         return self.createIndex(row, column, parentNode.childNodes[row])
 
@@ -59,15 +56,19 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
 
     def reset(self):
         self.rootNodes = self._rootNodes()
-        #self.todolist = self._rootNodes()
         QtCore.QAbstractItemModel.reset(self)
 
     def rowCount(self, parent=QtCore.QModelIndex()):
         if not parent.isValid():
             return len(self.rootNodes)
-            #return len(self.todolist)
         node = parent.internalPointer()
         return len(node.childNodes)
+
+    def recursiveLookup(self, rowlist):
+        if len(rowlist) == 1:
+            return self.rootNodes[rowlist[0]]
+        return self.rootNodes[rowlist[0]].recursiveLookup(rowlist[1:])
+
 
 
 class TodoListTableModel(TodoListBaseModel):
@@ -99,30 +100,30 @@ class TodoListTableModel(TodoListBaseModel):
                              (QtCore.Qt.EditRole, 3): lambda row: self.todolist[row].evaluation,
                              (QtCore.Qt.EditRole, 4): lambda row: self.todolist[row].analysis,
                              (QtCore.Qt.EditRole, 5): lambda row: self.todolist[row].condition,
-                             (QtCore.Qt.BackgroundColorRole, 1): lambda row: self.colorLookup[self.running] if self.activeRow==row else QtCore.Qt.white,
+                             (QtCore.Qt.BackgroundColorRole, 1): lambda row: self.colorLookup[self.running] if self.rootNodes[row].highlighted else QtCore.Qt.white,
                              (QtCore.Qt.BackgroundColorRole, 0): lambda row: self.colorStopFlagLookup[self.todolist[row].stopFlag]
                              }
-        self.childDataLookup =  { (QtCore.Qt.CheckStateRole, 0): lambda row, parentind: QtCore.Qt.Checked if self.todolist[parentind].children[row].enabled else QtCore.Qt.Unchecked,
-                             (QtCore.Qt.DisplayRole, 1): lambda row, parentind: self.todolist[parentind].children[row].scan,
-                             (QtCore.Qt.DisplayRole, 2): lambda row, parentind: self.todolist[parentind].children[row].measurement,
-                             (QtCore.Qt.DisplayRole, 3): lambda row, parentind: self.todolist[parentind].children[row].evaluation if (self.todolist[parentind].children[row].scan == 'Scan' or
-                                                                                                       self.todolist[parentind].children[row].scan == 'Todo List')
-                                                                                                     else '',
-                             (QtCore.Qt.DisplayRole, 4): lambda row, parentind: self.todolist[parentind].children[row].analysis if (self.todolist[parentind].children[row].scan == 'Scan' or
-                                                                                                     self.todolist[parentind].children[row].scan == 'Todo List')
-                                                                                                    else '',
-                             (QtCore.Qt.DisplayRole, 5): lambda row, parentind: self.todolist[parentind].children[row].condition,
-                             (QtCore.Qt.BackgroundRole, 3): lambda row, parentind: self.bgLookup(row),
-                             (QtCore.Qt.BackgroundRole, 4): lambda row, parentind: self.bgLookup(row),
-                             (QtCore.Qt.BackgroundRole, 5): lambda row, parentind: QtGui.QColor(255, 255, 255, 255) if self.todolist[row].condition != '' else QtGui.QColor(215, 215, 215, 255),
-                             (QtCore.Qt.EditRole, 1): lambda row, parentind: self.todolist[parentind].children[row].scan,
-                             (QtCore.Qt.EditRole, 2): lambda row, parentind: self.todolist[parentind].children[row].measurement,
-                             (QtCore.Qt.EditRole, 3): lambda row, parentind: self.todolist[parentind].children[row].evaluation,
-                             (QtCore.Qt.EditRole, 4): lambda row, parentind: self.todolist[parentind].children[row].analysis,
-                             (QtCore.Qt.EditRole, 5): lambda row, parentind: self.todolist[parentind].children[row].condition,
-                             (QtCore.Qt.BackgroundColorRole, 1): lambda row, parentind: self.colorLookup[self.running] if self.activeRow==row else QtCore.Qt.white,
-                             (QtCore.Qt.BackgroundColorRole, 0): lambda row, parentind: self.colorStopFlagLookup[self.todolist[parentind].children[row].stopFlag]
-                             }
+        self.childDataLookup =  { (QtCore.Qt.CheckStateRole, 0): lambda row, parentind: QtCore.Qt.Checked if self.rootNodes[parentind].childNodes[row].entry.enabled else QtCore.Qt.Unchecked,
+                                  (QtCore.Qt.DisplayRole, 1): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.scan,
+                                  (QtCore.Qt.DisplayRole, 2): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.measurement,
+                                  (QtCore.Qt.DisplayRole, 3): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.evaluation if (self.rootNodes[parentind].childNodes[row].entry.scan == 'Scan' or
+                                                                                                                                           self.rootNodes[parentind].childNodes[row].entry.scan == 'Todo List')
+                                                                                                                                          else '',
+                                  (QtCore.Qt.DisplayRole, 4): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.analysis if (self.rootNodes[parentind].childNodes[row].entry.scan == 'Scan' or
+                                                                                                                                         self.rootNodes[parentind].childNodes[row].entry.scan == 'Todo List')
+                                                                                                                                        else '',
+                                  (QtCore.Qt.DisplayRole, 5): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.condition,
+                                  (QtCore.Qt.BackgroundRole, 3): lambda row, parentind: self.bgLookup(row),
+                                  (QtCore.Qt.BackgroundRole, 4): lambda row, parentind: self.bgLookup(row),
+                                  (QtCore.Qt.BackgroundRole, 5): lambda row, parentind: QtGui.QColor(255, 255, 255, 255) if self.rootNodes[row].entry.condition != '' else QtGui.QColor(215, 215, 215, 255),
+                                  (QtCore.Qt.EditRole, 1): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.scan,
+                                  (QtCore.Qt.EditRole, 2): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.measurement,
+                                  (QtCore.Qt.EditRole, 3): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.evaluation,
+                                  (QtCore.Qt.EditRole, 4): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.analysis,
+                                  (QtCore.Qt.EditRole, 5): lambda row, parentind: self.rootNodes[parentind].childNodes[row].entry.condition,
+                                  (QtCore.Qt.BackgroundColorRole, 1): lambda row, parentind: self.colorLookup[self.running] if self.rootNodes[parentind].childNodes[row].highlighted else QtCore.Qt.white,
+                                  (QtCore.Qt.BackgroundColorRole, 0): lambda row, parentind: self.colorStopFlagLookup[self.rootNodes[parentind].childNodes[row].entry.stopFlag]
+                                  }
         self.setDataLookup ={ (QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
                              (QtCore.Qt.EditRole, 1): partial( self.setString, 'scan' ),
                              (QtCore.Qt.EditRole, 2): partial( self.setString, 'measurement' ),
@@ -133,6 +134,7 @@ class TodoListTableModel(TodoListBaseModel):
         self.colorLookup = { True: QtGui.QColor(0xd0, 0xff, 0xd0), False: QtGui.QColor(0xff, 0xd0, 0xd0) }
         self.colorStopFlagLookup = {True: QtGui.QColor( 0xcb, 0x4e, 0x28), False: QtCore.Qt.white}
         self.activeRow = None
+        self.activeEntry = None
         self.tabSelection = []
         self.measurementSelection = {}
         self.evaluationSelection = {}
@@ -143,9 +145,12 @@ class TodoListTableModel(TodoListBaseModel):
                               4: lambda row: self.analysisSelection[self.todolist[row].scan]}
 
     def _rootNodes(self):
-        #if len(self.todolist) > 0 and isinstance(self.todolist[0], TodoListNode):
-            #return self.todolist
         return [TodoListNode(elem, None, index) for index, elem in enumerate(self.todolist)]
+
+    def updateRootNodes(self):
+        self.beginResetModel()
+        self.rootNodes = self._rootNodes()
+        self.endResetModel()
 
     def bgLookup(self, row):
         if self.todolist[row].scan == 'Scan':
@@ -161,33 +166,28 @@ class TodoListTableModel(TodoListBaseModel):
         self.todolist[index.row()].enabled = value == QtCore.Qt.Checked
         return True      
 
-    def setActiveRow(self, row, running=True):
-        oldactive = self.activeRow
+    def setActiveRow(self, rowlist, running=True):
+        ref = self.recursiveLookup(rowlist)
+        row = rowlist[-1]
+        oldactive = None
+        if self.activeEntry is not None:
+            self.activeEntry.highlighted = False
+            oldactive = self.activeEntry.row
+        ref.highlighted = True
+        self.activeEntry = ref
         self.activeRow = row
         self.running = running
         if row is not None:
             self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
         if oldactive is not None and oldactive!=row:
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
-    '''
-    def rowCount(self, parent=QtCore.QModelIndex()):
-        if not parent.isValid():
-            return len(self.todolist)
-        node = parent.internalPointer()
-        #if hasattr(node, 'children'):
-        return len(node.children)#+len(self.todolist)
-        #else:
-        #return len(self.todolist)
-            #return 0
-        #return len(self.todolist)
-    '''
-        
-    def columnCount(self, parent=QtCore.QModelIndex()): 
+
+    def columnCount(self, parent=QtCore.QModelIndex()):
         return 6
 
     def nodeFromIndex(self, index):
         """Return the node at the given index"""
-        return index.internalPointer() if index.isValid() else self.root
+        return index.internalPointer() if index.isValid() else None#self.root
 
     def getLocation(self, index):
         """Return the node, column at the given index"""
@@ -197,7 +197,7 @@ class TodoListTableModel(TodoListBaseModel):
     def data(self, index, role):
         if index.isValid():
             node, col = self.getLocation(index)
-            if node.parent is not None:
+            if node is not None and node.parent is not None:
                 return self.childDataLookup.get((role, index.column()), lambda row, parentind: None)(index.row(), index.parent().row())#node.parentInd)
             return self.dataLookup.get((role, index.column()), lambda row: None)(index.row())
         return None
@@ -206,17 +206,10 @@ class TodoListTableModel(TodoListBaseModel):
         if index.isValid():
             value = self.setDataLookup.get((role, index.column()), lambda index, value: None)(index, value)
             if self.todolist[index.row()].scan == 'Todo List':
-                #for i in list(self.settingsCache[self.todolist[index.row()].measurement].todoList):
                 self.todolist[index.row()].children = copy.deepcopy(self.settingsCache[self.todolist[index.row()].measurement].todoList)
-                #self.todolist[index.row()].children = weakref.ref(self.settingsCache[self.todolist[index.row()].measurement].todoList)
-                #self.todolist[index.row()].parentInd = index.row()
-                for childind in range(len(self.todolist[index.row()].children)):
-                    #self.todolist[index.row()].children[childind].parent = weakref.ref(self.todolist[index.row()])
-                    self.todolist[index.row()].children[childind].parent = copy.deepcopy(self.todolist[index.row()])
-                    self.todolist[index.row()].children[childind].parentInd = index.row()
-            self.beginResetModel()
-            self.rootNodes = self._rootNodes()
-            self.endResetModel()
+                self.beginResetModel()
+                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row())
+                self.endResetModel()
             if value:
                 self.valueChanged.emit( None )
             return value
@@ -246,14 +239,14 @@ class TodoListTableModel(TodoListBaseModel):
                 for row in rows:
                     self.todolist[row], self.todolist[row-1] = self.todolist[row-1], self.todolist[row]
                     self.dataChanged.emit( self.createIndex(row-1, 0), self.createIndex(row, 3) )
-                #self.rootNodes = self._rootNodes()
+                self.updateRootNodes()
                 return True
         else:
             if len(rows)>0 and rows[0]<len(self.todolist)-1:
                 for row in rows:
                     self.todolist[row], self.todolist[row+1] = self.todolist[row+1], self.todolist[row]
                     self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
-                #self.rootNodes = self._rootNodes()
+                self.updateRootNodes()
                 return True
         return False
 
@@ -261,15 +254,15 @@ class TodoListTableModel(TodoListBaseModel):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.todolist), len(self.todolist))
         self.todolist.append( todoListElement )
         self.endInsertRows()
-        #self.rootNodes = self._rootNodes()
+        self.updateRootNodes()
         return len(self.todolist)-1
         
     def dropMeasurement (self, row):
         self.beginRemoveRows(QtCore.QModelIndex(), row, row )
         self.todolist.pop(row)
-        #self.rootNodes = self._rootNodes()
         self.endRemoveRows()
-    
+        self.updateRootNodes()
+
     def setTodolist(self, todolist):
         self.beginResetModel()
         self.todolist = todolist
@@ -289,36 +282,5 @@ class TodoListTableModel(TodoListBaseModel):
         for row_index in row_list:
             row_data = self.todolist[row_index]
             self.addMeasurement(copy.deepcopy(row_data))
-        self.rootNodes = self._rootNodes()
-'''
-    def index(self, row, column, parent):
-        #if not parent.parent().isValid():
-        if not parent.isValid():
-            return self.createIndex(row, column, self.todolist[row])
-        #parentNode = parent.parent().internalPointer()
-        parentNode = parent.internalPointer()
-        #return self.createIndex(self.todolist.index(parentNode), column, parentNode.children[row])
-        return self.createIndex(row, column, parentNode.children[row])
+        self.updateRootNodes()
 
-    def parent(self, index):
-        if not index.isValid() or index.row() == -1:
-            return QtCore.QModelIndex()
-        node = index.internalPointer()
-        if node is None or not hasattr(node, 'parent') or not hasattr(node, 'parentInd') or (hasattr(node, 'parentInd') and node.parent is None):
-        #if not index.parent().isValid():
-            return QtCore.QModelIndex()
-        else:
-            return self.createIndex(node.parentInd, 0, node.parent)
-            #return self.createIndex(self.todolist.index(node.parent), 0, node.parent)
-            #return self.createIndex(index.parent.row(), 0, node.parent)
-            #return self.createIndex(index.parent.index.row(), 0, node.parent)
-#    def index(self, row, column, parentIndex):
-        #"""Return a model index for the node at the given row, column, parentIndex"""
-        #if not self.hasIndex(row, column, parentIndex):
-            #ind = QtCore.QModelIndex()
-        #else:
-            #parentNode = self.nodeFromIndex(parentIndex)
-            #node = parentNode.child(row)
-            #ind = self.createIndex(row, column, node) if node else QtCore.QModelIndex()
-        #return ind
-'''
