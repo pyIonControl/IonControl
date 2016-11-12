@@ -9,44 +9,58 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 
 from GlobalVariables.GlobalVariablesModel import GridDelegateMixin
 from modules.PyqtUtility import BlockSignals
+from uiModules.ComboBoxDelegate import ComboBoxDelegateMixin
+from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegateMixin
 
+#ModeTypes = enum('ComboBox', 'Magnitude')
 
-class ComboBoxDelegateMixin(object):
-    def createEditor(self, parent, option, index ):
-        """Create the combo box editor"""
-        editor = QtWidgets.QComboBox(parent)
-        if hasattr(index.model(), 'comboBoxEditable'):
-            editor.setEditable(index.model().comboBoxEditable(index))
-        choice = index.model().choice(index) if hasattr(index.model(), 'choice') else None
-        if choice:
-            editor.addItems( choice )
-        editor.currentIndexChanged['QString'].connect( partial( index.model().setValue, index ))
-        return editor
-
-    def setEditorData(self, editor, index):
-        """Set the data in the editor based on the model"""
-        value = index.model().data(index, QtCore.Qt.EditRole)
-        if value:
-            with BlockSignals(editor) as e:
-                e.setCurrentIndex( e.findText(value) )
-
-    def setModelData(self, editor, model, index):
-        """Set the data in the model based on the editor"""
-        value = editor.currentText()
-        model.setData(index, value, QtCore.Qt.EditRole)
-
-
-class ComboBoxDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin):
+class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin, MagnitudeSpinBoxDelegateMixin):
     """Class for combo box editors in models"""
     def __init__(self):
         QtWidgets.QStyledItemDelegate.__init__(self)
+        self.globalDict = dict()
+        self.emptyStringValue = ''
 
-    createEditor = ComboBoxDelegateMixin.createEditor
-    setEditorData = ComboBoxDelegateMixin.setEditorData
-    setModelData = ComboBoxDelegateMixin.setModelData
+    def createEditor(self, parent, option, index):
+        """Create the combo box editor"""
+        model = index.model()
+        if model.nodeFromIndex(index).entry.scan != 'Rescan':
+            return ComboBoxDelegateMixin.createEditor(self, parent, option, index)
+        else:
+            return MagnitudeSpinBoxDelegateMixin.createEditor(self, parent, option, index)
+
+    def setEditorData(self, editor, index):
+        """Set the data in the editor based on the model"""
+        #if self.mode == ModeTypes.ComboBox:
+        model = index.model()
+        if model.nodeFromIndex(index).entry.scan != 'Rescan':
+            ComboBoxDelegateMixin.setEditorData(self, editor, index)
+        else:
+            MagnitudeSpinBoxDelegateMixin.setEditorData(self, editor, index)
+
+    def setModelData(self, editor, model, index):
+        """Set the data in the model based on the editor"""
+        #if self.mode == ModeTypes.ComboBox:
+        model = index.model()
+        if model.nodeFromIndex(index).entry.scan != 'Rescan':
+            ComboBoxDelegateMixin.setModelData(self, editor, model, index)
+        else:
+            MagnitudeSpinBoxDelegateMixin.setModelData(self, editor, model, index)
 
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
+
+#class ComboBoxDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin):
+    #"""Class for combo box editors in models"""
+    #def __init__(self):
+        #QtWidgets.QStyledItemDelegate.__init__(self)
+#
+    #createEditor = ComboBoxDelegateMixin.createEditor
+    #setEditorData = ComboBoxDelegateMixin.setEditorData
+    #setModelData = ComboBoxDelegateMixin.setModelData
+#
+    #def updateEditorGeometry(self, editor, option, index):
+        #editor.setGeometry(option.rect)
 
 class ComboBoxGridDelegateMixin(object):
     """Contains methods for drawing a grid and setting the size in a view. Used as part of a delegate in TodoList."""
@@ -55,6 +69,8 @@ class ComboBoxGridDelegateMixin(object):
         """Draw the grid if the node is a data node"""
         model = index.model()
         painter.save()
+        if model is None:
+            print('model is none!')
         painter.setBrush(model.colorData(index)) #references data in model to draw background
         if index.column() == 0:
             option.font.setWeight(QtGui.QFont.Bold)
@@ -66,7 +82,7 @@ class ComboBoxGridDelegateMixin(object):
         QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
 
 
-class ComboBoxGridDelegate(ComboBoxDelegate, ComboBoxGridDelegateMixin):
+class ComboBoxGridDelegate(TodoListChameleonDelegate, ComboBoxGridDelegateMixin):
     """Similar to the grid delegates used in GlobalVariablesModel but for comboboxes"""
     paint = ComboBoxGridDelegateMixin.paint
 

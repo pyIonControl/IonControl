@@ -8,6 +8,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
 import copy
 
+#from gui.TodoList import TodoListEntry
+
+
 class BaseNode(object):
     def __init__(self, parent, row):
         self.parent = parent
@@ -18,17 +21,35 @@ class BaseNode(object):
         raise NotImplementedError()
 
 class TodoListNode(BaseNode):
-    def __init__(self, entry, parent, row):
+    def __init__(self, entry, parent, row, labelDict):
         self.entry = entry
         self.highlighted = False
+        self.labelDict = labelDict
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
-        return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
+        childList = list()
+        labelDict = dict()
+        if not isinstance(self.entry, TodoListNode):#'children'):
+            for ind in range(len(self.entry.children)):
+                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict)
+                childList.append(node)
+                if node.entry.label != '':
+                    self.labelDict[node.entry.label] = node
+        ##self.labelDict.update(labelDict)
+        return childList
+
+
+        #childList = [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
+        #labelDict = {self.}
+        #return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
-            return self.childNodes[rowlist[0]]
+            try:
+                return self.childNodes[rowlist[0]]
+            except:
+                pass
         return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
@@ -66,23 +87,28 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
-            return self.rootNodes[rowlist[0]]
+            try:
+                return self.rootNodes[rowlist[0]]
+            except:
+                pass
         return self.rootNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
-    def __init__(self, todolist, settingsCache, parent=None, *args):
+    def __init__(self, todolist, settingsCache, labelDict, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
         """
         self.todolist = todolist
+        self.labelDict = labelDict
         self.settingsCache = settingsCache
         TodoListBaseModel.__init__(self)
         self.nodeDataLookup = {
              (QtCore.Qt.CheckStateRole, 0): lambda node: QtCore.Qt.Checked
                                                          if node.entry.enabled
                                                          else QtCore.Qt.Unchecked,
+             (QtCore.Qt.DisplayRole,    0): lambda node: node.entry.label,
              (QtCore.Qt.DisplayRole,    1): lambda node: node.entry.scan,
              (QtCore.Qt.DisplayRole,    2): lambda node: node.entry.measurement,
              (QtCore.Qt.DisplayRole,    3): lambda node: node.entry.evaluation
@@ -94,11 +120,13 @@ class TodoListTableModel(TodoListBaseModel):
                                                              node.entry.scan == 'Todo List')
                                                          else '',
              (QtCore.Qt.DisplayRole,    5): lambda node: node.entry.condition,
+             (QtCore.Qt.EditRole,       0): lambda node: node.entry.label,
              (QtCore.Qt.EditRole,       1): lambda node: node.entry.scan,
              (QtCore.Qt.EditRole,       2): lambda node: node.entry.measurement,
              (QtCore.Qt.EditRole,       3): lambda node: node.entry.evaluation,
              (QtCore.Qt.EditRole,       4): lambda node: node.entry.analysis,
-             (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition
+             (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition,
+             (QtCore.Qt.TextAlignmentRole, 0): lambda node: QtCore.Qt.AlignRight
              }
         self.colorDataLookup = {
              (QtCore.Qt.BackgroundRole, 0): lambda node: self.colorStopFlagLookup[node.entry.stopFlag],
@@ -112,6 +140,7 @@ class TodoListTableModel(TodoListBaseModel):
                                                          else QtGui.QColor(215, 215, 215, 255)
         }
         self.setDataLookup ={(QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
+                             (QtCore.Qt.EditRole, 0): partial( self.setString, 'label' ),
                              (QtCore.Qt.EditRole, 1): partial( self.setString, 'scan' ),
                              (QtCore.Qt.EditRole, 2): partial( self.setString, 'measurement' ),
                              (QtCore.Qt.EditRole, 3): partial( self.setString, 'evaluation' ),
@@ -136,7 +165,15 @@ class TodoListTableModel(TodoListBaseModel):
             for ind in range(len(self.todolist)):
                 if self.todolist[ind].scan == 'Todo List':
                     self.todolist[ind].children = self.settingsCache[self.todolist[ind].measurement].todoList
-        return [TodoListNode(self.todolist[ind], None, ind) for ind in range(len(self.todolist))]
+                #elif self.todolist[ind].scan == 'Rescan':
+                    #self.todolist[ind].children = [copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[ind].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
+        nodeList = list()
+        for ind in range(len(self.todolist)):
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict)
+            nodeList.append(node)
+            if node.entry.label != '':
+                self.labelDict[node.entry.label] = node
+        return nodeList
 
     def updateRootNodes(self):
         self.beginResetModel()
@@ -144,10 +181,13 @@ class TodoListTableModel(TodoListBaseModel):
         self.endResetModel()
 
     def bgLookup(self, node):
-        if node.entry.scan == 'Scan':
-            return QtGui.QColor(255, 255, 255, 255)
-        elif node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
+        if node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
             return QtGui.QColor(215, 215, 215, 255)
+        return QtGui.QColor(255, 255, 255, 255)
+        #if node.entry.scan == 'Scan':
+            #return QtGui.QColor(255, 255, 255, 255)
+        #if node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
+            #return QtGui.QColor(215, 215, 215, 255)
 
     def setString(self, attr, index, value):
         setattr(self.nodeFromIndex(index).entry, attr, str(value))
@@ -172,6 +212,7 @@ class TodoListTableModel(TodoListBaseModel):
             self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
         if oldactive is not None and oldactive!=row:
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
+        print(self.labelDict)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
         return 6
@@ -187,8 +228,8 @@ class TodoListTableModel(TodoListBaseModel):
 
     def colorData(self, index):
         if index.isValid():
-            return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: None)(self.nodeFromIndex(index))
-        return None
+            return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: QtGui.QColor(255, 255, 255, 255))(self.nodeFromIndex(index))
+        return QtGui.QColor(255, 255, 255, 255)
 
 
     def setData(self, index, value, role):
@@ -197,8 +238,18 @@ class TodoListTableModel(TodoListBaseModel):
             if self.todolist[index.row()].scan == 'Todo List':
                 self.todolist[index.row()].children = self.settingsCache[self.todolist[index.row()].measurement].todoList
                 self.beginResetModel()
-                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row())
+                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
                 self.endResetModel()
+            #elif self.todolist[index.row()].scan == 'Rescan':
+                #labelList = []
+                #for lbl in self.todolist[index.row()].measurement:
+                    #entry = copy.deepcopy(self.labelDict[lbl].entry)
+                    #entry.label = ''
+                    #labelList.append(entry)
+                #self.todolist[index.row()].children = labelList#[copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[index.row()].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
+                #self.beginResetModel()
+                #self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
+                #self.endResetModel()
             if value:
                 self.valueChanged.emit( None )
             return value
@@ -206,11 +257,21 @@ class TodoListTableModel(TodoListBaseModel):
 
     def flags(self, index):
         if self.todolist[index.row()].scan == 'Scan':
-            return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
+            return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled |
+                    QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
                     QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
         elif self.todolist[index.row()].scan == 'Script' or self.todolist[index.row()].scan == 'Todo List':
             if index.column()==0:
-                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
+                       QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+            elif index.column()==1 or index.column()==2 or index.column()==5:
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+            else:
+                return QtCore.Qt.ItemIsSelectable
+        elif self.nodeFromIndex(index).entry.scan == 'Rescan':
+            if index.column()==0:
+                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
+                       QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
             elif index.column()==1 or index.column()==2 or index.column()==5:
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
             else:
