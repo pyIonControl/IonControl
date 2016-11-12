@@ -96,14 +96,16 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
 class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
-    def __init__(self, todolist, settingsCache, labelDict, parent=None, *args):
+    def __init__(self, todolist, settingsCache, labelDict, currentRescanList, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
         """
         self.todolist = todolist
         self.labelDict = labelDict
         self.settingsCache = settingsCache
+        self.currentRescanList = currentRescanList
         TodoListBaseModel.__init__(self)
+        self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
              (QtCore.Qt.CheckStateRole, 0): lambda node: QtCore.Qt.Checked
                                                          if node.entry.enabled
@@ -138,6 +140,17 @@ class TodoListTableModel(TodoListBaseModel):
              (QtCore.Qt.BackgroundRole, 5): lambda node: QtGui.QColor(255, 255, 255, 255)
                                                          if node.entry.condition != ''
                                                          else QtGui.QColor(215, 215, 215, 255)
+        }
+        self.darkColorDataLookup = {
+            (QtCore.Qt.BackgroundRole, 0): lambda node: self.colorStopFlagLookup[node.entry.stopFlag],
+            (QtCore.Qt.BackgroundRole, 1): lambda node: self.colorLookup[self.running]
+                                                        if node.highlighted else self.defaultDarkBackground,
+            (QtCore.Qt.BackgroundRole, 2): lambda node: self.defaultDarkBackground,
+            (QtCore.Qt.BackgroundRole, 3): lambda node: self.bgLookup(node),
+            (QtCore.Qt.BackgroundRole, 4): lambda node: self.bgLookup(node),
+            (QtCore.Qt.BackgroundRole, 5): lambda node: self.defaultDarkBackground
+                                                        if node.entry.condition != ''
+                                                        else QtGui.QColor(215, 215, 215, 255)
         }
         self.setDataLookup ={(QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
                              (QtCore.Qt.EditRole, 0): partial( self.setString, 'label' ),
@@ -183,11 +196,9 @@ class TodoListTableModel(TodoListBaseModel):
     def bgLookup(self, node):
         if node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
             return QtGui.QColor(215, 215, 215, 255)
+        elif self.currentRescanList and node not in self.currentRescanList:
+            return self.defaultDarkBackground
         return QtGui.QColor(255, 255, 255, 255)
-        #if node.entry.scan == 'Scan':
-            #return QtGui.QColor(255, 255, 255, 255)
-        #if node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
-            #return QtGui.QColor(215, 215, 215, 255)
 
     def setString(self, attr, index, value):
         setattr(self.nodeFromIndex(index).entry, attr, str(value))
@@ -214,6 +225,20 @@ class TodoListTableModel(TodoListBaseModel):
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
         print(self.labelDict)
 
+    def setActiveItem(self, item, running=True):
+        if self.activeEntry is not None:
+            self.activeEntry.highlighted = False
+            oldactive = self.activeEntry.row
+        item.highlighted = True
+        self.activeEntry = item
+        self.activeRow = item.row
+        self.running = running
+        row = item.row
+        if row is not None:
+            self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
+        if oldactive is not None and oldactive!=row:
+            self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
+
     def columnCount(self, parent=QtCore.QModelIndex()):
         return 6
 
@@ -228,6 +253,9 @@ class TodoListTableModel(TodoListBaseModel):
 
     def colorData(self, index):
         if index.isValid():
+            if len(self.currentRescanList):
+                if self.nodeFromIndex(index).entry not in self.currentRescanList:
+                    return self.darkColorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: self.defaultDarkBackground)(self.nodeFromIndex(index))
             return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: QtGui.QColor(255, 255, 255, 255))(self.nodeFromIndex(index))
         return QtGui.QColor(255, 255, 255, 255)
 
@@ -240,16 +268,6 @@ class TodoListTableModel(TodoListBaseModel):
                 self.beginResetModel()
                 self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
                 self.endResetModel()
-            #elif self.todolist[index.row()].scan == 'Rescan':
-                #labelList = []
-                #for lbl in self.todolist[index.row()].measurement:
-                    #entry = copy.deepcopy(self.labelDict[lbl].entry)
-                    #entry.label = ''
-                    #labelList.append(entry)
-                #self.todolist[index.row()].children = labelList#[copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[index.row()].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
-                #self.beginResetModel()
-                #self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
-                #self.endResetModel()
             if value:
                 self.valueChanged.emit( None )
             return value

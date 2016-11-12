@@ -14,11 +14,13 @@ from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegateMixin
 
 #ModeTypes = enum('ComboBox', 'Magnitude')
 
+
+
 class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin, MagnitudeSpinBoxDelegateMixin):
     """Class for combo box editors in models"""
     def __init__(self):
         QtWidgets.QStyledItemDelegate.__init__(self)
-        self.globalDict = dict()
+        self.globalDict = {'D': 'D', 'DG': 'DG'}#dict()
         self.emptyStringValue = ''
 
     def createEditor(self, parent, option, index):

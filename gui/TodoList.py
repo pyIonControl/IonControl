@@ -142,6 +142,7 @@ class TodoList(Form, Base):
         self.indexStack = deque()
         self.todoStack = deque()
         self.rescanItems = deque()
+        self.fullRescanList = deque()
         self.rescan = False
         self.cachedIndex = None
         self.currentTodoList = self.settings.todoList
@@ -172,7 +173,8 @@ class TodoList(Form, Base):
         self.scanSelectionBox.addItems(['Scan', 'Script', 'Todo List', 'Rescan'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
-        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict )
+        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.fullRescanList)
+        self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
         self.tableModel.analysisSelection = self.scanModuleAnalysis
@@ -358,10 +360,14 @@ class TodoList(Form, Base):
         self.currentTodoList = self.settings.todoList
         self.indexStack.clear()
         self.todoStack.clear()
-        self.tableModel.setActiveRow( list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning' )
+        self.tableModel.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning' )
+        #self.tableModel.setActiveRow( list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning' )
         self.repeatButton.setChecked( self.settings.repeat )
         
     def setCurrentIndex(self, index):
+        self.rescanItems.clear()
+        self.fullRescanList.clear()
+        self.rescan = False
         self.settings.currentIndex = index.row()
         self.currentTodoList = self.settings.todoList
         self.populateStacks(self.settings.todoList, index)
@@ -369,7 +375,9 @@ class TodoList(Form, Base):
                         self.currentTodoList[self.settings.currentIndex].scan == 'Rescan':
             self.settings.currentIndex -= 1
             self.incrementIndex(overrideRepeat=True)
-        self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
+        self.activeItem = self.nodeFromIndex()
+        self.tableModel.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+        #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], self.statemachine.currentState=='MeasurementRunning')
         self.checkSettingsSavable()
 
     def updateMeasurementSelectionBox(self, newscan ):
@@ -536,16 +544,16 @@ class TodoList(Form, Base):
     def enableStopFlag(self, entry ):
         entry.stopFlag = not entry.stopFlag
 
-    def incrementIndex(self, overrideRepeat=False):
-        #if len(self.rescanItems) > 0:
-            #self.settings.currentIndex = self.rescanItems.popleft()
-            #return
-        modindex = (self.settings.currentIndex+1) % len(self.currentTodoList)
+    def nodeFromIndex(self, index=None):
+        if index is None:
+            index = self.settings.currentIndex
+        return self.tableModel.recursiveLookup(list(self.indexStack)+[self.settings.currentIndex])
 
+    def incrementIndex(self, overrideRepeat=False):
+        modindex = (self.settings.currentIndex+1) % len(self.currentTodoList)
         if self.currentTodoList[modindex].scan == 'Todo List':
             if self.currentTodoList[modindex].enabled:# and (not self.rescan or self.currentTodoList[modindex] in self.rescanItems):
                 self.indexStack.append(modindex)
-                #self.todoStack.append(deepcopy(self.currentTodoList))
                 self.todoStack.append(self.currentTodoList)
                 self.currentTodoList = self.currentTodoList[modindex].children
                 self.settings.currentIndex = -1
@@ -553,37 +561,24 @@ class TodoList(Form, Base):
             else:
                 self.settings.currentIndex = modindex
                 return self.incrementIndex()
-                #return modindex
-        #if self.currentTodoList[modindex].scan != 'Todo List':
         elif self.currentTodoList[modindex].scan == 'Rescan':
             if self.currentTodoList[modindex].enabled:
                 self.rescan = True
-                #self.indexStack.append(modindex)
-                #self.todoStack.append(deepcopy(self.currentTodoList))
                 self.rescanItems.extend(self.labelDict[lbl].entry for lbl in self.currentTodoList[modindex].measurement)
-                #self.todoStack.append(self.currentTodoList)
-                #self.currentTodoList = [self.labelDict[lbl].entry for lbl in self.currentTodoList[modindex].measurement]
-                #print(lbl for lbl in self.currentTodoList[modindex].measurement)
+                self.fullRescanList.extend(self.labelDict[lbl].entry for lbl in self.currentTodoList[modindex].measurement)
+                print(self.currentTodoList[modindex].measurement)
                 self.cachedIndex = modindex
                 self.settings.currentIndex = -1
                 return self.incrementIndex(overrideRepeat)
-                #return modindex
             else:
                 self.settings.currentIndex = modindex
                 return self.incrementIndex()
-                #return modindex
         else:
-
-
             if modindex == 0 and len(self.indexStack) > 0:# and not overrideRepeat:
-                #self.rescan = False
-                #self.rescanItems = list()
                 modindex = self.indexStack.pop()
                 self.currentTodoList = self.todoStack.pop()
                 self.settings.currentIndex = modindex
                 return self.incrementIndex(overrideRepeat)
-                #return modindex
-
             if self.rescan:
                 if len(self.rescanItems) > 0:
                     print(self.rescanItems[0].scan)
@@ -591,44 +586,33 @@ class TodoList(Form, Base):
                         self.rescanItems.popleft()
                         self.settings.currentIndex = modindex
                         if self.validTodoItem(self.currentTodoList[modindex]):
+                            self.activeItem = self.nodeFromIndex()
                             return modindex
                         return self.incrementIndex()
                     else:
                         self.settings.currentIndex = modindex
                         return self.incrementIndex()
-                        #return modindex
                 else:
                     self.rescan = False
-                    #self.rescanItems.clear( = deque()
+                    self.fullRescanList.clear()
                     self.settings.currentIndex = self.cachedIndex
                     return self.incrementIndex(overrideRepeat)
-                    #return modindex
             if modindex == 0 and not self.settings.repeat:
                 self.settings.currentIndex = (self.lastValidIndex+1) % len(self.currentTodoList)
                 self.lastValidIndex = self.settings.currentIndex
+                self.activeItem = self.nodeFromIndex()#self.currentTodoList[modindex]
                 self.enterIdle()
                 return self.lastValidIndex
             curItem = self.currentTodoList[modindex]
             if self.validTodoItem(curItem):
                 self.settings.currentIndex = modindex
+                self.activeItem = self.nodeFromIndex()
                 self.lastValidIndex = modindex
                 return modindex
             return self.incrementIndex()
 
     def validTodoItem(self, item):
         return item.enabled and (item.condition == '' or (eval(item.condition) and not item.stopFlag))
-
-        #else:
-            #if self.currentTodoList[modindex].enabled:
-                #self.indexStack.append(modindex)
-                ##self.todoStack.append(deepcopy(self.currentTodoList))
-                #self.todoStack.append(self.currentTodoList)
-                #self.currentTodoList = self.currentTodoList[modindex].children
-                #self.settings.currentIndex = 0
-            #else:
-                #self.settings.currentIndex = modindex
-                #self.incrementIndex(overrideRepeat)
-
 
     def isSomethingTodo2(self):
         for index in list(range( self.settings.currentIndex, len(self.currentTodoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat or len(self.indexStack) > 0 else []):
@@ -641,7 +625,8 @@ class TodoList(Form, Base):
                         elif self.currentTodoList[index].stopFlag:
                             self.settings.currentIndex = index
                             self.incrementIndex()
-                            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
+                            self.tableModel.setActiveItem(self.activeItem, False)
+                            #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
                             self.enterIdle()
                             return False
                     else:
@@ -650,11 +635,8 @@ class TodoList(Form, Base):
         return False
 
     def isSomethingTodo(self):
-        #currentIndex = copy(self.settings.currentIndex)
-        return True
+        return True #isn't there always?
 
-
-                
     def enterMeasurementRunning(self):
         entry = self.currentTodoList[ self.settings.currentIndex ]
         if entry.scan == 'Scan':
@@ -666,8 +648,8 @@ class TodoList(Form, Base):
             #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
             # start
             currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
-            #self.tableModel.setActiveEntry(self.currentTodoList[self.settings.currentIndex], True)
-            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
+            self.tableModel.setActiveItem(self.activeItem, True)
+            #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
         elif entry.scan == 'Script':
             self.statusLabel.setText('Script Running')
             self.currentScript = self.scripting.script.fullname
@@ -676,7 +658,8 @@ class TodoList(Form, Base):
             self.scripting.onStartScript()
             self.scripting.script.finished.connect(self.exitMeasurementRunning)
             self.scriptconnected = True
-            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
+            self.tableModel.setActiveItem(self.activeItem, True)
+            #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
 
     def exitMeasurementRunning(self):
         if self.scriptconnected:
@@ -688,7 +671,8 @@ class TodoList(Form, Base):
             self.onStateChanged('idle')
         else:
             self.incrementIndex()
-            self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
+            self.tableModel.setActiveItem(self.activeItem, False)
+            #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
         #self.globalVariablesUi.update(self.revertGlobalsList)
         
     def enterPaused(self):
