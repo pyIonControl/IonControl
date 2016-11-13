@@ -8,7 +8,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
 import copy
 
-#from gui.TodoList import TodoListEntry
 
 
 class BaseNode(object):
@@ -16,33 +15,92 @@ class BaseNode(object):
         self.parent = parent
         self.row = row
         self.childNodes = self._children()
+        if self.hideChildren:
+            self.hiddenChildren = self.childNodes
+            self.childNodes = list()
 
     def _children(self):
         raise NotImplementedError()
 
 class TodoListNode(BaseNode):
-    def __init__(self, entry, parent, row, labelDict):
+    allNodes = []
+
+    def __init__(self, entry, parent, row, labelDict, hideChildren=False):
         self.entry = entry
         self.highlighted = False
         self.labelDict = labelDict
+        self.hideChildren = hideChildren
+        self.hiddenChildren = None
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
         childList = list()
-        labelDict = dict()
-        if not isinstance(self.entry, TodoListNode):#'children'):
+        #if not isinstance(self.entry, TodoListNode):#'children'):
+        if not self.hideChildren:
             for ind in range(len(self.entry.children)):
                 node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict)
                 childList.append(node)
                 if node.entry.label != '':
                     self.labelDict[node.entry.label] = node
-        ##self.labelDict.update(labelDict)
+        else:
+            childList = self.entry.children
+            #childList = [self.labelDict[child] for child in self.entry.children]
         return childList
 
 
         #childList = [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
         #labelDict = {self.}
         #return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
+
+    #def incrementer(self, initNode=None):
+        #if initNode is None:
+            #if self.childNodes:
+                #yield from self.childNodes
+            #elif self.hiddenChildren is not None:
+                #yield from self.hiddenChildren
+            #else:
+                #yield self
+        #elif isinstance(initNode, list):
+            #yield from initNode
+        #else:
+            #yield from self.childNodes[initNode.row:]
+
+    def incrementer(self, initNode=None):
+        iterator = self.incr(initNode)
+        for item in iterator:
+            yield item
+            #cmd = yield item
+            #if cmd is None:
+                #break
+        #return 0#self
+
+
+    def incr(self, initNode=None):
+        if initNode is None:
+            if self.childNodes:
+                return self.childNodes
+            elif self.hideChildren:
+                print([self.labelDict[child] for child in self.hiddenChildren])
+                return [self.labelDict[child] for child in self.hiddenChildren]
+            else:
+                return [self]
+        elif isinstance(initNode, list):
+            return initNode
+        else:
+            return self.childNodes[initNode.row:]
+
+
+
+    def increment(self):
+        try:
+            return next(self.childGenerator)
+        except StopIteration:
+            return False
+
+    @classmethod
+    def initializeGenerators(cls):
+        for node in cls.allNodes:
+            node.childGenerator = node.incrementer()
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
@@ -55,6 +113,8 @@ class TodoListNode(BaseNode):
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self):
         QtCore.QAbstractItemModel.__init__(self)
+        self.inRescan = False
+        self.currentRescanList = list()
         self.rootNodes = self._rootNodes(init=True)
 
     def _rootNodes(self, init=False):
@@ -85,6 +145,13 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         node = parent.internalPointer()
         return len(node.childNodes)
 
+    def entryGenerator(self, node=None):
+        initRow = node.row if node is not None else 0
+        for root in self.rootNodes[initRow:]:
+            self.inRescan = True if root.hideChildren else False
+            self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
+            yield from root.incrementer()
+
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
             try:
@@ -103,7 +170,7 @@ class TodoListTableModel(TodoListBaseModel):
         self.todolist = todolist
         self.labelDict = labelDict
         self.settingsCache = settingsCache
-        self.currentRescanList = currentRescanList
+        #self.currentRescanList = list()#currentRescanList
         TodoListBaseModel.__init__(self)
         self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
@@ -178,11 +245,14 @@ class TodoListTableModel(TodoListBaseModel):
             for ind in range(len(self.todolist)):
                 if self.todolist[ind].scan == 'Todo List':
                     self.todolist[ind].children = self.settingsCache[self.todolist[ind].measurement].todoList
-                #elif self.todolist[ind].scan == 'Rescan':
+                elif self.todolist[ind].scan == 'Rescan':
+                    self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement]
+                    print(self.todolist[ind].children)
+                    #self.todolist[ind].hideChildren = True
                     #self.todolist[ind].children = [copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[ind].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
         nodeList = list()
         for ind in range(len(self.todolist)):
-            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict)
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan')
             nodeList.append(node)
             if node.entry.label != '':
                 self.labelDict[node.entry.label] = node
@@ -254,7 +324,7 @@ class TodoListTableModel(TodoListBaseModel):
     def colorData(self, index):
         if index.isValid():
             if len(self.currentRescanList):
-                if self.nodeFromIndex(index).entry not in self.currentRescanList:
+                if self.nodeFromIndex(index) not in self.currentRescanList:
                     return self.darkColorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: self.defaultDarkBackground)(self.nodeFromIndex(index))
             return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: QtGui.QColor(255, 255, 255, 255))(self.nodeFromIndex(index))
         return QtGui.QColor(255, 255, 255, 255)
