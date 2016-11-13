@@ -8,6 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
 import copy
 
+from itertools import chain
 
 
 class BaseNode(object):
@@ -48,6 +49,10 @@ class TodoListNode(BaseNode):
         return childList
 
 
+    def topLevelParent(self):
+        if self.parent is not None:
+            return self.parent.topLevelParent()
+        return self
         #childList = [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
         #labelDict = {self.}
         #return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
@@ -76,20 +81,68 @@ class TodoListNode(BaseNode):
 
 
     def incr(self, initNode=None):
-        if initNode is None:
+        if initNode is None or initNode is self:
             if self.childNodes:
                 return self.childNodes
             elif self.hideChildren:
-                print([self.labelDict[child] for child in self.hiddenChildren])
+                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
                 return [self.labelDict[child] for child in self.hiddenChildren]
             else:
                 return [self]
         elif isinstance(initNode, list):
             return initNode
-        else:
+        elif initNode in self.childNodes:
             return self.childNodes[initNode.row:]
+        else:
+            return [self]
 
+    def incrementer0(self, initNode=None):
+        if initNode is None or initNode is self:
+            if self.childNodes:
+                yield from [item.incrementer(initNode) for item in self.childNodes]
+            elif self.hideChildren:
+                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
+                yield from [self.labelDict[child].incrementer(initNode) for child in self.hiddenChildren]
+            else:
+                yield self
+        elif isinstance(initNode, list):
+            yield from [item.incrementer() for item in initNode]
+        elif initNode in self.childNodes:
+            yield from [item.incrementer(initNode) for item in self.childNodes[initNode.row:]]
+        else:
+            yield self
 
+    def incrementer3(self, initNode=None):
+        if initNode is None or initNode is self:
+            if self.childNodes:
+                return [item.incrementer(initNode) for item in self.childNodes]
+            elif self.hideChildren:
+                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
+                return [self.labelDict[child].incrementer(initNode) for child in self.hiddenChildren]
+            else:
+                yield self
+        elif isinstance(initNode, list):
+            return [item.incrementer() for item in initNode]
+        elif initNode in self.childNodes:
+            return [item.incrementer(initNode) for item in self.childNodes[initNode.row:]]
+        else:
+            yield self
+
+    def incr2(self, initNode=None):
+        if initNode is None or initNode is self:
+            if self.childNodes:
+                return chain(item.incr(initNode) for item in self.childNodes)
+            elif self.hideChildren:
+                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
+                return chain(self.labelDict[child].incr(initNode) for child in self.hiddenChildren)
+            else:
+                return [self]
+        elif isinstance(initNode, list):
+            return chain(item.incr() for item in initNode)
+        elif initNode in self.childNodes:
+            return chain(item.incr(initNode) for item in self.childNodes[initNode.row:])
+        else:
+            return [self]
 
     def increment(self):
         try:
@@ -146,11 +199,23 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         return len(node.childNodes)
 
     def entryGenerator(self, node=None):
-        initRow = node.row if node is not None else 0
+        initRow = node.topLevelParent().row
+        #initRow = node.row if node is not None else 0
+        initNode = node
+#        yield from self.flattenEntries(self.rootNodes[initRow:])
         for root in self.rootNodes[initRow:]:
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
             yield from root.incrementer()
+            #yield from self.flattenEntries(root.incrementer())
+            #initNode = None
+
+    def flattenEntries(self, item):
+        for subitem in item:
+            if isinstance(subitem, TodoListNode):
+                yield subitem
+            else:
+                yield from self.flattenEntries(subitem)
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
@@ -243,11 +308,15 @@ class TodoListTableModel(TodoListBaseModel):
     def _rootNodes(self, init=False):
         if init:
             for ind in range(len(self.todolist)):
-                if self.todolist[ind].scan == 'Todo List':
-                    self.todolist[ind].children = self.settingsCache[self.todolist[ind].measurement].todoList
-                elif self.todolist[ind].scan == 'Rescan':
+                self.connectSubTodoLists(self.todolist[ind])
+                #if self.todolist[ind].scan == 'Todo List':
+                    #self.conne
+                    #self.todolist[ind].children = self.settingsCache[self.todolist[ind].measurement].todoList
+                    #for child in self.todolist[ind].children:
+                        #if child.scan == 'TodoList' = self.settingsCache[self.todolist[ind].measurement].todoList
+                if self.todolist[ind].scan == 'Rescan':
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement]
-                    print(self.todolist[ind].children)
+                    print('Rootnode rescan init: ', self.todolist[ind].children)
                     #self.todolist[ind].hideChildren = True
                     #self.todolist[ind].children = [copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[ind].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
         nodeList = list()
@@ -257,6 +326,12 @@ class TodoListTableModel(TodoListBaseModel):
             if node.entry.label != '':
                 self.labelDict[node.entry.label] = node
         return nodeList
+
+    def connectSubTodoLists(self, item):
+        if item.scan == 'Todo List':
+            item.children = self.settingsCache[item.measurement].todoList
+            for ind in range(len(item.children)):
+                self.connectSubTodoLists(item.children[ind])
 
     def updateRootNodes(self):
         self.beginResetModel()
@@ -293,7 +368,7 @@ class TodoListTableModel(TodoListBaseModel):
             self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
         if oldactive is not None and oldactive!=row:
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
-        print(self.labelDict)
+        print('Set active row', self.labelDict)
 
     def setActiveItem(self, item, running=True):
         if self.activeEntry is not None:

@@ -3,13 +3,15 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import types
+from inspect import getgeneratorstate
 
 from PyQt5 import uic, QtCore, QtGui, QtWidgets
 
 from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.statemachine import Statemachine
-from .TodoListTableModel import TodoListTableModel
+from .TodoListTableModel import TodoListTableModel, TodoListNode
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
 from functools import partial
@@ -148,6 +150,7 @@ class TodoList(Form, Base):
         self.currentTodoList = self.settings.todoList
         self.labelDict = defaultdict(lambda: None)
         self.todoListGenerator = None
+        self.loopExhausted = False
 
     def setupStatemachine(self):
         self.statemachine = Statemachine()        
@@ -162,10 +165,10 @@ class TodoList(Form, Base):
         self.statemachine.addTransitionList('stopCommand', ['Idle', 'Paused'], 'Idle')
         self.statemachine.addTransition( 'stopCommand', 'MeasurementRunning', 'Waiting for Completion')
         self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Idle', self.checkStopFlag)
-        self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Check', lambda state: not self.checkStopFlag(state) and self.checkReadyToRun(state))
+        self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Check')#, lambda state: not self.checkStopFlag(state) and self.checkReadyToRun(state))
         self.statemachine.addTransition('measurementFinished', 'Waiting for Completion', 'Idle')
-        self.statemachine.addTransition('docheck', 'Check', 'MeasurementRunning', lambda state: (True or self.settings.currentIndex>0 or self.settings.repeat) and self.isSomethingTodo())
-        self.statemachine.addTransition('docheck', 'Check', 'Idle', lambda state: (True or self.settings.currentIndex == 0 and not self.settings.repeat) or not self.isSomethingTodo())
+        self.statemachine.addTransition('docheck', 'Check', 'MeasurementRunning', lambda state: (not self.loopExhausted or self.settings.repeat))# and self.isSomethingTodo())
+        self.statemachine.addTransition('docheck', 'Check', 'Idle', lambda state: (self.loopExhausted and not self.settings.repeat))# or not self.isSomethingTodo())
                 
     def setupUi(self):
         super(TodoList, self).setupUi(self)
@@ -367,14 +370,22 @@ class TodoList(Form, Base):
         
     def setCurrentIndex(self, index):
         if self.todoListGenerator is not None:
-            try:
-                self.todoListGenerator.send(None)
-            except StopIteration:
-                pass
-        self.activeItem = self.nodeFromIndex(index)
+            self.todoListGenerator.close()
+            #try:
+                #self.todoListGenerator.send(None)
+            #except StopIteration:
+                #pass
+        #self.activeItem = self.nodeFromIndex(index)
         self.settings.currentIndex = index.row()
-        self.todoListGenerator = self.tableModel.entryGenerator(self.nodeFromIndex(index))
+        self.todoListGenerator = self.tableModel.entryGenerator(self.tableModel.nodeFromIndex(index))
+        targetItem = self.tableModel.nodeFromIndex(index)
         self.activeItem = next(self.todoListGenerator)
+
+        while getgeneratorstate(self.todoListGenerator) == 'GEN_CREATED' or not (self.activeItem is targetItem or self.activeItem.parent is targetItem):
+            try:
+                self.activeItem = next(self.todoListGenerator)
+            except StopIteration:
+                break
         self.tableModel.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
 
         self.checkSettingsSavable()
@@ -504,6 +515,7 @@ class TodoList(Form, Base):
 
     def checkReadyToRun(self, state, _=True ):
         _, current = self.currentScan()
+        print("checkready: ",current.state()==0 and self.isSomethingTodo())
         return current.state()==0 and self.isSomethingTodo()
 
     def checkStopFlag(self, state):
@@ -628,7 +640,9 @@ class TodoList(Form, Base):
 
     def validTodoItem(self, item):
         #return item.enabled and (item.condition == '' or (eval(item.condition) and not item.stopFlag))
-        return item.enabled #and (item.condition == '' or (eval(item.condition) and not item.stopFlag))
+        if isinstance(item, TodoListNode):
+            return item.entry.enabled #and (item.condition == '' or (eval(item.condition) and not item.stopFlag))
+        return False
 
     #def stepTodoList(self):
         #if self.todoGenerator is None:
@@ -637,92 +651,29 @@ class TodoList(Form, Base):
         #nextItem =
         #self.activeItem = self.todoGenerator.send(self.active)
 
-    def incrementIndex(self):#, currentNode, overrideRepeat=False):
-        #currentNode = yield currentNode
-        #while True:
-            #index = currentNode.index()
-            #nextindex = currentNode.sibling(index.row()+1, 0, index)
-
-
+    def incrementIndex(self):
+        self.loopExhausted = False
         while True:
             try:
                 self.activeItem = next(self.todoListGenerator)
+                #while isinstance(self.activeItem, types.GeneratorType):
+                    #self.activeItem = next(self.activeItem)
+                #if getgeneratorstate(self.todoListGenerator) == 'GEN_SUSPENDED':
+
+
             except StopIteration:
+                #try:
+                    #self.activeItem = next(self.todoListGenerator)
+                #except StopIteration:
+                self.loopExhausted = True
                 self.settings.currentIndex = 1
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.enterIdle()
                 break
-            if self.validTodoItem(self.activeItem.entry):
+            if self.validTodoItem(self.activeItem):
                 self.settings.currentIndex = 1#self.activeItem.row
                 break
         return self.activeItem
-        '''
-        #modindex = (self.settings.currentIndex+1) % len(self.currentTodoList)
-        if self.currentTodoList[modindex].scan == 'Todo List':
-            if self.currentTodoList[modindex].enabled:# and (not self.rescan or self.currentTodoList[modindex] in self.rescanItems):
-                self.indexStack.append(modindex)
-                self.todoStack.append(self.currentTodoList)
-                self.currentTodoList = self.currentTodoList[modindex].children
-                self.settings.currentIndex = -1
-                return self.incrementIndex(overrideRepeat)
-            else:
-                self.settings.currentIndex = modindex
-                return self.incrementIndex()
-        elif self.currentTodoList[modindex].scan == 'Rescan':
-            if self.currentTodoList[modindex].enabled:
-                self.rescan = True
-                self.rescanItems.extend(self.labelDict[lbl].entry for lbl in self.currentTodoList[modindex].measurement)
-                self.fullRescanList.extend(self.labelDict[lbl].entry for lbl in self.currentTodoList[modindex].measurement)
-                print(self.currentTodoList[modindex].measurement)
-                self.cachedIndex = modindex
-                self.settings.currentIndex = -1
-                return self.incrementIndex(overrideRepeat)
-            else:
-                self.settings.currentIndex = modindex
-                return self.incrementIndex()
-        else:
-            if modindex == 0 and len(self.indexStack) > 0:# and not overrideRepeat:
-                modindex = self.indexStack.pop()
-                self.currentTodoList = self.todoStack.pop()
-                self.settings.currentIndex = modindex
-                return self.incrementIndex(overrideRepeat)
-            if self.rescan:
-                if len(self.rescanItems) > 0:
-                    print(self.rescanItems[0].scan)
-                    if self.currentTodoList[modindex] in self.rescanItems:
-                        self.rescanItems.popleft()
-                        self.settings.currentIndex = modindex
-                        if self.validTodoItem(self.currentTodoList[modindex]):
-                            self.activeItem = self.nodeFromIndex()
-                            return modindex
-                        return self.incrementIndex()
-                    else:
-                        self.settings.currentIndex = modindex
-                        return self.incrementIndex()
-                else:
-                    self.rescan = False
-                    self.fullRescanList.clear()
-                    self.settings.currentIndex = self.cachedIndex
-                    return self.incrementIndex(overrideRepeat)
-            if modindex == 0 and not self.settings.repeat:
-                self.settings.currentIndex = (self.lastValidIndex+1) % len(self.currentTodoList)
-                self.lastValidIndex = self.settings.currentIndex
-                self.activeItem = self.nodeFromIndex()#self.currentTodoList[modindex]
-                self.enterIdle()
-                return self.lastValidIndex
-            curItem = self.currentTodoList[modindex]
-            if self.validTodoItem(curItem):
-                self.settings.currentIndex = modindex
-                self.activeItem = self.nodeFromIndex()
-                self.lastValidIndex = modindex
-                return modindex
-            return self.incrementIndex()
-            '''
-
-    def incrementer(self):
-        print('start')
-        x = yield
-        print('temp')
 
     def isSomethingTodo2(self):
         for index in list(range( self.settings.currentIndex, len(self.currentTodoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat or len(self.indexStack) > 0 else []):
