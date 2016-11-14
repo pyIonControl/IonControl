@@ -22,7 +22,7 @@ from copy import deepcopy, copy
 from modules.PyqtUtility import updateComboBoxItems
 from modules.SequenceDict import SequenceDict
 from gui.TodoListSettingsTableModel import TodoListSettingsTableModel 
-from uiModules.TodoListChameleonDelegate import  ComboBoxGridDelegate, PlainGridDelegate
+from uiModules.TodoListChameleonDelegate import  ComboBoxGridDelegate, PlainGridDelegate, TodoListChameleonDelegate
 from uiModules.ComboBoxDelegate import ComboBoxDelegate
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.GuiAppearance import saveGuiState, restoreGuiState   #@UnresolvedImport
@@ -186,7 +186,8 @@ class TodoList(Form, Base):
         self.tableModel.valueChanged.connect( self.checkSettingsSavable )
         self.tableView.setModel( self.tableModel )
         self.tableView.setExpandsOnDoubleClick(False)
-        self.comboBoxDelegate = ComboBoxGridDelegate()
+        self.comboBoxDelegate = ComboBoxGridDelegate(self.labelDict)
+        #self.comboBoxDelegate.valueChanged
         self.gridDelegate = PlainGridDelegate()
         self.boldGridDelegate = PlainGridDelegate(bold=True)
         self.tableView.setItemDelegateForColumn(0, self.boldGridDelegate)

@@ -240,7 +240,7 @@ class TodoListTableModel(TodoListBaseModel):
             for ind in range(len(self.todolist)):
                 self.connectSubTodoLists(self.todolist[ind])
                 if self.todolist[ind].scan == 'Rescan':
-                    self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement]
+                    self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement.split(',')]
         nodeList = list()
         for ind in range(len(self.todolist)):
             node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan')
@@ -248,6 +248,12 @@ class TodoListTableModel(TodoListBaseModel):
             if node.entry.label != '':
                 self.labelDict[node.entry.label] = node
         return nodeList
+
+    def index(self, row, column, parent):
+        if not parent.isValid():
+            return self.createIndex(row, column, self.rootNodes[row])
+        parentNode = parent.internalPointer()
+        return self.createIndex(row, column, parentNode.childNodes[row])
 
     def connectSubTodoLists(self, item):
         if item.scan == 'Todo List':
@@ -290,7 +296,6 @@ class TodoListTableModel(TodoListBaseModel):
             self.dataChanged.emit( self.createIndex(row, 0), self.createIndex(row+1, 3) )
         if oldactive is not None and oldactive!=row:
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
-        print('Set active row', self.labelDict)
 
     def setActiveItem(self, item, running=True):
         if self.activeEntry is not None:
@@ -335,10 +340,21 @@ class TodoListTableModel(TodoListBaseModel):
                 self.beginResetModel()
                 self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
                 self.endResetModel()
+            if self.nodeFromIndex(index).entry.scan == 'Rescan':
+                self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
+                self.updateRootNodes()
+                #self.beginResetModel()
+                #self.nodeFromIndex(index).entry.hiddenChildren = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
+                #self.endResetModel()
             if value:
                 self.valueChanged.emit( None )
             return value
         return False
+
+    def setValue(self, index):
+        self.updateRootNodes()
+        #if self.nodeFromIndex(index).entry.scan == 'Rescan':
+            #self.nodeFromIndex(index).entry.hiddenChildren = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
 
     def flags(self, index):
         if self.todolist[index.row()].scan == 'Scan':
