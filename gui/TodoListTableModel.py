@@ -10,6 +10,8 @@ import copy
 
 from itertools import chain
 
+from modules.flatten import flattenAll
+
 
 class BaseNode(object):
     def __init__(self, parent, row):
@@ -71,7 +73,7 @@ class TodoListNode(BaseNode):
             #yield from self.childNodes[initNode.row:]
 
     def incrementer(self, initNode=None):
-        iterator = self.incr(initNode)
+        iterator = flattenAll(self.incr(initNode))
         for item in iterator:
             yield item
             #cmd = yield item
@@ -80,7 +82,7 @@ class TodoListNode(BaseNode):
         #return 0#self
 
 
-    def incr(self, initNode=None):
+    def incr2(self, initNode=None):
         if initNode is None or initNode is self:
             if self.childNodes:
                 return self.childNodes
@@ -128,13 +130,15 @@ class TodoListNode(BaseNode):
         else:
             yield self
 
-    def incr2(self, initNode=None):
+    def incr(self, initNode=None):
         if initNode is None or initNode is self:
             if self.childNodes:
-                return chain(item.incr(initNode) for item in self.childNodes)
+                print("NEW:", [item.incr(initNode) for item in self.childNodes])
+                print("OLD:", [item for item in self.childNodes])
+                return flattenAll([item.incr(initNode) for item in self.childNodes])
             elif self.hideChildren:
                 print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
-                return chain(self.labelDict[child].incr(initNode) for child in self.hiddenChildren)
+                return flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren])
             else:
                 return [self]
         elif isinstance(initNode, list):
@@ -199,7 +203,10 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         return len(node.childNodes)
 
     def entryGenerator(self, node=None):
-        initRow = node.topLevelParent().row
+        if node is None:
+            initRow = 0
+        else:
+            initRow = node.topLevelParent().row
         #initRow = node.row if node is not None else 0
         initNode = node
 #        yield from self.flattenEntries(self.rootNodes[initRow:])

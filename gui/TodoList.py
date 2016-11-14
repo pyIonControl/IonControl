@@ -165,10 +165,10 @@ class TodoList(Form, Base):
         self.statemachine.addTransitionList('stopCommand', ['Idle', 'Paused'], 'Idle')
         self.statemachine.addTransition( 'stopCommand', 'MeasurementRunning', 'Waiting for Completion')
         self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Idle', self.checkStopFlag)
-        self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Check')#, lambda state: not self.checkStopFlag(state) and self.checkReadyToRun(state))
+        self.statemachine.addTransition('measurementFinished', 'MeasurementRunning', 'Check', lambda state: not self.checkStopFlag(state) and self.checkReadyToRun(state))
         self.statemachine.addTransition('measurementFinished', 'Waiting for Completion', 'Idle')
-        self.statemachine.addTransition('docheck', 'Check', 'MeasurementRunning', lambda state: (not self.loopExhausted or self.settings.repeat))# and self.isSomethingTodo())
-        self.statemachine.addTransition('docheck', 'Check', 'Idle', lambda state: (self.loopExhausted and not self.settings.repeat))# or not self.isSomethingTodo())
+        self.statemachine.addTransition('docheck', 'Check', 'MeasurementRunning', lambda state: not self.loopExhausted or self.settings.repeat)# and self.isSomethingTodo())
+        self.statemachine.addTransition('docheck', 'Check', 'Idle', lambda state: self.loopExhausted and not self.settings.repeat)# or not self.isSomethingTodo())
                 
     def setupUi(self):
         super(TodoList, self).setupUi(self)
@@ -277,9 +277,10 @@ class TodoList(Form, Base):
         self.tableModel.copy_rows(row_list)
 
     def onActiveItemChanged(self, modelIndex, modelIndex2 ):
-        todoListElement = self.refineTodoListElement(modelIndex)
-        self.settingTableModel.setSettings( todoListElement.settings )
-        self.currentlySelectedLabel.setText( "{0} - {1}".format( todoListElement.measurement, todoListElement.evaluation) )
+        pass
+        #todoListElement = self.refineTodoListElement(modelIndex)
+        #self.settingTableModel.setSettings( todoListElement.settings )
+        #self.currentlySelectedLabel.setText( "{0} - {1}".format( todoListElement.measurement, todoListElement.evaluation) )
 
     def populateStacks(self, todolist, idx):
         self.indexStack.clear()
@@ -377,18 +378,18 @@ class TodoList(Form, Base):
                 #pass
         #self.activeItem = self.nodeFromIndex(index)
         self.settings.currentIndex = index.row()
-        self.todoListGenerator = self.tableModel.entryGenerator(self.tableModel.nodeFromIndex(index))
+        self.todoListGenerator = self.tableModel.entryGenerator()#self.tableModel.nodeFromIndex(index))
         targetItem = self.tableModel.nodeFromIndex(index)
         self.activeItem = next(self.todoListGenerator)
-
-        while getgeneratorstate(self.todoListGenerator) == 'GEN_CREATED' or not (self.activeItem is targetItem or self.activeItem.parent is targetItem):
+        #getgeneratorstate(self.todoListGenerator) == 'GEN_CREATED'
+        while not (self.activeItem.parent == targetItem or self.activeItem == targetItem):
             try:
                 self.activeItem = next(self.todoListGenerator)
             except StopIteration:
                 break
         self.tableModel.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
 
-        self.checkSettingsSavable()
+#        self.checkSettingsSavable()
         '''
         self.rescanItems.clear()
         self.fullRescanList.clear()
@@ -519,7 +520,8 @@ class TodoList(Form, Base):
         return current.state()==0 and self.isSomethingTodo()
 
     def checkStopFlag(self, state):
-        return self.currentTodoList[self.settings.currentIndex].stopFlag
+        #return self.currentTodoList[self.settings.currentIndex].stopFlag
+        return self.activeItem.entry.stopFlag
 
     def onStateChanged(self, newstate ):
         if newstate=='idle':
@@ -551,7 +553,8 @@ class TodoList(Form, Base):
     def onLoadLine(self):
         allrows = sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]))
         if len(allrows)==1: 
-            self.loadLine(self.currentTodoList[ allrows[0] ])
+            #self.loadLine(self.currentTodoList[ allrows[0] ])
+            self.loadLine(self.tableModel.nodeFromIndex(self.tableView.selectedIndexes()[0]).entry)
 
     def loadLine(self, entry ):
         currentname, currentwidget = self.currentScan()
@@ -666,40 +669,22 @@ class TodoList(Form, Base):
                     #self.activeItem = next(self.todoListGenerator)
                 #except StopIteration:
                 self.loopExhausted = True
+                print("LOOP EXHAUSTED")
                 self.settings.currentIndex = 1
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.enterIdle()
                 break
             if self.validTodoItem(self.activeItem):
-                self.settings.currentIndex = 1#self.activeItem.row
+                self.settings.currentIndex = self.activeItem.row
                 break
         return self.activeItem
-
-    def isSomethingTodo2(self):
-        for index in list(range( self.settings.currentIndex, len(self.currentTodoList))) + (list(range(0, self.settings.currentIndex)) if self.settings.repeat or len(self.indexStack) > 0 else []):
-            if len(self.rescanItems) == 0 or self.currentTodoList[index] in self.rescanItems:
-                if self.currentTodoList[ index ].enabled:
-                    if self.currentTodoList[index].condition != '':
-                        if eval(self.currentTodoList[index].condition):
-                            self.settings.currentIndex = index
-                            return True
-                        elif self.currentTodoList[index].stopFlag:
-                            self.settings.currentIndex = index
-                            self.incrementIndex()
-                            self.tableModel.setActiveItem(self.activeItem, False)
-                            #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
-                            self.enterIdle()
-                            return False
-                    else:
-                        self.settings.currentIndex = index
-                        return True
-        return False
 
     def isSomethingTodo(self):
         return True #isn't there always?
 
     def enterMeasurementRunning(self):
-        entry = self.currentTodoList[ self.settings.currentIndex ]
+        entry = self.activeItem.entry
+        #entry = self.currentTodoList[ self.settings.currentIndex ]
         if entry.scan == 'Scan':
             self.statusLabel.setText('Measurement Running')
             _, currentwidget = self.currentScan()
@@ -720,6 +705,12 @@ class TodoList(Form, Base):
             self.scripting.script.finished.connect(self.exitMeasurementRunning)
             self.scriptconnected = True
             self.tableModel.setActiveItem(self.activeItem, True)
+        elif entry.scan == 'Todo List':
+            print("ENTER TODO")
+            self.incrementIndex()
+            self.enterMeasurementRunning()
+        else:
+            print("NO VALID STATE")
             #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], True)
 
     def exitMeasurementRunning(self):
