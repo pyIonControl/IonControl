@@ -38,7 +38,6 @@ class TodoListNode(BaseNode):
 
     def _children(self):
         childList = list()
-        #if not isinstance(self.entry, TodoListNode):#'children'):
         if not self.hideChildren:
             for ind in range(len(self.entry.children)):
                 node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict)
@@ -47,97 +46,25 @@ class TodoListNode(BaseNode):
                     self.labelDict[node.entry.label] = node
         else:
             childList = self.entry.children
-            #childList = [self.labelDict[child] for child in self.entry.children]
         return childList
-
 
     def topLevelParent(self):
         if self.parent is not None:
             return self.parent.topLevelParent()
         return self
-        #childList = [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
-        #labelDict = {self.}
-        #return [TodoListNode(self.entry.children[ind], self, ind) for ind in range(len(self.entry.children))]
-
-    #def incrementer(self, initNode=None):
-        #if initNode is None:
-            #if self.childNodes:
-                #yield from self.childNodes
-            #elif self.hiddenChildren is not None:
-                #yield from self.hiddenChildren
-            #else:
-                #yield self
-        #elif isinstance(initNode, list):
-            #yield from initNode
-        #else:
-            #yield from self.childNodes[initNode.row:]
 
     def incrementer(self, initNode=None):
         iterator = flattenAll(self.incr(initNode))
         for item in iterator:
             yield item
-            #cmd = yield item
-            #if cmd is None:
-                #break
-        #return 0#self
-
-
-    def incr2(self, initNode=None):
-        if initNode is None or initNode is self:
-            if self.childNodes:
-                return self.childNodes
-            elif self.hideChildren:
-                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
-                return [self.labelDict[child] for child in self.hiddenChildren]
-            else:
-                return [self]
-        elif isinstance(initNode, list):
-            return initNode
-        elif initNode in self.childNodes:
-            return self.childNodes[initNode.row:]
-        else:
-            return [self]
-
-    def incrementer0(self, initNode=None):
-        if initNode is None or initNode is self:
-            if self.childNodes:
-                yield from [item.incrementer(initNode) for item in self.childNodes]
-            elif self.hideChildren:
-                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
-                yield from [self.labelDict[child].incrementer(initNode) for child in self.hiddenChildren]
-            else:
-                yield self
-        elif isinstance(initNode, list):
-            yield from [item.incrementer() for item in initNode]
-        elif initNode in self.childNodes:
-            yield from [item.incrementer(initNode) for item in self.childNodes[initNode.row:]]
-        else:
-            yield self
-
-    def incrementer3(self, initNode=None):
-        if initNode is None or initNode is self:
-            if self.childNodes:
-                return [item.incrementer(initNode) for item in self.childNodes]
-            elif self.hideChildren:
-                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
-                return [self.labelDict[child].incrementer(initNode) for child in self.hiddenChildren]
-            else:
-                yield self
-        elif isinstance(initNode, list):
-            return [item.incrementer() for item in initNode]
-        elif initNode in self.childNodes:
-            return [item.incrementer(initNode) for item in self.childNodes[initNode.row:]]
-        else:
-            yield self
 
     def incr(self, initNode=None):
+        if not self.entry.enabled or (self.entry.condition != '' and not eval(self.entry.condition) and not self.entry.stopFlag):
+            return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
-                print("NEW:", [item.incr(initNode) for item in self.childNodes])
-                print("OLD:", [item for item in self.childNodes])
                 return flattenAll([item.incr(initNode) for item in self.childNodes])
             elif self.hideChildren:
-                print('generator incr:', [self.labelDict[child] for child in self.hiddenChildren])
                 return flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren])
             else:
                 return [self]
@@ -209,13 +136,10 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             initRow = node.topLevelParent().row
         #initRow = node.row if node is not None else 0
         initNode = node
-#        yield from self.flattenEntries(self.rootNodes[initRow:])
         for root in self.rootNodes[initRow:]:
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
             yield from root.incrementer()
-            #yield from self.flattenEntries(root.incrementer())
-            #initNode = None
 
     def flattenEntries(self, item):
         for subitem in item:
@@ -242,7 +166,6 @@ class TodoListTableModel(TodoListBaseModel):
         self.todolist = todolist
         self.labelDict = labelDict
         self.settingsCache = settingsCache
-        #self.currentRescanList = list()#currentRescanList
         TodoListBaseModel.__init__(self)
         self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
@@ -316,16 +239,8 @@ class TodoListTableModel(TodoListBaseModel):
         if init:
             for ind in range(len(self.todolist)):
                 self.connectSubTodoLists(self.todolist[ind])
-                #if self.todolist[ind].scan == 'Todo List':
-                    #self.conne
-                    #self.todolist[ind].children = self.settingsCache[self.todolist[ind].measurement].todoList
-                    #for child in self.todolist[ind].children:
-                        #if child.scan == 'TodoList' = self.settingsCache[self.todolist[ind].measurement].todoList
                 if self.todolist[ind].scan == 'Rescan':
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement]
-                    print('Rootnode rescan init: ', self.todolist[ind].children)
-                    #self.todolist[ind].hideChildren = True
-                    #self.todolist[ind].children = [copy.deepcopy(self.labelDict[lbl].entry) for lbl in self.todolist[ind].measurement]#self.settingsCache[self.todolist[index.row()].measurement].todoList
         nodeList = list()
         for ind in range(len(self.todolist)):
             node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan')
