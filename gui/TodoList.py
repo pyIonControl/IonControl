@@ -180,7 +180,7 @@ class TodoList(Form, Base):
         self.scanSelectionBox.addItems(['Scan', 'Script', 'Todo List', 'Rescan'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
-        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.fullRescanList)
+        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.tableView)#self.fullRescanList)
         self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
@@ -256,8 +256,17 @@ class TodoList(Form, Base):
 
         self.tableView.setStyleSheet("""
             QTreeView::item::selected {
-                background-color: rgb(255,255,165);
+                background-color: rgba(255,255,0, 20%);
                 color: rgb(40,40,40);
+                border-top-width: 1px;
+                border-right-width: .1px;
+                border-bottom-width: .1px;
+                border-left-width: 1px;
+                border-top-style: solid;
+                border-right-style: solid;
+                border-bottom-style: solid;
+                border-left-style: solid;
+                border-color: black;
             }
         """)
 
@@ -360,19 +369,17 @@ class TodoList(Form, Base):
         self.currentTodoList = self.settings.todoList
         self.indexStack.clear()
         self.todoStack.clear()
-        #self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning' )
-        #self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning' )
         self.repeatButton.setChecked(self.settings.repeat)
         
     def setCurrentIndex(self, index):
-        if self.todoListGenerator is not None:
-            self.todoListGenerator.close()
-        self.tableModel.currentRescanList = list()
-        self.isSomethingTodo = True
-        self.settings.currentIndex = index.row()
-        #node = self.tableModel.nodeFromIndex(index)
-        self.currentItem = self.tableModel.nodeFromIndex(index)
-        self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
+        if self.statemachine.currentState=='Idle':
+            if self.todoListGenerator is not None:
+                self.todoListGenerator.close()
+            self.tableModel.currentRescanList = list()
+            self.isSomethingTodo = True
+            self.settings.currentIndex = index.row()
+            self.currentItem = self.tableModel.nodeFromIndex(index)
+            self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
 
     def synchronizeGeneratorWithSelectedItem(self):
         if self.todoListGenerator is not None:
@@ -389,8 +396,6 @@ class TodoList(Form, Base):
                     self.activeItem = next(self.todoListGenerator)
                 except StopIteration:
                     break
-
-        #self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
 
     def setActiveItem(self, item, state):

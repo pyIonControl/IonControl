@@ -32,7 +32,7 @@ class TodoListNode(BaseNode):
         self.entry = entry
         self.highlighted = highlighted
         self.labelDict = labelDict
-        self.hideChildren = hideChildren
+        self.hideChildren = hideChildren # currently used for Rescan
         self.hiddenChildren = None
         BaseNode.__init__(self, parent, row)
 
@@ -160,7 +160,7 @@ class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
     ignoreTypes = ['Scan', ]
-    def __init__(self, todolist, settingsCache, labelDict, currentRescanList, parent=None, *args):
+    def __init__(self, todolist, settingsCache, labelDict, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
         """
@@ -190,8 +190,8 @@ class TodoListTableModel(TodoListBaseModel):
              (QtCore.Qt.EditRole,       2): lambda node: node.entry.measurement,
              (QtCore.Qt.EditRole,       3): lambda node: node.entry.evaluation,
              (QtCore.Qt.EditRole,       4): lambda node: node.entry.analysis,
-             (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition,
-             (QtCore.Qt.TextAlignmentRole, 0): lambda node: QtCore.Qt.AlignRight
+             (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition
+             #(QtCore.Qt.TextAlignmentRole, 0): lambda node: QtCore.Qt.AlignRight
              }
         self.colorDataLookup = {
              (QtCore.Qt.BackgroundRole, 0): lambda node: self.colorStopFlagLookup[node.entry.stopFlag],
@@ -209,11 +209,11 @@ class TodoListTableModel(TodoListBaseModel):
             (QtCore.Qt.BackgroundRole, 1): lambda node: self.colorLookup[self.running]
                                                         if node.highlighted else self.defaultDarkBackground,
             (QtCore.Qt.BackgroundRole, 2): lambda node: self.defaultDarkBackground,
-            (QtCore.Qt.BackgroundRole, 3): lambda node: self.bgLookup(node),
-            (QtCore.Qt.BackgroundRole, 4): lambda node: self.bgLookup(node),
+            (QtCore.Qt.BackgroundRole, 3): lambda node: self.bgLookup(node, True),
+            (QtCore.Qt.BackgroundRole, 4): lambda node: self.bgLookup(node, True),
             (QtCore.Qt.BackgroundRole, 5): lambda node: self.defaultDarkBackground
                                                         if node.entry.condition != ''
-                                                        else QtGui.QColor(215, 215, 215, 255)
+                                                        else QtGui.QColor(195, 195, 195, 255)
         }
         self.setDataLookup ={(QtCore.Qt.CheckStateRole, 0): self.setEntryEnabled,
                              (QtCore.Qt.EditRole, 0): partial( self.setString, 'label' ),
@@ -269,11 +269,11 @@ class TodoListTableModel(TodoListBaseModel):
         if self.activeEntry is not None:
             self.setActiveItem(self.activeEntry, self.running)
 
-    def bgLookup(self, node):
+    def bgLookup(self, node, darkbg=False):
         if node.entry.scan == 'Script' or \
            node.entry.scan == 'Todo List' or \
            node.entry.scan == 'Rescan':
-            return QtGui.QColor(215, 215, 215, 255)
+            return QtGui.QColor(195, 195, 195, 255) if darkbg else QtGui.QColor(215, 215, 215, 255)
         elif self.currentRescanList and node not in self.currentRescanList:
             return self.defaultDarkBackground
         return QtGui.QColor(255, 255, 255, 255)
@@ -353,6 +353,8 @@ class TodoListTableModel(TodoListBaseModel):
                 self.nodeFromIndex(index).hiddenChildren = self.nodeFromIndex(index)._children()
                 #self.todolist[index.row()].children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
                 #self.updateRootNodes()
+            if index.column() == 0 and role == QtCore.Qt.EditRole:
+                self.labelDict[self.nodeFromIndex(index).entry.label] = self.nodeFromIndex(index)
             if value:
                 self.valueChanged.emit( None )
             return value

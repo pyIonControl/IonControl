@@ -14,11 +14,8 @@ from uiModules.ComboBoxDelegate import ComboBoxDelegateMixin
 from uiModules.MagnitudeSpinBox import MagnitudeSpinBox
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegateMixin
 
-#ModeTypes = enum('ComboBox', 'Magnitude')
-
-
-class AutoCompleterDelegateMixin(object):
-
+class ListCompleterDelegateMixin(object):
+    """Completes individual elements in a comma-separated list"""
     def createEditor(self, parent, option, index ):
         if hasattr( index.model(), 'localReplacementDict' ):
             localDict = dict(self.globalDict)
@@ -27,7 +24,6 @@ class AutoCompleterDelegateMixin(object):
             localDict = self.globalDict
         editor = ListEditor(parent, globalDict=localDict, valueChangedOnEditingFinished=False, emptyStringValue=self.emptyStringValue)
         editor.dimension = index.model().data(index, QtCore.Qt.UserRole)
-        #editor.valueChanged.connect( partial( index.model().setValue, index ))
         self.completer = CustomCompleter((self.globalDict.keys()), self)
         self.completer.setCaseSensitivity(QtCore.Qt.CaseSensitive)
         self.completer.setCompletionMode(QtWidgets.QCompleter.InlineCompletion)
@@ -49,8 +45,7 @@ class AutoCompleterDelegateMixin(object):
 
     def setModelData(self, editor, model, index):
         value = str(editor.text())
-        text = str(editor.text())
-        model.setData(index, value, QtCore.Qt.EditRole )    # DisplayRole would be better, for backwards compatibility we leave it at EditRole and distinguish there by type
+        model.setData(index, value, QtCore.Qt.EditRole)
 
 class CustomCompleter(QtWidgets.QCompleter):
     def __init__(self, tags, parent):
@@ -150,19 +145,19 @@ class ListEditor(QtWidgets.QAbstractSpinBox):
     #def wheelEvent(self, wheelEvent):
         #self.stepBy(copysign(1, wheelEvent.angleDelta().y()))
 
-class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin, AutoCompleterDelegateMixin):# MagnitudeSpinBoxDelegateMixin):
+class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin, ListCompleterDelegateMixin):# MagnitudeSpinBoxDelegateMixin):
     """Class for combo box editors in models"""
     def __init__(self, labelDict):
         QtWidgets.QStyledItemDelegate.__init__(self)
 
-        self.globalDict = labelDict#{'D': 'D', 'DG': 'DG'}#dict()
+        self.globalDict = labelDict
         self.emptyStringValue = ''
 
     def createEditor(self, parent, option, index):
         """Create the combo box editor"""
         model = index.model()
         if model.nodeFromIndex(index).entry.scan == 'Rescan' and index.column()==2:
-            return AutoCompleterDelegateMixin.createEditor(self, parent, option, index)
+            return ListCompleterDelegateMixin.createEditor(self, parent, option, index)
         else:
             return ComboBoxDelegateMixin.createEditor(self, parent, option, index)
 
@@ -170,7 +165,7 @@ class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateM
         """Set the data in the editor based on the model"""
         model = index.model()
         if model.nodeFromIndex(index).entry.scan == 'Rescan' and index.column()==2:
-            AutoCompleterDelegateMixin.setEditorData(self, editor, index)
+            ListCompleterDelegateMixin.setEditorData(self, editor, index)
         else:
             ComboBoxDelegateMixin.setEditorData(self, editor, index)
 
@@ -178,7 +173,7 @@ class TodoListChameleonDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateM
         """Set the data in the model based on the editor"""
         model = index.model()
         if model.nodeFromIndex(index).entry.scan == 'Rescan' and index.column()==2:
-            AutoCompleterDelegateMixin.setModelData(self, editor, model, index)
+            ListCompleterDelegateMixin.setModelData(self, editor, model, index)
         else:
             ComboBoxDelegateMixin.setModelData(self, editor, model, index)
 
@@ -209,7 +204,7 @@ class ComboBoxGridDelegate(TodoListChameleonDelegate, ComboBoxGridDelegateMixin)
     """Similar to the grid delegates used in GlobalVariablesModel but for comboboxes"""
     paint = ComboBoxGridDelegateMixin.paint
 
-    def __init__(self, labelDict):#bold=False):
+    def __init__(self, labelDict):
         super().__init__(labelDict)
 
 class PlainGridDelegate(QtWidgets.QStyledItemDelegate, ComboBoxGridDelegateMixin):
