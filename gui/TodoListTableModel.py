@@ -28,9 +28,9 @@ class BaseNode(object):
 class TodoListNode(BaseNode):
     allNodes = []
 
-    def __init__(self, entry, parent, row, labelDict, hideChildren=False):
+    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False):
         self.entry = entry
-        self.highlighted = False
+        self.highlighted = highlighted
         self.labelDict = labelDict
         self.hideChildren = hideChildren
         self.hiddenChildren = None
@@ -59,7 +59,7 @@ class TodoListNode(BaseNode):
             yield item
 
     def incr(self, initNode=None):
-        if not self.entry.enabled or (self.entry.condition != '' and not eval(self.entry.condition) and not self.entry.stopFlag):
+        if not self.entry.enabled or (self.entry.condition != '' and (not eval(self.entry.condition) and self.entry.stopFlag)):
             return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
@@ -132,10 +132,10 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
     def entryGenerator(self, node=None):
         if node is None:
             initRow = 0
+            initNode = self.rootNodes[0]
         else:
             initRow = node.topLevelParent().row
-        #initRow = node.row if node is not None else 0
-        initNode = node
+            initNode = node
         for root in self.rootNodes[initRow:]:
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
@@ -159,6 +159,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
 class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
+    ignoreTypes = ['Scan', ]
     def __init__(self, todolist, settingsCache, labelDict, currentRescanList, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
@@ -176,12 +177,12 @@ class TodoListTableModel(TodoListBaseModel):
              (QtCore.Qt.DisplayRole,    1): lambda node: node.entry.scan,
              (QtCore.Qt.DisplayRole,    2): lambda node: node.entry.measurement,
              (QtCore.Qt.DisplayRole,    3): lambda node: node.entry.evaluation
-                                                         if (node.entry.scan == 'Scan' or
-                                                             node.entry.scan == 'Todo List')
+                                                         if node.entry.scan == 'Scan'# or
+                                                             #node.entry.scan == 'Todo List')
                                                          else '',
              (QtCore.Qt.DisplayRole,    4): lambda node: node.entry.analysis
-                                                         if (node.entry.scan == 'Scan' or
-                                                             node.entry.scan == 'Todo List')
+                                                         if node.entry.scan == 'Scan'# or
+                                                             #node.entry.scan == 'Todo List' )
                                                          else '',
              (QtCore.Qt.DisplayRole,    5): lambda node: node.entry.condition,
              (QtCore.Qt.EditRole,       0): lambda node: node.entry.label,
@@ -265,9 +266,13 @@ class TodoListTableModel(TodoListBaseModel):
         self.beginResetModel()
         self.rootNodes = self._rootNodes()
         self.endResetModel()
+        if self.activeEntry is not None:
+            self.setActiveItem(self.activeEntry, self.running)
 
     def bgLookup(self, node):
-        if node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
+        if node.entry.scan == 'Script' or \
+           node.entry.scan == 'Todo List' or \
+           node.entry.scan == 'Rescan':
             return QtGui.QColor(215, 215, 215, 255)
         elif self.currentRescanList and node not in self.currentRescanList:
             return self.defaultDarkBackground
@@ -290,6 +295,7 @@ class TodoListTableModel(TodoListBaseModel):
             oldactive = self.activeEntry.row
         ref.highlighted = True
         self.activeEntry = ref
+        self.activeEntry.highlighted = True
         self.activeRow = row
         self.running = running
         if row is not None:
@@ -301,8 +307,8 @@ class TodoListTableModel(TodoListBaseModel):
         if self.activeEntry is not None:
             self.activeEntry.highlighted = False
             oldactive = self.activeEntry.row
-        item.highlighted = True
         self.activeEntry = item
+        self.activeEntry.highlighted = True
         self.activeRow = item.row
         self.running = running
         row = item.row
@@ -340,15 +346,17 @@ class TodoListTableModel(TodoListBaseModel):
                 self.beginResetModel()
                 self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
                 self.endResetModel()
+                if self.activeEntry is not None:
+                    self.setActiveItem(self.activeEntry, self.running)
             if self.nodeFromIndex(index).entry.scan == 'Rescan':
                 self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
-                self.updateRootNodes()
-                #self.beginResetModel()
-                #self.nodeFromIndex(index).entry.hiddenChildren = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
-                #self.endResetModel()
+                self.nodeFromIndex(index).hiddenChildren = self.nodeFromIndex(index)._children()
+                #self.todolist[index.row()].children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
+                #self.updateRootNodes()
             if value:
                 self.valueChanged.emit( None )
             return value
+        #self.setActiveItem(self.activeEntry, self.running)
         return False
 
     def setValue(self, index):
@@ -419,7 +427,9 @@ class TodoListTableModel(TodoListBaseModel):
         self.todolist = todolist
         self.rootNodes = self._rootNodes(init=True)
         self.endResetModel()
-        
+        if self.activeEntry is not None:
+            self.setActiveItem(self.activeEntry, self.running)
+
     def choice(self, index):
         return self.choiceLookup.get(index.column(), lambda row: [])(index.row())
     
