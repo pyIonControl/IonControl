@@ -143,6 +143,7 @@ class Parser:
         ('left','TIMES','DIVIDE'),
         ('right','UMINUS'),
         ('right','POW'),
+        ('left', 'GT', 'GTE', 'LT', 'LTE', 'EQ', 'NEQ')
     )
 
     def p_statement_expr(self, p):
@@ -317,8 +318,7 @@ class Expression:
     def evaluateAsMagnitude(self, s, variabledict=dict(), listDependencies=False, useFloat=False, functiondict=dict()):
         return self.exprParser.evaluateAsMagnitude(s, variabledict, listDependencies, useFloat, functiondict)
 
-#if __name__ == "__main__":
-def tests():
+if __name__ == "__main__":
     from time import time
     start_time = time()
     tests = """2*2
@@ -421,4 +421,3 @@ def tests():
 
     print("elapsed time:",time()-start_time)
 
-tests()
