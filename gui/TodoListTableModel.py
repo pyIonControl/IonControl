@@ -253,10 +253,10 @@ class TodoListTableModel(TodoListBaseModel):
         self.measurementSelection = {}
         self.evaluationSelection = {}
         self.analysisSelection = {}
-        self.choiceLookup = { 1: lambda row: list(self.measurementSelection.keys()),
-                              2: lambda row: self.measurementSelection[self.todolist[row].scan],
-                              3: lambda row: self.evaluationSelection[self.todolist[row].scan],
-                              4: lambda row: self.analysisSelection[self.todolist[row].scan]}
+        self.choiceLookup = { 1: lambda node: list(self.measurementSelection.keys()),
+                              2: lambda node: self.measurementSelection[node.entry.scan],# if node.entry.scan != 'Todo List' else {k: v for k, v in self.measurementSelection[node.entry.scan].items() if k ,
+                              3: lambda node: self.evaluationSelection[node.entry.scan],
+                              4: lambda node: self.analysisSelection[node.entry.scan]}
 
     def _rootNodes(self, init=False):
         if init:
@@ -373,20 +373,15 @@ class TodoListTableModel(TodoListBaseModel):
             if self.nodeFromIndex(index).entry.scan == 'Rescan':
                 self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
                 self.nodeFromIndex(index).hiddenChildren = self.nodeFromIndex(index)._children()
-                #self.todolist[index.row()].children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
-                #self.updateRootNodes()
             if index.column() == 0 and role == QtCore.Qt.EditRole:
                 self.labelDict[self.nodeFromIndex(index).entry.label] = self.nodeFromIndex(index)
             if value:
                 self.valueChanged.emit( None )
             return value
-        #self.setActiveItem(self.activeEntry, self.running)
         return False
 
     def setValue(self, index):
         self.updateRootNodes()
-        #if self.nodeFromIndex(index).entry.scan == 'Rescan':
-            #self.nodeFromIndex(index).entry.hiddenChildren = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
 
     def flags(self, index):
         if self.todolist[index.row()].scan == 'Scan':
@@ -455,7 +450,8 @@ class TodoListTableModel(TodoListBaseModel):
             self.setActiveItem(self.activeEntry, self.running)
 
     def choice(self, index):
-        return self.choiceLookup.get(index.column(), lambda row: [])(index.row())
+        node = self.nodeFromIndex(index)
+        return self.choiceLookup.get(index.column(), lambda row: [])(node)#(index.row())
     
     def setValue(self, index, value):
         self.setData( index, value, QtCore.Qt.EditRole)

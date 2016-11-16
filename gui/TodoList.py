@@ -254,6 +254,7 @@ class TodoList(Form, Base):
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         #QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Delete), self, self.delete_row)
 
+        # set style sheet to highlight selected items in yellow and preserve borders
         self.tableView.setStyleSheet("""
             QTreeView::item::selected {
                 background-color: rgba(255,255,0, 20%);
@@ -433,7 +434,7 @@ class TodoList(Form, Base):
 
     def populateMeasurements(self):
         self.scanModuleMeasurements = {'Script': sorted(self.scriptFiles.keys()),
-                                       'Todo List': sorted(self.settingsCache.keys()),
+                                       'Todo List': sorted(self.settingsCache.keys() - {self.masterSettings.currentSettingName}),
                                        'Rescan': sorted(self.labelDict.keys())}
         for name, widget in self.scanModules.items():
             if name == 'Scan':
@@ -454,7 +455,7 @@ class TodoList(Form, Base):
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Todo List':
-                self.populateMeasurementsItem(name, {k: v for k,v in self.settingsCache.items() if k is not self.masterSettings.currentSettingName})
+                self.populateMeasurementsItem(name, self.settingsCache)#{k: v for k,v in self.settingsCache.items() if k is not self.masterSettings.currentSettingName})
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Rescan':
@@ -467,7 +468,7 @@ class TodoList(Form, Base):
             self.tableModel.analysisSelection = self.scanModuleAnalysis
 
     def populateMeasurementsItem(self, name, settingsDict ):
-        self.scanModuleMeasurements[name] = sorted(settingsDict.keys())
+        self.scanModuleMeasurements[name] = sorted(settingsDict.keys()) if name != 'Todo List' else sorted(settingsDict.keys() - {self.masterSettings.currentSettingName})
         #if name == self.currentMeasurementsDisplayedForScan:
         updateComboBoxItems( self.measurementSelectionBox, self.scanModuleMeasurements[name] )
 
