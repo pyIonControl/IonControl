@@ -26,6 +26,12 @@ class BaseNode(object):
     def _children(self):
         raise NotImplementedError()
 
+    def updateChildren(self):
+        self.childNodes = self._children()
+        if self.hideChildren:
+            self.hiddenChildren = self.childNodes
+            self.childNodes = list()
+
 class TodoListNode(BaseNode):
     allNodes = []
 
@@ -254,7 +260,7 @@ class TodoListTableModel(TodoListBaseModel):
         self.evaluationSelection = {}
         self.analysisSelection = {}
         self.choiceLookup = { 1: lambda node: list(self.measurementSelection.keys()),
-                              2: lambda node: self.measurementSelection[node.entry.scan],# if node.entry.scan != 'Todo List' else {k: v for k, v in self.measurementSelection[node.entry.scan].items() if k ,
+                              2: self.measurementSelectionLimiter,
                               3: lambda node: self.evaluationSelection[node.entry.scan],
                               4: lambda node: self.analysisSelection[node.entry.scan]}
 
@@ -271,6 +277,17 @@ class TodoListTableModel(TodoListBaseModel):
             if node.entry.label != '':
                 self.labelDict[node.entry.label] = node
         return nodeList
+
+    def measurementSelectionLimiter(self, node):
+        if node.entry.scan != 'Todo List':
+            return self.measurementSelection[node.entry.scan]
+        reductionSet = set()
+        parent = node.parent
+        while parent is not None:
+            if parent.entry.scan == 'Todo List':
+                reductionSet.add(parent.entry.measurement)
+            parent = parent.parent
+        return sorted(set(self.measurementSelection[node.entry.scan]) - reductionSet)
 
     def index(self, row, column, parent):
         if not parent.isValid():
@@ -361,12 +378,13 @@ class TodoListTableModel(TodoListBaseModel):
 
 
     def setData(self, index, value, role):
+        node = self.nodeFromIndex(index)
         if index.isValid():
             value = self.setDataLookup.get((role, index.column()), lambda index, value: None)(index, value)
-            if self.todolist[index.row()].scan == 'Todo List':
-                self.todolist[index.row()].children = self.settingsCache[self.todolist[index.row()].measurement].todoList
+            if node.entry.scan == 'Todo List':
                 self.beginResetModel()
-                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict, globaldict=self.globalDict)
+                node.entry.children = self.settingsCache[node.entry.measurement].todoList
+                node.updateChildren()
                 self.endResetModel()
                 if self.activeEntry is not None:
                     self.setActiveItem(self.activeEntry, self.running)
