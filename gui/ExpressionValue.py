@@ -101,7 +101,7 @@ class ExpressionValue(QtCore.QObject):
         self.registrations[:] = []
         if self._string:
             val, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
-            if callable(val.m):
+            if hasattr(val, 'm') and callable(val.m):
                 self.func = deepcopy(val.m)
                 if any('NamedTraceDict' in key for key in val.m.__code__.co_names) or \
                    'NamedTrace' in val.m.__code__.co_names:

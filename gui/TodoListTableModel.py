@@ -10,6 +10,7 @@ import copy
 
 from itertools import chain
 
+from modules.Expression import Expression
 from modules.flatten import flattenAll
 
 
@@ -28,19 +29,21 @@ class BaseNode(object):
 class TodoListNode(BaseNode):
     allNodes = []
 
-    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False):
+    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None):
         self.entry = entry
         self.highlighted = highlighted
         self.labelDict = labelDict
         self.hideChildren = hideChildren # currently used for Rescan
         self.hiddenChildren = None
+        self.globalDict = globaldict if globaldict is not None else []
+        self.exprEval = Expression()
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
         childList = list()
         if not self.hideChildren:
             for ind in range(len(self.entry.children)):
-                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict)
+                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict)
                 childList.append(node)
                 if node.entry.label != '':
                     self.labelDict[node.entry.label] = node
@@ -58,8 +61,28 @@ class TodoListNode(BaseNode):
         for item in iterator:
             yield item
 
+    def evalCondition(self):
+        if self.entry.condition != '':
+            #return eval(self.entry.condition)
+            print('Condition:', self.entry.condition)
+            print('Evaluation:', self.exprEval.evaluate(self.entry.condition, self.globalDict))
+            return self.exprEval.evaluate(self.entry.condition, self.globalDict)
+        return True
+
+    #def __iter__(self):
+        #if not self.entry.enabled or (self.entry.condition != '' and (not self.evalCondition() and self.entry.stopFlag)):
+            #return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
+        #if self.childNodes:
+            #return iter(self.childNodes)
+        #elif self.hideChildren:
+            #return iter(self.hiddenChildren)
+            ##yield from flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren])
+        #else:
+            #yield self
+
+
     def incr(self, initNode=None):
-        if not self.entry.enabled or (self.entry.condition != '' and (not eval(self.entry.condition) and self.entry.stopFlag)):
+        if not self.entry.enabled or (self.entry.condition != '' and (not self.evalCondition() and self.entry.stopFlag)):
             return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
@@ -160,13 +183,14 @@ class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
     ignoreTypes = ['Scan', ]
-    def __init__(self, todolist, settingsCache, labelDict, parent=None, *args):
+    def __init__(self, todolist, settingsCache, labelDict, globalDict, parent=None, *args):
         """ variabledict dictionary of variable value pairs as defined in the pulse programmer file
             parameterdict dictionary of parameter value pairs that can be used to calculate the value of a variable
         """
         self.todolist = todolist
         self.labelDict = labelDict
         self.settingsCache = settingsCache
+        self.globalDict = globalDict
         TodoListBaseModel.__init__(self)
         self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
@@ -177,12 +201,10 @@ class TodoListTableModel(TodoListBaseModel):
              (QtCore.Qt.DisplayRole,    1): lambda node: node.entry.scan,
              (QtCore.Qt.DisplayRole,    2): lambda node: node.entry.measurement,
              (QtCore.Qt.DisplayRole,    3): lambda node: node.entry.evaluation
-                                                         if node.entry.scan == 'Scan'# or
-                                                             #node.entry.scan == 'Todo List')
+                                                         if node.entry.scan == 'Scan'
                                                          else '',
              (QtCore.Qt.DisplayRole,    4): lambda node: node.entry.analysis
-                                                         if node.entry.scan == 'Scan'# or
-                                                             #node.entry.scan == 'Todo List' )
+                                                         if node.entry.scan == 'Scan'
                                                          else '',
              (QtCore.Qt.DisplayRole,    5): lambda node: node.entry.condition,
              (QtCore.Qt.EditRole,       0): lambda node: node.entry.label,
@@ -244,7 +266,7 @@ class TodoListTableModel(TodoListBaseModel):
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement.split(',')]
         nodeList = list()
         for ind in range(len(self.todolist)):
-            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan')
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)
             nodeList.append(node)
             if node.entry.label != '':
                 self.labelDict[node.entry.label] = node
@@ -344,7 +366,7 @@ class TodoListTableModel(TodoListBaseModel):
             if self.todolist[index.row()].scan == 'Todo List':
                 self.todolist[index.row()].children = self.settingsCache[self.todolist[index.row()].measurement].todoList
                 self.beginResetModel()
-                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict)
+                self.rootNodes[index.row()] = TodoListNode(self.todolist[index.row()], None, index.row(), self.labelDict, globaldict=self.globalDict)
                 self.endResetModel()
                 if self.activeEntry is not None:
                     self.setActiveItem(self.activeEntry, self.running)

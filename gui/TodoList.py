@@ -180,7 +180,7 @@ class TodoList(Form, Base):
         self.scanSelectionBox.addItems(['Scan', 'Script', 'Todo List', 'Rescan'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
-        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.tableView)#self.fullRescanList)
+        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)#self.fullRescanList)
         self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
@@ -574,7 +574,7 @@ class TodoList(Form, Base):
 
     def validTodoItem(self, item):
         if isinstance(item, TodoListNode):
-            return item.entry.enabled and (item.entry.condition == '' or eval(item.entry.condition))# and not item.entry.stopFlag))
+            return item.entry.enabled and (item.entry.condition == '' or item.evalCondition())# and not item.entry.stopFlag))
         return False
 
     def incrementIndex(self):
@@ -594,7 +594,7 @@ class TodoList(Form, Base):
                 if not self.settings.repeat:
                     self.enterIdle()
                 break
-            if self.activeItem.entry.condition != '' and not eval(self.activeItem.entry.condition) and self.activeItem.entry.stopFlag:
+            if self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag:
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break
