@@ -34,10 +34,10 @@ class BaseNode(object):
 
 class TodoListNode(BaseNode):
     allNodes = []
-
     def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None):
         self.entry = entry
         self.highlighted = highlighted
+        self.label = ''
         self.labelDict = labelDict
         self.hideChildren = hideChildren # currently used for Rescan
         self.hiddenChildren = None
@@ -52,6 +52,10 @@ class TodoListNode(BaseNode):
                 node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict)
                 childList.append(node)
                 if node.entry.label != '':
+                    if node.entry.label != node.label:
+                        if node.label != '' and node.label in self.labelDict:
+                            del self.labelDict[node.label]
+                        node.label = copy.copy(node.entry.label)
                     self.labelDict[node.entry.label] = node
         else:
             childList = self.entry.children
@@ -65,42 +69,37 @@ class TodoListNode(BaseNode):
     def incrementer(self, initNode=None):
         iterator = flattenAll(self.incr(initNode))
         for item in iterator:
-            yield item
+            if item.entry.scan == 'Rescan': # this supports recursive rescans
+                yield from item.incrementer()
+            else:
+                yield item
 
     def evalCondition(self):
         if self.entry.condition != '':
-            #return eval(self.entry.condition)
-            print('Condition:', self.entry.condition)
-            print('Evaluation:', self.exprEval.evaluate(self.entry.condition, self.globalDict))
             return self.exprEval.evaluate(self.entry.condition, self.globalDict)
         return True
 
-    #def __iter__(self):
-        #if not self.entry.enabled or (self.entry.condition != '' and (not self.evalCondition() and self.entry.stopFlag)):
-            #return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
-        #if self.childNodes:
-            #return iter(self.childNodes)
-        #elif self.hideChildren:
-            #return iter(self.hiddenChildren)
-            ##yield from flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren])
-        #else:
-            #yield self
-
-
     def incr(self, initNode=None):
-        if not self.entry.enabled or (self.entry.condition != '' and (not self.evalCondition() and self.entry.stopFlag)):
+        if not self.entry.enabled or (self.entry.condition != '' and not self.evalCondition()):# and self.entry.stopFlag)):
             return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
-                return flattenAll([item.incr(initNode) for item in self.childNodes])
+                return flattenAll([item.incr() for item in self.childNodes])
             elif self.hideChildren:
-                return flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren])
+                labelNodes = []
+                for child in self.hiddenChildren:
+                    if child in self.labelDict:
+                        labelNodes.append(self.labelDict[child]) #was self.labelDict[child].incr() which doesn't work with recursive rescans
+                return flattenAll(labelNodes)
+                #return flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren if child in self.labelDict])
+            #elif initNode is self:
+                #return self
             else:
                 return [self]
-        elif isinstance(initNode, list):
-            return chain(item.incr() for item in initNode)
-        elif initNode in self.childNodes:
-            return chain(item.incr(initNode) for item in self.childNodes[initNode.row:])
+        #elif isinstance(initNode, list):
+            #return chain(item.incr() for item in initNode)
+        #elif initNode in self.childNodes:
+            #return chain(item.incr(initNode) for item in self.childNodes[initNode.row:])
         else:
             return [self]
 
@@ -161,7 +160,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
     def entryGenerator(self, node=None):
         if node is None:
             initRow = 0
-            initNode = self.rootNodes[0]
+            initNode = self.rootNodes[0] # intended for more efficient partial generator creation, current not used
         else:
             initRow = node.topLevelParent().row
             initNode = node
@@ -187,6 +186,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
 
 class TodoListTableModel(TodoListBaseModel):
     valueChanged = QtCore.pyqtSignal( object )
+    labelsChanged = QtCore.pyqtSignal(str, bool)
     headerDataLookup = ['Enable', 'Scan type', 'Scan', 'Evaluation', 'Analysis', 'Condition']
     ignoreTypes = ['Scan', ]
     def __init__(self, todolist, settingsCache, labelDict, globalDict, parent=None, *args):
@@ -219,7 +219,7 @@ class TodoListTableModel(TodoListBaseModel):
              (QtCore.Qt.EditRole,       3): lambda node: node.entry.evaluation,
              (QtCore.Qt.EditRole,       4): lambda node: node.entry.analysis,
              (QtCore.Qt.EditRole,       5): lambda node: node.entry.condition
-             #(QtCore.Qt.TextAlignmentRole, 0): lambda node: QtCore.Qt.AlignRight
+             #(QtCore.Qt.TextAlignmentRole, 0): lambda node: QtCore.Qt.AlignRight #right justify labels, messes up editor position
              }
         self.colorDataLookup = {
              (QtCore.Qt.BackgroundRole, 0): lambda node: self.colorStopFlagLookup[node.entry.stopFlag],
@@ -275,7 +275,13 @@ class TodoListTableModel(TodoListBaseModel):
             node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)
             nodeList.append(node)
             if node.entry.label != '':
+                if node.entry.label != node.label:
+                    if node.label != '':
+                        del self.labelDict[node.label]
+                        self.labelsChanged.emit(node.label, False)
+                    node.label = copy.copy(node.entry.label)
                 self.labelDict[node.entry.label] = node
+                self.labelsChanged.emit(node.label, True)
         return nodeList
 
     def measurementSelectionLimiter(self, node):
@@ -392,7 +398,13 @@ class TodoListTableModel(TodoListBaseModel):
                 self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
                 self.nodeFromIndex(index).hiddenChildren = self.nodeFromIndex(index)._children()
             if index.column() == 0 and role == QtCore.Qt.EditRole:
+                if node.entry.label != node.label:
+                    if node.label != '':
+                        del self.labelDict[node.label]
+                        self.labelsChanged.emit(node.label, False)
+                    node.label = copy.copy(node.entry.label)
                 self.labelDict[self.nodeFromIndex(index).entry.label] = self.nodeFromIndex(index)
+                self.labelsChanged.emit(node.label, True)
             if value:
                 self.valueChanged.emit( None )
             return value
@@ -469,7 +481,7 @@ class TodoListTableModel(TodoListBaseModel):
 
     def choice(self, index):
         node = self.nodeFromIndex(index)
-        return self.choiceLookup.get(index.column(), lambda row: [])(node)#(index.row())
+        return self.choiceLookup.get(index.column(), lambda row: [])(node)
     
     def setValue(self, index, value):
         self.setData( index, value, QtCore.Qt.EditRole)

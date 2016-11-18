@@ -70,7 +70,7 @@ class TodoListEntry(object):
         self.__dict__.setdefault('highlighted', False)
         self.scan = str(self.scan) if self.scan is not None else None
 
-    stateFields = ['scan', 'measurement', 'scanParameter', 'evaluation', 'analysis', 'settings', 'enabled', 'stopFlag' ]
+    stateFields = ['scan', 'measurement', 'scanParameter', 'evaluation', 'analysis', 'settings', 'enabled', 'stopFlag']
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and tuple(getattr(self, field) for field in self.stateFields)==tuple(getattr(other, field) for field in self.stateFields)
@@ -83,7 +83,6 @@ class TodoListEntry(object):
             logging.getLogger(__name__).info("Replacing list with hashable list")
             self.todoList = HashableList(self.todoList)
         return hash(tuple(getattr(self, field) for field in self.stateFields))
-    
 
 class Settings:
     def __init__(self):
@@ -109,7 +108,6 @@ class Settings:
             logging.getLogger(__name__).info("Replacing list with hashable list")
             self.todoList = HashableList(self.todoList)
         return hash(tuple(getattr(self, field) for field in self.stateFields))
-    
 
 class MasterSettings(AttributeComparisonEquality):
     def __init__(self):
@@ -140,7 +138,7 @@ class TodoList(Form, Base):
         self.globalVariablesUi = globalVariablesUi
         self.revertGlobalsList = list()
         self.idleConfiguration = None
-        self.scriptconnected = False
+        self.scriptConnected = False
         self.currentScript = None
         self.currentScriptCode = None
         self.indexStack = deque()
@@ -186,10 +184,10 @@ class TodoList(Form, Base):
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
         self.tableModel.analysisSelection = self.scanModuleAnalysis
         self.tableModel.valueChanged.connect( self.checkSettingsSavable )
+        self.tableModel.labelsChanged.connect(self.updateRescanComboBox)
         self.tableView.setModel( self.tableModel )
         self.tableView.setExpandsOnDoubleClick(False)
         self.comboBoxDelegate = ComboBoxGridDelegate(self.labelDict)
-        #self.comboBoxDelegate.valueChanged
         self.gridDelegate = PlainGridDelegate()
         self.boldGridDelegate = PlainGridDelegate(bold=True)
         self.tableView.setItemDelegateForColumn(0, self.boldGridDelegate)
@@ -201,7 +199,7 @@ class TodoList(Form, Base):
         self.tableModel.analysisSelection = self.scanModuleAnalysis     
         self.addMeasurementButton.clicked.connect( self.onAddMeasurement )
         self.removeMeasurementButton.clicked.connect( self.onDropMeasurement )
-        self.runButton.clicked.connect( self.startTodoList)#partial( self.statemachine.processEvent, 'startCommand' ) )
+        self.runButton.clicked.connect(self.startTodoList)
         self.stopButton.clicked.connect( partial( self.statemachine.processEvent, 'stopCommand' ) )
         self.repeatButton.setChecked( self.settings.repeat )
         self.repeatButton.clicked.connect( self.onRepeatChanged )
@@ -286,33 +284,32 @@ class TodoList(Form, Base):
             row_list = list(map(int, row_string.strip('[]').split(',')))
         except ValueError:
             raise ValueError("Invalid data on clipboard. Cannot paste into TODO list")
-    
-        # Stuff
         self.tableModel.copy_rows(row_list)
 
     def startTodoList(self, *args):
+        """When the play button is clicked, synchronizes current generator item with current active item then runs"""
         self.synchronizeGeneratorWithSelectedItem()
         self.statemachine.processEvent('startCommand',*args)
 
     def onActiveItemChanged(self, modelIndex, modelIndex2 ):
-        todoListElement = self.tableModel.nodeFromIndex(modelIndex).entry#self.refineTodoListElement(modelIndex)
+        todoListElement = self.tableModel.nodeFromIndex(modelIndex).entry
         self.settingTableModel.setSettings( todoListElement.settings )
         self.currentlySelectedLabel.setText( "{0} - {1}".format( todoListElement.measurement, todoListElement.evaluation) )
 
-    def populateIndexStack(self, idx, lst=None):
-        if lst is None:
-            lst = []
-        lst.append(idx.row())
-        if idx.parent().isValid():# != -1:
-            return self.populateIndexStack(idx.parent(), lst)
-        return lst
+    #def populateIndexStack(self, idx, lst=None):
+        #if lst is None:
+            #lst = []
+        #lst.append(idx.row())
+        #if idx.parent().isValid():
+            #return self.populateIndexStack(idx.parent(), lst)
+        #return lst
 
-    def refineTodoListElement(self, idx):
-        indexList = self.populateIndexStack(idx)
-        localTodo = self.settings.todoList
-        for i in reversed(indexList[1:]):
-            localTodo = localTodo[i].children
-        return localTodo[indexList[0]]
+    #def refineTodoListElement(self, idx):
+        #indexList = self.populateIndexStack(idx)
+        #localTodo = self.settings.todoList
+        #for i in reversed(indexList[1:]):
+            #localTodo = localTodo[i].children
+        #return localTodo[indexList[0]]
 
     def onAddSetting(self):
         self.settingTableModel.addSetting()
@@ -363,7 +360,13 @@ class TodoList(Form, Base):
             #self.setSettings( deepcopy( self.settingsCache[text] ) )
             self.setSettings(self.settingsCache[text])
         self.checkSettingsSavable()
-        
+
+    def updateRescanComboBox(self, item, add):
+        if self.currentComboScan == 'Rescan':
+            # need to change this so not all items are updated every time a single label is changed
+            # but there should be a small amount of overhead resulting from updating all elements
+            updateComboBoxItems(self.measurementSelectionBox, sorted(self.labelDict.keys()))
+
     def setSettings(self, newSettings):
         self.settings = newSettings
         self.tableModel.setTodolist(self.settings.todoList)
@@ -373,6 +376,7 @@ class TodoList(Form, Base):
         self.repeatButton.setChecked(self.settings.repeat)
         
     def setCurrentIndex(self, index):
+        """Sets the current active item, does not affect generator state"""
         if self.statemachine.currentState=='Idle':
             if self.todoListGenerator is not None:
                 self.todoListGenerator.close()
@@ -383,6 +387,8 @@ class TodoList(Form, Base):
             self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
 
     def synchronizeGeneratorWithSelectedItem(self):
+        """Steps through the todo list generator until it hits currentItem.
+           This is necessary to start a todo list from subtodo lists"""
         if self.todoListGenerator is not None:
             self.todoListGenerator.close()
         self.isSomethingTodo = True
@@ -405,6 +411,7 @@ class TodoList(Form, Base):
 
     def updateMeasurementSelectionBox(self, newscan ):
         newscan = str(newscan)
+        self.currentComboScan = newscan
         if self.currentMeasurementsDisplayedForScan != newscan:
             self.currentMeasurementsDisplayedForScan = newscan
             if newscan == 'Scan':
@@ -522,7 +529,6 @@ class TodoList(Form, Base):
             self.statemachine.processEvent('measurementFinished')
             self.statemachine.processEvent('docheck')
 
-    
     def onRepeatChanged(self, enabled):
         self.settings.repeat = enabled
         self.checkSettingsSavable()
@@ -548,7 +554,6 @@ class TodoList(Form, Base):
     def onLoadLine(self):
         allrows = sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]))
         if len(allrows)==1: 
-            #self.loadLine(self.currentTodoList[ allrows[0] ])
             self.loadLine(self.tableModel.nodeFromIndex(self.tableView.selectedIndexes()[0]).entry)
 
     def loadLine(self, entry ):
@@ -579,6 +584,7 @@ class TodoList(Form, Base):
         return False
 
     def incrementIndex(self):
+        """Steps through todo list generator"""
         self.loopExhausted = False
         self.isSomethingTodo = True
         if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
@@ -606,7 +612,6 @@ class TodoList(Form, Base):
 
     def enterMeasurementRunning(self):
         entry = self.activeItem.entry
-
         if entry.scan == 'Scan':
             self.statusLabel.setText('Measurement Running')
             _, currentwidget = self.currentScan()
@@ -624,7 +629,7 @@ class TodoList(Form, Base):
             self.scripting.loadFile(self.scriptFiles[entry.measurement])
             self.scripting.onStartScript()
             self.scripting.script.finished.connect(self.exitMeasurementRunning)
-            self.scriptconnected = True
+            self.scriptConnected = True
             self.setActiveItem(self.activeItem, True)
         elif entry.scan == 'Todo List':
             self.incrementIndex()
@@ -633,9 +638,9 @@ class TodoList(Form, Base):
             print("NO VALID STATE")
 
     def exitMeasurementRunning(self):
-        if self.scriptconnected:
+        if self.scriptConnected:
             self.scripting.script.finished.disconnect(self.exitMeasurementRunning)
-            self.scriptconnected = False
+            self.scriptConnected = False
             if self.currentScript is not None:
                 self.scripting.loadFile(self.currentScript)
                 self.scripting.textEdit.setPlainText(self.currentScriptCode)
