@@ -299,12 +299,14 @@ class Parser:
         self.variableCM = ChainMap(variabledict, self.defaultVarCM)
         self.functionCM = ChainMap(functiondict, self.defaultFuncCM)
         self.parser.parse(s, lexer=self.lexer)
-        if not isinstance(self.val, bool):
+        if isinstance(self.val, bool):
             if self.val:
                 self.val = Q(1)
             else:
                 self.val = Q(0)
-            #self.val = Q(self.val)
+        else:
+            self.val = Q(self.val)
+
         if listDependencies:
             return self.val, self.dependencies
         return self.val

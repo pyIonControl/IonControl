@@ -31,6 +31,37 @@ from collections import defaultdict, deque
 
 Form, Base = uic.loadUiType('ui/TodoList.ui')
 
+
+class GlobalOverrideContext:
+    def __init__(self, oldglobals, newglobals):
+        self.oldGlobals = oldglobals
+        self.globalOverrides = newglobals
+        self.revertGlobalsValues = list()
+
+        #self.globalStack = deque()
+
+    def __enter__(self):
+        self.overrideGlobals()
+        return self.oldGlobals + self.revertGlobalsValues
+        #self.globalStack.push(self.oldGlobals)
+        #self.oldGlobals = self.newGlobals
+
+    def __exit__(self, exittype, value, tb):
+        #self.oldGlobals = self.globalStack.pop()
+        self.revertGlobals()
+
+    def overrideGlobals(self):
+        self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
+        for key, value in self.globalOverrides:
+            self.revertGlobalsValues.append((key, self.oldGlobals[key]))
+            self.oldGlobals[key] = value
+
+    def revertGlobals(self):
+        for key, value in self.revertGlobalsValues:
+            self.oldGlobals[key] = value
+        #self.revertGlobalsValues[:] = list()
+        self.revertGlobalsValues = list()
+
 class TodoListEntry(object):
     def __init__(self, scan=None, measurement=None, evaluation=None, analysis=None):
         super().__init__()
@@ -89,14 +120,14 @@ class Settings:
         self.todoList = list()
         self.currentIndex = 0
         self.repeat = False
-        
+
     def __setstate__(self, state):
         self.__dict__ = state
         self.__dict__.setdefault( 'currentIndex', 0)
         self.__dict__.setdefault( 'repeat', False)
 
-    stateFields = ['currentIndex', 'repeat', 'todoList'] 
-        
+    stateFields = ['currentIndex', 'repeat', 'todoList']
+
     def __eq__(self, other):
         return isinstance(other, self.__class__) and tuple(getattr(self, field) for field in self.stateFields)==tuple(getattr(other, field) for field in self.stateFields)
 
@@ -120,7 +151,7 @@ class MasterSettings(AttributeComparisonEquality):
 
 class TodoList(Form, Base):
     def __init__(self,scanModules,config,currentScan,setCurrentScan,globalVariablesUi,scriptingUi,parent=None):
-        Base.__init__(self, parent)    
+        Base.__init__(self, parent)
         Form.__init__(self)
         self.config = config
         self.settings = config.get('TodolistSettings', Settings())
@@ -152,9 +183,12 @@ class TodoList(Form, Base):
         self.todoListGenerator = None
         self.loopExhausted = False
         self.isSomethingTodo = True
+        self.currentGlobalOverrides = list()
+        self.revertGlobalsValues = list()
+        self.parentStop = False
 
     def setupStatemachine(self):
-        self.statemachine = Statemachine()        
+        self.statemachine = Statemachine()
         self.statemachine.addState( 'Idle', self.enterIdle, self.exitIdle  )
         self.statemachine.addState( 'MeasurementRunning')
         self.statemachine.addState( 'Waiting for Completion', lambda:self.statusLabel.setText('Waiting for completion of measurement') )
@@ -170,7 +204,7 @@ class TodoList(Form, Base):
         self.statemachine.addTransition('measurementFinished', 'Waiting for Completion', 'Idle')
         self.statemachine.addTransition('docheck', 'Check', 'MeasurementRunning', lambda state: (not self.loopExhausted or self.settings.repeat) and self.isSomethingTodo)
         self.statemachine.addTransition('docheck', 'Check', 'Idle', lambda state: (self.loopExhausted and not self.settings.repeat) or not self.isSomethingTodo)
-                
+
     def setupUi(self):
         super(TodoList, self).setupUi(self)
         self.setupStatemachine()
@@ -195,8 +229,8 @@ class TodoList(Form, Base):
         for column in range(1, 5):
             self.tableView.setItemDelegateForColumn(column, self.comboBoxDelegate)
         self.tableModel.measurementSelection = self.scanModuleMeasurements
-        self.tableModel.evaluationSelection = self.scanModuleEvaluations     
-        self.tableModel.analysisSelection = self.scanModuleAnalysis     
+        self.tableModel.evaluationSelection = self.scanModuleEvaluations
+        self.tableModel.analysisSelection = self.scanModuleAnalysis
         self.addMeasurementButton.clicked.connect( self.onAddMeasurement )
         self.removeMeasurementButton.clicked.connect( self.onDropMeasurement )
         self.runButton.clicked.connect(self.startTodoList)
@@ -244,9 +278,9 @@ class TodoList(Form, Base):
         self.enableStopFlagAction.triggered.connect( self.onEnableStopFlag  )
         self.tableView.addAction( self.enableStopFlagAction )
 
-        # 
+        #
         restoreGuiState( self, self.config.get('Todolist.guiState'))
-        
+
         # Copy rows
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
@@ -274,11 +308,11 @@ class TodoList(Form, Base):
         clip = QtWidgets.QApplication.clipboard()
         rows = [ i.row() for i in self.tableView.selectedIndexes()]
         clip.setText(str(rows))
-        
+
     def paste_from_clipboard(self):
         """ Append the string of rows from the clipboard to the end of the TODO list. """
         clip = QtWidgets.QApplication.clipboard()
-        
+
         row_string = str(clip.text())
         try:
             row_list = list(map(int, row_string.strip('[]').split(',')))
@@ -381,6 +415,7 @@ class TodoList(Form, Base):
             if self.todoListGenerator is not None:
                 self.todoListGenerator.close()
             self.tableModel.currentRescanList = list()
+            self.tableModel.globalOverrideStack.clear()
             self.isSomethingTodo = True
             self.settings.currentIndex = index.row()
             self.currentItem = self.tableModel.nodeFromIndex(index)
@@ -394,13 +429,13 @@ class TodoList(Form, Base):
         self.isSomethingTodo = True
         if self.currentItem.parent is None:
             self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
-            self.activeItem = next(self.todoListGenerator)
+            self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
         else:
             self.todoListGenerator = self.tableModel.entryGenerator()#self.tableModel.nodeFromIndex(index))
-            self.activeItem = next(self.todoListGenerator)
+            self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
             while not (self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
                 try:
-                    self.activeItem = next(self.todoListGenerator)
+                    self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
                 except StopIteration:
                     break
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
@@ -522,7 +557,7 @@ class TodoList(Form, Base):
         return current.state()==0 and self.isSomethingTodo
 
     def checkStopFlag(self, state):
-        return self.activeItem.entry.stopFlag
+        return self.activeItem.entry.stopFlag# or self.parentStop
 
     def onStateChanged(self, newstate ):
         if newstate=='idle':
@@ -573,6 +608,18 @@ class TodoList(Form, Base):
     def enableStopFlag(self, entry):
         entry.stopFlag = not entry.stopFlag
 
+    def overrideGlobals(self):
+        self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
+        for key, value in self.currentGlobalOverrides:
+            self.revertGlobalsValues.append((key, self.globalVariablesUi.globalDict[key]))
+            self.globalVariablesUi.globalDict[key] = value
+
+    def revertGlobals(self):
+        for key, value in self.revertGlobalsValues:
+            self.globalVariablesUi.globalDict[key] = value
+        self.revertGlobalsValues[:] = list()
+        #self.revertGlobalsValues = list()
+
     def nodeFromIndex(self, index=None):
         if index is None:
             index = self.settings.currentIndex
@@ -591,13 +638,13 @@ class TodoList(Form, Base):
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
             try:
-                self.activeItem = next(self.todoListGenerator)
+                self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
             except StopIteration:
                 self.loopExhausted = True
                 self.settings.currentIndex = 1
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
-                self.activeItem = next(self.todoListGenerator) # prime the generator
+                self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator) # prime the generator
                 if not self.settings.repeat:
                     self.enterIdle()
                 break
@@ -612,6 +659,7 @@ class TodoList(Form, Base):
 
     def enterMeasurementRunning(self):
         entry = self.activeItem.entry
+        print("Global Overrides:", self.currentGlobalOverrides)
         if entry.scan == 'Scan':
             self.statusLabel.setText('Measurement Running')
             _, currentwidget = self.currentScan()
@@ -623,6 +671,7 @@ class TodoList(Form, Base):
             currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
             self.setActiveItem(self.activeItem, True)
         elif entry.scan == 'Script':
+            self.overrideGlobals()
             self.statusLabel.setText('Script Running')
             self.currentScript = self.scripting.script.fullname
             self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
@@ -646,6 +695,7 @@ class TodoList(Form, Base):
                 self.scripting.textEdit.setPlainText(self.currentScriptCode)
             self.onStateChanged('idle')
         else:
+            self.revertGlobals()
             self.incrementIndex()
             self.setActiveItem(self.activeItem, False)
         #self.globalVariablesUi.update(self.revertGlobalsList)
@@ -659,5 +709,13 @@ class TodoList(Form, Base):
         self.config['Todolist.MasterSettings'] = self.masterSettings
         self.config['Todolist.guiState'] = saveGuiState( self )
        
-        
+
+    # TODO: push globals on a stack?
+    #       revert globals when stopping in the middle of a rescan
+    #       stop flags should apply to rescans and subtodo lists
+    #       fancy button drop down for new rescans
+    #       modify parser to handle and/or statements
+    #       fix handling of manually starting enabled items in disabled subtodo lists
+    #       get rid of savable code
+    #       fix copy/paste of todo list elements so they are stored in a dict format
         

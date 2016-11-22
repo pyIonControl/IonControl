@@ -3,6 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import functools
+from collections import deque
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
@@ -13,6 +15,36 @@ from itertools import chain
 from modules.Expression import Expression
 from modules.flatten import flattenAll
 
+
+class OverrideContext:
+    def __init__(self, oldglobals, newglobals):
+        self.oldGlobals = oldglobals
+        self.globalOverrides = newglobals
+        self.revertGlobalsValues = list()
+
+        #self.globalStack = deque()
+
+    def __enter__(self):
+        self.overrideGlobals()
+        return self.oldGlobals + self.revertGlobalsValues
+        #self.globalStack.push(self.oldGlobals)
+        #self.oldGlobals = self.newGlobals
+
+    def __exit__(self, exittype, value, tb):
+        #self.oldGlobals = self.globalStack.pop()
+        self.revertGlobals()
+
+    def overrideGlobals(self):
+        #self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
+        for key, value in self.globalOverrides:
+            self.revertGlobalsValues.append((key, self.oldGlobals[key]))
+            #self.oldGlobals[key] = value
+
+    def revertGlobals(self):
+        #for key, value in self.revertGlobalsValues:
+            #self.oldGlobals[key] = value
+        ##self.revertGlobalsValues[:] = list()
+        self.revertGlobalsValues = list()
 
 class BaseNode(object):
     def __init__(self, parent, row):
@@ -34,7 +66,7 @@ class BaseNode(object):
 
 class TodoListNode(BaseNode):
     allNodes = []
-    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None):
+    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None, globalOverrideStack=None):
         self.entry = entry
         self.highlighted = highlighted
         self.label = ''
@@ -43,13 +75,15 @@ class TodoListNode(BaseNode):
         self.hiddenChildren = None
         self.globalDict = globaldict if globaldict is not None else []
         self.exprEval = Expression()
+        self.currentGlobalOverrides = list()
+        self.globalOverrideStack = globalOverrideStack if globalOverrideStack is not None else deque()#list()
         BaseNode.__init__(self, parent, row)
 
     def _children(self):
         childList = list()
         if not self.hideChildren:
             for ind in range(len(self.entry.children)):
-                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict)
+                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict, globalOverrideStack=self.globalOverrideStack)
                 childList.append(node)
                 if node.entry.label != '':
                     if node.entry.label != node.label:
@@ -66,13 +100,37 @@ class TodoListNode(BaseNode):
             return self.parent.topLevelParent()
         return self
 
-    def incrementer(self, initNode=None):
-        iterator = flattenAll(self.incr(initNode))
+    @staticmethod
+    def flattenOverrides(overrides):
+        if len(overrides) == 0:
+            return []
+        elif len(overrides) == 1:
+            return overrides[0]
+        else:
+            return functools.reduce(lambda x,y: x+y, overrides)
+
+    def getOverrides(self, item, overrides=None):
+        if overrides is None:
+            overrides = []
+        if item.parent is not None:
+            return self.getOverrides(item.parent, overrides + [(k, v) for k, v in item.entry.settings.items()])
+        return overrides + [(k, v) for k, v in item.entry.settings.items()]
+
+    def incrementer(self, parentStop=False, initNode=None):
+        it, ovrds = self.incr()
+        #self.stopFlagStack.append(sf)
+        self.globalOverrideStack.append([(k, v) for k, v in ovrds])
+        iterator = list(flattenAll(it))
         for item in iterator:
-            if item.entry.scan == 'Rescan': # this supports recursive rescans
-                yield from item.incrementer()
+            if item.entry.scan == 'Rescan' or item.entry.scan == 'Todo List': # this supports recursive rescans
+                yield from item.incrementer(self.entry.stopFlag)
+                #yield StopNode
+            elif item is iterator[-1]:
+                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], parentStop or self.entry.stopFlag#self.getOverrides(item)
             else:
-                yield item
+                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], self.entry.stopFlag#self.getOverrides(item)
+        self.currentGlobalOverrides = self.globalOverrideStack.pop()
+        #self.stopFlagStack.pop()
 
     def evalCondition(self):
         if self.entry.condition != '':
@@ -81,27 +139,18 @@ class TodoListNode(BaseNode):
 
     def incr(self, initNode=None):
         if not self.entry.enabled or (self.entry.condition != '' and not self.evalCondition()):# and self.entry.stopFlag)):
-            return [] #doesn't create a generator for disabled todo list items, needed here for sublists/rescans
+            return [], []#doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
-                return flattenAll([item.incr() for item in self.childNodes])
+                return flattenAll([item for item in self.childNodes]), [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
             elif self.hideChildren:
                 labelNodes = []
                 for child in self.hiddenChildren:
                     if child in self.labelDict:
                         labelNodes.append(self.labelDict[child]) #was self.labelDict[child].incr() which doesn't work with recursive rescans
-                return flattenAll(labelNodes)
-                #return flattenAll([self.labelDict[child].incr(initNode) for child in self.hiddenChildren if child in self.labelDict])
-            #elif initNode is self:
-                #return self
+                return flattenAll(labelNodes), [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
             else:
-                return [self]
-        #elif isinstance(initNode, list):
-            #return chain(item.incr() for item in initNode)
-        #elif initNode in self.childNodes:
-            #return chain(item.incr(initNode) for item in self.childNodes[initNode.row:])
-        else:
-            return [self]
+                return [self], [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
 
     def increment(self):
         try:
@@ -123,11 +172,12 @@ class TodoListNode(BaseNode):
         return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
-    def __init__(self):
+    def __init__(self, globalDict):
         QtCore.QAbstractItemModel.__init__(self)
         self.inRescan = False
         self.currentRescanList = list()
         self.rootNodes = self._rootNodes(init=True)
+        self.globalDict = globalDict
 
     def _rootNodes(self, init=False):
         raise NotImplementedError()
@@ -160,10 +210,8 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
     def entryGenerator(self, node=None):
         if node is None:
             initRow = 0
-            initNode = self.rootNodes[0] # intended for more efficient partial generator creation, current not used
         else:
             initRow = node.topLevelParent().row
-            initNode = node
         for root in self.rootNodes[initRow:]:
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
@@ -197,7 +245,8 @@ class TodoListTableModel(TodoListBaseModel):
         self.labelDict = labelDict
         self.settingsCache = settingsCache
         self.globalDict = globalDict
-        TodoListBaseModel.__init__(self)
+        self.globalOverrideStack = deque()
+        TodoListBaseModel.__init__(self, globalDict)
         self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
              (QtCore.Qt.CheckStateRole, 0): lambda node: QtCore.Qt.Checked
@@ -272,7 +321,7 @@ class TodoListTableModel(TodoListBaseModel):
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement.split(',')]
         nodeList = list()
         for ind in range(len(self.todolist)):
-            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict, globalOverrideStack=self.globalOverrideStack)
             nodeList.append(node)
             if node.entry.label != '':
                 if node.entry.label != node.label:
