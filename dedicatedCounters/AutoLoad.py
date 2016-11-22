@@ -80,6 +80,7 @@ class AutoLoadSettings(object):
         self.counterMask = 0
         self.adcMask = 0
         self.maxFailedAutoload = 5
+        self.ovenCoolDownTime = Q(10, 's')
         # Lists fpr changes to be populated/manipulated in multiple functions
         self.shuttlingNodes = list()
         self.previousShuttlingNode = 'Loading'
@@ -105,9 +106,10 @@ class AutoLoadSettings(object):
         """
         return [{'name': 'Check time', 'type': 'magnitude', 'value': self.checkTime, 'tip': "Time ions need to be present before switching to trapped", 'field': 'checkTime', 'dimension': 's'},
                 {'name': 'Periodic check', 'type': 'magnitude', 'value': self.periodicCheck, 'tip': "Time until a periodic check is made from loading", 'field': 'periodicCheck', 'dimension': 's'},
-                {'name': 'Periodic load', 'type': 'magnitude', 'value': self.periodicLoad, 'tip': "Time until a periodic load attemp checking", 'field': 'periodicLoad', 'dimension': 's'},
-                {'name': 'Preheat Time', 'type': 'magnitude', 'value': self.preheatTime, 'tip': "Time until a periodic load attemp is made from idle (Preheat)", 'field': 'preheatTime', 'dimension': 's'},
+                {'name': 'Periodic load', 'type': 'magnitude', 'value': self.periodicLoad, 'tip': "Time until a periodic load attempt checking", 'field': 'periodicLoad', 'dimension': 's'},
+                {'name': 'Preheat Time', 'type': 'magnitude', 'value': self.preheatTime, 'tip': "Time until a periodic load attempt is made from idle (Preheat)", 'field': 'preheatTime', 'dimension': 's'},
                 {'name': 'Max time', 'type': 'magnitude', 'value': self.maxTime, 'tip': "Maximum time oven is on during one attempt", 'field': 'maxTime', 'dimension': 's'},
+                {'name': 'Oven Cooldown Time', 'type': 'magnitude', 'value': self.ovenCoolDownTime, 'tip': "Time to let oven cool before another loading attempt", 'field': 'ovenCoolDownTime', 'dimension': 's'},
                 {'name': 'Wait for comeback', 'type': 'magnitude', 'value': self.waitForComebackTime, 'tip': "time to wait for re-appearance of an ion after it is lost", 'field': 'waitForComebackTime', 'dimension': 's'},
                 {'name': 'Post sequence wait', 'type': 'magnitude', 'value': self.postSequenceWaitTime, 'tip': "wait time after running sequence is finished", 'field': 'postSequenceWaitTime', 'dimension': 's'},
                 {'name': 'Max failed autoload', 'type': 'magnitude', 'value': self.maxFailedAutoload, 'tip': "maximum number of consecutive failed loading attempts", 'field': 'maxFailedAutoload'},
@@ -154,8 +156,9 @@ class AutoLoadSettings(object):
         self.__dict__.setdefault('maxTime', Q(600, 's'))
         self.__dict__.setdefault('beyondThresholdTime', Q(10, 's'))
         self.__dict__.setdefault('dumpTime', Q(10, 's'))
+        self.__dict__.setdefault('ovenCoolDownTime', Q(10, 's'))
 
-    stateFields = ['maxTime', 'checkTime', 'useInterlock', 'interlock',
+    stateFields = ['maxTime', 'ovenCoolDownTime', 'checkTime', 'useInterlock', 'interlock',
                    'autoReload', 'waitForComebackTime', 'maxFailedAutoload', 'postSequenceWaitTime', 'historyLength',
                    'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime']
 
@@ -226,6 +229,7 @@ class AutoLoad(UiForm, UiBase):
         self.trappingTime = None
         self.voltageControl = None
         self.preheatStartTime = now()
+        self.ovenCoolStartTime = now()
         self.externalInstrumentObservable = externalInstrumentObservable
         self.originalResetValue = 0
         self.tempName = None
@@ -233,6 +237,7 @@ class AutoLoad(UiForm, UiBase):
         wavemeterHardwareSetting = next(iter(getProject().hardware.get('HighFinesse Wavemeter', {None: {}}).values()))
         self.wavemeterAddress = wavemeterHardwareSetting.get('uri', None)
         self.wavemeterAvailable = wavemeterHardwareSetting.get('enabled', False) and bool(self.wavemeterAddress)
+        self.wavemeterOutOfLock = False
         logging.getLogger(__name__).info("Wavemeter URI: {0} {1}".format(self.wavemeterAddress, "available" if self.wavemeterAvailable else "not available"))
 
     def constructStatemachine(self):
@@ -240,16 +245,18 @@ class AutoLoad(UiForm, UiBase):
         self.statemachine.addState('Idle', self.setIdle, self.exitIdle)
         self.statemachine.addState('Preheat', self.setPreheat, needsConfirmation=True)
         self.statemachine.addState('Load', self.setLoad, needsConfirmation=True)
+        self.statemachine.addState('OvenCooldown', self.setOvenCooldown, needsConfirmation=True)
         self.statemachine.addState('PeriodicCheck', self.setPeriodicCheck, needsConfirmation=True)
         self.statemachine.addState('Check', self.setCheck, needsConfirmation=True)
         self.statemachine.addState('Trapped', self.setTrapped, self.exitTrapped, needsConfirmation=True,
                                    confirmedFunc=self.setTrappedConfirmed)
         self.statemachine.addState('Frozen', self.setFrozen, needsConfirmation=True)
         self.statemachine.addState('WaitingForComeback', self.setWaitingForComeback, needsConfirmation=True)
-        self.statemachine.addState('AutoReloadFailed', self.setAutoReloadFailed, needsConfirmation=True)
+        self.statemachine.addState('AutoReloadFailed', self.setAutoReloadFailed, self.exitIdle, needsConfirmation=True)
         self.statemachine.addState('PostSequenceWait', self.setPostSequenceWait, needsConfirmation=True)
         self.statemachine.addState('BeyondThreshold', self.setBeyondThreshold, needsConfirmation=True)
         self.statemachine.addState('Dump', self.setDump, needsConfirmation=True)
+
 
         self.statemachine.addTransitionList('startButton', ['Idle', 'AutoReloadFailed'], 'Preheat',
                                             description="Start Button")
@@ -261,8 +268,16 @@ class AutoLoad(UiForm, UiBase):
                                                       self.numFailedAutoload >= self.settings.maxFailedAutoload,
                                         description="maximum auto load parameter reached")
         self.statemachine.addTransition('timer', 'Load', 'Idle',
-                                        lambda state: self.ovenLimitReached() and not self.settings.autoReload,
+                                        lambda state: (self.ovenLimitReached() and not self.settings.autoReload) or
+                                                      self.wavemeterOutOfLock,
                                         description="maximum loading time reached")
+        self.statemachine.addTransition('timer', 'Load', 'OvenCooldown',
+                                        lambda state: self.ovenLimitReached() and self.settings.autoReload and
+                                                      self.numFailedAutoload < self.settings.maxFailedAutoload,
+                                        description="letting oven cool")
+        self.statemachine.addTransition('timer', 'OvenCooldown', 'Preheat',
+                                        lambda state: self.ovenCoolDownLimitReached(),
+                                        description="oven cooled down")
         self.statemachine.addTransition('timer', 'Load', 'PeriodicCheck',
                                         lambda state: state.timeInState() > self.settings.periodicCheck,
                                         description="periodic check")
@@ -332,7 +347,7 @@ class AutoLoad(UiForm, UiBase):
                                         description="ion trapped manually")
         self.statemachine.addTransitionList('ppStarted', ['Preheat', 'Load', 'PeriodicCheck', 'Check', 'Trapped',
                                                           'BeyondThreshold', 'WaitingForComeback', 'AutoReloadFailed',
-                                                          'PostSequenceWait', 'Dump'], 'Frozen',
+                                                          'PostSequenceWait', 'Dump', 'OvenCooldown'], 'Frozen',
                                             description="pulse program started")
         self.statemachine.addTransition('ionStillTrapped', 'Idle', 'Trapped', lambda state: len(
             self.historyTableModel.history) > 0 and not self.pulser.ppActive,
@@ -363,6 +378,9 @@ class AutoLoad(UiForm, UiBase):
 
     def ovenLimitReached(self):
         return timedeltaToMagnitude(now() - self.preheatStartTime) > self.settings.maxTime
+
+    def ovenCoolDownLimitReached(self):
+        return timedeltaToMagnitude(now() - self.ovenCoolStartTime) > self.settings.ovenCoolDownTime
 
     def initMagnitude(self, ui, settingsname, dimension=None  ):
         ui.setValue( getattr( self.settings, settingsname  ) )
@@ -651,16 +669,19 @@ class AutoLoad(UiForm, UiBase):
             self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(0, 0, 0)}")
             self.allFreqsInRange.setToolTip("No channels are selected")
             self.outOfRangeCount = 0
+            self.wavemeterOutOfLock = False
         elif outOfRangeChannels==0:
             if maxIdenticalReading is None or maxIdenticalReading<10:
                 #if all channels are in range, set bar on GUI to green
                 self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(0, 198, 0)}")
                 self.allFreqsInRange.setToolTip("All laser frequencies are in range")
                 self.outOfRangeCount = 0
+                self.wavemeterOutOfLock = False
             else:
                 self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(198, 198, 0)}")
                 self.allFreqsInRange.setToolTip("All laser frequencies seem in range but some readings are struck")
                 self.outOfRangeCount += 1
+                self.wavemeterOutOfLock = False
         else:
             #Because of the bug where the wavemeter reads incorrectly after calibration,
             #Loading is only inhibited after 10 consecutive bad measurements
@@ -674,6 +695,7 @@ class AutoLoad(UiForm, UiBase):
                 self.allFreqsInRange.setToolTip("There are laser frequencies out of range")
                 #This is the interlock: loading is inhibited if frequencies are out of range
                 if self.settings.useInterlock:
+                    self.wavemeterOutOfLock = True
                     self.statemachine.processEvent( 'outOfLock' )
 
     def onValueChanged(self,attr,value):
@@ -771,6 +793,16 @@ class AutoLoad(UiForm, UiBase):
         self.numFailedAutoload += 1
         self.timerNullTime = now()
         self.preheatStartTime = now()
+
+    def setOvenCooldown(self):
+        self.changeSettings('OvenCooldown')
+        self.externalInstrumentObservable(self.statemachine.confirmStateReached)
+        self.startButton.setEnabled( True )
+        self.stopButton.setEnabled( True )
+        self.elapsedLabel.setStyleSheet("QLabel { color:blue; }")
+        self.statusLabel.setText("Letting Oven Cool")
+        #self.numFailedAutoload += 1
+        self.ovenCoolStartTime = now()
 
     def setLoad(self):
         """Execute after preheating. Turn on ionization laser, and begin
