@@ -131,12 +131,12 @@ class FeedbackEvaluation(EvaluationBase):
             self.integrator = globalDict[globalName]
             self.settings['Reset'] = False
         mean, (_, _), raw =  self.evaluateMinMax(countarray)
-        errorval = self.settings['SetPoint'].value - mean
+        errorval = self.settings['SetPoint'].m - mean
         pOut = self.settings['P'] * errorval
         self.integrator = self.integrator + errorval * self.settings['I'] 
         totalOut = pOut + self.integrator
-        globalDict[globalName] = totalOut
-        return float(totalOut), (0.0, 0.0), raw
+        globalDict[globalName] = totalOut.to(globalDict[globalName])
+        return float(totalOut.m), (0.0, 0.0), raw
 
     def parameters(self):
         parameterDict = super(FeedbackEvaluation, self).parameters()

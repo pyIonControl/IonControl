@@ -23,7 +23,8 @@ class StatemachineException(Exception):
 
 
 class State(object):
-    def __init__(self, name, enterfunc=None, exitfunc=None, now=None, enterObservable=None, exitObservable=None):
+    def __init__(self, name, enterfunc=None, exitfunc=None, now=None, enterObservable=None, exitObservable=None,
+                 needsConfirmation=False, confirmedFunc=None):
         self.name = name
         self.enterfunc = enterfunc
         self.exitfunc = exitfunc
@@ -32,6 +33,8 @@ class State(object):
         self.enterObservable = enterObservable
         self.exitObservable = exitObservable
         self.now = now if now is not None else datetime.now
+        self.needsConfirmation = needsConfirmation
+        self.confirmedFunc = confirmedFunc
         
     def enterState(self):
         logging.getLogger(__name__).log(25, "Entering state {0}".format(self.name))
@@ -52,19 +55,27 @@ class StateGroup(State):
     def __init__(self, name, states, enterfunc=None, exitfunc=None ):
         super( StateGroup, self ).__init__(name, enterfunc, exitfunc)
         self.states = set(states)
-    
-        
+
+
 class Transition:
-    def __init__(self, fromstate, tostate, condition=None, transitionfunc=None, description=None):
+    def __init__(self, fromstate, tostate, condition=None, transitionfunc=None, description=None, eventType=None,
+                 refValueFunc=None):
         self.fromstate = fromstate
         self.tostate = tostate
         self.condition = condition if condition is not None else lambda *args: True
         self.transitionfunc = transitionfunc
         self.description = description
-        
-    def transitionState(self, fromObj, toObj ):
+        self.refValueFunc = refValueFunc
+        self.eventType = eventType
+
+    def transitionState(self, fromObj, toObj):
         if self.transitionfunc is not None:
-            self.transitionfunc( fromObj, toObj )
+            self.transitionfunc(fromObj, toObj)
+        if self.description is not None:
+            if self.refValueFunc is None:
+                logging.getLogger(__name__).log(25, "{0} transition {1}".format(self.eventType, self.description))
+            else:
+                logging.getLogger(__name__).log(25, "{0} transition {1} value {2}".format(self.eventType, self.description, self.refValueFunc()))
 
 class Statemachine:
     def __init__(self, name="Statemachine", now=None ):
@@ -73,9 +84,13 @@ class Statemachine:
         self.stateGroups = dict()
         self.stateGroupLookup = defaultdict( set )
         self.currentState = None
+        self.currentStateReached = True
         self.graph = nx.MultiDiGraph()
         self.name=name
-        self.now = now if now is not None else datetime.now 
+        self.now = now if now is not None else datetime.now
+        self.ignoreEventTypes = set()  # these event types are ignored while a state is not confirmed, others are stacked
+        self.immediateActionEventTypes = set()  # these event types will be acted upon immediately, independent of the state being reached
+        self.eventQueue = list()
         
     def initialize(self, state, enter=True):
         if enter:
@@ -83,8 +98,9 @@ class Statemachine:
         self.currentState = state
         # self.generateDiagram()
                 
-    def addState(self, name, enterfunc=None, exitfunc=None):
-        self.states[name] = State( name, enterfunc, exitfunc, now=self.now )
+    def addState(self, name, enterfunc=None, exitfunc=None, needsConfirmation=False, confirmedFunc=None):
+        self.states[name] = State( name, enterfunc, exitfunc, now=self.now, needsConfirmation=needsConfirmation,
+                                   confirmedFunc=confirmedFunc)
         self.graph.add_node(name)
         
     def addStateGroup(self, name, states, enterfunc=None, exitfunc=None ):
@@ -96,11 +112,13 @@ class Statemachine:
         self.states[state.name] = state
         
     def addTransition(self, eventType, fromstate, tostate, condition=None, transitionfunc=None, description=None):
-        self.addTransitionObj(eventType, Transition(fromstate, tostate, condition, transitionfunc, description=description))
+        self.addTransitionObj(eventType, Transition(fromstate, tostate, condition, transitionfunc,
+                                                    description=description, eventType=eventType))
         
     def addTransitionList(self, eventType, fromstates, tostate, condition=None, description=None):
         for state in fromstates:
-            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description))            
+            self.addTransitionObj(eventType, Transition(state, tostate, condition, description=description,
+                                                        eventType=eventType))
         
     def addTransitionObj(self, eventType, transition):
         if transition.fromstate not in self.states:
@@ -131,6 +149,9 @@ class Statemachine:
         transition.transitionState(fromStateObj, toStateObj)
         for stategroup in enteredStateGroups:
             stategroup.enterState()
+        self.currentStateReached = not toStateObj.needsConfirmation
+        if not self.currentStateReached:
+            self.confirmationFunction = toStateObj.confirmedFunc
         toStateObj.enterState()
         if toStateObj.enterObservable is None:
             self._makeTransition_enter(transition)
@@ -142,13 +163,26 @@ class Statemachine:
         logging.getLogger(__name__).debug("Now in state {0}".format(self.currentState))
         
     def processEvent(self, eventType, *args, **kwargs ):
-        for thistransition in self.transitions[(eventType, self.currentState)]:
-            if thistransition.condition( self.states[self.currentState], *args, **kwargs ):
-                logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
-                self.makeTransition( thistransition )
-                break
+        if self.currentStateReached or eventType in self.immediateActionEventTypes:
+            for thistransition in self.transitions[(eventType, self.currentState)]:
+                if thistransition.condition( self.states[self.currentState], *args, **kwargs ):
+                    logging.getLogger(__name__).debug("Transition initiated by {0} in {1} from {2} to {3}".format(eventType, self.currentState, thistransition.fromstate, thistransition.tostate))
+                    self.makeTransition( thistransition )
+                    break
+        elif eventType not in self.ignoreEventTypes:
+            self.eventQueue.append((eventType, args, kwargs))
         return self.currentState
-                
+
+    def confirmStateReached(self):
+        self.currentStateReached = True
+        if self.confirmationFunction is not None:
+            self.confirmationFunction()
+            self.confirmationFunction = None
+        for eventType, args, kwargs in self.eventQueue:
+            self.processEvent(eventType, *args, **kwargs)
+        self.eventQueue.clear()
+
+
     # def generateDiagram(self):
     #     try:
     #         # convert from networkx -> pydot

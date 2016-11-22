@@ -42,7 +42,7 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.initcode = ''
         if not self.defaultDir.exists():
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/Scripts')) #/IonControl/config/Scripts directory
-            shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
+            shutil.copytree(defaultScriptsDir, str(self.defaultDir)) #Copy over all example scripts
 
     def setupUi(self, parent):
         super(ScriptingUi, self).setupUi(parent)
@@ -292,6 +292,13 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
                 self.filenameComboBox.setCurrentIndex(0)
                 return False
         self.loadFile(self.filenameComboBox.itemData(ind))
+
+    def onLoad(self):
+        """The load button is clicked. Open file prompt for file."""
+        fullname, _ = QtWidgets.QFileDialog.getOpenFileName(self, 'Open Script', str(self.defaultDir), 'Python scripts (*.py *.pyw)')
+        if fullname != "":
+            fullname = Path(fullname)
+            self.loadFile(fullname)
 
     def loadFile(self, fullname):
         """Load in a file."""

@@ -176,7 +176,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
         self.script = UserCode(self.displayFullPathNames, self.defaultDir) #carries around code body and filepath info
         if not self.defaultDir.exists():
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/' + self.configDirFolder)) #/IonControl/config/UserFunctions directory
-            shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
+            shutil.copytree(defaultScriptsDir, str(self.defaultDir)) #Copy over all example scripts
 
     def setupUi(self, parent):
         super(UserFunctionsEditor, self).setupUi(parent)
