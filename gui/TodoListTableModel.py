@@ -16,35 +16,7 @@ from modules.Expression import Expression
 from modules.flatten import flattenAll
 
 
-class OverrideContext:
-    def __init__(self, oldglobals, newglobals):
-        self.oldGlobals = oldglobals
-        self.globalOverrides = newglobals
-        self.revertGlobalsValues = list()
-
-        #self.globalStack = deque()
-
-    def __enter__(self):
-        self.overrideGlobals()
-        return self.oldGlobals + self.revertGlobalsValues
-        #self.globalStack.push(self.oldGlobals)
-        #self.oldGlobals = self.newGlobals
-
-    def __exit__(self, exittype, value, tb):
-        #self.oldGlobals = self.globalStack.pop()
-        self.revertGlobals()
-
-    def overrideGlobals(self):
-        #self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
-        for key, value in self.globalOverrides:
-            self.revertGlobalsValues.append((key, self.oldGlobals[key]))
-            #self.oldGlobals[key] = value
-
-    def revertGlobals(self):
-        #for key, value in self.revertGlobalsValues:
-            #self.oldGlobals[key] = value
-        ##self.revertGlobalsValues[:] = list()
-        self.revertGlobalsValues = list()
+PARENT_TYPES = {'Todo List', 'Rescan'}
 
 class BaseNode(object):
     def __init__(self, parent, row):
