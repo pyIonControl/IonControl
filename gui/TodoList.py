@@ -557,7 +557,7 @@ class TodoList(Form, Base):
         return current.state()==0 and self.isSomethingTodo
 
     def checkStopFlag(self, state):
-        return self.activeItem.entry.stopFlag# or self.parentStop
+        return self.activeItem.entry.stopFlag or self.parentStop
 
     def onStateChanged(self, newstate ):
         if newstate=='idle':
@@ -637,6 +637,10 @@ class TodoList(Form, Base):
         if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
+            #if self.parentStop:
+                #self.isSomethingTodo = False
+                #self.enterIdle()
+                #break
             try:
                 self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
             except StopIteration:
@@ -648,7 +652,7 @@ class TodoList(Form, Base):
                 if not self.settings.repeat:
                     self.enterIdle()
                 break
-            if self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag:
+            if (self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break

@@ -116,21 +116,21 @@ class TodoListNode(BaseNode):
             return self.getOverrides(item.parent, overrides + [(k, v) for k, v in item.entry.settings.items()])
         return overrides + [(k, v) for k, v in item.entry.settings.items()]
 
-    def incrementer(self, parentStop=False, initNode=None):
-        it, ovrds = self.incr()
-        #self.stopFlagStack.append(sf)
+    def incrementer(self, parentStop=None, initNode=None):
+        it, ovrds, sf = self.incr()
+        if sf is not False:
+            parentStop = True
         self.globalOverrideStack.append([(k, v) for k, v in ovrds])
         iterator = list(flattenAll(it))
         for item in iterator:
             if item.entry.scan == 'Rescan' or item.entry.scan == 'Todo List': # this supports recursive rescans
-                yield from item.incrementer(self.entry.stopFlag)
-                #yield StopNode
-            elif item is iterator[-1]:
-                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], parentStop or self.entry.stopFlag#self.getOverrides(item)
+                yield from item.incrementer(parentStop=item.entry.stopFlag)
+            elif item == iterator[-1] and parentStop is not None:
+                print("next items parent will stop:", parentStop)
+                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], parentStop
             else:
-                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], self.entry.stopFlag#self.getOverrides(item)
+                yield item, self.flattenOverrides(self.globalOverrideStack) + [(k, v) for k, v in item.entry.settings.items()], False
         self.currentGlobalOverrides = self.globalOverrideStack.pop()
-        #self.stopFlagStack.pop()
 
     def evalCondition(self):
         if self.entry.condition != '':
@@ -139,18 +139,18 @@ class TodoListNode(BaseNode):
 
     def incr(self, initNode=None):
         if not self.entry.enabled or (self.entry.condition != '' and not self.evalCondition()):# and self.entry.stopFlag)):
-            return [], []#doesn't create a generator for disabled todo list items, needed here for sublists/rescans
+            return [], [], False#doesn't create a generator for disabled todo list items, needed here for sublists/rescans
         if initNode is None or initNode is self:
             if self.childNodes:
-                return flattenAll([item for item in self.childNodes]), [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
+                return flattenAll([item for item in self.childNodes]), [(k, v) for k, v in self.entry.settings.items()], self.entry.stopFlag
             elif self.hideChildren:
                 labelNodes = []
                 for child in self.hiddenChildren:
                     if child in self.labelDict:
                         labelNodes.append(self.labelDict[child]) #was self.labelDict[child].incr() which doesn't work with recursive rescans
-                return flattenAll(labelNodes), [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
+                return flattenAll(labelNodes), [(k, v) for k, v in self.entry.settings.items()], self.entry.stopFlag
             else:
-                return [self], [(k, v) for k, v in self.entry.settings.items()]#, self.entry.stopFlag
+                return [self], [(k, v) for k, v in self.entry.settings.items()], self.entry.stopFlag
 
     def increment(self):
         try:
