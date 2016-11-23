@@ -615,7 +615,7 @@ class TodoList(Form, Base):
             self.globalVariablesUi.globalDict[key] = value
 
     def revertGlobals(self):
-        for key, value in self.revertGlobalsValues:
+        for key, value in reversed(self.revertGlobalsValues):
             self.globalVariablesUi.globalDict[key] = value
         self.revertGlobalsValues[:] = list()
         #self.revertGlobalsValues = list()
