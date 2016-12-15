@@ -63,6 +63,8 @@ class Script(QtCore.QThread):
     fitSignal = QtCore.pyqtSignal(str, str) #args: fitName, traceName
     genericCallSignal = QtCore.pyqtSignal(str, object, object) #args: function name, argument tuple, keyword argument dict
     consolePrintSignal = QtCore.pyqtSignal(str, bool, str) #args: String to write, True if no error occurred, color to use
+    setAWGSignal = QtCore.pyqtSignal(str, str) #args: AWG name, AWG settings name
+    programAWGSignal = QtCore.pyqtSignal(str) #arg: AWG name
     namedTraceSignal = QtCore.pyqtSignal(str, str, int, float, str) #args: top node, child node, row, data and column (x or y)
     loadVoltageDefSignal = QtCore.pyqtSignal(str,str) #args: file name (sans '.txt'), path
 
@@ -288,7 +290,30 @@ class Script(QtCore.QThread):
         Raises:
             ScriptException: if there is no scan by that name"""
         self.setScanSignal.emit(name)
-     
+
+    @scriptFunction()
+    def setAWG(self, awgName, name):
+        """setAWG(awgName, name)
+        set the AWG (named "awgName") settings to "name."
+
+        This is equivalent to selecting "name" from the AWG settings drop down menu.
+
+        Args:
+            name (str): name of the AWG settings to set
+
+        Raises:
+            ScriptException: if there is no AWG settings by that name"""
+        self.setAWGSignal.emit(awgName, name)
+
+    @scriptFunction()
+    def programAWG(self, awgName):
+        """programAWG(awgName)
+        Program the AWG named "awgName".
+
+        This is equivalent to clicking "program AWG"
+        """
+        self.programAWGSignal.emit(awgName)
+
     @scriptFunction()
     def setEvaluation(self, name):
         """setEvaluation(name)

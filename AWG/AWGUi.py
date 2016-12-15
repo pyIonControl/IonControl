@@ -280,6 +280,11 @@ class AWGUi(AWGForm, AWGBase):
         """Reload settings"""
         name = str(self.settingsComboBox.currentText())
         self.onLoad(name)
+
+    def loadSetting(self, name):
+        if name and self.settingsComboBox.findText(name)>=0:
+            self.settingsComboBox.setCurrentIndex( self.settingsComboBox.findText(name) )
+            self.onLoad(name)
        
     def onLoad(self, name):
         """load settings"""
