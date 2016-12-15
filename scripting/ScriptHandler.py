@@ -567,6 +567,7 @@ class ScriptHandler(QtCore.QObject):
             plottedTrace.traceCollection.description["traceFinalized"] = datetime.now(pytz.utc)
             plottedTrace.traceCollection.save()
             self.registerMeasurement(plottedTrace)
+        self.scriptTraces = dict()
         self.scanExperiment.namedTraceui.saveAndUpdateFileList(self.namedTraceList)
 
     @QtCore.pyqtSlot(str, bool, str)
