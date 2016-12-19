@@ -583,3 +583,204 @@ class CounterSumThresholdEvaluation(EvaluationBase):
                                         tooltip='Threshold evaluation (the threshold value itself is excluded)')
         parameterDict['invert'] = Parameter(name='invert', dataType='bool', value=self.settings['invert'])
         return parameterDict
+
+
+class ThreeIonEvaluation(EvaluationBase):
+    """Straightforward extension of two ion eval to three ions using coefficients on the nine possible states"""
+    name = "ThreeIon"
+    tooltip = "Three ion evaluation"
+    hasChannel = False
+    def __init__(self, globalDict=None, settings=None):
+        EvaluationBase.__init__(self, globalDict, settings)
+
+    def setDefault(self):
+        self.settings.setdefault('Ion_1','')
+        self.settings.setdefault('Ion_2','')
+        self.settings.setdefault('Ion_3','')
+        self.settings.setdefault('---',1)
+        self.settings.setdefault('--o',0)
+        self.settings.setdefault('-o-',0)
+        self.settings.setdefault('o--',0)
+        self.settings.setdefault('oo-',0)
+        self.settings.setdefault('o-o',0)
+        self.settings.setdefault('-oo',0)
+        self.settings.setdefault('ooo',0)
+
+    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
+        name1, name2, name3 = self.settings['Ion_1'], self.settings['Ion_2'], self.settings['Ion_3']
+        eval1, eval2, eval3 = data.evaluated.get(name1), data.evaluated.get(name2), data.evaluated.get(name3)
+
+        if eval1 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name1))
+        if eval2 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name2))
+        if eval3 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name3))
+
+        if len(eval1)!=len(eval2):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval1),len(eval2)))
+        if len(eval1)!=len(eval3):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval1),len(eval3)))
+        if len(eval2)!=len(eval3):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval2),len(eval3)))
+
+        N = float(len(eval1))
+        lookup = {(0,0,0): self.settings['---'],
+                  (0,0,1): self.settings['--o'],
+                  (0,1,0): self.settings['-o-'],
+                  (1,0,0): self.settings['o--'],
+                  (1,1,0): self.settings['oo-'],
+                  (1,0,1): self.settings['o-o'],
+                  (0,1,1): self.settings['-oo'],
+                  (1,1,1): self.settings['ooo'] }
+        discriminated = [ lookup[trio] for trio in zip(eval1, eval2, eval3) ]
+        if evaluation.name:
+            data.evaluated[evaluation.name] = discriminated
+        x = float(numpy.sum( discriminated )) # Float converts type "magnitude" to float so as to not break plotting (numpy.isnan fails)
+        p = x/N
+        # Wilson score interval with continuity correction
+        # see http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
+        rootp = 3-1/N -4*p+4*N*(1-p)*p
+        top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
+        rootb = -1-1/N +4*p+4*N*(1-p)*p
+        bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0
+        if expected is not None:
+            p = abs(expected-p)
+            bottom = abs(expected-bottom)
+            top = abs(expected-top)
+        return p, (p-bottom, top-p), x
+
+    def parameters(self):
+        parameterDict = super(ThreeIonEvaluation, self).parameters()
+        parameterDict['Ion_1'] = Parameter(name='Ion_1', dataType='str', value=self.settings['Ion_1'], tooltip='The evaluation for ion 1')
+        parameterDict['Ion_2'] = Parameter(name='Ion_2', dataType='str', value=self.settings['Ion_2'], tooltip='The evaluation for ion 2')
+        parameterDict['Ion_3'] = Parameter(name='Ion_3', dataType='str', value=self.settings['Ion_3'], tooltip='The evaluation for ion 3')
+        tooltipLookup = SequenceDict([ ('---', 'multiplier for --- (3 ions dark)'),
+                                       ('--o', 'multiplier for --o'),
+                                       ('-o-', 'multiplier for -o-'),
+                                       ('o--', 'multiplier for o--'),
+                                       ('oo-', 'multiplier for oo-'),
+                                       ('o-o', 'multiplier for o-o'),
+                                       ('-oo', 'multiplier for -oo'),
+                                       ('ooo', 'multiplier for ooo') ])
+        for name, tooltip in tooltipLookup.items():
+            parameterDict[name] = Parameter(name=name, dataType='magnitude', value=self.settings[name],
+                                            text=self.settings.get( (name, 'text') ), tooltip=tooltip)
+        return parameterDict
+
+class FourIonEvaluation(EvaluationBase):
+    """Straightforward extension of two ion eval to four ions using coefficients on the sixteen possible states"""
+    name = "FourIon"
+    tooltip = "Four ion evaluation"
+    hasChannel = False
+    def __init__(self, globalDict=None, settings=None):
+        EvaluationBase.__init__(self, globalDict, settings)
+
+    def setDefault(self):
+        self.settings.setdefault('Ion_1','')
+        self.settings.setdefault('Ion_2','')
+        self.settings.setdefault('Ion_3','')
+        self.settings.setdefault('Ion_4','')
+        self.settings.setdefault('----',1)
+        self.settings.setdefault('o---',1)
+        self.settings.setdefault('-o--',1)
+        self.settings.setdefault('--o-',1)
+        self.settings.setdefault('---o',1)
+        self.settings.setdefault('oo--',1)
+        self.settings.setdefault('o-o-',1)
+        self.settings.setdefault('o--o',1)
+        self.settings.setdefault('-oo-',1)
+        self.settings.setdefault('-o-o',1)
+        self.settings.setdefault('--oo',1)
+        self.settings.setdefault('ooo-',1)
+        self.settings.setdefault('oo-o',1)
+        self.settings.setdefault('o-oo',1)
+        self.settings.setdefault('-ooo',1)
+        self.settings.setdefault('oooo',1)
+
+    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
+        name1, name2, name3, name4 = self.settings['Ion_1'], self.settings['Ion_2'], self.settings['Ion_3'], self.settings['Ion_4']
+        eval1, eval2, eval3, eval4 = data.evaluated.get(name1), data.evaluated.get(name2), data.evaluated.get(name3),data.evaluated.get(name4)
+
+        if eval1 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name1))
+        if eval2 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name2))
+        if eval3 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name3))
+        if eval4 is None:
+            raise EvaluationException("Cannot find data '{0}'".format(name4))
+
+        if len(eval1)!=len(eval2):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval1),len(eval2)))
+        if len(eval1)!=len(eval3):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval1),len(eval3)))
+        if len(eval2)!=len(eval3):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval2),len(eval3)))
+        if len(eval1)!=len(eval4):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval1),len(eval4)))
+        if len(eval2)!=len(eval4):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval2),len(eval4)))
+        if len(eval3)!=len(eval4):
+            raise EvaluationException("Evaluated arrays have different length {0}, {1}".format(len(eval3),len(eval4)))
+
+        N = float(len(eval1))
+        lookup = {(0,0,0,0): self.settings['----'],
+                  (1,0,0,0): self.settings['o---'],
+                  (0,1,0,0): self.settings['-o--'],
+                  (0,0,1,0): self.settings['--o-'],
+                  (0,0,0,1): self.settings['---o'],
+                  (1,1,0,0): self.settings['oo--'],
+                  (1,0,1,0): self.settings['o-o-'],
+                  (1,0,0,1): self.settings['o--o'],
+                  (0,1,1,0): self.settings['-oo-'],
+                  (0,1,0,1): self.settings['-o-o'],
+                  (0,0,1,1): self.settings['--oo'],
+                  (1,1,1,0): self.settings['ooo-'],
+                  (1,1,0,1): self.settings['oo-o'],
+                  (1,0,1,1): self.settings['o-oo'],
+                  (0,1,1,1): self.settings['-ooo'],
+                  (1,1,1,1): self.settings['oooo'] }
+        discriminated = [ lookup[quartet] for quartet in zip(eval1, eval2, eval3, eval4) ]
+        if evaluation.name:
+            data.evaluated[evaluation.name] = discriminated
+        x = float(numpy.sum( discriminated )) # Float converts type "magnitude" to float so as to not break plotting (numpy.isnan fails)
+        p = x/N
+        # Wilson score interval with continuity correction
+        # see http://en.wikipedia.org/wiki/Binomial_proportion_confidence_interval
+        rootp = 3-1/N -4*p+4*N*(1-p)*p
+        top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
+        rootb = -1-1/N +4*p+4*N*(1-p)*p
+        bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0
+        if expected is not None:
+            p = abs(expected-p)
+            bottom = abs(expected-bottom)
+            top = abs(expected-top)
+        return p, (p-bottom, top-p), x
+
+    def parameters(self):
+        parameterDict = super(FourIonEvaluation, self).parameters()
+        parameterDict['Ion_1'] = Parameter(name='Ion_1', dataType='str', value=self.settings['Ion_1'], tooltip='The evaluation for ion 1')
+        parameterDict['Ion_2'] = Parameter(name='Ion_2', dataType='str', value=self.settings['Ion_2'], tooltip='The evaluation for ion 2')
+        parameterDict['Ion_3'] = Parameter(name='Ion_3', dataType='str', value=self.settings['Ion_3'], tooltip='The evaluation for ion 3')
+        parameterDict['Ion_4'] = Parameter(name='Ion_4', dataType='str', value=self.settings['Ion_4'], tooltip='The evaluation for ion 4')
+        tooltipLookup = SequenceDict([ ('----', 'multiplier for ---- (4 ions dark)'),
+                                       ('o---', 'multiplier for o---'),
+                                       ('-o--', 'multiplier for -o--'),
+                                       ('--o-', 'multiplier for --o-'),
+                                       ('---o', 'multiplier for ---o'),
+                                       ('oo--', 'multiplier for oo--'),
+                                       ('o-o-', 'multiplier for o-o-'),
+                                       ('o--o', 'multiplier for o--o'),
+                                       ('-oo-', 'multiplier for -oo-'),
+                                       ('-o-o', 'multiplier for -o-o'),
+                                       ('--oo', 'multiplier for --oo'),
+                                       ('ooo-', 'multiplier for ooo-'),
+                                       ('oo-o', 'multiplier for oo-o'),
+                                       ('o-oo', 'multiplier for o-oo'),
+                                       ('-ooo', 'multiplier for -ooo'),
+                                       ('oooo', 'multiplier for oooo (4 ions bright)') ])
+        for name, tooltip in tooltipLookup.items():
+            parameterDict[name] = Parameter(name=name, dataType='magnitude', value=self.settings[name],
+                                            text=self.settings.get( (name, 'text') ), tooltip=tooltip)
+        return parameterDict
