@@ -90,6 +90,7 @@ class AWGWaveform(object):
         for node in nodeList:
             if node.nodeType==nodeTypes.segment:
                 _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True, variabledict=defaultdict(int))
+                nodeDependencies.discard('__exprfunc__')
                 self.dependencies.update(nodeDependencies)
                 if isIdentifier(node.duration):
                     self.dependencies.add(node.duration)
