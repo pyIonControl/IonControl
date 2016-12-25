@@ -328,9 +328,9 @@ class TodoListTableModel(TodoListBaseModel):
             for ind in range(len(item.children)):
                 self.connectSubTodoLists(item.children[ind])
 
-    def updateRootNodes(self):
+    def updateRootNodes(self, init=False):
         self.beginResetModel()
-        self.rootNodes = self._rootNodes()
+        self.rootNodes = self._rootNodes(init)
         self.endResetModel()
         if self.activeEntry is not None:
             self.setActiveItem(self.activeEntry, self.running)
@@ -483,7 +483,7 @@ class TodoListTableModel(TodoListBaseModel):
         self.beginInsertRows(QtCore.QModelIndex(), len(self.todolist), len(self.todolist))
         self.todolist.append(todoListElement)
         self.endInsertRows()
-        self.updateRootNodes()
+        self.updateRootNodes(True)
         return len(self.todolist)-1
         
     def dropMeasurement (self, row):
