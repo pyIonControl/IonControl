@@ -542,6 +542,7 @@ class TodoList(Form, Base):
         if self.currentMeasurementsDisplayedForScan and self.measurementSelectionBox.currentText():
             self.tableModel.addMeasurement( TodoListEntry(self.currentMeasurementsDisplayedForScan, str(self.measurementSelectionBox.currentText()), 
                                                           str(self.evaluationSelectionBox.currentText()), str(self.analysisSelectionBox.currentText())))
+        self.onSaveTodoList()
         self.checkSettingsSavable()
     
     def onDropMeasurement(self):
