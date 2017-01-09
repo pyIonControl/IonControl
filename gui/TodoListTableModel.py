@@ -435,11 +435,12 @@ class TodoListTableModel(TodoListBaseModel):
         self.updateRootNodes()
 
     def flags(self, index):
-        if self.todolist[index.row()].scan == 'Scan':
+        node = self.nodeFromIndex(index)
+        if node.entry.scan == 'Scan':
             return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled |
                     QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
                     QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
-        elif self.todolist[index.row()].scan == 'Script' or self.todolist[index.row()].scan == 'Todo List':
+        elif node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
             if index.column()==0:
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
                        QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
@@ -447,7 +448,7 @@ class TodoListTableModel(TodoListBaseModel):
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
             else:
                 return QtCore.Qt.ItemIsSelectable
-        elif self.nodeFromIndex(index).entry.scan == 'Rescan':
+        elif node.entry.scan == 'Rescan':
             if index.column()==0:
                 return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
                        QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
