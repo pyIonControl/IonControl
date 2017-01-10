@@ -4,7 +4,7 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 import functools
-from collections import deque
+from collections import deque, ChainMap
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
@@ -146,8 +146,8 @@ class TodoListNode(BaseNode):
         self.currentGlobalOverrides = self.globalOverrideStack.pop()
 
     def evalCondition(self):
-        if self.entry.condition != '':
-            return self.exprEval.evaluate(self.entry.condition, self.globalDict)
+        if self.entry.condition != '':                         #chainmap used for checking conditionals with appropriate global overrides
+            return self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
         return True
 
     def incr(self, initNode=None):
