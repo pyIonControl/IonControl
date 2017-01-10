@@ -11,7 +11,8 @@ from PyQt5 import uic, QtCore, QtGui, QtWidgets
 from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.statemachine import Statemachine
-from .TodoListTableModel import TodoListTableModel, TodoListNode
+#from .TodoListTableModel import TodoListTableModel, TodoListNode
+from .TodoListIterModel import TodoListTableModel, TodoListNode, GLOBALORDICT
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
 from functools import partial
@@ -183,7 +184,7 @@ class TodoList(Form, Base):
         self.todoListGenerator = None
         self.loopExhausted = False
         self.isSomethingTodo = True
-        self.currentGlobalOverrides = list()
+        self.currentGlobalOverrides = GLOBALORDICT#list()
         self.revertGlobalsValues = list()
         self.parentStop = False
 
@@ -424,6 +425,28 @@ class TodoList(Form, Base):
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
+        #if self.todoListGenerator is not None:
+            #self.todoListGenerator.close()
+        #self.isSomethingTodo = True
+        #if self.currentItem.parent is None:
+            #self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
+            ##self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
+            #self.activeItem = next(self.todoListGenerator)
+        #else:
+        self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)#self.tableModel.nodeFromIndex(index))
+        #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
+        self.activeItem = next(self.todoListGenerator)
+        while not (self.activeItem is False or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
+            try:
+                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
+                self.activeItem = next(self.todoListGenerator)
+            except StopIteration:
+                break
+        self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+
+    def synchronizeGeneratorWithSelectedItem2(self):
+        """Steps through the todo list generator until it hits currentItem.
+           This is necessary to start a todo list from subtodo lists"""
         if self.todoListGenerator is not None:
             self.todoListGenerator.close()
         self.isSomethingTodo = True
@@ -442,7 +465,10 @@ class TodoList(Form, Base):
 
     def setActiveItem(self, item, state):
         self.currentItem = item
-        self.tableModel.setActiveItem(self.currentItem, state)
+        if self.currentItem is False:
+            self.incrementIndex()
+        else:
+            self.tableModel.setActiveItem(self.currentItem, state)
 
     def updateMeasurementSelectionBox(self, newscan ):
         newscan = str(newscan)
@@ -611,7 +637,7 @@ class TodoList(Form, Base):
 
     def overrideGlobals(self):
         self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
-        for key, value in self.currentGlobalOverrides:
+        for key, value in self.currentGlobalOverrides.items():
             self.revertGlobalsValues.append((key, self.globalVariablesUi.globalDict[key]))
             self.globalVariablesUi.globalDict[key] = value
 
@@ -632,6 +658,42 @@ class TodoList(Form, Base):
         return False
 
     def incrementIndex(self):
+        """Steps through todo list generator"""
+        self.loopExhausted = False
+        self.isSomethingTodo = True
+        self.currentGlobalOverrides = GLOBALORDICT #just for bugtesting
+        if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
+            self.todoListGenerator = self.tableModel.entryGenerator()
+        while True:
+            try:
+                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
+                self.activeItem = next(self.todoListGenerator)
+            except StopIteration:
+                self.loopExhausted = True
+                self.settings.currentIndex = 1
+                self.activeItem = self.tableModel.rootNodes[0]
+                self.todoListGenerator = self.tableModel.entryGenerator()
+                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator) # prime the generator
+                self.activeItem = next(self.todoListGenerator) # prime the generator
+                if not self.settings.repeat:
+                    self.enterIdle()
+                break
+            if self.activeItem is False:
+                self.activeItem = next(self.todoListGenerator)
+                self.isSomethingTodo = False
+                self.enterIdle()
+                break
+            if (self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
+                self.isSomethingTodo = False
+                self.enterIdle()
+                break
+            if self.validTodoItem(self.activeItem):
+                self.settings.currentIndex = self.activeItem.row
+                break
+        return True
+
+
+    def incrementIndex2(self):
         """Steps through todo list generator"""
         self.loopExhausted = False
         self.isSomethingTodo = True
@@ -663,33 +725,37 @@ class TodoList(Form, Base):
         return True
 
     def enterMeasurementRunning(self):
-        entry = self.activeItem.entry
-        print("Global Overrides:", self.currentGlobalOverrides)
-        if entry.scan == 'Scan':
-            self.statusLabel.setText('Measurement Running')
-            _, currentwidget = self.currentScan()
-            self.loadLine( entry )
-            # set the global variables
-            #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
-            #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
-            # start
-            currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
-            self.setActiveItem(self.activeItem, True)
-        elif entry.scan == 'Script':
-            self.overrideGlobals()
-            self.statusLabel.setText('Script Running')
-            self.currentScript = self.scripting.script.fullname
-            self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
-            self.scripting.loadFile(self.scriptFiles[entry.measurement])
-            self.scripting.onStartScript()
-            self.scripting.script.finished.connect(self.exitMeasurementRunning)
-            self.scriptConnected = True
-            self.setActiveItem(self.activeItem, True)
-        elif entry.scan == 'Todo List':
+        if self.activeItem is False:
             self.incrementIndex()
-            self.enterMeasurementRunning()
+            self.enterIdle()
         else:
-            print("NO VALID STATE")
+            entry = self.activeItem.entry
+            print("Global Overrides:", self.currentGlobalOverrides)
+            if entry.scan == 'Scan':
+                self.statusLabel.setText('Measurement Running')
+                _, currentwidget = self.currentScan()
+                self.loadLine( entry )
+                # set the global variables
+                #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
+                #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
+                # start
+                currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
+                self.setActiveItem(self.activeItem, True)
+            elif entry.scan == 'Script':
+                self.overrideGlobals()
+                self.statusLabel.setText('Script Running')
+                self.currentScript = self.scripting.script.fullname
+                self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
+                self.scripting.loadFile(self.scriptFiles[entry.measurement])
+                self.scripting.onStartScript()
+                self.scripting.script.finished.connect(self.exitMeasurementRunning)
+                self.scriptConnected = True
+                self.setActiveItem(self.activeItem, True)
+            elif entry.scan == 'Todo List':
+                self.incrementIndex()
+                self.enterMeasurementRunning()
+            else:
+                print("NO VALID STATE")
 
     def exitMeasurementRunning(self):
         if self.scriptConnected:
