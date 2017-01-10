@@ -12,7 +12,7 @@ from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.statemachine import Statemachine
 #from .TodoListTableModel import TodoListTableModel, TodoListNode
-from .TodoListIterModel import TodoListTableModel, TodoListNode, GLOBALORDICT
+from .TodoListIterModel import TodoListTableModel, TodoListNode, GLOBALORDICT, StopNode
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
 from functools import partial
@@ -425,20 +425,10 @@ class TodoList(Form, Base):
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
-        #if self.todoListGenerator is not None:
-            #self.todoListGenerator.close()
-        #self.isSomethingTodo = True
-        #if self.currentItem.parent is None:
-            #self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
-            ##self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
-            #self.activeItem = next(self.todoListGenerator)
-        #else:
         self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)#self.tableModel.nodeFromIndex(index))
-        #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
         self.activeItem = next(self.todoListGenerator)
-        while not (self.activeItem is False or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
+        while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
             try:
-                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
                 self.activeItem = next(self.todoListGenerator)
             except StopIteration:
                 break
@@ -465,7 +455,7 @@ class TodoList(Form, Base):
 
     def setActiveItem(self, item, state):
         self.currentItem = item
-        if self.currentItem is False:
+        if isinstance(self.currentItem, StopNode):
             self.incrementIndex()
         else:
             self.tableModel.setActiveItem(self.currentItem, state)
@@ -676,7 +666,7 @@ class TodoList(Form, Base):
                 if not self.settings.repeat:
                     self.enterIdle()
                 break
-            if self.activeItem is False:
+            if isinstance(self.activeItem, StopNode):
                 self.activeItem = next(self.todoListGenerator)
                 self.isSomethingTodo = False
                 self.enterIdle()
@@ -723,7 +713,7 @@ class TodoList(Form, Base):
         return True
 
     def enterMeasurementRunning(self):
-        if self.activeItem is False:
+        if isinstance(self.activeItem, StopNode):
             self.incrementIndex()
             self.enterIdle()
         else:
