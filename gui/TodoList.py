@@ -484,8 +484,6 @@ class TodoList(Form, Base):
                     selectionModel.select( self.tableModel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select )
         self.onSaveTodoList()
         self.tableModel.updateRootNodes(True)
-        self.tableModel.updateRootNodes()
-        #self.tableModel.updateChildren()
         self.checkSettingsSavable()
 
     def onAddMeasurement(self):

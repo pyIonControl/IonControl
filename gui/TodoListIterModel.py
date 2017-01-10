@@ -29,9 +29,9 @@ class CMStack(ChainMap):
 GLOBALORDICT = CMStack()
 
 class StopNode:
-    pass
+    def updateChildren(self):
+        pass
 
-#updateChildrenSignal = QtCore.pyqtSignal()
 # originally intended as a generic structure for other trees, perhaps it should just be merged into the TodoListNode
 class BaseNode:#(QtCore.QObject):
     def __init__(self, parent, row):
@@ -39,8 +39,6 @@ class BaseNode:#(QtCore.QObject):
         self.parent = parent
         self.row = row
         self._childNodes = self._children()
-        #self.updateChildrenSignal = updateChildrenSignal
-        #self.updateChildrenSignal.connect(self.updateChildren)
 
     @property
     def childNodes(self):
@@ -53,10 +51,6 @@ class BaseNode:#(QtCore.QObject):
 
     def updateChildren(self):
         self._childNodes = self._children()
-
-    #@classmethod
-    #def updateChildren(cls):
-        #cls.updateChildrenSignal.emit()
 
 class TodoListNode(BaseNode):
     allNodes = []
@@ -126,12 +120,7 @@ class TodoListNode(BaseNode):
             GLOBALORDICT.pop()
 
     def evalCondition(self):
-        #return self.p
-        #if self.entry.condition != '':                         #chainmap used for checking conditionals with appropriate global overrides
         condition = True if self.entry.condition == '' else self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
-        #print('CCCCCCCCCCCCCCCCondition: ', condition)
-        #if self.parent is not None:
-            #return condition and self.parent.evalCondition()
         return condition
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
@@ -140,6 +129,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         self.inRescan = False
         self.currentRescanList = list()
         self.rootNodes = self._rootNodes(init=True)
+        self.updateAllChildNodes()
         self.globalDict = globalDict
 
     def _rootNodes(self, init=False):
@@ -179,6 +169,10 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [root, *root._childNodes] if root.hideChildren else list()
             yield from iter(root)
+
+    def updateAllChildNodes(self):
+        for node in self.entryGenerator():
+            node.updateChildren()
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
@@ -314,13 +308,10 @@ class TodoListTableModel(TodoListBaseModel):
     def updateRootNodes(self, init=False):
         self.beginResetModel()
         self.rootNodes = self._rootNodes(init)
+        self.updateAllChildNodes()
         self.endResetModel()
         if self.activeEntry is not None:
             self.setActiveItem(self.activeEntry, self.running)
-
-    #def updateChildren(self):
-        #updateChildrenSignal.emit()
-        #BaseNode.updateChildren()
 
     def bgLookup(self, node, darkbg=False):
         if node.entry.scan == 'Script' or \
