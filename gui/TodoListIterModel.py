@@ -3,8 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-import functools
-from collections import deque, ChainMap, UserDict
+from collections import deque, ChainMap
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from _functools import partial
@@ -13,8 +12,6 @@ import copy
 from itertools import chain
 
 from modules.Expression import Expression
-from modules.flatten import flattenAll
-
 
 PARENT_TYPES = {'Todo List', 'Rescan'}
 
@@ -34,15 +31,16 @@ GLOBALORDICT = CMStack()
 class StopNode:
     pass
 
+#updateChildrenSignal = QtCore.pyqtSignal()
 # originally intended as a generic structure for other trees, perhaps it should just be merged into the TodoListNode
-class BaseNode(object):
+class BaseNode:#(QtCore.QObject):
     def __init__(self, parent, row):
+        #super().__init__(parent)
         self.parent = parent
         self.row = row
         self._childNodes = self._children()
-        if self.hideChildren:
-            self.hiddenChildren = self._childNodes
-            self._childNodes = [self.labelDict[child] for child in self._childNodes if child in self.labelDict]
+        #self.updateChildrenSignal = updateChildrenSignal
+        #self.updateChildrenSignal.connect(self.updateChildren)
 
     @property
     def childNodes(self):
@@ -56,9 +54,13 @@ class BaseNode(object):
     def updateChildren(self):
         self._childNodes = self._children()
 
+    #@classmethod
+    #def updateChildren(cls):
+        #cls.updateChildrenSignal.emit()
+
 class TodoListNode(BaseNode):
     allNodes = []
-    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None, globalOverrideStack=None):
+    def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None):
         self.entry = entry
         self.highlighted = highlighted
         self.label = ''
@@ -67,8 +69,6 @@ class TodoListNode(BaseNode):
         self.hiddenChildren = None
         self.globalDict = globaldict if globaldict is not None else []
         self.exprEval = Expression()
-        #self.currentGlobalOverrides = list()
-        self.globalOverrideStack = globalOverrideStack if globalOverrideStack is not None else deque()#list()
         self.globalOverrides = self.entry.settings
         BaseNode.__init__(self, parent, row)
 
@@ -83,7 +83,7 @@ class TodoListNode(BaseNode):
         childList = list()
         if not self.hideChildren:
             for ind in range(len(self.entry.children)):
-                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict, globalOverrideStack=self.globalOverrideStack)
+                node = TodoListNode(self.entry.children[ind], self, ind, self.labelDict, globaldict=self.globalDict)
                 childList.append(node)
                 if node.entry.label != '':
                     if node.entry.label != node.label:
@@ -93,7 +93,6 @@ class TodoListNode(BaseNode):
                     self.labelDict[node.entry.label] = node
         else:
             childList = [self.labelDict[child] for child in self.entry.children if child in self.labelDict]
-            #childList = self.entry.children
         return childList
 
     def topLevelParent(self):
@@ -107,10 +106,12 @@ class TodoListNode(BaseNode):
            __exit__ context definitions and is used to keep track of nested global overrides as the iterator is
            consumed. The node itself is yielded automatically and handled later, this causes the active element to
            step forward by one row if the todo list is stopped, and it also prevents indexing bugs when starting
-           from a subtodo list or a rescan."""
+           from a subtodo list or a rescan. StopNode() is an empty object that is yielded to indicate that a stop
+           flag is enabled. Passing StopNode() greatly simplifies handling of rescans/subtodo lists with stop flags
+           enabled."""
         with self:
             yield self
-            if self._childNodes:
+            if self._childNodes and self.evalCondition():
                 yield from chain(*map(iter, self._childNodes))
         if self.entry.enabled and self.entry.stopFlag:
             yield StopNode()
@@ -125,9 +126,13 @@ class TodoListNode(BaseNode):
             GLOBALORDICT.pop()
 
     def evalCondition(self):
-        if self.entry.condition != '':                         #chainmap used for checking conditionals with appropriate global overrides
-            return self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
-        return True
+        #return self.p
+        #if self.entry.condition != '':                         #chainmap used for checking conditionals with appropriate global overrides
+        condition = True if self.entry.condition == '' else self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
+        #print('CCCCCCCCCCCCCCCCondition: ', condition)
+        #if self.parent is not None:
+            #return condition and self.parent.evalCondition()
+        return condition
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self, globalDict):
@@ -172,9 +177,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             initRow = node.topLevelParent().row
         for root in self.rootNodes[initRow:]:
             self.inRescan = True if root.hideChildren else False
-            #self.currentRescanList = [self.labelDict[child] for child in root.hiddenChildren] if root.hideChildren else list()
-            self.currentRescanList = root._childNodes if root.hideChildren else list()
-            #yield from root.incrementer()
+            self.currentRescanList = [root, *root._childNodes] if root.hideChildren else list()
             yield from iter(root)
 
     def recursiveLookup(self, rowlist):
@@ -198,7 +201,6 @@ class TodoListTableModel(TodoListBaseModel):
         self.labelDict = labelDict
         self.settingsCache = settingsCache
         self.globalDict = globalDict
-        self.globalOverrideStack = deque()
         TodoListBaseModel.__init__(self, globalDict)
         self.defaultDarkBackground = QtGui.QColor(225, 225, 225, 255)
         self.nodeDataLookup = {
@@ -274,7 +276,7 @@ class TodoListTableModel(TodoListBaseModel):
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement.split(',')]
         nodeList = list()
         for ind in range(len(self.todolist)):
-            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict, globalOverrideStack=self.globalOverrideStack)
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)
             nodeList.append(node)
             if node.entry.label != '':
                 if node.entry.label != node.label:
@@ -315,6 +317,10 @@ class TodoListTableModel(TodoListBaseModel):
         self.endResetModel()
         if self.activeEntry is not None:
             self.setActiveItem(self.activeEntry, self.running)
+
+    #def updateChildren(self):
+        #updateChildrenSignal.emit()
+        #BaseNode.updateChildren()
 
     def bgLookup(self, node, darkbg=False):
         if node.entry.scan == 'Script' or \
@@ -398,7 +404,6 @@ class TodoListTableModel(TodoListBaseModel):
                     self.setActiveItem(self.activeEntry, self.running)
             if self.nodeFromIndex(index).entry.scan == 'Rescan':
                 self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
-                #self.nodeFromIndex(index).hiddenChildren = self.nodeFromIndex(index)._children()
                 self.nodeFromIndex(index)._childNodes = self.nodeFromIndex(index)._children()
                 self.nodeFromIndex(index).hideChildren = True
             if index.column() == 0 and role == QtCore.Qt.EditRole:
@@ -419,26 +424,29 @@ class TodoListTableModel(TodoListBaseModel):
 
     def flags(self, index):
         node = self.nodeFromIndex(index)
-        if node.entry.scan == 'Scan':
-            return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled |
-                    QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
-                    QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
-        elif node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
-            if index.column()==0:
-                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
-                       QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
-            elif index.column()==1 or index.column()==2 or index.column()==5:
-                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-            else:
-                return QtCore.Qt.ItemIsSelectable
-        elif node.entry.scan == 'Rescan':
-            if index.column()==0:
-                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
-                       QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
-            elif index.column()==1 or index.column()==2 or index.column()==5:
-                return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-            else:
-                return QtCore.Qt.ItemIsSelectable
+        if index.column() == 1:
+            return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
+        else:
+            if node.entry.scan == 'Scan':
+                return (QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled |
+                        QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsUserCheckable if index.column()==0 else
+                        QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable )
+            elif node.entry.scan == 'Script' or node.entry.scan == 'Todo List':
+                if index.column()==0:
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
+                           QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+                elif index.column()==2 or index.column()==5:
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+                else:
+                    return QtCore.Qt.ItemIsSelectable
+            elif node.entry.scan == 'Rescan':
+                if index.column()==0:
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
+                           QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEditable
+                elif index.column()==2 or index.column()==5:
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
+                else:
+                    return QtCore.Qt.ItemIsSelectable
 
     def headerData(self, section, orientation, role):
         if (role == QtCore.Qt.DisplayRole):
