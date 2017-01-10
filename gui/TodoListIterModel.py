@@ -23,19 +23,31 @@ class BaseNode(object):
     def __init__(self, parent, row):
         self.parent = parent
         self.row = row
-        self.childNodes = self._children()
+        self._childNodes = self._children()
         if self.hideChildren:
-            self.hiddenChildren = self.childNodes
-            self.childNodes = list()
+            self.hiddenChildren = self._childNodes
+            #self.childNodes = list()
+            #labelNodes = []
+            self._childNodes = [self.labelDict[child] for child in self._childNodes if child in self.labelDict]
+            #for child in self._childNodes:
+                #if child in self.labelDict:
+                    #labelNodes.append(self.labelDict[child]) #was self.labelDict[child].incr() which doesn't work with recursive rescans
+            #self._childNodes = labelNodes
+
+    @property
+    def childNodes(self):
+        if self.hideChildren:
+            return list()
+        return self._childNodes
 
     def _children(self):
         raise NotImplementedError()
 
     def updateChildren(self):
-        self.childNodes = self._children()
-        if self.hideChildren:
-            self.hiddenChildren = self.childNodes
-            self.childNodes = list()
+        self._childNodes = self._children()
+        #if self.hideChildren:
+            #self.hiddenChildren = self.childNodes
+            #self.childNodes = list()
 
 class TodoListNode(BaseNode):
     allNodes = []
@@ -52,6 +64,12 @@ class TodoListNode(BaseNode):
         self.globalOverrideStack = globalOverrideStack if globalOverrideStack is not None else deque()#list()
         self.globalOverrides = self.entry.settings
         BaseNode.__init__(self, parent, row)
+
+    @property
+    def enabled(self):
+        if self.parent is not None:
+            return self.entry.enabled and self.parent.enabled
+        return self.entry.enabled
 
     def _children(self):
         childList = list()
@@ -91,14 +109,11 @@ class TodoListNode(BaseNode):
         return overrides + [(k, v) for k, v in item.entry.settings.items()]
 
     def __iter__(self):
-        if self.childNodes:
-            with self:
-                yield from chain(*map(iter, self.childNodes))
-        else:
-            print('yielding self')
+        with self:
             yield self
+            if self._childNodes:
+                yield from chain(*map(iter, self._childNodes))
         if self.entry.enabled and self.entry.stopFlag:
-            print('yielding false')
             yield False
 
     def __enter__(self):

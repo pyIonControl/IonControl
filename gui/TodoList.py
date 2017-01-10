@@ -654,7 +654,7 @@ class TodoList(Form, Base):
 
     def validTodoItem(self, item):
         if isinstance(item, TodoListNode):
-            return item.entry.enabled and (item.entry.condition == '' or item.evalCondition())# and not item.entry.stopFlag))
+            return item.enabled and (item.entry.condition == '' or item.evalCondition()) and item.entry.scan != 'Todo List' and item.entry.scan != 'Rescan'# and not item.entry.stopFlag))
         return False
 
     def incrementIndex(self):
@@ -666,14 +666,12 @@ class TodoList(Form, Base):
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
             try:
-                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
                 self.activeItem = next(self.todoListGenerator)
             except StopIteration:
                 self.loopExhausted = True
                 self.settings.currentIndex = 1
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
-                #self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator) # prime the generator
                 self.activeItem = next(self.todoListGenerator) # prime the generator
                 if not self.settings.repeat:
                     self.enterIdle()
@@ -683,7 +681,7 @@ class TodoList(Form, Base):
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break
-            if (self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
+            if (self.activeItem.enabled and self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break
@@ -751,7 +749,7 @@ class TodoList(Form, Base):
                 self.scripting.script.finished.connect(self.exitMeasurementRunning)
                 self.scriptConnected = True
                 self.setActiveItem(self.activeItem, True)
-            elif entry.scan == 'Todo List':
+            elif entry.scan == 'Todo List' or entry.scan == 'Rescan':
                 self.incrementIndex()
                 self.enterMeasurementRunning()
             else:
