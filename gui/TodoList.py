@@ -598,6 +598,16 @@ class TodoList(Form, Base):
                     self.enterIdle()
                 break
             if isinstance(self.activeItem, StopNode):
+                try:
+                    self.activeItem = next(self.todoListGenerator)
+                except StopIteration:
+                    self.loopExhausted = True
+                    self.settings.currentIndex = 1
+                    self.activeItem = self.tableModel.rootNodes[0]
+                    self.todoListGenerator = self.tableModel.entryGenerator()
+                    self.activeItem = next(self.todoListGenerator) # prime the generator
+                    self.enterIdle()
+                    break
                 self.activeItem = next(self.todoListGenerator)
                 self.isSomethingTodo = False
                 self.enterIdle()
