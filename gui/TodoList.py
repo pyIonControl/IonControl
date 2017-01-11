@@ -606,9 +606,9 @@ class TodoList(Form, Base):
                     self.activeItem = self.tableModel.rootNodes[0]
                     self.todoListGenerator = self.tableModel.entryGenerator()
                     self.activeItem = next(self.todoListGenerator) # prime the generator
+                    self.isSomethingTodo = False
                     self.enterIdle()
                     break
-                self.activeItem = next(self.todoListGenerator)
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break
