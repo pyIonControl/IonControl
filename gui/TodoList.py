@@ -11,7 +11,8 @@ from PyQt5 import uic, QtCore, QtGui, QtWidgets
 from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.statemachine import Statemachine
-from .TodoListTableModel import TodoListTableModel, TodoListNode
+#from .TodoListTableModel import TodoListTableModel, TodoListNode
+from .TodoListIterModel import TodoListTableModel, TodoListNode, GLOBALORDICT, StopNode
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
 from functools import partial
@@ -30,37 +31,6 @@ from modules.firstNotNone import firstNotNone
 from collections import defaultdict, deque
 
 Form, Base = uic.loadUiType('ui/TodoList.ui')
-
-
-class GlobalOverrideContext:
-    def __init__(self, oldglobals, newglobals):
-        self.oldGlobals = oldglobals
-        self.globalOverrides = newglobals
-        self.revertGlobalsValues = list()
-
-        #self.globalStack = deque()
-
-    def __enter__(self):
-        self.overrideGlobals()
-        return self.oldGlobals + self.revertGlobalsValues
-        #self.globalStack.push(self.oldGlobals)
-        #self.oldGlobals = self.newGlobals
-
-    def __exit__(self, exittype, value, tb):
-        #self.oldGlobals = self.globalStack.pop()
-        self.revertGlobals()
-
-    def overrideGlobals(self):
-        self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
-        for key, value in self.globalOverrides:
-            self.revertGlobalsValues.append((key, self.oldGlobals[key]))
-            self.oldGlobals[key] = value
-
-    def revertGlobals(self):
-        for key, value in self.revertGlobalsValues:
-            self.oldGlobals[key] = value
-        #self.revertGlobalsValues[:] = list()
-        self.revertGlobalsValues = list()
 
 class TodoListEntry(object):
     def __init__(self, scan=None, measurement=None, evaluation=None, analysis=None):
@@ -183,7 +153,7 @@ class TodoList(Form, Base):
         self.todoListGenerator = None
         self.loopExhausted = False
         self.isSomethingTodo = True
-        self.currentGlobalOverrides = list()
+        self.currentGlobalOverrides = GLOBALORDICT
         self.revertGlobalsValues = list()
         self.parentStop = False
 
@@ -212,7 +182,7 @@ class TodoList(Form, Base):
         self.scanSelectionBox.addItems(['Scan', 'Script', 'Todo List', 'Rescan'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
-        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)#self.fullRescanList)
+        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)
         self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
@@ -322,6 +292,7 @@ class TodoList(Form, Base):
 
     def startTodoList(self, *args):
         """When the play button is clicked, synchronizes current generator item with current active item then runs"""
+        self.isSomethingTodo = True
         self.synchronizeGeneratorWithSelectedItem()
         self.statemachine.processEvent('startCommand',*args)
 
@@ -329,21 +300,6 @@ class TodoList(Form, Base):
         todoListElement = self.tableModel.nodeFromIndex(modelIndex).entry
         self.settingTableModel.setSettings( todoListElement.settings )
         self.currentlySelectedLabel.setText( "{0} - {1}".format( todoListElement.measurement, todoListElement.evaluation) )
-
-    #def populateIndexStack(self, idx, lst=None):
-        #if lst is None:
-            #lst = []
-        #lst.append(idx.row())
-        #if idx.parent().isValid():
-            #return self.populateIndexStack(idx.parent(), lst)
-        #return lst
-
-    #def refineTodoListElement(self, idx):
-        #indexList = self.populateIndexStack(idx)
-        #localTodo = self.settings.todoList
-        #for i in reversed(indexList[1:]):
-            #localTodo = localTodo[i].children
-        #return localTodo[indexList[0]]
 
     def onAddSetting(self):
         self.settingTableModel.addSetting()
@@ -391,14 +347,11 @@ class TodoList(Form, Base):
         text = str(text) if text is not None else str(self.comboBoxListCache.currentText())
         if text in self.settingsCache:
             self.masterSettings.currentSettingName = text
-            #self.setSettings( deepcopy( self.settingsCache[text] ) )
             self.setSettings(self.settingsCache[text])
         self.checkSettingsSavable()
 
     def updateRescanComboBox(self, item, add):
         if self.currentComboScan == 'Rescan':
-            # need to change this so not all items are updated every time a single label is changed
-            # but there should be a small amount of overhead resulting from updating all elements
             updateComboBoxItems(self.measurementSelectionBox, sorted(self.labelDict.keys()))
 
     def setSettings(self, newSettings):
@@ -415,7 +368,6 @@ class TodoList(Form, Base):
             if self.todoListGenerator is not None:
                 self.todoListGenerator.close()
             self.tableModel.currentRescanList = list()
-            self.tableModel.globalOverrideStack.clear()
             self.isSomethingTodo = True
             self.settings.currentIndex = index.row()
             self.currentItem = self.tableModel.nodeFromIndex(index)
@@ -424,27 +376,25 @@ class TodoList(Form, Base):
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
-        if self.todoListGenerator is not None:
-            self.todoListGenerator.close()
-        self.isSomethingTodo = True
-        if self.currentItem.parent is None:
-            self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
-            self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
-        else:
-            self.todoListGenerator = self.tableModel.entryGenerator()#self.tableModel.nodeFromIndex(index))
-            self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
-            while not (self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
-                try:
-                    self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
-                except StopIteration:
-                    break
+        if self.activeItem == self.currentItem:
+            return
+        self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
+        self.activeItem = next(self.todoListGenerator)
+        while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
+            try:
+                self.activeItem = next(self.todoListGenerator)
+            except StopIteration:
+                break
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
 
     def setActiveItem(self, item, state):
         self.currentItem = item
-        self.tableModel.setActiveItem(self.currentItem, state)
+        if isinstance(self.currentItem, StopNode):
+            self.incrementIndex()
+        else:
+            self.tableModel.setActiveItem(self.currentItem, state)
 
-    def updateMeasurementSelectionBox(self, newscan ):
+    def updateMeasurementSelectionBox(self, newscan):
         newscan = str(newscan)
         self.currentComboScan = newscan
         if self.currentMeasurementsDisplayedForScan != newscan:
@@ -497,7 +447,7 @@ class TodoList(Form, Base):
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Todo List':
-                self.populateMeasurementsItem(name, self.settingsCache)#{k: v for k,v in self.settingsCache.items() if k is not self.masterSettings.currentSettingName})
+                self.populateMeasurementsItem(name, self.settingsCache)
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Rescan':
@@ -511,17 +461,14 @@ class TodoList(Form, Base):
 
     def populateMeasurementsItem(self, name, settingsDict ):
         self.scanModuleMeasurements[name] = sorted(settingsDict.keys()) if name != 'Todo List' else sorted(settingsDict.keys() - {self.masterSettings.currentSettingName})
-        #if name == self.currentMeasurementsDisplayedForScan:
         updateComboBoxItems( self.measurementSelectionBox, self.scanModuleMeasurements[name] )
 
     def populateEvaluationItem(self, name, settingsDict ):
         self.scanModuleEvaluations[name] = sorted(settingsDict.keys())
-        #if name == self.currentMeasurementsDisplayedForScan:
         updateComboBoxItems( self.evaluationSelectionBox, self.scanModuleEvaluations[name] )
 
     def populateAnalysisItem(self, name, settingsDict ):
         self.scanModuleAnalysis[name] = sorted(settingsDict.keys())
-        #if name == self.currentMeasurementsDisplayedForScan:
         updateComboBoxItems( self.analysisSelectionBox, self.scanModuleAnalysis[name] )
 
     def onReorder(self, key):
@@ -535,7 +482,8 @@ class TodoList(Form, Base):
                 selectionModel.clearSelection()
                 for index in indexes:
                     selectionModel.select( self.tableModel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select )
-#            self.selectionChanged.emit( self.enabledParametersObjects )
+        self.onSaveTodoList()
+        self.tableModel.updateRootNodes(True)
         self.checkSettingsSavable()
 
     def onAddMeasurement(self):
@@ -610,8 +558,8 @@ class TodoList(Form, Base):
         entry.stopFlag = not entry.stopFlag
 
     def overrideGlobals(self):
-        self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
-        for key, value in self.currentGlobalOverrides:
+        self.revertGlobals() # make sure old values were reverted e.g. when calling start on a running scan
+        for key, value in self.currentGlobalOverrides.items():
             self.revertGlobalsValues.append((key, self.globalVariablesUi.globalDict[key]))
             self.globalVariablesUi.globalDict[key] = value
 
@@ -619,7 +567,6 @@ class TodoList(Form, Base):
         for key, value in reversed(self.revertGlobalsValues):
             self.globalVariablesUi.globalDict[key] = value
         self.revertGlobalsValues[:] = list()
-        #self.revertGlobalsValues = list()
 
     def nodeFromIndex(self, index=None):
         if index is None:
@@ -628,32 +575,44 @@ class TodoList(Form, Base):
 
     def validTodoItem(self, item):
         if isinstance(item, TodoListNode):
-            return item.entry.enabled and (item.entry.condition == '' or item.evalCondition())# and not item.entry.stopFlag))
+            return (item.entry.enabled if self.tableModel.inRescan else item.enabled) and (item.entry.condition == '' or item.evalCondition()) and item.entry.scan != 'Todo List' and item.entry.scan != 'Rescan'# and not item.entry.stopFlag))
         return False
 
     def incrementIndex(self):
         """Steps through todo list generator"""
         self.loopExhausted = False
         self.isSomethingTodo = True
+        self.currentGlobalOverrides = GLOBALORDICT # need to change this so it's only set once
         if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
-            #if self.parentStop:
-                #self.isSomethingTodo = False
-                #self.enterIdle()
-                #break
             try:
-                self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator)
+                self.activeItem = next(self.todoListGenerator)
             except StopIteration:
                 self.loopExhausted = True
                 self.settings.currentIndex = 1
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
-                self.activeItem, self.currentGlobalOverrides, self.parentStop = next(self.todoListGenerator) # prime the generator
+                self.activeItem = next(self.todoListGenerator) # prime the generator
                 if not self.settings.repeat:
                     self.enterIdle()
                 break
-            if (self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
+            if isinstance(self.activeItem, StopNode):
+                try:
+                    self.activeItem = next(self.todoListGenerator)
+                except StopIteration:
+                    self.loopExhausted = True
+                    self.settings.currentIndex = 1
+                    self.activeItem = self.tableModel.rootNodes[0]
+                    self.todoListGenerator = self.tableModel.entryGenerator()
+                    self.activeItem = next(self.todoListGenerator) # prime the generator
+                    self.enterIdle()
+                    break
+                self.activeItem = next(self.todoListGenerator)
+                self.isSomethingTodo = False
+                self.enterIdle()
+                break
+            if (self.activeItem.enabled and self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
                 self.isSomethingTodo = False
                 self.enterIdle()
                 break
@@ -663,33 +622,39 @@ class TodoList(Form, Base):
         return True
 
     def enterMeasurementRunning(self):
-        entry = self.activeItem.entry
-        print("Global Overrides:", self.currentGlobalOverrides)
-        if entry.scan == 'Scan':
-            self.statusLabel.setText('Measurement Running')
-            _, currentwidget = self.currentScan()
-            self.loadLine( entry )
-            # set the global variables
-            #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
-            #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
-            # start
-            currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
-            self.setActiveItem(self.activeItem, True)
-        elif entry.scan == 'Script':
-            self.overrideGlobals()
-            self.statusLabel.setText('Script Running')
-            self.currentScript = self.scripting.script.fullname
-            self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
-            self.scripting.loadFile(self.scriptFiles[entry.measurement])
-            self.scripting.onStartScript()
-            self.scripting.script.finished.connect(self.exitMeasurementRunning)
-            self.scriptConnected = True
-            self.setActiveItem(self.activeItem, True)
-        elif entry.scan == 'Todo List':
+        if isinstance(self.activeItem, StopNode):
+            self.incrementIndex()
+            self.enterIdle()
+        elif not self.validTodoItem(self.activeItem):
             self.incrementIndex()
             self.enterMeasurementRunning()
         else:
-            print("NO VALID STATE")
+            entry = self.activeItem.entry
+            if entry.scan == 'Scan':
+                self.statusLabel.setText('Measurement Running')
+                _, currentwidget = self.currentScan()
+                self.loadLine( entry )
+                # set the global variables
+                #self.revertGlobalsList = [('Global', key, self.globalVariablesUi.globalDict[key]) for key in entry.settings.iterkeys()]
+                #self.globalVariablesUi.update( ( ('Global', k, v) for k,v in entry.settings.items() ))
+                # start
+                currentwidget.onStart([(k, v) for k, v in entry.settings.items()])
+                self.setActiveItem(self.activeItem, True)
+            elif entry.scan == 'Script':
+                self.overrideGlobals()
+                self.statusLabel.setText('Script Running')
+                self.currentScript = self.scripting.script.fullname
+                self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
+                self.scripting.loadFile(self.scriptFiles[entry.measurement])
+                self.scripting.onStartScript()
+                self.scripting.script.finished.connect(self.exitMeasurementRunning)
+                self.scriptConnected = True
+                self.setActiveItem(self.activeItem, True)
+            elif entry.scan == 'Todo List' or entry.scan == 'Rescan':
+                self.incrementIndex()
+                self.enterMeasurementRunning()
+            else:
+                print("NO VALID STATE")
 
     def exitMeasurementRunning(self):
         if self.scriptConnected:
@@ -703,7 +668,6 @@ class TodoList(Form, Base):
             self.revertGlobals()
             self.incrementIndex()
             self.setActiveItem(self.activeItem, False)
-        #self.globalVariablesUi.update(self.revertGlobalsList)
 
     def enterPaused(self):
         self.statusLabel.setText('Paused')
@@ -716,11 +680,12 @@ class TodoList(Form, Base):
        
 
     # TODO: push globals on a stack?
-    #       revert globals when stopping in the middle of a rescan
-    #       stop flags should apply to rescans and subtodo lists
+    #XXXX   revert globals when stopping in the middle of a rescan
+    #XXXX   stop flags should apply to rescans and subtodo lists
     #       fancy button drop down for new rescans
     #       modify parser to handle and/or statements
     #       fix handling of manually starting enabled items in disabled subtodo lists
     #       get rid of savable code
     #       fix copy/paste of todo list elements so they are stored in a dict format
+    #       get rid of unnecessary variables in state machine
         
