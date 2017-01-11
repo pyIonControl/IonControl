@@ -558,7 +558,7 @@ class TodoList(Form, Base):
         entry.stopFlag = not entry.stopFlag
 
     def overrideGlobals(self):
-        self.revertGlobals()#self.revertGlobalsValues)  # make sure old values were reverted e.g. when calling start on a running scan
+        self.revertGlobals() # make sure old values were reverted e.g. when calling start on a running scan
         for key, value in self.currentGlobalOverrides.items():
             self.revertGlobalsValues.append((key, self.globalVariablesUi.globalDict[key]))
             self.globalVariablesUi.globalDict[key] = value

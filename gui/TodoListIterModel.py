@@ -12,30 +12,19 @@ import copy
 from itertools import chain
 
 from modules.Expression import Expression
+from modules.ChainMapStack import ChainMapStack
 
 PARENT_TYPES = {'Todo List', 'Rescan'}
-
-class CMStack(ChainMap):
-    def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
-        self.maps = deque()
-
-    def push(self, x):
-        self.maps.appendleft(x)
-
-    def pop(self):
-        return self.maps.popleft()
-
-GLOBALORDICT = CMStack()
+GLOBALORDICT = ChainMapStack()
 
 class StopNode:
+    """Dummy class that is used to signal if a stop flag is encountered"""
     def updateChildren(self):
         pass
 
-# originally intended as a generic structure for other trees, perhaps it should just be merged into the TodoListNode
-class BaseNode:#(QtCore.QObject):
+class BaseNode:
+    """Skeleton for todo list nodes"""
     def __init__(self, parent, row):
-        #super().__init__(parent)
         self.parent = parent
         self.row = row
         self._childNodes = self._children()
@@ -53,14 +42,15 @@ class BaseNode:#(QtCore.QObject):
         self._childNodes = self._children()
 
 class TodoListNode(BaseNode):
-    allNodes = []
+    rescanNodes = set()
     def __init__(self, entry, parent, row, labelDict, hideChildren=False, highlighted=False, globaldict=None):
         self.entry = entry
+        if self.entry.scan == 'Rescan':
+            self.rescanNodes.add(self)
         self.highlighted = highlighted
         self.label = ''
         self.labelDict = labelDict
         self.hideChildren = hideChildren # currently used for Rescan
-        self.hiddenChildren = None
         self.globalDict = globaldict if globaldict is not None else []
         self.exprEval = Expression()
         self.globalOverrides = self.entry.settings
@@ -105,7 +95,7 @@ class TodoListNode(BaseNode):
            enabled."""
         with self:
             yield self
-            if self._childNodes and self.evalCondition():
+            if self._childNodes and self.evalCondition(): #limiting elements with evalCondition() here supports recursive Rescan calls but is not ideal
                 yield from chain(*map(iter, self._childNodes))
         if self.entry.enabled and self.entry.stopFlag:
             yield StopNode()
@@ -123,13 +113,19 @@ class TodoListNode(BaseNode):
         condition = True if self.entry.condition == '' else self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
         return condition
 
+    @classmethod
+    def updateRescans(cls):
+        """Recalculate children for rescans which contain labels that have not yet been created."""
+        for node in copy.copy(cls.rescanNodes):
+            node.updateChildren()
+
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self, globalDict):
         QtCore.QAbstractItemModel.__init__(self)
         self.inRescan = False
         self.currentRescanList = list()
         self.rootNodes = self._rootNodes(init=True)
-        self.updateAllChildNodes()
+        TodoListNode.updateRescans()
         self.globalDict = globalDict
 
     def _rootNodes(self, init=False):
@@ -169,10 +165,6 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             self.inRescan = True if root.hideChildren else False
             self.currentRescanList = [root, *root._childNodes] if root.hideChildren else list()
             yield from iter(root)
-
-    def updateAllChildNodes(self):
-        for node in self.entryGenerator():
-            node.updateChildren()
 
     def recursiveLookup(self, rowlist):
         if len(rowlist) == 1:
@@ -263,6 +255,7 @@ class TodoListTableModel(TodoListBaseModel):
                               4: lambda node: self.analysisSelection[node.entry.scan]}
 
     def _rootNodes(self, init=False):
+        TodoListNode.rescanNodes.clear()
         if init:
             for ind in range(len(self.todolist)):
                 self.connectSubTodoLists(self.todolist[ind])
@@ -270,7 +263,7 @@ class TodoListTableModel(TodoListBaseModel):
                     self.todolist[ind].children = [lbl for lbl in self.todolist[ind].measurement.split(',')]
         nodeList = list()
         for ind in range(len(self.todolist)):
-            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)
+            node = TodoListNode(self.todolist[ind], None, ind, self.labelDict, hideChildren=self.todolist[ind].scan == 'Rescan', globaldict=self.globalDict)#, updchildsig=self.updateChildrenSignal)
             nodeList.append(node)
             if node.entry.label != '':
                 if node.entry.label != node.label:
@@ -283,6 +276,8 @@ class TodoListTableModel(TodoListBaseModel):
         return nodeList
 
     def measurementSelectionLimiter(self, node):
+        """Ensures that a subtodo list can not specify the todo list in which it's
+           contained. Also works for nested todo lists (ie subsubtodo lists and so on)"""
         if node.entry.scan != 'Todo List':
             return self.measurementSelection[node.entry.scan]
         reductionSet = set()
@@ -308,7 +303,7 @@ class TodoListTableModel(TodoListBaseModel):
     def updateRootNodes(self, init=False):
         self.beginResetModel()
         self.rootNodes = self._rootNodes(init)
-        self.updateAllChildNodes()
+        TodoListNode.updateRescans()
         self.endResetModel()
         if self.activeEntry is not None:
             self.setActiveItem(self.activeEntry, self.running)
@@ -393,20 +388,20 @@ class TodoListTableModel(TodoListBaseModel):
                 self.endResetModel()
                 if self.activeEntry is not None:
                     self.setActiveItem(self.activeEntry, self.running)
-            if self.nodeFromIndex(index).entry.scan == 'Rescan':
-                self.nodeFromIndex(index).entry.children = [lbl for lbl in self.nodeFromIndex(index).entry.measurement.split(',')]
-                self.nodeFromIndex(index)._childNodes = self.nodeFromIndex(index)._children()
-                self.nodeFromIndex(index).hideChildren = True
+            if node.entry.scan == 'Rescan':
+                node.entry.children = [lbl for lbl in node.entry.measurement.split(',')]
+                node.updateChildren()
+                node.hideChildren = True
             if index.column() == 0 and role == QtCore.Qt.EditRole:
                 if node.entry.label != node.label:
                     if node.label != '':
                         del self.labelDict[node.label]
                         self.labelsChanged.emit(node.label, False)
                     node.label = copy.copy(node.entry.label)
-                self.labelDict[self.nodeFromIndex(index).entry.label] = self.nodeFromIndex(index)
+                self.labelDict[node.entry.label] = node
                 self.labelsChanged.emit(node.label, True)
             if value:
-                self.valueChanged.emit( None )
+                self.valueChanged.emit(None)
             return value
         return False
 
@@ -429,7 +424,7 @@ class TodoListTableModel(TodoListBaseModel):
                 elif index.column()==2 or index.column()==5:
                     return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
                 else:
-                    return QtCore.Qt.ItemIsSelectable
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
             elif node.entry.scan == 'Rescan':
                 if index.column()==0:
                     return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | \
@@ -437,7 +432,7 @@ class TodoListTableModel(TodoListBaseModel):
                 elif index.column()==2 or index.column()==5:
                     return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
                 else:
-                    return QtCore.Qt.ItemIsSelectable
+                    return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
 
     def headerData(self, section, orientation, role):
         if (role == QtCore.Qt.DisplayRole):
