@@ -95,7 +95,7 @@ class TodoListNode(BaseNode):
            enabled."""
         with self:
             yield self
-            if self._childNodes and self.evalCondition(): #limiting elements with evalCondition() here supports recursive Rescan calls but is not ideal
+            if self._childNodes and self.evalCondition(True): #limiting elements with evalCondition() here supports recursive Rescan calls but is not ideal
                 yield from chain(*map(iter, self._childNodes))
         if self.entry.enabled and self.entry.stopFlag:
             yield StopNode()
@@ -109,7 +109,13 @@ class TodoListNode(BaseNode):
         if self.globalOverrides:
             GLOBALORDICT.pop()
 
-    def evalCondition(self):
+    def evalCondition(self, recursive=False):
+        """evaluate condition entry. If recursive is true, it only checks for the condition if the node is also
+           one of its own children. The recursive feature is necessary for minor bugfixes for recursive rescans"""
+        if recursive:
+            if self in self._childNodes:
+                return self.evalCondition()
+            return True
         condition = True if self.entry.condition == '' else self.exprEval.evaluate(self.entry.condition, ChainMap(GLOBALORDICT, self.globalDict))
         return condition
 
