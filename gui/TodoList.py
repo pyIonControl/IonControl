@@ -153,7 +153,7 @@ class TodoList(Form, Base):
         self.todoListGenerator = None
         self.loopExhausted = False
         self.isSomethingTodo = True
-        self.currentGlobalOverrides = GLOBALORDICT#list()
+        self.currentGlobalOverrides = GLOBALORDICT
         self.revertGlobalsValues = list()
         self.parentStop = False
 
@@ -182,7 +182,7 @@ class TodoList(Form, Base):
         self.scanSelectionBox.addItems(['Scan', 'Script', 'Todo List', 'Rescan'])
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
-        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)#self.fullRescanList)
+        self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)
         self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
@@ -376,9 +376,9 @@ class TodoList(Form, Base):
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
-        if self.activeItem == self.currentItem:#not self.resyncNeeded:
+        if self.activeItem == self.currentItem:
             return
-        self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)#self.tableModel.nodeFromIndex(index))
+        self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
         self.activeItem = next(self.todoListGenerator)
         while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
             try:
@@ -447,7 +447,7 @@ class TodoList(Form, Base):
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Todo List':
-                self.populateMeasurementsItem(name, self.settingsCache)#{k: v for k,v in self.settingsCache.items() if k is not self.masterSettings.currentSettingName})
+                self.populateMeasurementsItem(name, self.settingsCache)
                 self.populateEvaluationItem( name, {} )
                 self.populateAnalysisItem( name, {} )
             elif name == 'Rescan':
@@ -575,14 +575,14 @@ class TodoList(Form, Base):
 
     def validTodoItem(self, item):
         if isinstance(item, TodoListNode):
-            return item.enabled and (item.entry.condition == '' or item.evalCondition()) and item.entry.scan != 'Todo List' and item.entry.scan != 'Rescan'# and not item.entry.stopFlag))
+            return (item.entry.enabled if self.tableModel.inRescan else item.enabled) and (item.entry.condition == '' or item.evalCondition()) and item.entry.scan != 'Todo List' and item.entry.scan != 'Rescan'# and not item.entry.stopFlag))
         return False
 
     def incrementIndex(self):
         """Steps through todo list generator"""
         self.loopExhausted = False
         self.isSomethingTodo = True
-        self.currentGlobalOverrides = GLOBALORDICT #just for bugtesting
+        self.currentGlobalOverrides = GLOBALORDICT # need to change this so it's only set once
         if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
@@ -680,11 +680,12 @@ class TodoList(Form, Base):
        
 
     # TODO: push globals on a stack?
-    #       revert globals when stopping in the middle of a rescan
-    #       stop flags should apply to rescans and subtodo lists
+    #XXXX   revert globals when stopping in the middle of a rescan
+    #XXXX   stop flags should apply to rescans and subtodo lists
     #       fancy button drop down for new rescans
     #       modify parser to handle and/or statements
     #       fix handling of manually starting enabled items in disabled subtodo lists
     #       get rid of savable code
     #       fix copy/paste of todo list elements so they are stored in a dict format
+    #       get rid of unnecessary variables in state machine
         

@@ -64,6 +64,7 @@ class TodoListNode(BaseNode):
         return self.entry.enabled
 
     def _children(self):
+        """seek out child nodes and put them into the appropriate format, differs for rescans and subtodo lists"""
         childList = list()
         if not self.hideChildren:
             for ind in range(len(self.entry.children)):
@@ -101,11 +102,13 @@ class TodoListNode(BaseNode):
             yield StopNode()
 
     def __enter__(self):
+        """push current global overrides to the global override chain map stack"""
         if self.globalOverrides:
             GLOBALORDICT.push(self.globalOverrides)
         return GLOBALORDICT
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """pop current global overrides off the global override chain map stack"""
         if self.globalOverrides:
             GLOBALORDICT.pop()
 
@@ -163,6 +166,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
         return len(node.childNodes)
 
     def entryGenerator(self, node=None):
+        """Creates a generator from the root nodes"""
         if node is None:
             initRow = 0
         else:
@@ -277,7 +281,7 @@ class TodoListTableModel(TodoListBaseModel):
                         del self.labelDict[node.label]
                         self.labelsChanged.emit(node.label, False)
                     node.label = copy.copy(node.entry.label)
-                self.labelDict[node.entry.label] = node
+                self.labelDict[node.entry.label] = node #should dummy nodes be added in the init routine?
                 self.labelsChanged.emit(node.label, True)
         return nodeList
 
@@ -301,12 +305,14 @@ class TodoListTableModel(TodoListBaseModel):
         return self.createIndex(row, column, parentNode.childNodes[row])
 
     def connectSubTodoLists(self, item):
+        """grabs all todo list information for subtodo lists"""
         if item.scan == 'Todo List':
             item.children = self.settingsCache[item.measurement].todoList
             for ind in range(len(item.children)):
                 self.connectSubTodoLists(item.children[ind])
 
     def updateRootNodes(self, init=False):
+        """reconstruct the tree"""
         self.beginResetModel()
         self.rootNodes = self._rootNodes(init)
         TodoListNode.updateRescans()
@@ -328,10 +334,13 @@ class TodoListTableModel(TodoListBaseModel):
         return True
 
     def setEntryEnabled(self, index, value):
+        """Toggle the enable checkbox"""
         self.nodeFromIndex(index).entry.enabled = value == QtCore.Qt.Checked
         return True
 
     def setActiveRow(self, rowlist, running=True):
+        """Sets the current highlighted row. Preferably setActiveItem should be used
+           but this method is necessary for initializing the todo list on startup"""
         ref = self.recursiveLookup(rowlist)
         row = rowlist[-1]
         oldactive = None
@@ -349,6 +358,7 @@ class TodoListTableModel(TodoListBaseModel):
             self.dataChanged.emit( self.createIndex(oldactive, 0), self.createIndex(oldactive+1, 3) )
 
     def setActiveItem(self, item, running=True):
+        """Sets the current highlighted item"""
         if self.activeEntry is not None:
             self.activeEntry.highlighted = False
             oldactive = self.activeEntry.row
@@ -381,7 +391,6 @@ class TodoListTableModel(TodoListBaseModel):
                     return self.darkColorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: self.defaultDarkBackground)(self.nodeFromIndex(index))
             return self.colorDataLookup.get((QtCore.Qt.BackgroundRole, index.column()), lambda row: QtGui.QColor(255, 255, 255, 255))(self.nodeFromIndex(index))
         return QtGui.QColor(255, 255, 255, 255)
-
 
     def setData(self, index, value, role):
         node = self.nodeFromIndex(index)
@@ -477,6 +486,7 @@ class TodoListTableModel(TodoListBaseModel):
         self.updateRootNodes()
 
     def setTodolist(self, todolist):
+        """Load a specified todo list"""
         self.beginResetModel()
         self.todolist = todolist
         self.rootNodes = self._rootNodes(init=True)
@@ -499,3 +509,4 @@ class TodoListTableModel(TodoListBaseModel):
             row_data = self.todolist[row_index]
             self.addMeasurement(copy.deepcopy(row_data))
         self.updateRootNodes()
+
