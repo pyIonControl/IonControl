@@ -307,9 +307,10 @@ class TodoListTableModel(TodoListBaseModel):
     def connectSubTodoLists(self, item):
         """grabs all todo list information for subtodo lists"""
         if item.scan == 'Todo List':
-            item.children = self.settingsCache[item.measurement].todoList
-            for ind in range(len(item.children)):
-                self.connectSubTodoLists(item.children[ind])
+            if item.measurement in self.settingsCache.keys():
+                item.children = self.settingsCache[item.measurement].todoList
+                for ind in range(len(item.children)):
+                    self.connectSubTodoLists(item.children[ind])
 
     def updateRootNodes(self, init=False):
         """reconstruct the tree"""
