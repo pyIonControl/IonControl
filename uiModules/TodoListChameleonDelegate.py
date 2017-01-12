@@ -30,18 +30,18 @@ class ListCompleterDelegateMixin(object):
         lineedit = editor.lineEdit()
         self.completer.cursorPos(lineedit.cursorPosition)
         self.completer.setLineEditor(lineedit)
-        lineedit.setCompleter(self.completer)
+        #lineedit.setCompleter(self.completer)
         return editor
 
     def setEditorData(self, editor, index):
         value = index.model().data(index, QtCore.Qt.EditRole)
         editor.setValue(value)
         editor.lineEdit().setCursorPosition(0)
-        try:
-            numberlen = len(re.split(',', str(value))[1])
-            editor.lineEdit().cursorForward(True, numberlen)
-        except:
-            editor.lineEdit().cursorWordForward(True)
+        #try:
+            #numberlen = len(re.split(',', str(value))[1])
+            #editor.lineEdit().cursorForward(True, numberlen)
+        #except:
+            #editor.lineEdit().cursorWordForward(True)
 
     def setModelData(self, editor, model, index):
         value = str(editor.text())
