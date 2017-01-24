@@ -6,10 +6,12 @@
 import types
 from inspect import getgeneratorstate
 
+import collections
 from PyQt5 import uic, QtCore, QtGui, QtWidgets
 
 from GlobalVariables.GlobalVariablesModel import MagnitudeSpinBoxGridDelegate
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
+from modules.flatten import flattenAll
 from modules.statemachine import Statemachine
 #from .TodoListTableModel import TodoListTableModel, TodoListNode
 from .TodoListIterModel import TodoListTableModel, TodoListNode, GLOBALORDICT, StopNode
@@ -88,12 +90,12 @@ class TodoListEntry(object):
 class Settings:
     def __init__(self):
         self.todoList = list()
-        self.currentIndex = 0
+        self.currentIndex = [0]
         self.repeat = False
 
     def __setstate__(self, state):
         self.__dict__ = state
-        self.__dict__.setdefault( 'currentIndex', 0)
+        self.__dict__.setdefault( 'currentIndex', [0])
         self.__dict__.setdefault( 'repeat', False)
 
     stateFields = ['currentIndex', 'repeat', 'todoList']
@@ -183,6 +185,8 @@ class TodoList(Form, Base):
         self.scanSelectionBox.currentIndexChanged[str].connect( self.updateMeasurementSelectionBox )
         self.updateMeasurementSelectionBox( self.scanSelectionBox.currentText() )
         self.tableModel = TodoListTableModel( self.settings.todoList, self.settingsCache, self.labelDict, self.globalVariablesUi.globalDict, self.tableView)
+        if not isinstance(self.settings.currentIndex, collections.Iterable):
+            self.settings.currentIndex = [self.settings.currentIndex]
         self.activeItem = self.nodeFromIndex()
         self.tableModel.measurementSelection = self.scanModuleMeasurements
         self.tableModel.evaluationSelection = self.scanModuleEvaluations
@@ -210,7 +214,8 @@ class TodoList(Form, Base):
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
         self.filter.keyPressed.connect( self.onReorder )
         self.tableView.installEventFilter(self.filter)
-        self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
+        #self.tableModel.setActiveRow(list(self.indexStack)+[self.settings.currentIndex], False)
+        #self.tableModel.setActiveRow(self.settings.currentIndex, False)
         self.tableView.doubleClicked.connect( self.setCurrentIndex )
         # naming and saving of todo lists
         self.toolButtonDelete.clicked.connect( self.onDeleteSaveTodoList )
@@ -255,6 +260,9 @@ class TodoList(Form, Base):
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
         #QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Delete), self, self.delete_row)
+
+        self.currentItem = self.tableModel.recursiveLookup(self.settings.currentIndex)
+        self.synchronizeGeneratorWithSelectedItem()
 
         # set style sheet to highlight selected items in yellow and preserve borders
         self.tableView.setStyleSheet("""
@@ -361,7 +369,12 @@ class TodoList(Form, Base):
         self.indexStack.clear()
         self.todoStack.clear()
         self.repeatButton.setChecked(self.settings.repeat)
-        
+
+    def fullRowLookup(self, index):
+        if index.parent().row() != -1:
+            return list(flattenAll([self.fullRowLookup(index.parent()), index.row()]))
+        return [index.row()]
+
     def setCurrentIndex(self, index):
         """Sets the current active item, does not affect generator state"""
         if self.statemachine.currentState=='Idle':
@@ -369,15 +382,13 @@ class TodoList(Form, Base):
                 self.todoListGenerator.close()
             self.tableModel.currentRescanList = list()
             self.isSomethingTodo = True
-            self.settings.currentIndex = index.row()
+            self.settings.currentIndex = self.fullRowLookup(index)
             self.currentItem = self.tableModel.nodeFromIndex(index)
             self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
 
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
-        if self.activeItem == self.currentItem:
-            return
         self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
         self.activeItem = next(self.todoListGenerator)
         while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
@@ -498,7 +509,7 @@ class TodoList(Form, Base):
             self.tableModel.dropMeasurement(index)
         numEntries = self.tableModel.rowCount()
         if self.settings.currentIndex >= numEntries:
-            self.settings.currentIndex = 0
+            self.settings.currentIndex = [0]
         self.checkSettingsSavable()
 
     def checkReadyToRun(self, state, _=True ):
@@ -571,7 +582,7 @@ class TodoList(Form, Base):
     def nodeFromIndex(self, index=None):
         if index is None:
             index = self.settings.currentIndex
-        return self.tableModel.recursiveLookup(list(self.indexStack)+[self.settings.currentIndex])
+        return self.tableModel.recursiveLookup(self.settings.currentIndex)
 
     def validTodoItem(self, item):
         if isinstance(item, TodoListNode):
@@ -580,6 +591,8 @@ class TodoList(Form, Base):
 
     def incrementIndex(self):
         """Steps through todo list generator"""
+        if self.scriptConnected:
+            return True
         self.loopExhausted = False
         self.isSomethingTodo = True
         self.currentGlobalOverrides = GLOBALORDICT # need to change this so it's only set once
@@ -590,7 +603,7 @@ class TodoList(Form, Base):
                 self.activeItem = next(self.todoListGenerator)
             except StopIteration:
                 self.loopExhausted = True
-                self.settings.currentIndex = 1
+                self.settings.currentIndex = [0]
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
                 self.activeItem = next(self.todoListGenerator) # prime the generator
@@ -602,7 +615,7 @@ class TodoList(Form, Base):
                     self.activeItem = next(self.todoListGenerator)
                 except StopIteration:
                     self.loopExhausted = True
-                    self.settings.currentIndex = 1
+                    self.settings.currentIndex = [0]
                     self.activeItem = self.tableModel.rootNodes[0]
                     self.todoListGenerator = self.tableModel.entryGenerator()
                     self.activeItem = next(self.todoListGenerator) # prime the generator
@@ -617,7 +630,7 @@ class TodoList(Form, Base):
                 self.enterIdle()
                 break
             if self.validTodoItem(self.activeItem):
-                self.settings.currentIndex = self.activeItem.row
+                self.settings.currentIndex = self.activeItem.rowList()
                 break
         return True
 
@@ -647,7 +660,7 @@ class TodoList(Form, Base):
                 self.currentScriptCode = str(self.scripting.textEdit.toPlainText())
                 self.scripting.loadFile(self.scriptFiles[entry.measurement])
                 self.scripting.onStartScript()
-                self.scripting.script.finished.connect(self.exitMeasurementRunning)
+                self.scripting.scriptFinishedSignal.connect(self.exitScriptRunning)
                 self.scriptConnected = True
                 self.setActiveItem(self.activeItem, True)
             elif entry.scan == 'Todo List' or entry.scan == 'Rescan':
@@ -656,15 +669,21 @@ class TodoList(Form, Base):
             else:
                 print("NO VALID STATE")
 
-    def exitMeasurementRunning(self):
+    @QtCore.pyqtSlot()
+    def exitScriptRunning(self):
         if self.scriptConnected:
-            self.scripting.script.finished.disconnect(self.exitMeasurementRunning)
+            self.scripting.scriptFinishedSignal.disconnect(self.exitScriptRunning)
             self.scriptConnected = False
             if self.currentScript is not None:
                 self.scripting.loadFile(self.currentScript)
                 self.scripting.textEdit.setPlainText(self.currentScriptCode)
+            # next 3 lines seem to be the best way of handling script with multiple scans and a stop flag
             self.onStateChanged('idle')
-        else:
+            if self.activeItem.entry.stopFlag:
+                self.exitMeasurementRunning()
+
+    def exitMeasurementRunning(self):
+        if not self.scriptConnected:
             self.revertGlobals()
             self.incrementIndex()
             self.setActiveItem(self.activeItem, False)
