@@ -211,7 +211,7 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.enableScriptChange(True)
         if self.revert and self.savedState:
             self.restoreSettingsState()
-        self.scriptFinishedSignal.emit()
+        self.scriptFinishedSignal.emit() #used for running scans from todo list
 
     @QtCore.pyqtSlot()
     def onRepeat(self):
