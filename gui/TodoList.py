@@ -688,7 +688,8 @@ class TodoList(Form, Base):
                 self.scripting.loadFile(self.scriptFiles[entry.measurement])
                 self.scripting.onStartScript()
                 #self.scripting.script.finished.connect(self.exitMeasurementRunning)
-                self.scripting.script.finished.connect(self.exitScriptRunning)
+                #self.scripting.script.finished.connect(self.exitScriptRunning)
+                self.scripting.scriptFinishedSignal.connect(self.exitScriptRunning)
                 self.scriptConnected = True
                 self.setActiveItem(self.activeItem, True)
             elif entry.scan == 'Todo List' or entry.scan == 'Rescan':
@@ -702,14 +703,19 @@ class TodoList(Form, Base):
         #if self.scripting.script.stopped:
         #self.scripting.script.finished.disconnect(self.exitScriptRunning)
         #if self.scripting.script.stopped:
-        self.scriptConnected = False
-        if self.currentScript is not None:
-            self.scripting.loadFile(self.currentScript)
-            self.scripting.textEdit.setPlainText(self.currentScriptCode)
-        
-        self.onStateChanged('idle')
+        if self.scriptConnected:
+            self.scripting.scriptFinishedSignal.disconnect(self.exitScriptRunning)
+            self.scriptConnected = False
+            if self.currentScript is not None:
+                self.scripting.loadFile(self.currentScript)
+                self.scripting.textEdit.setPlainText(self.currentScriptCode)
+
+            self.onStateChanged('idle')
+            if self.activeItem.entry.stopFlag:# and self.scripting.script.stopped:
+                self.exitMeasurementRunning()
+        else:
+            self.onStateChanged('idle')
         #self.incrementIndex()
-        #self.exitMeasurementRunning()
         #self.revertGlobals()
         #self.incrementIndex()
         #self.setActiveItem(self.activeItem, False)
