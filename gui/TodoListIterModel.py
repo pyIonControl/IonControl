@@ -13,6 +13,7 @@ from itertools import chain
 
 from modules.Expression import Expression
 from modules.ChainMapStack import ChainMapStack
+from modules.flatten import flattenAll
 
 PARENT_TYPES = {'Todo List', 'Rescan'}
 GLOBALORDICT = ChainMapStack()
@@ -40,6 +41,11 @@ class BaseNode:
 
     def updateChildren(self):
         self._childNodes = self._children()
+
+    def rowList(self):
+        if self.parent is not None:
+            return list(flattenAll([self.parent.rowList(), self.row]))
+        return [self.row]
 
 class TodoListNode(BaseNode):
     rescanNodes = set()
@@ -127,6 +133,15 @@ class TodoListNode(BaseNode):
         """Recalculate children for rescans which contain labels that have not yet been created."""
         for node in copy.copy(cls.rescanNodes):
             node.updateChildren()
+
+    def recursiveLookup(self, rowlist):
+        if len(rowlist) == 1:
+            try:
+                return self.childNodes[rowlist[0]]
+            except:
+                pass
+        return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
+
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self, globalDict):
@@ -360,6 +375,7 @@ class TodoListTableModel(TodoListBaseModel):
 
     def setActiveItem(self, item, running=True):
         """Sets the current highlighted item"""
+        oldactive = None
         if self.activeEntry is not None:
             self.activeEntry.highlighted = False
             oldactive = self.activeEntry.row
