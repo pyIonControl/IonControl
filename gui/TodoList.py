@@ -491,11 +491,11 @@ class TodoList(Form, Base):
             if self.tableModel.moveRow( rows, up=up ):
                 selectionModel = self.tableView.selectionModel()
                 selectionModel.clearSelection()
+                self.onSaveTodoList()
+                self.tableModel.updateRootNodes(True)
+                self.checkSettingsSavable()
                 for index in indexes:
                     selectionModel.select( self.tableModel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select )
-        self.onSaveTodoList()
-        self.tableModel.updateRootNodes(True)
-        self.checkSettingsSavable()
 
     def onAddMeasurement(self):
         if self.currentMeasurementsDisplayedForScan and self.measurementSelectionBox.currentText():
