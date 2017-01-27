@@ -158,6 +158,7 @@ class TodoList(Form, Base):
         self.currentGlobalOverrides = GLOBALORDICT
         self.revertGlobalsValues = list()
         self.parentStop = False
+        self.stopRequested = False
 
     def setupStatemachine(self):
         self.statemachine = Statemachine()
@@ -208,7 +209,7 @@ class TodoList(Form, Base):
         self.addMeasurementButton.clicked.connect( self.onAddMeasurement )
         self.removeMeasurementButton.clicked.connect( self.onDropMeasurement )
         self.runButton.clicked.connect(self.startTodoList)
-        self.stopButton.clicked.connect( partial( self.statemachine.processEvent, 'stopCommand' ) )
+        self.stopButton.clicked.connect(self.onStopRequested)
         self.repeatButton.setChecked( self.settings.repeat )
         self.repeatButton.clicked.connect( self.onRepeatChanged )
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
@@ -519,6 +520,10 @@ class TodoList(Form, Base):
     def checkStopFlag(self, state):
         return self.activeItem.entry.stopFlag or self.parentStop
 
+    def onStopRequested(self, *args, **kwargs):
+        self.stopRequested = True
+        self.statemachine.processEvent('stopCommand', *args, **kwargs)
+
     def onStateChanged(self, newstate ):
         if newstate=='idle':
             self.statemachine.processEvent('measurementFinished')
@@ -607,9 +612,11 @@ class TodoList(Form, Base):
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
                 self.activeItem = next(self.todoListGenerator) # prime the generator
-                if not self.settings.repeat:
+                if not self.settings.repeat or self.stopRequested:
                     self.enterIdle()
+                    self.stopRequested = False
                 break
+
             if isinstance(self.activeItem, StopNode):
                 try:
                     self.activeItem = next(self.todoListGenerator)
@@ -623,6 +630,11 @@ class TodoList(Form, Base):
                     self.enterIdle()
                     break
                 self.isSomethingTodo = False
+                self.enterIdle()
+                break
+            if self.stopRequested:
+                #self.isSomethingTodo = False
+                self.stopRequested = False
                 self.enterIdle()
                 break
             if (self.activeItem.enabled and self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
@@ -679,7 +691,7 @@ class TodoList(Form, Base):
                 self.scripting.textEdit.setPlainText(self.currentScriptCode)
             # next 3 lines seem to be the best way of handling script with multiple scans and a stop flag
             self.onStateChanged('idle')
-            if self.activeItem.entry.stopFlag:
+            if self.activeItem.entry.stopFlag or self.stopRequested:
                 self.exitMeasurementRunning()
 
     def exitMeasurementRunning(self):
