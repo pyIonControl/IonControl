@@ -601,7 +601,7 @@ class TodoList(Form, Base):
         self.loopExhausted = False
         self.isSomethingTodo = True
         self.currentGlobalOverrides = GLOBALORDICT # need to change this so it's only set once
-        if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
+        if not isinstance(self.todoListGenerator, collections.Iterable) or getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
             try:
