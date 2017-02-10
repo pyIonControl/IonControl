@@ -530,7 +530,7 @@ class TodoList(Form, Base):
         self.statemachine.processEvent('stopCommand', *args, **kwargs)
 
     def onStateChanged(self, newstate ):
-        if newstate=='idle':
+        if newstate=='idle' and not self.scriptConnected:
             self.statemachine.processEvent('measurementFinished')
             self.statemachine.processEvent('docheck')
 
@@ -702,15 +702,3 @@ class TodoList(Form, Base):
         self.config['TodolistSettings.Cache'] = self.settingsCache
         self.config['Todolist.MasterSettings'] = self.masterSettings
         self.config['Todolist.guiState'] = saveGuiState( self )
-       
-
-    # TODO: push globals on a stack?
-    #XXXX   revert globals when stopping in the middle of a rescan
-    #XXXX   stop flags should apply to rescans and subtodo lists
-    #       fancy button drop down for new rescans
-    #       modify parser to handle and/or statements
-    #       fix handling of manually starting enabled items in disabled subtodo lists
-    #       get rid of savable code
-    #       fix copy/paste of todo list elements so they are stored in a dict format
-    #       get rid of unnecessary variables in state machine
-        
