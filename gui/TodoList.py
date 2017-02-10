@@ -158,6 +158,7 @@ class TodoList(Form, Base):
         self.currentGlobalOverrides = GLOBALORDICT
         self.revertGlobalsValues = list()
         self.parentStop = False
+        self.stopRequested = False
 
     def setupStatemachine(self):
         self.statemachine = Statemachine()
@@ -208,7 +209,7 @@ class TodoList(Form, Base):
         self.addMeasurementButton.clicked.connect( self.onAddMeasurement )
         self.removeMeasurementButton.clicked.connect( self.onDropMeasurement )
         self.runButton.clicked.connect(self.startTodoList)
-        self.stopButton.clicked.connect( partial( self.statemachine.processEvent, 'stopCommand' ) )
+        self.stopButton.clicked.connect(self.onStopRequested)
         self.repeatButton.setChecked( self.settings.repeat )
         self.repeatButton.clicked.connect( self.onRepeatChanged )
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
@@ -301,7 +302,8 @@ class TodoList(Form, Base):
     def startTodoList(self, *args):
         """When the play button is clicked, synchronizes current generator item with current active item then runs"""
         self.isSomethingTodo = True
-        self.synchronizeGeneratorWithSelectedItem()
+        if not self.generatorSynchronized():
+            self.synchronizeGeneratorWithSelectedItem()
         self.statemachine.processEvent('startCommand',*args)
 
     def onActiveItemChanged(self, modelIndex, modelIndex2 ):
@@ -397,6 +399,9 @@ class TodoList(Form, Base):
             except StopIteration:
                 break
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+
+    def generatorSynchronized(self):
+        return (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem)
 
     def setActiveItem(self, item, state):
         self.currentItem = item
@@ -497,13 +502,14 @@ class TodoList(Form, Base):
                 for index in indexes:
                     selectionModel.select( self.tableModel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select )
 
+
     def onAddMeasurement(self):
         if self.currentMeasurementsDisplayedForScan and self.measurementSelectionBox.currentText():
             self.tableModel.addMeasurement( TodoListEntry(self.currentMeasurementsDisplayedForScan, str(self.measurementSelectionBox.currentText()), 
                                                           str(self.evaluationSelectionBox.currentText()), str(self.analysisSelectionBox.currentText())))
         self.onSaveTodoList()
         self.checkSettingsSavable()
-    
+
     def onDropMeasurement(self):
         for index in sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]), reverse=True):
             self.tableModel.dropMeasurement(index)
@@ -518,6 +524,10 @@ class TodoList(Form, Base):
 
     def checkStopFlag(self, state):
         return self.activeItem.entry.stopFlag or self.parentStop
+
+    def onStopRequested(self, *args, **kwargs):
+        self.stopRequested = True
+        self.statemachine.processEvent('stopCommand', *args, **kwargs)
 
     def onStateChanged(self, newstate ):
         if newstate=='idle':
@@ -596,7 +606,7 @@ class TodoList(Form, Base):
         self.loopExhausted = False
         self.isSomethingTodo = True
         self.currentGlobalOverrides = GLOBALORDICT # need to change this so it's only set once
-        if getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
+        if not isinstance(self.todoListGenerator, collections.Iterable) or getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED':
             self.todoListGenerator = self.tableModel.entryGenerator()
         while True:
             try:
@@ -607,22 +617,18 @@ class TodoList(Form, Base):
                 self.activeItem = self.tableModel.rootNodes[0]
                 self.todoListGenerator = self.tableModel.entryGenerator()
                 self.activeItem = next(self.todoListGenerator) # prime the generator
-                if not self.settings.repeat:
+                if not self.settings.repeat or self.stopRequested:
                     self.enterIdle()
+                    self.stopRequested = False
                 break
+
             if isinstance(self.activeItem, StopNode):
-                try:
-                    self.activeItem = next(self.todoListGenerator)
-                except StopIteration:
-                    self.loopExhausted = True
-                    self.settings.currentIndex = [0]
-                    self.activeItem = self.tableModel.rootNodes[0]
-                    self.todoListGenerator = self.tableModel.entryGenerator()
-                    self.activeItem = next(self.todoListGenerator) # prime the generator
-                    self.isSomethingTodo = False
-                    self.enterIdle()
-                    break
+                self.stopRequested = True
+                self.incrementIndex()
+                break
+            if self.stopRequested:
                 self.isSomethingTodo = False
+                self.stopRequested = False
                 self.enterIdle()
                 break
             if (self.activeItem.enabled and self.activeItem.entry.condition != '' and not self.activeItem.evalCondition() and self.activeItem.entry.stopFlag):
@@ -679,7 +685,7 @@ class TodoList(Form, Base):
                 self.scripting.textEdit.setPlainText(self.currentScriptCode)
             # next 3 lines seem to be the best way of handling script with multiple scans and a stop flag
             self.onStateChanged('idle')
-            if self.activeItem.entry.stopFlag:
+            if self.activeItem.entry.stopFlag or self.stopRequested:
                 self.exitMeasurementRunning()
 
     def exitMeasurementRunning(self):
