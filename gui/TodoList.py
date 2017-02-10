@@ -302,7 +302,8 @@ class TodoList(Form, Base):
     def startTodoList(self, *args):
         """When the play button is clicked, synchronizes current generator item with current active item then runs"""
         self.isSomethingTodo = True
-        self.synchronizeGeneratorWithSelectedItem()
+        if not self.generatorSynchronized():
+            self.synchronizeGeneratorWithSelectedItem()
         self.statemachine.processEvent('startCommand',*args)
 
     def onActiveItemChanged(self, modelIndex, modelIndex2 ):
@@ -398,6 +399,9 @@ class TodoList(Form, Base):
             except StopIteration:
                 break
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+
+    def generatorSynchronized(self):
+        return (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem)
 
     def setActiveItem(self, item, state):
         self.currentItem = item
@@ -498,13 +502,14 @@ class TodoList(Form, Base):
                 for index in indexes:
                     selectionModel.select( self.tableModel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select )
 
+
     def onAddMeasurement(self):
         if self.currentMeasurementsDisplayedForScan and self.measurementSelectionBox.currentText():
             self.tableModel.addMeasurement( TodoListEntry(self.currentMeasurementsDisplayedForScan, str(self.measurementSelectionBox.currentText()), 
                                                           str(self.evaluationSelectionBox.currentText()), str(self.analysisSelectionBox.currentText())))
         self.onSaveTodoList()
         self.checkSettingsSavable()
-    
+
     def onDropMeasurement(self):
         for index in sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]), reverse=True):
             self.tableModel.dropMeasurement(index)
@@ -618,22 +623,11 @@ class TodoList(Form, Base):
                 break
 
             if isinstance(self.activeItem, StopNode):
-                try:
-                    self.activeItem = next(self.todoListGenerator)
-                except StopIteration:
-                    self.loopExhausted = True
-                    self.settings.currentIndex = [0]
-                    self.activeItem = self.tableModel.rootNodes[0]
-                    self.todoListGenerator = self.tableModel.entryGenerator()
-                    self.activeItem = next(self.todoListGenerator) # prime the generator
-                    self.isSomethingTodo = False
-                    self.enterIdle()
-                    break
-                self.isSomethingTodo = False
-                self.enterIdle()
+                self.stopRequested = True
+                self.incrementIndex()
                 break
             if self.stopRequested:
-                #self.isSomethingTodo = False
+                self.isSomethingTodo = False
                 self.stopRequested = False
                 self.enterIdle()
                 break
