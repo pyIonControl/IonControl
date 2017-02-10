@@ -380,13 +380,15 @@ class TodoList(Form, Base):
     def setCurrentIndex(self, index):
         """Sets the current active item, does not affect generator state"""
         if self.statemachine.currentState=='Idle':
-            if self.todoListGenerator is not None:
-                self.todoListGenerator.close()
-            self.tableModel.currentRescanList = list()
-            self.isSomethingTodo = True
-            self.settings.currentIndex = self.fullRowLookup(index)
-            self.currentItem = self.tableModel.nodeFromIndex(index)
-            self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
+            newitem = self.tableModel.nodeFromIndex(index)
+            if self.currentItem != newitem:
+                if self.todoListGenerator is not None:
+                    self.todoListGenerator.close()
+                self.tableModel.currentRescanList = list()
+                self.isSomethingTodo = True
+                self.settings.currentIndex = self.fullRowLookup(index)
+                self.currentItem = newitem
+                self.setActiveItem(self.currentItem, self.statemachine.currentState=='MeasurementRunning')
 
     def synchronizeGeneratorWithSelectedItem(self):
         """Steps through the todo list generator until it hits currentItem.
@@ -401,7 +403,11 @@ class TodoList(Form, Base):
         self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
 
     def generatorSynchronized(self):
-        return (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem)
+        return (isinstance(self.activeItem, StopNode)
+                or self.activeItem.parent == self.currentItem
+                or self.activeItem == self.currentItem
+                and isinstance(self.todoListGenerator, collections.Iterable)
+                and not getgeneratorstate(self.todoListGenerator) == 'GEN_CLOSED')
 
     def setActiveItem(self, item, state):
         self.currentItem = item
