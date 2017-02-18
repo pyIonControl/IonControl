@@ -42,7 +42,7 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.initcode = ''
         if not self.defaultDir.exists():
             defaultScriptsDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/Scripts')) #/IonControl/config/Scripts directory
-            shutil.copytree(defaultScriptsDir, self.defaultDir) #Copy over all example scripts
+            shutil.copytree(defaultScriptsDir, str(self.defaultDir)) #Copy over all example scripts
 
     def setupUi(self, parent):
         super(ScriptingUi, self).setupUi(parent)

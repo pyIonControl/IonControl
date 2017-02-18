@@ -181,6 +181,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                     list(self.project.hardware['APT Motion'].values())[0]['dllPath'])
             except Exception as e:  # popup on failed import
                 importErrorPopup('APT Motion error {0}'.format(e))
+        if self.project.isEnabled('hardware', 'Lab Brick'):
+            try:
+                import externalParameter.LabBrick  # @UnusedImport
+                externalParameter.LabBrick.loadDll(
+                    list(self.project.hardware['Lab Brick'].values())[0]['dllPath'])
+            except Exception as e:  # popup on failed import
+                importErrorPopup('Lab Brick error {0}'.format(e))
         from externalParameter.ExternalParameterBase import InstrumentDict
 
         # setup FPGAs
