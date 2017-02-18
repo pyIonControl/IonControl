@@ -13,13 +13,14 @@ from expressionFunctions.ExprFuncDecorator import userfunc
 def userFuncLoader(ParentPath):
     logger = logging.getLogger(__name__)
     ppath = Path(ParentPath)
-    if ppath.is_dir():
-        for path in ppath.iterdir():
-            userFuncLoader(path)
-    elif ppath.suffix == '.py':
-        try:
-            globs = {'fitfunc': fitfunc, 'userfunc': userfunc}
-            runpy.run_path(str(ppath), globs)
-        except SyntaxError as e:
-            logger.error('Failed to load {0}, because {1}'.format(str(ppath), e))
+    if ppath.exists():
+        if ppath.is_dir():
+            for path in ppath.iterdir():
+                userFuncLoader(path)
+        elif ppath.suffix == '.py':
+            try:
+                globs = {'fitfunc': fitfunc, 'userfunc': userfunc}
+                runpy.run_path(str(ppath), globs)
+            except SyntaxError as e:
+                logger.error('Failed to load {0}, because {1}'.format(str(ppath), e))
 

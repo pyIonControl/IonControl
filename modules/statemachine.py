@@ -10,6 +10,9 @@ import logging
 from modules.quantity import Q
 import networkx as nx
 from functools import partial
+# import pygraphviz
+from networkx.drawing.nx_agraph import to_agraph
+
 
 def timedeltaToMagnitude(timedelta):
     return Q((timedelta).total_seconds(), 's')

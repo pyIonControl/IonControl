@@ -7,6 +7,7 @@ from functools import partial
 
 from PyQt5 import QtGui, QtCore, QtWidgets
 
+from GlobalVariables.GlobalVariablesModel import GridDelegateMixin
 from modules.PyqtUtility import BlockSignals
 
 
@@ -47,4 +48,35 @@ class ComboBoxDelegate(QtWidgets.QStyledItemDelegate, ComboBoxDelegateMixin):
     def updateEditorGeometry(self, editor, option, index):
         editor.setGeometry(option.rect)
 
+class ComboBoxGridDelegateMixin(object):
+    """Contains methods for drawing a grid and setting the size in a view. Used as part of a delegate in TodoList."""
+    gridColor = QtGui.QColor(25, 25, 25, 255) #dark gray
+    def paint(self, painter, option, index):
+        """Draw the grid if the node is a data node"""
+        model = index.model()
+        painter.save()
+        painter.setBrush(model.colorData(index)) #references data in model to draw background
+        if index.column() == 0:
+            option.font.setWeight(QtGui.QFont.Bold)
+        else:
+            option.font.setWeight(QtGui.QFont.Normal)
+        painter.setPen(self.gridColor)
+        painter.drawRect(option.rect)
+        painter.restore()
+        QtWidgets.QStyledItemDelegate.paint(self, painter, option, index)
 
+
+class ComboBoxGridDelegate(ComboBoxDelegate, ComboBoxGridDelegateMixin):
+    """Similar to the grid delegates used in GlobalVariablesModel but for comboboxes"""
+    paint = ComboBoxGridDelegateMixin.paint
+
+    def __init__(self, bold=False):
+        self.bold = bold
+        super().__init__()
+
+class PlainGridDelegate(QtWidgets.QStyledItemDelegate, ComboBoxGridDelegateMixin):
+    """Draws a grid for default delegate"""
+    paint = ComboBoxGridDelegateMixin.paint
+    def __init__(self, bold=False):
+        self.bold = bold
+        super().__init__()

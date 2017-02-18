@@ -8,6 +8,7 @@ from pint import DimensionalityError
 import logging
 import expressionFunctions.ExprFuncDecorator as trc# NamedTraceDict
 from modules.Expression import Expression
+from modules.flatten import flattenAll
 from modules.quantity import Q, is_Q
 from modules import WeakMethod
 from PyQt5 import QtCore
@@ -47,8 +48,14 @@ class ExpressionValue(QtCore.QObject):
         self._updateFloatValue()
 
     def __eq__(self, other):
-        return other is not None and isinstance(other, ExpressionValue) and \
-               (self.name, self._string, self._value) == (other.name, other._string, other._value)
+        try:
+            return other is not None and isinstance(other, ExpressionValue) and \
+                   (self.name, self._string, self._value) == (other.name, other._string, other._value)
+        except ValueError:
+            # catches a rare exception that occurs when comparing quantities with nested iterables
+            return other is not None and isinstance(other, ExpressionValue) and \
+                   self.name == other.name and self.string == other._string and \
+                   all(flattenAll([self._value == other._value]))
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -101,7 +108,7 @@ class ExpressionValue(QtCore.QObject):
         self.registrations[:] = []
         if self._string:
             val, dependencies = self.expression.evaluateAsMagnitude(self._string, self._globalDict, listDependencies=True)
-            if callable(val.m):
+            if hasattr(val, 'm') and callable(val.m):
                 self.func = deepcopy(val.m)
                 if any('NamedTraceDict' in key for key in val.m.__code__.co_names) or \
                    'NamedTrace' in val.m.__code__.co_names:

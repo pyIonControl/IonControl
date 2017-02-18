@@ -28,6 +28,7 @@ ScriptingWidget, ScriptingBase = PyQt5.uic.loadUiType(uipath)
 
 class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
     """Ui for the scripting interface."""
+    scriptFinishedSignal = QtCore.pyqtSignal()
     def __init__(self, experimentUi):
         ScriptingWidget.__init__(self)
         ScriptingBase.__init__(self)
@@ -210,7 +211,8 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.enableScriptChange(True)
         if self.revert and self.savedState:
             self.restoreSettingsState()
-            
+        self.scriptFinishedSignal.emit() #used for running scans from todo list
+
     @QtCore.pyqtSlot()
     def onRepeat(self):
         """Repeat button is clicked."""

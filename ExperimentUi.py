@@ -178,6 +178,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                     list(self.project.hardware['APT Motion'].values())[0]['dllPath'])
             except Exception as e:  # popup on failed import
                 importErrorPopup('APT Motion error {0}'.format(e))
+        if self.project.isEnabled('hardware', 'Lab Brick'):
+            try:
+                import externalParameter.LabBrick  # @UnusedImport
+                externalParameter.LabBrick.loadDll(
+                    list(self.project.hardware['Lab Brick'].values())[0]['dllPath'])
+            except Exception as e:  # popup on failed import
+                importErrorPopup('Lab Brick error {0}'.format(e))
         from externalParameter.ExternalParameterBase import InstrumentDict
 
         # setup FPGAs
@@ -336,8 +343,12 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                
         self.ExternalParametersSelectionUi.outputChannelsChanged.connect( partial(self.scanExperiment.updateScanTarget, 'External') )               
         self.scanExperiment.updateScanTarget( 'External', self.ExternalParametersSelectionUi.outputChannels() )
-        
-        self.todoList = TodoList( self.tabDict, self.config, self.getCurrentTab, self.switchTab, self.globalVariablesUi )
+
+        # initialize ScriptingUi
+        self.scriptingWindow = ScriptingUi(self)
+        self.scriptingWindow.setupUi(self.scriptingWindow)
+
+        self.todoList = TodoList(self.tabDict, self.config, self.getCurrentTab, self.switchTab, self.globalVariablesUi, self.scriptingWindow)
         self.todoList.setupUi()
         self.todoListDock = QtWidgets.QDockWidget("Todo List")
         self.todoListDock.setWidget(self.todoList)
@@ -444,9 +455,9 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             if hasattr(widget, 'addPushDestination'):
                 widget.addPushDestination( 'External', self.ExternalParametersUi )
                 
-        # initialize ScriptingUi
-        self.scriptingWindow = ScriptingUi(self)
-        self.scriptingWindow.setupUi(self.scriptingWindow)
+        ## initialize ScriptingUi
+        #self.scriptingWindow = ScriptingUi(self)
+        #self.scriptingWindow.setupUi(self.scriptingWindow)
 
         # this is redundant in __init__ but this resolves issues with user-defined functions that reference NamedTraces
         localpath = getProject().configDir+'/UserFunctions/'

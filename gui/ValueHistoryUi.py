@@ -132,6 +132,5 @@ class ValueHistoryUi(Form, Base):
         clip = QtWidgets.QApplication.clipboard()
         index = self.tableView.selectedIndexes()[0]
         if self.currentSpace == 'globalVar' and self.currentGlobal is not None:
-            self.globalDict[self.currentGlobal] = self.dataModel.data[index.row()][1]
             clip.setText(str(self.dataModel.data[index.row()][1]))
 

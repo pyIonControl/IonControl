@@ -31,7 +31,7 @@ def TraceOffset(parentname, childname, Line, offset=0, col='y'):
     Returns:
         float
     """
-    return NamedTrace(parentname, childname, Line, offset, col=col)
+    return NamedTrace(parentname, childname, Line, col=col) + offset
 
 @userfunc
 def TraceDivider(numeratorTrace, denominatorTrace, Line, col='y'):
