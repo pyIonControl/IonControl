@@ -47,6 +47,7 @@ from pulser.PulserHardwareServer import PulserHardwareException
 from gui.FPGASettings import FPGASettings
 from gui.StashButton import StashButtonControl
 from expressionFunctions import UserFunctions
+from expressionFunctions.UserFuncImporter import userFuncLoader
 from ProjectConfig.Project import getProject
 from pathlib import Path
 import importlib
@@ -113,11 +114,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.voltageControlWindow = None
 
         localpath = getProject().configDir+'/UserFunctions/'
-        for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
-            try:
-                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
-            except SyntaxError as e:
-                SyntaxError('Failed to load {0}'.format(str(filename)))
+        userFuncLoader(localpath)
 
     def __enter__(self):
         self.pulser = PulserHardware()
@@ -181,6 +178,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                     list(self.project.hardware['APT Motion'].values())[0]['dllPath'])
             except Exception as e:  # popup on failed import
                 importErrorPopup('APT Motion error {0}'.format(e))
+        if self.project.isEnabled('hardware', 'Lab Brick'):
+            try:
+                import externalParameter.LabBrick  # @UnusedImport
+                externalParameter.LabBrick.loadDll(
+                    list(self.project.hardware['Lab Brick'].values())[0]['dllPath'])
+            except Exception as e:  # popup on failed import
+                importErrorPopup('Lab Brick error {0}'.format(e))
         from externalParameter.ExternalParameterBase import InstrumentDict
 
         # setup FPGAs
@@ -339,8 +343,12 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                
         self.ExternalParametersSelectionUi.outputChannelsChanged.connect( partial(self.scanExperiment.updateScanTarget, 'External') )               
         self.scanExperiment.updateScanTarget( 'External', self.ExternalParametersSelectionUi.outputChannels() )
-        
-        self.todoList = TodoList( self.tabDict, self.config, self.getCurrentTab, self.switchTab, self.globalVariablesUi )
+
+        # initialize ScriptingUi
+        self.scriptingWindow = ScriptingUi(self)
+        self.scriptingWindow.setupUi(self.scriptingWindow)
+
+        self.todoList = TodoList(self.tabDict, self.config, self.getCurrentTab, self.switchTab, self.globalVariablesUi, self.scriptingWindow)
         self.todoList.setupUi()
         self.todoListDock = QtWidgets.QDockWidget("Todo List")
         self.todoListDock.setWidget(self.todoList)
@@ -447,17 +455,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             if hasattr(widget, 'addPushDestination'):
                 widget.addPushDestination( 'External', self.ExternalParametersUi )
                 
-        # initialize ScriptingUi
-        self.scriptingWindow = ScriptingUi(self)
-        self.scriptingWindow.setupUi(self.scriptingWindow)
+        ## initialize ScriptingUi
+        #self.scriptingWindow = ScriptingUi(self)
+        #self.scriptingWindow.setupUi(self.scriptingWindow)
 
         # this is redundant in __init__ but this resolves issues with user-defined functions that reference NamedTraces
         localpath = getProject().configDir+'/UserFunctions/'
-        for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
-            try:
-                importlib.machinery.SourceFileLoader("UserFunctions", str(filename).replace('\\','/')).load_module()
-            except SyntaxError as e:
-                SyntaxError('Failed to load {0}'.format(str(filename)))
+        userFuncLoader(localpath)
 
         # initialize NamedTraceUi
         self.userFunctionsEditor = UserFunctionsEditor(self, self.globalVariablesUi.globalDict)
@@ -717,6 +721,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         #map(lambda x: x.shutdown(), self.auxiliaryPulsers)
         for p in self.auxiliaryPulsers:
             p.shutdown()
+        self.dac.shutdown()
 
     def saveConfig(self):
         self.config['MainWindow.State'] = self.parent.saveState()

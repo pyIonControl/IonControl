@@ -3,10 +3,12 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-"""
-3rd generation of Expression, used for parsing arithmetic, units and custom functions in combo boxes
-this version uses PLY and is modeled off of http://www.dabeaz.com/ply/example.html
-"""
+
+#"""
+#3rd generation of Expression, used for parsing arithmetic, units and custom functions in combo boxes
+#this version uses PLY and is modeled off of http://www.dabeaz.com/ply/example.html
+#"""
+
 import inspect
 import math
 from collections import ChainMap
@@ -16,7 +18,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 
 import expressionFunctions.UserFunctions as UserFunctions
-from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc
+from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc, UserFuncCls
 from modules.quantity import Q, is_Q
 
 
@@ -73,8 +75,8 @@ class Parser:
 
     # Token rules
     tokens = (
-        'NAME','INT','FLOAT','POW', 'MOD',
-        'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
+        'NAME','INT','FLOAT','POW', 'MOD', 'GT', 'GTE', 'LT', 'LTE',
+        'EQ', 'NEQ', 'PLUS','MINUS','TIMES','DIVIDE','EQUALS',
         'LPAREN','RPAREN','COMMA','RBRACK','LBRACK',
         'RBRACE','LBRACE','COLON', 'STRING'
         )
@@ -85,6 +87,12 @@ class Parser:
     t_DIVIDE  = r'/'
     t_POW     = r'\^'
     t_MOD     = r'\%'
+    t_GT      = r'>'
+    t_GTE     = r'>='
+    t_LT      = r'<'
+    t_LTE     = r'<='
+    t_EQ      = r'=='
+    t_NEQ     = r'!='
     t_EQUALS  = r'='
     t_LPAREN  = r'\('
     t_RPAREN  = r'\)'
@@ -135,6 +143,7 @@ class Parser:
         ('left','TIMES','DIVIDE'),
         ('right','UMINUS'),
         ('right','POW'),
+        ('left', 'GT', 'GTE', 'LT', 'LTE', 'EQ', 'NEQ')
     )
 
     def p_statement_expr(self, p):
@@ -148,13 +157,25 @@ class Parser:
                       | expression TIMES expression
                       | expression DIVIDE expression
                       | expression POW expression
-                      | expression MOD expression'''
+                      | expression MOD expression
+                      | expression GT expression
+                      | expression GTE expression
+                      | expression LT expression
+                      | expression LTE expression
+                      | expression EQ expression
+                      | expression NEQ expression'''
         if p[2] == '+'  : p[0] = p[1] + p[3]
         elif p[2] == '-': p[0] = p[1] - p[3]
         elif p[2] == '*': p[0] = p[1] * p[3]
         elif p[2] == '/': p[0] = p[1] / p[3]
         elif p[2] == '^': p[0] = p[1] ** p[3]
         elif p[2] == '%': p[0] = p[1] % p[3]
+        elif p[2] == '>': p[0] = p[1] > p[3]
+        elif p[2] == '>=': p[0] = p[1] >= p[3]
+        elif p[2] == '<' : p[0] = p[1] < p[3]
+        elif p[2] == '<=': p[0] = p[1] <= p[3]
+        elif p[2] == '==': p[0] = p[1] == p[3]
+        elif p[2] == '!=': p[0] = p[1] != p[3]
 
     def p_expression_uminus(self, p):
         'expression : MINUS expression %prec UMINUS'
@@ -196,7 +217,7 @@ class Parser:
                     self.getNTDeps(t[1], *t[3])
 
     def getNTDeps(self, key, *args, **kwargs):
-        if isinstance(self.functionCM[key], userfunc):
+        if isinstance(self.functionCM[key], UserFuncCls):
             if self.functionCM[key].deps:
                 fn = self.functionCM[key]
                 for d in fn.deps:
@@ -205,7 +226,7 @@ class Parser:
                     elif d[1] == 'arg':
                         boundSig = fn.sig.bind(*args, **kwargs)
                         boundSig.apply_defaults()
-                        self.dependencies.add('_NT_'+boundSig.arguments[d[2][0]].split('_')[0])
+                        self.dependencies.add('_NT_'+boundSig.arguments[d[2]].split('_')[0])
 
     def p_expression_name(self, t):
         'expression : NAME'
@@ -278,7 +299,14 @@ class Parser:
         self.variableCM = ChainMap(variabledict, self.defaultVarCM)
         self.functionCM = ChainMap(functiondict, self.defaultFuncCM)
         self.parser.parse(s, lexer=self.lexer)
-        self.val = Q(self.val)
+        if isinstance(self.val, bool):
+            if self.val:
+                self.val = Q(1)
+            else:
+                self.val = Q(0)
+        else:
+            self.val = Q(self.val)
+
         if listDependencies:
             return self.val, self.dependencies
         return self.val
@@ -305,25 +333,22 @@ if __name__ == "__main__":
            6.02E23
            6.02e+023
            1.0e-7
-           tempfun(5)
-           addtwo(3,2)
-           kwfun(1,2)
-           kwfun(1,2,3)
-           kwfun(1,2,3,f=10,d=9)
-           kwfun(tempfun(4),2,3,f=10,d=9)
            1+2
            9+3+6
            3^2+4*-3+5+6+7+9/5/4/3*3*(4*4+4*5)
-           3+tempfun(2)
            PI
            round(3.21)
            round(PI)
            (sqrt(1 s / 2 s))
-           (3^(tempfun(2)-1)*(1 kHz)+kwfun(tempfun(tempfun(1)),0,f=2^2,d=-9)*(1 MHz))
-           (3^(tempfun(2)-1)*(1 kHz)+kwfun(tempfun(tempfun(1)),0,d=2^2)*(1 MHz))
            0x0000000000000001
            sin(pi/2)
            [1,2,3,4]
+           1>2
+           3>1
+           5==2
+           5==5
+           4!=2
+           4!=4
            'a quoted string'""".split("\n")
 
     ExprEvalOld = Expression()
@@ -387,8 +412,8 @@ if __name__ == "__main__":
         test( "sgn(0.1)", 1 )
         test( "2*(3+5)", 16 )
         test( "2*(alpha+beta)", 14, {'alpha':5,'beta':2} )
-        test("kwfun(tempfun(4),2,3,f=10,d=9)", UserFunctions.kwfun(UserFunctions.tempfun(4),2,3,f=10,d=9))
-        test("kwfun(tempfun(4),2,3,f=10,d=myvar,verbose=1)", UserFunctions.kwfun(UserFunctions.tempfun(4),2,3,f=10,d=124),{'myvar':124},listDependencies=True)
+        #test("kwfun(tempfun(4),2,3,f=10,d=9)", UserFunctions.kwfun(UserFunctions.tempfun(4),2,3,f=10,d=9))
+        #test("kwfun(tempfun(4),2,3,f=10,d=myvar,verbose=1)", UserFunctions.kwfun(UserFunctions.tempfun(4),2,3,f=10,d=124),{'myvar':124},listDependencies=True)
         test( "-4 MHz", Q(-4, 'MHz') )
         test( "2*4 MHz", Q(8, 'MHz') )
         test( "2 * sqrt( 4 s / 1 s)", 4 )

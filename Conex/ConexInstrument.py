@@ -3,6 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import logging
 import time
 
 from Conex.ConexBase import ConexCC, ConexError
@@ -32,6 +33,10 @@ class ConexInstrument:
         if retval != 0:
             raise ConexError("Newport Conex cannot open '{0}' returnvalue {1}".format(self.instrumentKey, retval))
         (self.controllerId,) = processReturn('ID_Get', self._cc.ID_Get(self.address, None, None))
+        if self.isNotHomed:
+            logging.getLogger(__name__).info("Newport conex home search {0}".format(self.instrumentKey))
+            self.homeSearch()
+
 
     def close(self):
         self._cc.CloseInstrument()

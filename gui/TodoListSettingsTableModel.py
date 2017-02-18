@@ -47,7 +47,7 @@ class TodoListSettingsTableModel(QtCore.QAbstractTableModel):
         if index.isValid():
             return self.dataLookup.get((role, index.column()), lambda row: None)(index.row())
         return None
-        
+
     def setDataValue(self, index, value):
         logger = logging.getLogger(__name__)
         try:

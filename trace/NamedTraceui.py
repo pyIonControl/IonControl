@@ -146,6 +146,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.highlightUnsaved = highlightUnsaved
         self.newDataAvailable = False
         self.plotsChangedSignal = plotsChangedSignal
+        self.classIndicator = 'namedtrace'
+        self.tableEditor = None
 
     def setupUi(self, *args):
         TraceuiForm.setupUi(self, *args)
@@ -465,4 +467,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.settings.filelist += [self.plottedTraceList[0].traceCollection.filename]
         self.settings.filelist = list(set(self.settings.filelist))
         self.updateNames()
+
+    def onClose(self):
+        if self.tableEditor is not None:
+            self.tableEditor.close()
 

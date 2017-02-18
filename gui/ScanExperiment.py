@@ -218,7 +218,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         self.namedTraceui.openMeasurementLog.connect(self.measurementLog.onOpenMeasurementLog)
 
         # new fit widget
-        self.fitWidget = FitUi(self.traceui, self.config, self.experimentName, globalDict = self.globalVariablesUi.globalDict )
+        self.fitWidget = FitUi(self.traceui, self.config, self.experimentName, globalDict=self.globalVariablesUi.globalDict, namedtraceui=self.namedTraceui)
         self.fitWidget.setupUi(self.fitWidget)
         self.globalVariablesUi.valueChanged.connect( self.fitWidget.evaluate )
         self.fitWidgetDock = self.setupAsDockWidget(self.fitWidget, "Fit", QtCore.Qt.LeftDockWidgetArea,
@@ -853,6 +853,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         self.analysisControlWidget.saveConfig()
         
     def onClose(self):
+        self.namedTraceui.onClose()
         if self.dataStore:
             self.dataStore.close_session()
 

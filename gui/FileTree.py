@@ -62,7 +62,7 @@ def checkTree(widget, pathobj, fileChanges=[]):
         if widget.child(childind).isdir:
             checkTree(widget.child(childind), Path(widget.child(childind).path), fileChanges)
 
-def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPyFiles=False):
+def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPyFiles=False, fullFileList=None, rootdir=None):
     """
     Construct the file tree
     :param widget: Initial object is root TreeWidget
@@ -70,17 +70,22 @@ def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPy
     :param expandAbovePathName: Specifies path of a new file so directories can be expanded to reveal the file
     :return:
     """
+    if fullFileList is None:
+        fullFileList = dict()
+    if rootdir is None:
+        rootdir = pathobj
     for path in pathobj.iterdir():
         childpaths = [widget.child(p).path for p in range(widget.childCount())]
         if str(path) in childpaths:
             if path.is_dir():
                 childind = childpaths.index(str(path))
-                genFileTree(widget.child(childind), path, expandAbovePathName)
+                genFileTree(widget.child(childind), path, expandAbovePathName, fullFileList=fullFileList, rootdir=rootdir)
         else: #otherwise make a new tree item.
             if path.suffix == '.py':
                 child = TreeItem()
                 child.setText(0, path.name)
                 child.path = str(path)
+                fullFileList[str(path.relative_to(rootdir))] = path
                 child.isdir = False
                 child.setFlags(QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 child.setIcon(0,QtGui.QIcon( ":/openicon/icons/edit-shred.png"))
@@ -94,7 +99,7 @@ def genFileTree(widget, pathobj, expandAbovePathName=None, onlyIncludeDirsWithPy
                 child.setFlags(QtCore.Qt.ItemIsDropEnabled | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsDragEnabled | QtCore.Qt.ItemIsSelectable)
                 child.setIcon(0,QtGui.QIcon( ":/openicon/icons/document-open-5.png"))
                 widget.addChild(child)
-                genFileTree(child, path, expandAbovePathName)
+                genFileTree(child, path, expandAbovePathName, fullFileList=fullFileList, rootdir=rootdir)
     widget.sortChildren(0, 0)
 
 def expandAboveChild(child):
@@ -207,6 +212,7 @@ class FileTreeMixin:
         self.fileTreeWidget.setSortingEnabled(True)
         self.fileTreeWidget.sortItems(0, QtCore.Qt.AscendingOrder)
         self.fileTreeWidget.setHeaderLabels(['User Function Files'])
+        self.allFiles = dict()
         self.populateTree()
 
         self.expandTree = QtWidgets.QAction("Expand All", self)
@@ -315,7 +321,7 @@ class FileTreeMixin:
 
     def populateTree(self, newfilepath=None):
         """constructs the file tree viewer"""
-        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath)
+        genFileTree(self.fileTreeWidget.invisibleRootItem(), Path(self.defaultDir), newfilepath, fullFileList=self.allFiles)
 
     def onDrop(self, event):
         """an extension of dropEvent call that applies path changes to the system"""

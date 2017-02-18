@@ -563,6 +563,8 @@ def fromXmlElement(element):
     Creates a FitFunction Object from a saved string representation
     """
     name = element.attrib['name']
+    if name not in fitFunctionMap.keys():
+        return None
     function = fitFunctionMap[name]()
     function.parametersConfidence = [None]*len(function.parameters)
     function.parameterEnabled = [True]*len(function.parameters)

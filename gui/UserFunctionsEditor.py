@@ -16,14 +16,14 @@ from PyQt5.Qsci import QsciScintilla
 import logging
 from datetime import datetime
 from ProjectConfig.Project import getProject
+from expressionFunctions.UserFuncImporter import userFuncLoader
 from modules.PyqtUtility import BlockSignals
 from uiModules.KeyboardFilter import KeyListFilter
 from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs, NamedTraceDict#, ExprFuncSignals
+from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, ExpressionFunctions, UserExprFuncs, SystemExprFuncs
 from expressionFunctions.UserFunctions import constLookup, localFunctions
 from inspect import isfunction
-import importlib
 import inspect
 from pathlib import Path
 from gui.ExpressionValue import ExpressionValue
@@ -366,8 +366,6 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
                         with fullname.open('w') as f:
                             newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
                             f.write(newFileText)
-                            defaultImportText = 'from expressionFunctions.ExprFuncDecorator import userfunc\n\n'
-                            f.write(defaultImportText)
                     except Exception as e:
                         message = "Unable to create new file {0}: {1}".format(shortname, e)
                         logger.error(message)
@@ -425,7 +423,7 @@ class UserFunctionsEditor(FileTreeMixin, EditorWidget, EditorBase):
                 logger.info('{0} saved'.format(self.script.fullname))
             self.initcode = copy.copy(self.script.code)
         try:
-            importlib.machinery.SourceFileLoader("UserFunctions", str(self.script.fullname)).load_module()
+            userFuncLoader(self.script.fullname)
             self.tableModel.updateData()
             top = ast.parse(self.script.fullname.read_text())
             analyzer = UserFuncAnalyzer()

@@ -19,7 +19,7 @@ from .AdjustValue import AdjustValue
 from ProjectConfig.Project import getProject
 from uiModules.ImportErrorPopup import importErrorPopup
 from Chassis.itfParser import itfParser
-from pulser.DACController import DACControllerException
+from pulser.DACControllerServer import DACControllerException
 from inspect import isfunction
 
 project = getProject()
@@ -303,6 +303,8 @@ class VoltageBlender(QtCore.QObject):
         else:
             if definition:
                 logger.info( "Starting finite shuttling" )
+                globaladjust = [0]*len(self.lines[0])
+                self.adjustLine(globaladjust)
                 self.hardware.shuttlePath( [(index, start!=edge.startName, True) for start, _, edge, index in definition] )
                 start, _, edge, _ = definition[-1]
                 self.shuttleTo = edge.startLine if start!=edge.startName else edge.stopLine
@@ -310,10 +312,13 @@ class VoltageBlender(QtCore.QObject):
                 self.outputVoltage = line = self.calculateLine( float(self.shuttleTo), float(self.lineGain), float(self.globalGain) )
                 self.dataChanged.emit(0, 1, len(self.electrodes)-1, 1)
                         
-    def adjustLine(self, lineData, lineno):
+    def adjustLine(self, lineData, lineno=None):
         offset = numpy.zeros(len(lineData))
         for adjust in self.adjustDict.values():
-            offset += self.adjustLines[adjust.line] * float(adjust.func(lineno))
+            if lineno is None:
+                offset += self.adjustLines[adjust.line] * float(adjust.floatValue)
+            else:
+                offset += self.adjustLines[adjust.line] * float(adjust.func(lineno))
         offset *= self.adjustGain
         return (lineData + offset)
             
@@ -341,7 +346,7 @@ class VoltageBlender(QtCore.QObject):
 
     def writeShuttleLookup(self, edgeList, address=0):
         if(self.dacController.isOpen):
-            self.dacController.writeShuttleLookup(edgeList, address)
+            self.dacController.writeShuttleLookup(list(edgeList), address)  # list() removes extra fields of ShuttlingGraph
     
     def writeData(self, shuttlingGraph):
         towrite = list()

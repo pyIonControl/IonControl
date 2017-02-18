@@ -28,6 +28,7 @@ ScriptingWidget, ScriptingBase = PyQt5.uic.loadUiType(uipath)
 
 class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
     """Ui for the scripting interface."""
+    scriptFinishedSignal = QtCore.pyqtSignal()
     def __init__(self, experimentUi):
         ScriptingWidget.__init__(self)
         ScriptingBase.__init__(self)
@@ -210,7 +211,8 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         self.enableScriptChange(True)
         if self.revert and self.savedState:
             self.restoreSettingsState()
-            
+        self.scriptFinishedSignal.emit() #used for running scans from todo list
+
     @QtCore.pyqtSlot()
     def onRepeat(self):
         """Repeat button is clicked."""
@@ -245,19 +247,23 @@ class ScriptingUi(FileTreeMixin, ScriptingWidget, ScriptingBase):
         if ok:
             shortname = str(shortname)
             shortname = shortname.replace(' ', '_') #Replace spaces with underscores
-            shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
-            fullname = self.defaultDir.joinpath(shortname)
-            ensurePath(fullname.parent)
-            if not fullname.exists():
-                try:
-                    with fullname.open('w') as f:
-                        newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
-                        f.write(newFileText)
-                except Exception as e:
-                    message = "Unable to create new file {0}: {1}".format(shortname, e)
-                    logger.error(message)
-                    return
-            self.loadFile(fullname)
+            if shortname[-1] == '/':
+                fullname = self.defaultDir.joinpath(shortname)
+                ensurePath(fullname)
+            else:
+                shortname = shortname.split('.')[0] + '.py'#Take only what's before the '.'
+                fullname = self.defaultDir.joinpath(shortname)
+                ensurePath(fullname.parent)
+                if not fullname.exists():
+                    try:
+                        with fullname.open('w') as f:
+                            newFileText = '#' + shortname + ' created ' + str(datetime.now()) + '\n\n'
+                            f.write(newFileText)
+                    except Exception as e:
+                        message = "Unable to create new file {0}: {1}".format(shortname, e)
+                        logger.error(message)
+                        return
+                self.loadFile(fullname)
             self.populateTree(fullname)
 
     def enableScriptChange(self, enabled):
