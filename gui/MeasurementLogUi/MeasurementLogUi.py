@@ -269,7 +269,7 @@ class MeasurementLogUi(Form, Base ):
         
     def getParameter(self, measurement, space, name):
         param = measurement.parameterByName(space, name)
-        return (param.value, None, None) if param is not None and not math.isinf(param.value.m) else None
+        return (param.value, None, None) if param is not None and not math.isinf(param.value.m) else (None, None, None)
         
     def getResult(self, measurement, space, name):
         result = measurement.resultByName(name)

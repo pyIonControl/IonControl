@@ -196,7 +196,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             try:
                 return self.rootNodes[rowlist[0]]
             except:
-                pass
+                return None
         return self.rootNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListTableModel(TodoListBaseModel):

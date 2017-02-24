@@ -280,6 +280,11 @@ class AWGUi(AWGForm, AWGBase):
         """Reload settings"""
         name = str(self.settingsComboBox.currentText())
         self.onLoad(name)
+
+    def loadSetting(self, name):
+        if name and self.settingsComboBox.findText(name)>=0:
+            self.settingsComboBox.setCurrentIndex( self.settingsComboBox.findText(name) )
+            self.onLoad(name)
        
     def onLoad(self, name):
         """load settings"""
@@ -336,7 +341,7 @@ class AWGUi(AWGForm, AWGBase):
         allDependencies = set()
         [channelUi.waveform.updateDependencies() for channelUi in self.awgChannelUiList]
         [allDependencies.update(channelUi.waveform.dependencies) for channelUi in self.awgChannelUiList]
-        default = lambda varname:{'value':Q(1, 'us'), 'text':None} if varname.startswith('Duration') else {'value':Q(0), 'text':None}
+        default = lambda varname:{'value':Q(1, 'us'), 'text':None} if varname.startswith('T0') else {'value':Q(0), 'text':None}
         deletions = [varname for varname in self.settings.varDict if varname not in allDependencies]
         [self.settings.varDict.pop(varname) for varname in deletions] #remove all values that aren't dependencies anymore
         [self.settings.varDict.setdefault(varname, default(varname)) for varname in allDependencies] #add missing values

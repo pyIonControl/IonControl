@@ -394,13 +394,16 @@ class TodoList(Form, Base):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
         self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
-        self.activeItem = next(self.todoListGenerator)
-        while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
-            try:
-                self.activeItem = next(self.todoListGenerator)
-            except StopIteration:
-                break
-        self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+        try:
+            self.activeItem = next(self.todoListGenerator)
+            while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
+                try:
+                    self.activeItem = next(self.todoListGenerator)
+                except StopIteration:
+                    break
+            self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+        except StopIteration:
+            pass
 
     def generatorSynchronized(self):
         return (isinstance(self.activeItem, StopNode)

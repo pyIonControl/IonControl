@@ -113,6 +113,7 @@ class VoltageGlobalAdjust(VoltageGlobalAdjustForm, VoltageGlobalAdjustBase ):
     def restoreValue(self, channel):
         if self.savedValue[channel] is not None:
             self.globalAdjustDict[channel] = self.savedValue[channel]
+            self.globalAdjustDict[channel].recalculate()
         return True
     
     def strValue(self, channel):

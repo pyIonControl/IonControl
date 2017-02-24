@@ -15,7 +15,7 @@ from modules.MagnitudeParser import isIdentifier, isValueExpression
 from modules.quantity import Q
 from modules.enum import enum
 from .AWGSegmentModel import nodeTypes
-
+from collections import defaultdict
 
 class AWGWaveform(object):
     """waveform object for AWG channels. Responsible for parsing and evaluating waveforms.
@@ -89,8 +89,8 @@ class AWGWaveform(object):
     def updateSegmentDependencies(self, nodeList):
         for node in nodeList:
             if node.nodeType==nodeTypes.segment:
-                node.stack = node.expression._parse_expression(node.equation)
-                nodeDependencies = node.expression.findDependencies(node.stack)
+                _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True, variabledict=defaultdict(int))
+                nodeDependencies.discard('__exprfunc__')
                 self.dependencies.update(nodeDependencies)
                 if isIdentifier(node.duration):
                     self.dependencies.add(node.duration)
@@ -121,7 +121,7 @@ class AWGWaveform(object):
                     sampleList = numpy.append(sampleList, newSamples)
                 elif node.nodeType==nodeTypes.segmentSet:
                     repMag = self.settings.varDict[node.repetitions]['value'] if isIdentifier(node.repetitions) else self.expression.evaluateAsMagnitude(node.repetitions)
-                    repetitions = int(repMag.to_base_units().val) #convert to float, then to integer
+                    repetitions = int(repMag.to_base_units().magnitude) #convert to float, then to integer
                     for n in range(repetitions):
                         startStep, newSamples = self.evaluateSegments(node.children, startStep) #recursive
                         sampleList = numpy.append(sampleList, newSamples)
@@ -153,8 +153,12 @@ class AWGWaveform(object):
             sampleList: list of values to program to the AWG.
         """
         #calculate number of samples
-        numSamples = duration*self.sampleRate
-        numSamples = int(round(numSamples)) #convert to float, then to integer
+        if duration:
+            numSamples = duration*self.sampleRate
+            numSamples = numSamples.to_base_units()
+            numSamples = int(round(numSamples)) #convert to float, then to integer
+        else:
+            numSamples = Q(0)
         numSamples = max(0, min(numSamples, self.maxSamples-startStep)) #cap at maxSamples-startStep, so that the last sample does not exceed maxSamples
         stopStep = numSamples + startStep - 1
         nextSegmentStartStep = stopStep + 1
@@ -162,7 +166,7 @@ class AWGWaveform(object):
         try:
             node.expression.variabledict = {varName:varValueTextDict['value'] for varName, varValueTextDict in self.settings.varDict.items()}
             node.expression.variabledict.update({'t':Q(1, 'us')})
-            node.expression.evaluateWithStack(node.stack[:])  # TODO: does not exist anymore
+            node.expression.evaluate(node.equation, variabledict=node.expression.variabledict)
             error = False
         except ValueError:
             logging.getLogger(__name__).warning("Must be dimensionless!")
@@ -170,7 +174,7 @@ class AWGWaveform(object):
             nextSegmentStartStep = startStep
             sampleList = numpy.array([])
         if not error:
-            varValueDict = {varName:varValueTextDict['value'].to_base_units().val for varName, varValueTextDict in self.settings.varDict.items()}
+            varValueDict = {varName:varValueTextDict['value'].to_base_units().magnitude for varName, varValueTextDict in self.settings.varDict.items()}
             varValueDict['t'] = sympy.Symbol('t')
             sympyExpr = parse_expr(node.equation, varValueDict) #parse the equation
             key = str(sympyExpr)
