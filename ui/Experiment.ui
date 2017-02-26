@@ -66,6 +66,7 @@
    <addaction name="actionMeasurementLog"/>
    <addaction name="actionScripting"/>
    <addaction name="actionUserFunctions"/>
+   <addaction name="actionCamera"/>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -693,6 +694,18 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionCamera">
+   <property name="icon">
+    <iconset>
+     <normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/movie.png</normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/movie.png</iconset>
+   </property>
+   <property name="text">
+    <string>Camera</string>
+   </property>
+   <property name="toolTip">
+    <string>Camera</string>
    </property>
   </action>
  </widget>

@@ -19,6 +19,7 @@ from functools import partial
 from GlobalVariables.GlobalVariablesUi import GlobalVariablesUi
 from gui import ScanExperiment
 from dedicatedCounters.DedicatedCounters import DedicatedCounters
+from Camera.camera import Camera
 from externalParameter import ExternalParameterSelection
 from externalParameter import ExternalParameterUi
 from externalParameter.InstrumentLoggingDisplay import InstrumentLoggingDisplay
@@ -386,6 +387,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.actionUserFunctions.triggered.connect(self.onUserFunctionsEditor)
         self.actionMeasurementLog.triggered.connect(self.onMeasurementLog)
         self.actionDedicatedCounters.triggered.connect(self.showDedicatedCounters)
+        self.actionCamera.triggered.connect(self.showCamera)
         self.actionLogic.triggered.connect(self.showLogicAnalyzer)
         self.currentTab = self.tabDict.at( min(len(self.tabDict)-1, self.config.get('MainWindow.currentIndex',0) ) )
         self.tabWidget.setCurrentIndex( self.config.get('MainWindow.currentIndex',0) )
@@ -405,10 +407,14 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                 self.showMaximized()
         else:
             self.showMaximized()
-            
-        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting )
+
+        self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
+        self.CameraWindow.setupUi(self.CameraWindow)
+
+        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
-        
+
+
         self.logicAnalyzerWindow = LogicAnalyzer(self.config, self.pulser, self.channelNameData )
         self.logicAnalyzerWindow.setupUi(self.logicAnalyzerWindow)
 
@@ -534,6 +540,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dedicatedCountersWindow.setWindowState(QtCore.Qt.WindowActive)
         self.dedicatedCountersWindow.raise_()
         self.dedicatedCountersWindow.onStart() #Start displaying data immediately
+
+    def showCamera(self):
+        self.CameraWindow.show()
+        self.CameraWindow.setWindowState(QtCore.Qt.WindowActive)
+        self.CameraWindow.raise_()
+        #self.CameraWindow.onStart()
+
 
     def showLogicAnalyzer(self):
         self.logicAnalyzerWindow.show()
