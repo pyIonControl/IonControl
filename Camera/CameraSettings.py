@@ -26,7 +26,7 @@ import os
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 
-uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/DedicatedCountersSettings.ui')
+uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/CameraSettings.ui')
 UiForm, UiBase = PyQt5.uic.loadUiType(uipath)
 
 import pytz
@@ -40,7 +40,8 @@ class Settings(object):
         self.integrationTime = Q(100, 'ms')
         self.displayUnit = CountrateConversion.DisplayUnit()
         self.unit = 0
-        self.pointsToKeep = 400
+        self.exposureTime = 100
+        self.EMGain=0
         self.counterDict = dict(zip(list(['Count {0}'.format(i) for i in range(16)]), list(i for i in range(16))))
         self.adcDict = dict(zip(list(['ADC {0}'.format(i) for i in range(4)]), list(i for i in range(4))))
         self.plotDisplayData = SequenceDict()
@@ -57,16 +58,17 @@ class Settings(object):
         self.__dict__.setdefault('integrationTime', Q(100, 'ms'))
         self.__dict__.setdefault( 'displayUnit', CountrateConversion.DisplayUnit() )
         self.__dict__.setdefault( 'unit', 0 )
-        self.__dict__.setdefault( 'pointsToKeep', 400 )
+        self.__dict__.setdefault( 'exposureTime', 307 )
+        self.__dict__.setdefault( 'EMgain', 13)
         self.__dict__.setdefault( 'counterDict', dict(zip(list(['Count {0}'.format(i) for i in range(16)])
                                                           , list(i for i in range(16)))) )
         self.__dict__.setdefault( 'adcDict', dict(zip(list(['ADC {0}'.format(i) for i in range(4)])
                                                       , list(i for i in range(4)))) )
         self.__dict__.setdefault( 'plotDisplayData', SequenceDict() )
 
-        self.__dict__.setdefault( 'name', "DedicatedCounterSettings" )
+        self.__dict__.setdefault( 'name', "CameraSettings" )
 
-class DedicatedCountersSettings(UiForm,UiBase ):
+class CameraSettings(UiForm,UiBase):
     valueChanged = QtCore.pyqtSignal(object)
 
     def __init__(self,config,plotDict,parent=None):
@@ -74,16 +76,19 @@ class DedicatedCountersSettings(UiForm,UiBase ):
         UiBase.__init__(self,parent)
         self.config = config
         self.plotDict = plotDict
-        self.settings = self.config.get('DedicatedCounterSettings.Settings',Settings())
-        self.settingsDict = self.config.get('DedicatedCounterSettings.Settings.dict', dict())
-        self.currentSettingsName = self.config.get('DedicatedCounterSettings.SettingsName','')
+        self.settings = self.config.get('CameraSettings.Settings',Settings())
+        self.settingsDict = self.config.get('CameraSettings.Settings.dict', dict())
+        self.currentSettingsName = self.config.get('CameraSettings.SettingsName','')
 
     def setupUi(self, parent):
         UiForm.setupUi(self,parent)
         self.integrationTimeBox.setValue( self.settings.integrationTime )
         self.integrationTimeBox.valueChanged.connect( functools.partial(self.onValueChanged, 'integrationTime') )
-        self.pointsToKeepBox.setValue( self.settings.pointsToKeep )
-        self.pointsToKeepBox.valueChanged.connect( functools.partial(self.onValueChanged,'pointsToKeep') )
+        self.exposureTimeBox.setValue( self.settings.exposureTime )
+        self.exposureTimeBox.valueChanged.connect( functools.partial(self.onValueChanged,'exposureTime') )
+        self.EMGainBox.setValue(self.settings.EMGain)
+        self.EMGainBox.valueChanged.connect(functools.partial(self.onValueChanged, 'EMGain'))
+
         self.displayUnitCombo.currentIndexChanged[int].connect( self.onIndexChanged )
         self.displayUnitCombo.setCurrentIndex(self.settings.unit)
         self.settings.displayUnit.unit = self.settings.unit
@@ -113,7 +118,7 @@ class DedicatedCountersSettings(UiForm,UiBase ):
             self.plotLegend.addItem(item)
 
         self.removeDedicatedCountersProfileButton.clicked.connect( self.onRemoveProfile )
-        restoreGuiState( self, self.config.get('DedicatedCounterSettings.guiState') )
+        restoreGuiState( self, self.config.get('CameraSettings.guiState') )
         # Added profiles
         self.profileDedicatedCountersComboBox.addItems( self.settingsDict.keys() )
         if self.currentSettingsName in self.settingsDict:
@@ -186,12 +191,15 @@ class DedicatedCountersSettings(UiForm,UiBase ):
         self.valueChanged.emit( self.settings )
 
     def saveConfig(self):
-        self.config['DedicatedCounterSettings.Settings'] = self.settings
-        self.config['DedicatedCounterSettings.guiState'] = saveGuiState( self )
-        self.config['DedicatedCounterSettings.Settings.dict'] = self.settingsDict
-        self.config['DedicatedCounterSettings.SettingsName'] = self.currentSettingsName
+        self.config['CameraSettings.Settings'] = self.settings
+        self.config['CameraSettings.guiState'] = saveGuiState( self )
+        self.config['CameraSettings.Settings.dict'] = self.settingsDict
+        self.config['CameraSettings.SettingsName'] = self.currentSettingsName
 
     def saveable(self):
         name = str(self.profileDedicatedCountersComboBox.currentText())
         return name != '' and ( name not in self.settingsDict or not (self.settingsDict[name] == self.settings))
+
+
+
 

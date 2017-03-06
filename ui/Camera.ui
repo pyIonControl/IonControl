@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>935</width>
-    <height>711</height>
+    <width>1005</width>
+    <height>777</height>
    </rect>
   </property>
   <property name="focusPolicy">
@@ -20,150 +20,13 @@
    <property name="cursor">
     <cursorShape>ArrowCursor</cursorShape>
    </property>
-   <widget class="QWidget" name="horizontalLayoutWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>10</y>
-      <width>345</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetNoConstraint</enum>
-     </property>
-     <item>
-      <widget class="QCheckBox" name="autoSaveCheckBox">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>AutoSave</string>
-       </property>
-       <property name="toolTipDuration">
-        <number>-1</number>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset>
-         <activeon>:/kde/icons/filesaveas.png</activeon>
-        </iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="saveButton">
-       <property name="toolTip">
-        <string>Save current</string>
-       </property>
-       <property name="toolTipDuration">
-        <number>-1</number>
-       </property>
-       <property name="text">
-        <string notr="true">...</string>
-       </property>
-       <property name="icon">
-        <iconset resource="Experiment.qrc">
-         <normaloff>:/kde/icons/filesave.png</normaloff>:/kde/icons/filesave.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>16</width>
-         <height>16</height>
-        </size>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="AcquireButton">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="cursor">
-        <cursorShape>ArrowCursor</cursorShape>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::WheelFocus</enum>
-       </property>
-       <property name="text">
-        <string>Acquire</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/go.png</normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/go.png</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>31</width>
-         <height>30</height>
-        </size>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="autoRepeatDelay">
-        <number>300</number>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="CoolButton">
-       <property name="cursor">
-        <cursorShape>ArrowCursor</cursorShape>
-       </property>
-       <property name="focusPolicy">
-        <enum>Qt::WheelFocus</enum>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::NoContextMenu</enum>
-       </property>
-       <property name="acceptDrops">
-        <bool>false</bool>
-       </property>
-       <property name="toolTip">
-        <string>Cool Down CCD</string>
-       </property>
-       <property name="text">
-        <string>Cool CCD</string>
-       </property>
-       <property name="icon">
-        <iconset>
-         <activeoff>../bitmaps/stop.png</activeoff>
-         <activeon>../bitmaps/go.png</activeon>
-        </iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>30</width>
-         <height>30</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </widget>
    <widget class="QGraphicsView" name="CameraView">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>70</y>
-      <width>661</width>
-      <height>561</height>
+      <x>70</x>
+      <y>40</y>
+      <width>650</width>
+      <height>650</height>
      </rect>
     </property>
     <property name="cursor" stdset="0">
@@ -173,13 +36,23 @@
      <enum>QFrame::Sunken</enum>
     </property>
    </widget>
+   <widget class="CoordinatePlotWidget" name="graphicsLayout">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>120</y>
+      <width>501</width>
+      <height>511</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>935</width>
+     <width>1005</width>
      <height>21</height>
     </rect>
    </property>
@@ -200,27 +73,16 @@
    <addaction name="actionSave"/>
    <addaction name="actionAcquire"/>
    <addaction name="actionCoolCCD"/>
-   <addaction name="actionStopCooling"/>
+   <addaction name="actionLive"/>
   </widget>
-  <widget class="QDockWidget" name="Settingsdock">
+  <widget class="QDockWidget" name="settingsDock">
    <property name="windowTitle">
     <string>Settings</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <widget class="QTableView" name="tableView">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>0</y>
-       <width>211</width>
-       <height>621</height>
-      </rect>
-     </property>
-    </widget>
-   </widget>
+   <widget class="QWidget" name="dockWidgetContents"/>
   </widget>
   <action name="actionSave">
    <property name="icon">
@@ -239,6 +101,9 @@
    </property>
   </action>
   <action name="actionAcquire">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset>
      <normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/go.png</normaloff>Z:/Lab/Andor Project/imaging_software_g/bitmaps/go.png</iconset>
@@ -249,11 +114,11 @@
    <property name="toolTip">
     <string>Acquire</string>
    </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
-   </property>
   </action>
   <action name="actionCoolCCD">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="icon">
     <iconset resource="Experiment.qrc">
      <normaloff>:/openicon/icons/go-down-7.png</normaloff>:/openicon/icons/go-down-7.png</iconset>
@@ -265,19 +130,26 @@
     <string>Cool CCD</string>
    </property>
   </action>
-  <action name="actionStopCooling">
+  <action name="actionLive">
    <property name="icon">
     <iconset resource="Experiment.qrc">
-     <normaloff>:/openicon/icons/go-up-7.png</normaloff>:/openicon/icons/go-up-7.png</iconset>
+     <normaloff>:/petersIcons/icons/ChipScope.png</normaloff>:/petersIcons/icons/ChipScope.png</iconset>
    </property>
    <property name="text">
-    <string>StopCooling</string>
+    <string>Live</string>
    </property>
    <property name="toolTip">
-    <string>Cool CCD</string>
+    <string>Live Mode</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CoordinatePlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>uiModules.CoordinatePlotWidget</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="Experiment.qrc"/>
  </resources>
