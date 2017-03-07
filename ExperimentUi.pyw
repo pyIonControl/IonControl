@@ -112,6 +112,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dbConnection = project.dbConnection
         self.objectListToSaveContext = list()
         self.voltageControlWindow = None
+        self.CameraWindow = None
 
         localpath = getProject().configDir+'/UserFunctions/'
         for filename in Path(localpath.replace('\\','/')).glob('**/*.py'):
@@ -166,6 +167,11 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.voltagesEnabled = self.project.isEnabled('software', 'Voltages')
         if self.voltagesEnabled:
             from voltageControl.VoltageControl import VoltageControl
+
+        #determine if Andor Camera is enabled and import class if it is
+        self.AndorCameraEnabled = self.project.isEnabled('hardware', 'Andor Camera')
+        if self.AndorCameraEnabled:
+            from Camera.camera import Camera
 
         #setup external parameters; import specific libraries if they are needed, popup warnings if selected hardware import fail
         import externalParameter.StandardExternalParameter
@@ -387,7 +393,11 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.actionUserFunctions.triggered.connect(self.onUserFunctionsEditor)
         self.actionMeasurementLog.triggered.connect(self.onMeasurementLog)
         self.actionDedicatedCounters.triggered.connect(self.showDedicatedCounters)
-        self.actionCamera.triggered.connect(self.showCamera)
+        if self.AndorCameraEnabled:
+            self.actionCamera.triggered.connect(self.showCamera)
+        else:
+            self.actionCamera.setDisabled(True)
+            self.actionCamera.setVisible(False)
         self.actionLogic.triggered.connect(self.showLogicAnalyzer)
         self.currentTab = self.tabDict.at( min(len(self.tabDict)-1, self.config.get('MainWindow.currentIndex',0) ) )
         self.tabWidget.setCurrentIndex( self.config.get('MainWindow.currentIndex',0) )
@@ -408,8 +418,9 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         else:
             self.showMaximized()
 
-        self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
-        self.CameraWindow.setupUi(self.CameraWindow)
+        if self.AndorCameraEnabled:
+            self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
+            self.CameraWindow.setupUi(self.CameraWindow)
 
         self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
@@ -545,7 +556,6 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.CameraWindow.show()
         self.CameraWindow.setWindowState(QtCore.Qt.WindowActive)
         self.CameraWindow.raise_()
-        #self.CameraWindow.onStart()
 
 
     def showLogicAnalyzer(self):
@@ -720,6 +730,8 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.measurementLog.close()
         if self.voltagesEnabled:
             self.voltageControlWindow.close()
+        if self.AndorCameraEnabled:
+            self.CameraWindow.close()
         for awgUi in self.AWGUiDict.values():
             awgUi.close()
         numTempAreas = len(self.scanExperiment.area.tempAreas)
@@ -754,6 +766,8 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         if self.voltagesEnabled:
             if self.voltageControlWindow:
                 self.voltageControlWindow.saveConfig()
+        if self.AndorCameraEnabled:
+            self.CameraWindow.saveConfig()
         self.ExternalParametersSelectionUi.saveConfig()
         self.globalVariablesUi.saveConfig()
         self.loggerUi.saveConfig()
@@ -826,6 +840,11 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             voltageControlWindowVisible = getattr(self.voltageControlWindow.settings, 'isVisible', False)
             if voltageControlWindowVisible: self.voltageControlWindow.show()
             else: self.voltageControlWindow.hide()
+
+        if self.AndorCameraEnabled:
+            CameraWindowVisible = getattr(self.CameraWindow.settings, 'isVisible', False)
+            if CameraWindowVisible:self.CameraWindow.show()
+            else: self.CameraWindow.hide()
 
         if self.AWGUiDict:
             for awgUi in self.AWGUiDict.values():

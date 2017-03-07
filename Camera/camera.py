@@ -38,6 +38,13 @@ from uiModules.DateTimePlotWidget import DateTimePlotWidget
 from modules.RollingUpdate import rollingUpdate
 from uiModules.BlockAutoRange import BlockAutoRange
 from modules.quantity import is_Q, Q
+from ProjectConfig.Project import getProject
+
+#project = getProject()
+
+
+
+
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Camera.ui')
 CameraForm, CameraBase = PyQt5.uic.loadUiType(uipath)
@@ -65,8 +72,8 @@ class AndorTemperatureThread(threading.Thread):  # Class added
             global andortemp
             andortemp = True
             while andortemp:
-                #self.app.statusBar().showMessage("Temp = %.1f °C" % camandor.gettemperature() )
-                self.app.statusBar().showMessage("T = %.1f °C" %time.time())
+                self.app.statusBar().showMessage("Temp = %.1f °C" % camandor.gettemperature() )
+                #self.app.statusBar().showMessage("T = %.1f °C" %time.time())
                 #print(self.camandor.gettemperature())
                 time.sleep(2)
 
@@ -457,6 +464,12 @@ class Camera(CameraForm, CameraBase):
         if self.configName + '.MainWindow.State' in self.config:
             QtGui.QMainWindow.restoreState(self, self.config[self.configName + '.MainWindow.State'])
         self.onSettingsChanged()
+
+    def saveConfig(self):
+        self.settings.state = self.saveState()
+        self.settings.isVisible = self.isVisible()
+        self.config[self.configName] = self.settings
+        self.settingsUi.saveConfig()
 
     def onSave(self):
         print("save image")

@@ -36,16 +36,6 @@
      <enum>QFrame::Sunken</enum>
     </property>
    </widget>
-   <widget class="CoordinatePlotWidget" name="graphicsLayout">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>120</y>
-      <width>501</width>
-      <height>511</height>
-     </rect>
-    </property>
-   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -143,13 +133,6 @@
    </property>
   </action>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>CoordinatePlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>uiModules.CoordinatePlotWidget</header>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="Experiment.qrc"/>
  </resources>
