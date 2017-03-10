@@ -18,30 +18,18 @@ import threading, queue
 import time
 from Camera import fileSettings
 from Camera import readImage
-
+from scan import ScanControl, ScanList
 
 from pyqtgraph import image
-from astropy.io import fits
+
+#from astropy.io import fits
+
 from dedicatedCounters import AutoLoad
 from dedicatedCounters import DedicatedCountersSettings
 from Camera import CameraSettings
 from dedicatedCounters import DedicatedDisplay
 from dedicatedCounters import InputCalibrationUi
 from modules import enum
-from trace.TraceCollection import TraceCollection, TracePlotting
-from modules.DataDirectory import DataDirectory
-from modules.SequenceDict import SequenceDict
-from trace.pens import penList
-from dedicatedCounters.StatusDisplay import StatusDisplay
-from pyqtgraph.dockarea import Dock, DockArea
-from uiModules.DateTimePlotWidget import DateTimePlotWidget
-from modules.RollingUpdate import rollingUpdate
-from uiModules.BlockAutoRange import BlockAutoRange
-from modules.quantity import is_Q, Q
-from ProjectConfig.Project import getProject
-
-#project = getProject()
-
 
 
 
@@ -382,7 +370,7 @@ class Camera(CameraForm, CameraBase):
     dataAvailable = QtCore.pyqtSignal(object)
     OpStates = enum.enum('idle', 'running', 'paused')
 
-    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable,parent=None):
+    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, ScanExperiment, parent=None):
         CameraForm.__init__(self)
         CameraBase.__init__(self, parent)
 
@@ -391,9 +379,13 @@ class Camera(CameraForm, CameraBase):
         self.configName = 'Camera'
         self.dbConnection = dbConnection
         self.pulserHardware = pulserHardware
+        self.globalVariables = globalVariablesUi.globalDict
+        self.globalVariablesChanged = globalVariablesUi.valueChanged
         self.globalVariablesUi = globalVariablesUi
         self.shutterUi = shutterUi
-        self.externalInstrumentObservable = externalInstrumentObservable
+        self.ScanExperiment = ScanExperiment
+
+
 
         # Timing and acquisition settings
         self.imaging_mode_andor = 'TriggeredAcquisition'
@@ -404,20 +396,6 @@ class Camera(CameraForm, CameraBase):
         self.properties_andor = AndorProperties(ampgain=0, emgain=0)
         self.imaging_andor_useROI = False
 
-        #old stuff from Dedicated counters
-        self.curvesDict = {}
-        self.dataSlotConnected = False
-        self.state = self.OpStates.idle
-        self.xData = [numpy.array([])] * 20
-        self.yData = [numpy.array([])] * 20
-        self.refValue = [None] * 20
-        self.integrationTime = 0
-        self.integrationTimeLookup = dict()
-        self.tick = 0
-        self.analogCalbrations = None
-        self.externalInstrumentObservable = externalInstrumentObservable
-        self.plotDict = dict()
-
     @property
     def settings(self):
         return self.settingsUi.settings
@@ -425,7 +403,14 @@ class Camera(CameraForm, CameraBase):
     def setupUi(self, parent):
         CameraForm.setupUi(self, parent)
 
-        self.settingsUi = CameraSettings.CameraSettings(self.config, self.plotDict)
+        self.setWindowTitle("Andor Camera")
+
+
+
+        # Setting
+
+
+        self.settingsUi = CameraSettings.CameraSettings(self.config,self.globalVariablesUi)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget(self.settingsUi)
         self.settingsUi.valueChanged.connect(self.onSettingsChanged)
@@ -446,19 +431,19 @@ class Camera(CameraForm, CameraBase):
 
         # --------------------------------------- image display ---------------------------------------#
         # self.filename = 'Z:/Lab/Andor Project/imaging_software_g/bitmaps/acquire_splash_big.png'
-        self.filename = 'Z:/Lab/Andor Project/imaging_software_g/bitmaps/80up_1.fits'
-        image_data = fits.getdata(self.filename)
-        image_f = image_data[[0], :, range(0, 256)]
-        self.image= QtGui.QImage(image_f.shape[0], image_f.shape[1], QtGui.QImage.Format_RGB32)
-        for x in range(image_f.shape[0]):
-            for y in range(image_f.shape[1]):
-                self.image.setPixel(x, y, QtGui.QColor(image_f[x][y]/50.).rgb())
-
-        self.pixmap = QtGui.QPixmap.fromImage(self.image.scaledToWidth(570))
-        scene = QtWidgets.QGraphicsScene(self)
-        scene.addPixmap(self.pixmap)
-        self.CameraView.setScene(scene)
-        self.CameraView.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
+        # self.filename = 'Z:/Lab/Andor Project/imaging_software_g/bitmaps/80up_1.fits'
+        # image_data = fits.getdata(self.filename)
+        # image_f = image_data[[0], :, range(0, 256)]
+        # self.image= QtGui.QImage(image_f.shape[0], image_f.shape[1], QtGui.QImage.Format_RGB32)
+        # for x in range(image_f.shape[0]):
+        #     for y in range(image_f.shape[1]):
+        #         self.image.setPixel(x, y, QtGui.QColor(image_f[x][y]/50.).rgb())
+        #
+        # self.pixmap = QtGui.QPixmap.fromImage(self.image.scaledToWidth(570))
+        # scene = QtWidgets.QGraphicsScene(self)
+        # scene.addPixmap(self.pixmap)
+        # self.CameraView.setScene(scene)
+        # self.CameraView.setCacheMode(QtWidgets.QGraphicsView.CacheBackground)
         #----------------------------------------------------------------------------------------------#
 
         if self.configName + '.MainWindow.State' in self.config:
@@ -471,12 +456,19 @@ class Camera(CameraForm, CameraBase):
         self.config[self.configName] = self.settings
         self.settingsUi.saveConfig()
 
+
     def onSave(self):
         print("save image")
-        image_file = os.path.join(os.path.dirname(__file__), '..', 'ui/icons/80up_1.fits')
-        image_data = fits.getdata(image_file)
-        image_f = image_data[[0], :, range(0, 256)]
-        image(image_f, title="Ions")
+
+        print(self.ScanExperiment.scanControlWidget.getScan().list)
+        print(self.ScanExperiment.scanControlWidget.getScan().list[0])
+        print(self.ScanExperiment.scanControlWidget.getScan().list[-1])
+        print(self.globalVariables['CoolTimeGlobal'])
+        # needs astropy
+        # image_file = os.path.join(os.path.dirname(__file__), '..', 'ui/icons/80up_1.fits')
+        # image_data = fits.getdata(image_file)
+        # image_f = image_data[[0], :, range(0, 256)]
+        # image(image_f, title="Ions")
 
     def onSettingsChanged(self):
         pass

@@ -19,7 +19,6 @@ from functools import partial
 from GlobalVariables.GlobalVariablesUi import GlobalVariablesUi
 from gui import ScanExperiment
 from dedicatedCounters.DedicatedCounters import DedicatedCounters
-from Camera.camera import Camera
 from externalParameter import ExternalParameterSelection
 from externalParameter import ExternalParameterUi
 from externalParameter.InstrumentLoggingDisplay import InstrumentLoggingDisplay
@@ -419,7 +418,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             self.showMaximized()
 
         if self.AndorCameraEnabled:
-            self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
+            self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting,self.scanExperiment)
             self.CameraWindow.setupUi(self.CameraWindow)
 
         self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)

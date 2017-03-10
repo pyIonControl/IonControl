@@ -4,13 +4,13 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 import functools
+from functools import partial
 
 from PyQt5 import QtCore, QtWidgets
 import PyQt5.uic
 
 from modules import CountrateConversion
 from trace.pens import penicons
-from modules.SequenceDict import SequenceDict
 from uiModules.ComboBoxDelegate import ComboBoxDelegate
 from uiModules.MultiSelectDelegate import MultiSelectDelegate
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
@@ -18,11 +18,16 @@ from dedicatedCounters.DedicatedCountersTableModel import DedicatedCounterTableM
 from modules.PyqtUtility import updateComboBoxItems
 from modules.GuiAppearance import restoreGuiState, saveGuiState
 from modules.Utility import unique
-from modules.quantity import Q
+
 from datetime import datetime, timedelta
 import copy
 
 import os
+
+from uiModules.ParameterTable import ParameterTable, Parameter,ParameterTableModel
+from pulseProgram import VariableTableModel,VariableDictionary
+from modules.SequenceDict import SequenceDict
+from modules.quantity import Q
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 
@@ -35,18 +40,18 @@ def now():
 
 class Settings(object):
     def __init__(self):
-        self.counterMask = 0
-        self.adcMask = 0
+
         self.integrationTime = Q(100, 'ms')
         self.displayUnit = CountrateConversion.DisplayUnit()
         self.unit = 0
         self.exposureTime = 100
-        self.EMGain=0
-        self.counterDict = dict(zip(list(['Count {0}'.format(i) for i in range(16)]), list(i for i in range(16))))
-        self.adcDict = dict(zip(list(['ADC {0}'.format(i) for i in range(4)]), list(i for i in range(4))))
+        self.EMGain = 0
+
         self.plotDisplayData = SequenceDict()
 
-        self.name = "DedicatedCounterSettings"
+        self.name = "CameraSettings"
+
+
 
     def __setstate__(self, state):
         """this function ensures that the given fields are present in the class object
@@ -60,25 +65,39 @@ class Settings(object):
         self.__dict__.setdefault( 'unit', 0 )
         self.__dict__.setdefault( 'exposureTime', 307 )
         self.__dict__.setdefault( 'EMgain', 13)
-        self.__dict__.setdefault( 'counterDict', dict(zip(list(['Count {0}'.format(i) for i in range(16)])
-                                                          , list(i for i in range(16)))) )
-        self.__dict__.setdefault( 'adcDict', dict(zip(list(['ADC {0}'.format(i) for i in range(4)])
-                                                      , list(i for i in range(4)))) )
-        self.__dict__.setdefault( 'plotDisplayData', SequenceDict() )
 
         self.__dict__.setdefault( 'name', "CameraSettings" )
 
 class CameraSettings(UiForm,UiBase):
     valueChanged = QtCore.pyqtSignal(object)
 
-    def __init__(self,config,plotDict,parent=None):
+    def __init__(self,config,globalVariablesUi,parent=None):
         UiForm.__init__(self)
         UiBase.__init__(self,parent)
         self.config = config
-        self.plotDict = plotDict
         self.settings = self.config.get('CameraSettings.Settings',Settings())
         self.settingsDict = self.config.get('CameraSettings.Settings.dict', dict())
         self.currentSettingsName = self.config.get('CameraSettings.SettingsName','')
+
+        self.globalVariables = globalVariablesUi.globalDict
+        self.globalVariablesChanged = globalVariablesUi.valueChanged
+        self.globalVariablesUi = globalVariablesUi
+
+
+
+        self.a = Parameter(name='exposuretime', dataType='magnitude', value=Q(100, 'ms'), tooltip="Exposure time")
+        self.b = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
+        self.c = Parameter(name='experiments', dataType='magnitude', value=100, tooltip="Number of experiments")
+
+        self.parameterDict = SequenceDict(
+            [(self.a.name, self.a),
+             (self.b.name, self.b),
+             (self.c.name, self.c)]
+        )
+
+        self.ParameterTableModel = ParameterTableModel(parameterDict=self.parameterDict)
+
+
 
     def setupUi(self, parent):
         UiForm.setupUi(self,parent)
@@ -93,44 +112,24 @@ class CameraSettings(UiForm,UiBase):
         self.displayUnitCombo.setCurrentIndex(self.settings.unit)
         self.settings.displayUnit.unit = self.settings.unit
 
-        # Added counter table to select which counters to plot
-        self.DedicatedTableModel = DedicatedCounterTableModel( self.settings.counterDict
-                                                               ,self.settings.adcDict,self.settings.plotDisplayData,self.plotDict)
-        self.DedicatedTableModel.edited.connect( self.onSaveProfile )
-        self.DedicatedTableModel.edited.connect( self.updateMask )
-        self.DedicatedCounterTableView.setModel( self.DedicatedTableModel )
-        self.comboBoxDelegate = ComboBoxDelegate()
-        self.magnitudeSpinBoxDelegate = MagnitudeSpinBoxDelegate()
-        self.multiSelectDelegate = MultiSelectDelegate()
-        self.DedicatedCounterTableView.setItemDelegateForColumn( 0, self.multiSelectDelegate )
-        self.DedicatedCounterTableView.setItemDelegateForColumn( 1, self.comboBoxDelegate )
-        self.dropDedicatedCounterSettingButton.clicked.connect( self.onCounterRemoveSetting )
-        self.addDedicatedCounterSettingButton.clicked.connect( self.DedicatedTableModel.addSetting )
+        self.ParameterTable = ParameterTable()
+        self.ParameterTable.setupUi(parameterDict=self.parameterDict, globalDict=self.globalVariables)
+        if self.globalVariablesChanged:
+            self.globalVariablesChanged.connect(self.ParameterTableModel.evaluate)
+        self.parameterView.setModel(self.ParameterTableModel)
+        self.parameterView.resizeColumnToContents(0)
+        # self.parameterView.clicked.connect(self.onVariableViewClicked)
 
-        #Plot legend
-        icons = penicons().penicons()
-        for n in range(20):
-            if n < 16:
-                item = QtWidgets.QListWidgetItem(icons[n+1], "Count {0}".format(n))
-            else:
-                item = QtWidgets.QListWidgetItem(icons[n+1], "ADC {0}".format(n-16))
-            item.setFlags(QtCore.Qt.ItemIsEnabled)
-            self.plotLegend.addItem(item)
+        self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
 
-        self.removeDedicatedCountersProfileButton.clicked.connect( self.onRemoveProfile )
-        restoreGuiState( self, self.config.get('CameraSettings.guiState') )
-        # Added profiles
-        self.profileDedicatedCountersComboBox.addItems( self.settingsDict.keys() )
-        if self.currentSettingsName in self.settingsDict:
-            self.profileDedicatedCountersComboBox.setCurrentIndex( self.profileDedicatedCountersComboBox.findText(self.currentSettingsName))
-        else:
-            self.currentSettingsName = str( self.profileDedicatedCountersComboBox.currentText() )
-        self.profileDedicatedCountersComboBox.currentIndexChanged[str].connect(self.onLoadProfile)
-        self.profileDedicatedCountersComboBox.lineEdit().editingFinished.connect( self.onSaveProfile )
 
-        self.setProfile( self.currentSettingsName, self.settings )
-        self.onSaveProfile()
-    
+
+    def onDataChanged(self,parameterDict):
+        for key, param in self.parameterDict.items():
+            print('{0}: {1}'.format(key, param.value))
+
+
+
     def onLoadProfile(self, name):
         name = str(name)
         if name in self.settingsDict and name!=self.currentSettingsName:
@@ -192,7 +191,7 @@ class CameraSettings(UiForm,UiBase):
 
     def saveConfig(self):
         self.config['CameraSettings.Settings'] = self.settings
-        self.config['CameraSettings.guiState'] = saveGuiState( self )
+        #self.config['CameraSettings.guiState'] = saveGuiState( self ) #TODO
         self.config['CameraSettings.Settings.dict'] = self.settingsDict
         self.config['CameraSettings.SettingsName'] = self.currentSettingsName
 
