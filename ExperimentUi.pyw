@@ -418,12 +418,11 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             self.showMaximized()
 
         if self.AndorCameraEnabled:
-            self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting,self.scanExperiment)
+            self.CameraWindow = Camera(self.config, self.dbConnection, self.pulser,self.globalVariablesUi, self.shutterUi,self.scanExperiment)
             self.CameraWindow.setupUi(self.CameraWindow)
 
         self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting)
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
-
 
         self.logicAnalyzerWindow = LogicAnalyzer(self.config, self.pulser, self.channelNameData )
         self.logicAnalyzerWindow.setupUi(self.logicAnalyzerWindow)

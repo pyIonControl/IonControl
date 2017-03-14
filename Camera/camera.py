@@ -30,6 +30,7 @@ from Camera import CameraSettings
 from dedicatedCounters import DedicatedDisplay
 from dedicatedCounters import InputCalibrationUi
 from modules import enum
+from modules.quantity import Q
 
 
 
@@ -164,11 +165,11 @@ class AcquireThreadAndor(AcquireThread):
         with closing(self.cam.open()):
 
             if self.app.timing_andor.external:
-                self.cam.set_timing(integration=self.app.settings.exposureTime,
+                print("Exp is gonna be = ",self.app.settings.exposureTime.value)
+                self.cam.set_timing(integration=self.app.settings.exposureTime.value,
                                     repetition=0,
                                     ampgain=self.app.properties_andor.get_ampgain(),
-                                    #emgain=self.app.properties_andor.get_emgain())
-                                    emgain=self.app.settings.EMGain)
+                                    emgain=int(self.app.settings.EMGain.value))
 
             else:
                 #AndorTemperatureThread(self.app).stop()
@@ -333,7 +334,6 @@ class ConsumerThreadAndorFast(ConsumerThread):
         self.message('E')
         print("Exiting ImageConsumerThread")
 
-
 class ConsumerThreadIons(ConsumerThread):
     """Acquire one images, calculate absorption image, save to file, display"""
     def run(self):
@@ -364,8 +364,6 @@ class ConsumerThreadIons(ConsumerThread):
         self.message('Exit')
         print("Exiting ImageConsumerThread")
 
-
-
 class Camera(CameraForm, CameraBase):
     dataAvailable = QtCore.pyqtSignal(object)
     OpStates = enum.enum('idle', 'running', 'paused')
@@ -390,11 +388,7 @@ class Camera(CameraForm, CameraBase):
         # Timing and acquisition settings
         self.imaging_mode_andor = 'TriggeredAcquisition'
 
-        # Queues for image acquisition
-        self.imagequeue_andor = queue.Queue(1)
-        self.timing_andor = CamTiming(exposure=100, repetition=1, live=False)
-        self.properties_andor = AndorProperties(ampgain=0, emgain=0)
-        self.imaging_andor_useROI = False
+
 
     @property
     def settings(self):
@@ -407,18 +401,26 @@ class Camera(CameraForm, CameraBase):
 
 
 
-        # Setting
+        # Settings
 
 
         self.settingsUi = CameraSettings.CameraSettings(self.config,self.globalVariablesUi)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget(self.settingsUi)
         self.settingsUi.valueChanged.connect(self.onSettingsChanged)
+        self.CameraParameters=self.settingsUi.ParameterTableModel.parameterDict
 
         # Arrange the dock widgets
         #self.tabifyDockWidget(self.CameraView, self.settingsDock)
 
-
+        # Queues for image acquisition
+        print("NumberofExperiments = ", self.settingsUi.settings.NumberOfExperiments)
+        print("Exposure time = ", self.settingsUi.settings.exposureTime)
+        print("EMGain = ", self.settingsUi.settings.EMGain)
+        self.imagequeue_andor = queue.Queue(1)#self.settingsUi.settings.NumberOfExperiments
+        self.timing_andor = CamTiming(exposure=100, repetition=1, live=False)
+        self.properties_andor = AndorProperties(ampgain=0, emgain=0)
+        self.imaging_andor_useROI = False
 
         #Actions
         self.actionSave.triggered.connect(self.onSave)
@@ -463,7 +465,12 @@ class Camera(CameraForm, CameraBase):
         print(self.ScanExperiment.scanControlWidget.getScan().list)
         print(self.ScanExperiment.scanControlWidget.getScan().list[0])
         print(self.ScanExperiment.scanControlWidget.getScan().list[-1])
-        print(self.globalVariables['CoolTimeGlobal'])
+        for i in range(3):
+            for j in range(2):
+                aa=self.settingsUi.ParameterTableModel.data(self.settingsUi.ParameterTableModel.index(i,j),QtCore.Qt.DisplayRole)
+                print(aa)
+        for key, param in self.CameraParameters.items():
+                print('{0}: {1}'.format(key, param.value))
         # needs astropy
         # image_file = os.path.join(os.path.dirname(__file__), '..', 'ui/icons/80up_1.fits')
         # image_data = fits.getdata(image_file)

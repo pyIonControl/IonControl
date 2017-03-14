@@ -10,7 +10,7 @@ import os
 
 
 dllpath = os.path.join(os.path.dirname(__file__), '..', 'Camera/atmcd64d')
-print(dllpath)
+#print(dllpath)
 windll.LoadLibrary(dllpath)
 #hack to releas GIL during wait
 # MVll = ctypes.windll.mvDeviceManager

@@ -167,16 +167,20 @@ if __name__=='__main__':
     import sys
     from functools import partial
 
-    globalDict = {'a': Q(5, 'ms'), 'b': Q(125,'us')}
+    globalDict = {'aa': Q(5, 'ms'), 'bb': Q(125,'us')}
 
     def onDataChanged(parameterDict):
         for key, param in parameterDict.items():
             print('{0}: {1}'.format(key, param.value))
+        for key, param in globalDict.items():
+            print('{0}: {1}'.format(key, param))
+
 
     def onButtonClicked(model, parameter):
         print("{0} was clicked".format(parameter.value))
-        globalDict['a'] += Q(1, 'us')
+        globalDict['aa'] += Q(1, 'us')
         model.evaluate(globalDict)
+        print(globalDict['aa'])
 
     app = QtWidgets.QApplication(sys.argv)
 

@@ -41,14 +41,9 @@ def now():
 class Settings(object):
     def __init__(self):
 
-        self.integrationTime = Q(100, 'ms')
-        self.displayUnit = CountrateConversion.DisplayUnit()
-        self.unit = 0
-        self.exposureTime = 100
+        self.exposureTime = Q(100, 'ms')
         self.EMGain = 0
-
-        self.plotDisplayData = SequenceDict()
-
+        self.NumberOfExperiments = 100
         self.name = "CameraSettings"
 
 
@@ -58,14 +53,9 @@ class Settings(object):
         after unpickling. Only new class attributes need to be added here.
         """
         self.__dict__ = state
-        self.__dict__.setdefault( 'counterMask', 0 )
-        self.__dict__.setdefault( 'adcMask', 0 )
-        self.__dict__.setdefault('integrationTime', Q(100, 'ms'))
-        self.__dict__.setdefault( 'displayUnit', CountrateConversion.DisplayUnit() )
-        self.__dict__.setdefault( 'unit', 0 )
-        self.__dict__.setdefault( 'exposureTime', 307 )
-        self.__dict__.setdefault( 'EMgain', 13)
-
+        self.__dict__.setdefault( 'exposureTime', Q(100, 'ms') )
+        self.__dict__.setdefault( 'EMGain', 0)
+        self.__dict__.setdefault('NumberOfExperiments', 200)
         self.__dict__.setdefault( 'name', "CameraSettings" )
 
 class CameraSettings(UiForm,UiBase):
@@ -84,110 +74,49 @@ class CameraSettings(UiForm,UiBase):
         self.globalVariablesUi = globalVariablesUi
 
 
-
-        self.a = Parameter(name='exposuretime', dataType='magnitude', value=Q(100, 'ms'), tooltip="Exposure time")
-        self.b = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
-        self.c = Parameter(name='experiments', dataType='magnitude', value=100, tooltip="Number of experiments")
+        self.settings.exposureTime = Parameter(name='exposuretime', dataType='magnitude', value=Q(5, 'ms'), tooltip="Exposure time")
+        self.settings.EMGain = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
+        self.settings.NumberOfExperiment = Parameter(name='experiments', dataType='magnitude', value=100, tooltip="Number of experiments")
 
         self.parameterDict = SequenceDict(
-            [(self.a.name, self.a),
-             (self.b.name, self.b),
-             (self.c.name, self.c)]
+            [(self.settings.exposureTime.name, self.settings.exposureTime),
+             (self.settings.EMGain.name, self.settings.EMGain),
+             (self.settings.NumberofExperiment.name, self.settings.NumberofExperiment)]
         )
 
         self.ParameterTableModel = ParameterTableModel(parameterDict=self.parameterDict)
 
 
-
     def setupUi(self, parent):
         UiForm.setupUi(self,parent)
-        self.integrationTimeBox.setValue( self.settings.integrationTime )
-        self.integrationTimeBox.valueChanged.connect( functools.partial(self.onValueChanged, 'integrationTime') )
-        self.exposureTimeBox.setValue( self.settings.exposureTime )
-        self.exposureTimeBox.valueChanged.connect( functools.partial(self.onValueChanged,'exposureTime') )
-        self.EMGainBox.setValue(self.settings.EMGain)
-        self.EMGainBox.valueChanged.connect(functools.partial(self.onValueChanged, 'EMGain'))
 
-        self.displayUnitCombo.currentIndexChanged[int].connect( self.onIndexChanged )
-        self.displayUnitCombo.setCurrentIndex(self.settings.unit)
-        self.settings.displayUnit.unit = self.settings.unit
+        # self.integrationTimeBox.setValue( self.settings.integrationTime )
+        # self.integrationTimeBox.valueChanged.connect( functools.partial(self.onValueChanged, 'integrationTime') )
+        # self.exposureTimeBox.setValue( self.settings.exposureTime1 )
+        # self.exposureTimeBox.valueChanged.connect( functools.partial(self.onValueChanged,'exposureTime') )
+        # self.EMGainBox.setValue(self.settings.EMGain1)
+        # self.EMGainBox.valueChanged.connect(functools.partial(self.onValueChanged, 'EMGain'))
 
         self.ParameterTable = ParameterTable()
         self.ParameterTable.setupUi(parameterDict=self.parameterDict, globalDict=self.globalVariables)
-        if self.globalVariablesChanged:
-            self.globalVariablesChanged.connect(self.ParameterTableModel.evaluate)
         self.parameterView.setModel(self.ParameterTableModel)
         self.parameterView.resizeColumnToContents(0)
-        # self.parameterView.clicked.connect(self.onVariableViewClicked)
 
-        self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
-
-
+        self.delegate = MagnitudeSpinBoxDelegate(self.globalVariables)
+        self.parameterView.setItemDelegateForColumn(1, self.delegate)
+        if self.globalVariablesChanged:
+            self.globalVariablesChanged.connect(partial(self.ParameterTableModel.evaluate, self.globalVariables))
+        #self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
 
     def onDataChanged(self,parameterDict):
         for key, param in self.parameterDict.items():
             print('{0}: {1}'.format(key, param.value))
 
-
-
-    def onLoadProfile(self, name):
-        name = str(name)
-        if name in self.settingsDict and name!=self.currentSettingsName:
-            self.setProfile( name, copy.deepcopy( self.settingsDict[name] ) )
-
-    def onSaveProfile(self):
-        name = str(self.profileDedicatedCountersComboBox.currentText())
-        isNew = name not in self.settingsDict
-        self.settingsDict[name] = copy.deepcopy( self.settings )
-        if isNew:
-            updateComboBoxItems( self.profileDedicatedCountersComboBox, sorted(self.settingsDict.keys()), name)
-
-    def onRemoveProfile(self):
-        name = str(self.profileDedicatedCountersComboBox.currentText())
-        if name in self.settingsDict:
-            self.settingsDict.pop(name)
-            updateComboBoxItems( self.profileDedicatedCountersComboBox, sorted(self.settingsDict.keys()))
-            name = str(self.profileComboBox.currentText())
-            self.onLoadProfile(name)
-
-    def setProfile(self, name, profile):
-        self.settings = profile
-        self.currentSettingsName = name
-        self.displayUnitCombo.setCurrentIndex(self.settings.unit)
-        self.DedicatedTableModel.setSettings(self.settings.plotDisplayData)
-        self.valueChanged.emit( self.settings )
-
-    def onCounterRemoveSetting(self):
-        for index in sorted(unique([ i.row() for i in self.DedicatedCounterTableView.selectedIndexes() ]),reverse=True):
-            self.DedicatedTableModel.dropSetting(index)
-        self.onSaveProfile()
-
-    def updateMask(self):
-        self.settings.counterMask = 0
-        self.settings.adcMask = 0
-        self.plotDisplayData = self.settings.plotDisplayData
-        for plot, counters in self.plotDisplayData.items():
-            for counter in counters:
-                if counter in self.settings.counterDict:
-                    num = self.settings.counterDict[counter]
-                    if not (self.settings.counterMask & (1 << num)):
-                        self.settings.counterMask |= (1 << num)
-                elif counter in self.settings.adcDict:
-                    num = self.settings.adcDict[counter]
-                    if not (self.settings.adcMask & (1 << num)):
-                        self.settings.adcMask |= (1 << num)
-
-        self.valueChanged.emit( self.settings )
-        self.onSaveProfile()
-
-    def onIndexChanged(self, index):
-        self.settings.displayUnit.unit = index
-        self.settings.unit = index
-        self.valueChanged.emit( self.settings)
     
     def onValueChanged(self, name, value):
         setattr(self.settings, name, value)
         self.valueChanged.emit( self.settings )
+
 
     def saveConfig(self):
         self.config['CameraSettings.Settings'] = self.settings
@@ -195,9 +124,6 @@ class CameraSettings(UiForm,UiBase):
         self.config['CameraSettings.Settings.dict'] = self.settingsDict
         self.config['CameraSettings.SettingsName'] = self.currentSettingsName
 
-    def saveable(self):
-        name = str(self.profileDedicatedCountersComboBox.currentText())
-        return name != '' and ( name not in self.settingsDict or not (self.settingsDict[name] == self.settings))
 
 
 
