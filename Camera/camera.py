@@ -165,8 +165,14 @@ class AcquireThreadAndor(AcquireThread):
         with closing(self.cam.open()):
 
             if self.app.timing_andor.external:
-                print("Exp is gonna be = ",self.app.settings.exposureTime.value)
-                self.cam.set_timing(integration=self.app.settings.exposureTime.value,
+                print("Exp is gonna be = ",self.app.settings.exposureTime.value.magnitude,self.app.settings.exposureTime.value.u)
+                print("EM is gonna be = ", self.app.settings.EMGain.value)
+
+                if   str(self.app.settings.exposureTime.value.u) == 'us': exp=self.app.settings.exposureTime.value.magnitude*0.001
+                elif str(self.app.settings.exposureTime.value.u) == 'ms': exp=self.app.settings.exposureTime.value.magnitude
+                else:                                                     exp = self.app.settings.exposureTime.value.magnitude
+                print('exp = ', exp)
+                self.cam.set_timing(integration=exp,
                                     repetition=0,
                                     ampgain=self.app.properties_andor.get_ampgain(),
                                     emgain=int(self.app.settings.EMGain.value))
@@ -411,7 +417,7 @@ class Camera(CameraForm, CameraBase):
         self.CameraParameters=self.settingsUi.ParameterTableModel.parameterDict
 
         # Arrange the dock widgets
-        #self.tabifyDockWidget(self.CameraView, self.settingsDock)
+        #self.tabifyDockWidget(self.centralwidget, self.settingsDock)
 
         # Queues for image acquisition
         print("NumberofExperiments = ", self.settingsUi.settings.NumberOfExperiments)
@@ -465,12 +471,7 @@ class Camera(CameraForm, CameraBase):
         print(self.ScanExperiment.scanControlWidget.getScan().list)
         print(self.ScanExperiment.scanControlWidget.getScan().list[0])
         print(self.ScanExperiment.scanControlWidget.getScan().list[-1])
-        for i in range(3):
-            for j in range(2):
-                aa=self.settingsUi.ParameterTableModel.data(self.settingsUi.ParameterTableModel.index(i,j),QtCore.Qt.DisplayRole)
-                print(aa)
-        for key, param in self.CameraParameters.items():
-                print('{0}: {1}'.format(key, param.value))
+        self.settingsUi.saveConfig()
         # needs astropy
         # image_file = os.path.join(os.path.dirname(__file__), '..', 'ui/icons/80up_1.fits')
         # image_data = fits.getdata(image_file)

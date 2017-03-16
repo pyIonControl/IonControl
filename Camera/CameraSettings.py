@@ -14,9 +14,8 @@ from trace.pens import penicons
 from uiModules.ComboBoxDelegate import ComboBoxDelegate
 from uiModules.MultiSelectDelegate import MultiSelectDelegate
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from dedicatedCounters.DedicatedCountersTableModel import DedicatedCounterTableModel
 from modules.PyqtUtility import updateComboBoxItems
-from modules.GuiAppearance import restoreGuiState, saveGuiState
+
 from modules.Utility import unique
 
 from datetime import datetime, timedelta
@@ -28,6 +27,7 @@ from uiModules.ParameterTable import ParameterTable, Parameter,ParameterTableMod
 from pulseProgram import VariableTableModel,VariableDictionary
 from modules.SequenceDict import SequenceDict
 from modules.quantity import Q
+from modules.GuiAppearance import restoreGuiState, saveGuiState
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 
@@ -41,9 +41,13 @@ def now():
 class Settings(object):
     def __init__(self):
 
-        self.exposureTime = Q(100, 'ms')
-        self.EMGain = 0
-        self.NumberOfExperiments = 100
+        # self.exposureTime = Q(100, 'ms')
+        # self.EMGain = 0
+        # self.NumberOfExperiments = 200
+        self.exposureTime=Parameter(name='Exposure time', dataType='magnitude', value=Q(5, 'ms'), tooltip="Exposure time")
+        self.EMGain = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
+        self.NumberOfExperiments = Parameter(name='experiments', dataType='magnitude', value=200,tooltip="Number of experiments")
+
         self.name = "CameraSettings"
 
 
@@ -53,9 +57,12 @@ class Settings(object):
         after unpickling. Only new class attributes need to be added here.
         """
         self.__dict__ = state
-        self.__dict__.setdefault( 'exposureTime', Q(100, 'ms') )
-        self.__dict__.setdefault( 'EMGain', 0)
-        self.__dict__.setdefault('NumberOfExperiments', 200)
+        # self.__dict__.setdefault( 'Exposure time', Q(100, 'ms') )
+        # self.__dict__.setdefault( 'EMGain', 0)
+        # self.__dict__.setdefault('NumberOfExperiments', 200)
+        self.__dict__.setdefault(self.exposureTime.name, self.exposureTime.value)
+        self.__dict__.setdefault(self.EMGain.name, self.EMGain.value)
+        self.__dict__.setdefault(self.NumberOfExperiments.name, self.NumberOfExperiments.value)
         self.__dict__.setdefault( 'name', "CameraSettings" )
 
 class CameraSettings(UiForm,UiBase):
@@ -73,17 +80,16 @@ class CameraSettings(UiForm,UiBase):
         self.globalVariablesChanged = globalVariablesUi.valueChanged
         self.globalVariablesUi = globalVariablesUi
 
+        # self.settings.exposureTime = Parameter(name='Exposure time', dataType='magnitude', value=Q(5, 'ms'), tooltip="Exposure time")
+        # self.settings.EMGain = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
+        # self.settings.NumberOfExperiments = Parameter(name='experiments', dataType='magnitude', value=200, tooltip="Number of experiments")
+        # self.parameterDict = SequenceDict(
+        #     [(self.settings.exposureTime.name, self.settings.exposureTime),
+        #      (self.settings.EMGain.name, self.settings.EMGain),
+        #      (self.settings.NumberOfExperiments.name, self.settings.NumberOfExperiments)]
+        # )
 
-        self.settings.exposureTime = Parameter(name='exposuretime', dataType='magnitude', value=Q(5, 'ms'), tooltip="Exposure time")
-        self.settings.EMGain = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
-        self.settings.NumberOfExperiment = Parameter(name='experiments', dataType='magnitude', value=100, tooltip="Number of experiments")
-
-        self.parameterDict = SequenceDict(
-            [(self.settings.exposureTime.name, self.settings.exposureTime),
-             (self.settings.EMGain.name, self.settings.EMGain),
-             (self.settings.NumberofExperiment.name, self.settings.NumberofExperiment)]
-        )
-
+        self.parameterDict = self.settingsDict
         self.ParameterTableModel = ParameterTableModel(parameterDict=self.parameterDict)
 
 
@@ -106,8 +112,10 @@ class CameraSettings(UiForm,UiBase):
         self.parameterView.setItemDelegateForColumn(1, self.delegate)
         if self.globalVariablesChanged:
             self.globalVariablesChanged.connect(partial(self.ParameterTableModel.evaluate, self.globalVariables))
-        #self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
 
+        self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
+
+        restoreGuiState(self, self.config.get('CameraSettings.guiState'))
     def onDataChanged(self,parameterDict):
         for key, param in self.parameterDict.items():
             print('{0}: {1}'.format(key, param.value))
@@ -120,8 +128,8 @@ class CameraSettings(UiForm,UiBase):
 
     def saveConfig(self):
         self.config['CameraSettings.Settings'] = self.settings
-        #self.config['CameraSettings.guiState'] = saveGuiState( self ) #TODO
-        self.config['CameraSettings.Settings.dict'] = self.settingsDict
+        self.config['CameraSettings.guiState'] = saveGuiState( self )
+        self.config['CameraSettings.Settings.dict'] = self.parameterDict
         self.config['CameraSettings.SettingsName'] = self.currentSettingsName
 
 
