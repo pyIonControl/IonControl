@@ -3,36 +3,38 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from . import logging
+import os
+
+import logging
 import sys
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
-from .mylogging.ExceptionLogButton import ExceptionLogButton
-from .mylogging import LoggingSetup  #@UnusedImport
-from .modules import DataDirectory
-from .persist import configshelve
-from .uiModules import MagnitudeParameter #@UnusedImport
+from mylogging.ExceptionLogButton import ExceptionLogButton
+from mylogging import LoggingSetup  #@UnusedImport
+from modules import DataDirectory
+from persist import configshelve
+from uiModules import MagnitudeParameter #@UnusedImport
 from pyqtgraph.exporters.ImageExporter import ImageExporter
 
-from .trace import Traceui
-from .trace import pens
+from trace import Traceui
+from trace import pens
 
 from pyqtgraph.dockarea import DockArea, Dock
-from .uiModules.DateTimePlotWidget import DateTimePlotWidget
-from .externalParameter.InstrumentLogging import LoggingInstruments 
-from .externalParameter.InstrumentLoggingSelection import InstrumentLoggingSelection 
-from .externalParameter.InstrumentLoggingHandler import InstrumentLoggingHandler
-from .fit.FitUi import FitUi
-from .externalParameter.InstrumentLoggerQueryUi import InstrumentLoggerQueryUi
-from .externalParameter.InstrumentLoggingDisplay import InstrumentLoggingDisplay
-from .modules.SequenceDict import SequenceDict
-from .mylogging.LoggerLevelsUi import LoggerLevelsUi
-from _functools import partial
-from .gui.Preferences import PreferencesUi
-from .modules.SceneToPrint import SceneToPrint
-from .ProjectConfig.Project import Project, ProjectInfoUi
+from uiModules.DateTimePlotWidget import DateTimePlotWidget
+from externalParameter.InstrumentLogging import LoggingInstruments
+from externalParameter.InstrumentLoggingSelection import InstrumentLoggingSelection
+from externalParameter.InstrumentLoggingHandler import InstrumentLoggingHandler
+from fit.FitUi import FitUi
+from externalParameter.InstrumentLoggerQueryUi import InstrumentLoggerQueryUi
+from externalParameter.InstrumentLoggingDisplay import InstrumentLoggingDisplay
+from modules.SequenceDict import SequenceDict
+from mylogging.LoggerLevelsUi import LoggerLevelsUi
+from functools import partial
+from gui.Preferences import PreferencesUi
+from modules.SceneToPrint import SceneToPrint
+from ProjectConfig.Project import Project, ProjectInfoUi
 import ctypes
 setID = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
 
@@ -368,7 +370,12 @@ if __name__ == "__main__":
     project = Project()
     logger = logging.getLogger("")
     setID('TrappedIons.InstrumentLogging') #Makes the icon in the Windows taskbar match the icon set in Qt Designer
-    with configshelve.configshelve(project.guiConfigFile) as config:
+
+    overrideConfigFile = project.projectConfig.get('configurationFile')
+    overrideFileType = {'.yml': 'yaml', '.yaml': 'yaml', '.db': 'sqlite'}.get(os.path.splitext(overrideConfigFile)[1], 'sqlite') if overrideConfigFile else None
+    loadFromDate = project.projectConfig.get('configurationFile')
+    with configshelve.configshelve(project.dbConnection, loadFromDate=project.projectConfig.get('loadFromDateTime', None),
+                                   filename=overrideConfigFile, filetype=overrideFileType) as config:
         with InstrumentLoggingUi(project, config) as ui:
             ui.setupUi(ui)
             LoggingSetup.qtHandler.textWritten.connect(ui.onMessageWrite)

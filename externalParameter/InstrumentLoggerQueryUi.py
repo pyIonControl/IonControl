@@ -19,7 +19,7 @@ from modules import WeakMethod
 import weakref
 from modules.NamedTimespan import getRelativeDatetime, timespans
 import pytz
-from .externalParameter.persistence import DBPersist
+from .persistence import DBPersist
 from ProjectConfig.Project import getProject
 from copy import deepcopy
 
