@@ -38,6 +38,92 @@ def read(filename):
     #return img.astype(numpy.float_)
     return img.astype(numpy.float32)
 
+def read_nr(filename):
+    fid = open(filename, 'rb')
+    foo = fid.read(10)
+    #fid1 = open(filename, 'rb')
+    height = int(fromfile(fid, dtype = uint16, count = 1))
+    width  = int(fromfile(fid, dtype = uint16, count = 1))
+    print("h=",height,"w=",width)
+
+    nr = int(fromfile(fid, dtype=uint16, count=1))
+    print('nr =', nr)
+
+    lentext = int(fromfile(fid, dtype=uint8, count=1))
+    print('lentext = ', lentext)
+    fid.read(10)
+    a=fid.read(lentext+1)
+    print(str(a))
+
+    fid.read(181)
+    raw  = int(fromfile(fid, dtype = uint8 , count = 1))
+    print('raw = ',raw)
+
+
+    xoff = int(fromfile(fid, dtype = uint16, count = 1))
+    yoff = int(fromfile(fid, dtype = uint16, count = 1))
+
+
+    #img = fromfile(fid, dtype = numpy.int32, count = width*height)
+    data = read_fid_full(fid, size = width*height*2, timeout = 5)
+    #print(data)
+    img = fromstring(data, dtype = uint16, count = width*height)
+    img.shape = (height, width)
+    #print(img.shape)
+    #print(img)
+
+    #if (raw == 1):
+    #    img = (img+1.0)*1000.0
+
+    fid.close()
+    #return img.astype(numpy.float_)
+    return img.astype(numpy.float32)
+
+
+def read_imagearrays(filename):
+    fid = open(filename, 'rb')
+    foo = fid.read(10)
+    #fid1 = open(filename, 'rb')
+    height = int(fromfile(fid, dtype = uint16, count = 1))
+    width  = int(fromfile(fid, dtype = uint16, count = 1))
+    print("h=",height,"w=",width)
+
+    nr = int(fromfile(fid, dtype=uint16, count=1))
+    print('nr =', nr)
+
+    lentext = int(fromfile(fid, dtype=uint8, count=1))
+    print('lentext = ', lentext)
+    fid.read(10)
+    a=fid.read(lentext+1)
+    print(str(a))
+
+    fid.read(181)
+    raw  = int(fromfile(fid, dtype = uint8 , count = 1))
+    print('raw = ',raw)
+
+
+    xoff = int(fromfile(fid, dtype = uint16, count = 1))
+    yoff = int(fromfile(fid, dtype = uint16, count = 1))
+
+
+    #img = fromfile(fid, dtype = numpy.int32, count = width*height)
+    data = read_fid_full(fid, size = width*height*2*nr, timeout = 5)
+    #print(data)
+    imagearray=[]
+    i=0
+    while i<=nr:
+        img = fromstring(data, dtype = uint16, count = width*height)
+        img.shape = (height, width)
+        imagearray.append(img.astype(numpy.float32))
+        i=i+1
+
+    #if (raw == 1):
+    #    img = (img+1.0)*1000.0
+
+    fid.close()
+    #return img.astype(numpy.float_)
+    return imagearray
+
 def read_fid_full(fid, size, timeout = 1):
     numbytesread = 0
     result=bytes()
@@ -74,6 +160,77 @@ def write_raw_image(filename, img, raw = False):
     else:
         img.astype(uint16).tofile(fid)
     print(img)
+    fid.close()
+
+def write_raw_image_nr(filename, img, nr, text, lentext ,raw = False):
+    fid = open(filename, 'wb')#file(filename, 'wb')
+    fid.write(b' '*10)#write 10 bytes
+    #############write width height nr and lentext###################
+    height, width = img.shape
+    ha = numpy.array([height], dtype = numpy.uint16)
+    ha.tofile(fid)
+    wa = numpy.array([width], dtype = numpy.uint16)
+    wa.tofile(fid)
+    nra = numpy.array([nr], dtype=numpy.uint16)
+    nra.tofile(fid)
+    lt=numpy.array([lentext], dtype=numpy.uint16)
+    lt.tofile(fid)
+
+    fid.write(b' ' * 10)#write 10 bytes
+    #############write text###################
+    b = bytearray()
+    b.extend(map(ord, text))
+    fid.write(b)
+
+    fid.write(b' '*181)
+    #############write raw###################
+    if raw == True:
+        fid.write('\x01')
+    else:
+        fid.write(b' ')
+    fid.write(b' '*4)#TODO: offsets
+    #############write image###################
+    if img.dtype == numpy.uint16:
+        img.tofile(fid)
+    else:
+        img.astype(uint16).tofile(fid)
+    print(img)
+    fid.close()
+
+def write_raw_imagearrays(filename, imgarr, nr, text, lentext ,raw = False):
+    fid = open(filename, 'wb')#file(filename, 'wb')
+    fid.write(b' '*10)#write 10 bytes
+    #############write width height nr and lentext###################
+    height, width = imgarr[0].shape
+    ha = numpy.array([height], dtype = numpy.uint16)
+    ha.tofile(fid)
+    wa = numpy.array([width], dtype = numpy.uint16)
+    wa.tofile(fid)
+    nra = numpy.array([nr], dtype=numpy.uint16)
+    nra.tofile(fid)
+    lt=numpy.array([lentext], dtype=numpy.uint16)
+    lt.tofile(fid)
+
+    fid.write(b' ' * 10)#write 10 bytes
+    #############write text###################
+    b = bytearray()
+    b.extend(map(ord, text))
+    fid.write(b)
+
+    fid.write(b' '*181)
+    #############write raw###################
+    if raw == True:
+        fid.write('\x01')
+    else:
+        fid.write(b' ')
+    fid.write(b' '*4)#TODO: offsets
+    #############write image###################
+    for img in imgarr:
+        if img.dtype == numpy.uint16:
+            img.tofile(fid)
+        else:
+            img.astype(uint16).tofile(fid)
+    print(imgarr)
     fid.close()
 
 def loadimg(filename):
@@ -115,7 +272,7 @@ def test_read(filename):
 def test_save(filename, img):
     print("saving...")
     sys.stdout.flush()
-    write_raw_image(filename, img)
+    write_raw_imagearrays(filename, img,2,'cane',len('cane'))
     print("done")
     sys.stdout.flush()
 
@@ -144,8 +301,13 @@ if __name__ == '__main__':
     #aa.reshape(5, 5)
     #filename='C:/IonControl/Camera/Images/YourMom.sis'
     #write_raw_image(filename, aa , raw=False)
-    filename = 'C:/IonControl/Camera/Images/20170305194438-ScanName-Image-number.sis'
-    img = read(filename)
-    test_save("C:/IonControl/Camera/Images/cane",img)
+
+    filename = 'Z:\Lab\Andor Project/Images/20170321114744-ScanName-Image-number3.sis'
+    img = read_imagearrays(filename)
+    test_save("Z:\Lab\Andor Project/Images/cane",img)
+
+    filename = "Z:\Lab\Andor Project/Images/cane"
+    img = read_imagearrays(filename)
+    test_save("Z:\Lab\Andor Project/Images/cane", img)
     #simultanous_write_read()
     

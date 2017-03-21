@@ -37,6 +37,7 @@ class Cam(object):
         self.andormode='live'
         self.width=0
         self.height=0
+        self.numberandorimages=0
         windll.atmcd64d.Initialize(".")
         camsn = c_long()
         windll.atmcd64d.GetCameraSerialNumber(byref(camsn))
@@ -50,9 +51,9 @@ class Cam(object):
 
     def open(self):
         print('Andor open')
-        windll.atmcd64d.SetTriggerMode(1) #external
+        windll.atmcd64d.SetTriggerMode(1) #1=external, 0=internal
         windll.atmcd64d.SetReadMode(4) #read images
-        windll.atmcd64d.SetShutter(1,1,1000,1000)
+        windll.atmcd64d.SetShutter(1,1,1000,1000) #Shutter open
         return self
 
     def close(self):
@@ -78,13 +79,13 @@ class Cam(object):
         windll.atmcd64d.GetTotalNumberImagesAcquired(byref(currentnumberimages))
         print("currentnumberimages = ", currentnumberimages.value)
         time.sleep(0.5)#--------------------------------#
-        if self.andormode == 'absorption3' or self.andormode == 'live':
+        if self.andormode == 'TriggeredAcquisition' or self.andormode == 'live':
             if currentnumberimages.value != self.numberandorimages:
                 print('Image #', currentnumberimages.value)
                 self.numberandorimages = currentnumberimages.value
             else:
                 raise CamTimeoutError
-        if self.andormode == 'TriggeredAcquisition':
+        if self.andormode == 'TriggeredAcquisition_1':
             windll.atmcd64d.GetStatus(byref(status))
             print("status = ", status.value)
             if status.value == 20073:
@@ -122,23 +123,23 @@ class Cam(object):
     def set_timing(self, integration=100,
                    repetition=0, ampgain=0, emgain=0):
         print('Andor Imaging mode: ', self.andormode)
-        aa=8#-----------------------Set aa=0, just for debugging-----------#
+        fakeim=2#==============================In normal operation set fakeim=0, just for debugging====================================#
         if self.andormode == 'FastKinetics':
             print('Setting camera parameters for fast kinetics.')
-            self.width=self.frame_width()+aa
-            self.height=self.frame_height()+aa
+            self.width=self.frame_width()+fakeim
+            self.height=self.frame_height()+fakeim
             windll.atmcd64d.SetAcquisitionMode(4) #1 single mode 2 accumulate mode 5 run till abort
             #windll.atmcd64d.SetFastKinetics(501,2,c_float(3.0e-3),4,1,1)
             windll.atmcd64d.SetFastKinetics(501,2,c_float(integration*1.0e-3),4,1,1)
         elif self.andormode == 'live':
             print('Setting camera parameters for live mode.')
-            self.width=self.frame_width()+aa
-            self.height=self.frame_height()+aa
+            self.width=self.frame_width()+fakeim
+            self.height=self.frame_height()+fakeim
             windll.atmcd64d.SetAcquisitionMode(5) #1 single mode 2 accumulate mode 5 run till abort
         elif self.andormode == 'TriggeredAcquisition':
             print('Setting camera parameters for Triggered Acquisition mode')
-            self.width=self.frame_width()+aa
-            self.height=self.frame_height()+aa
+            self.width=self.frame_width()+fakeim
+            self.height=self.frame_height()+fakeim
             windll.atmcd64d.SetAcquisitionMode(5) #1 single mode 2 accumulate mode 5 run till abort
         print('Andor set timings:')
         print('  set exposure time =', integration, 'ms')
@@ -186,7 +187,7 @@ class Cam(object):
         starttime=time.time()
         if self.andormode == 'TriggeredAcquisition' or self.andormode == 'live':
             print('Retrieving image: ', self.width,'x',self.height)
-            imgtype = c_long*(self.width*self.height)#remove+2 when operating on Andor
+            imgtype = c_long*(self.width*self.height)
             img = imgtype()
             windll.atmcd64d.GetMostRecentImage(img,c_long(self.width*self.height))
             imgout=numpy.ctypeslib.as_array(img)

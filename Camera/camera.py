@@ -161,28 +161,24 @@ class AcquireThread(threading.Thread):
 class AcquireThreadAndor(AcquireThread):
     def run(self):
         self.running = True
+        self.nr=0
         print('Starting Acquiring Thread and the mode is = ', camandor.andormode)
         with closing(self.cam.open()):
+            if str(self.app.CameraParameters['Exposure time'].value.u) == 'us':   exp = self.app.CameraParameters['Exposure time'].value.magnitude * 0.001
+            elif str(self.app.CameraParameters['Exposure time'].value.u) == 'ms': exp = self.app.CameraParameters['Exposure time'].value.magnitude
+            else: exp = self.app.CameraParameters['Exposure time'].value.magnitude
 
             if self.app.timing_andor.external:
-                print("Exp is gonna be = ",self.app.settings.exposureTime.value.magnitude,self.app.settings.exposureTime.value.u)
-                print("EM is gonna be = ", self.app.settings.EMGain.value)
-
-                if   str(self.app.settings.exposureTime.value.u) == 'us': exp=self.app.settings.exposureTime.value.magnitude*0.001
-                elif str(self.app.settings.exposureTime.value.u) == 'ms': exp=self.app.settings.exposureTime.value.magnitude
-                else:                                                     exp = self.app.settings.exposureTime.value.magnitude
-                print('exp = ', exp)
                 self.cam.set_timing(integration=exp,
                                     repetition=0,
                                     ampgain=self.app.properties_andor.get_ampgain(),
-                                    emgain=int(self.app.settings.EMGain.value))
-
+                                    emgain=int(self.app.CameraParameters['EMGain'].value.magnitude))
             else:
                 #AndorTemperatureThread(self.app).stop()
-                self.cam.set_timing(integration=self.app.timing_andor.exposure,
+                self.cam.set_timing(integration=exp,
                                     repetition=self.app.timing_andor.repetition,
                                     ampgain=self.app.properties_andor.get_ampgain(),
-                                    emgain=self.app.settings.EMGain)
+                                    emgain=int(self.app.CameraParameters['EMGain'].value.magnitude))
 
             #self.cam.start_live_acquisition()# let's comment this out, we will introduce the live afterwards
 
@@ -190,14 +186,14 @@ class AcquireThreadAndor(AcquireThread):
                 try:
                     #self.cam.wait(0.1)
                     pass
-
                 except CamTimeoutError:
-                    pass
+                    print("Timeout!")
                 else:
                     img = self.cam.roidata()
-                    time.sleep(1)
+                    time.sleep(2)
                     # self.running=False
                     self.nr += 1
+                    if (self.nr > self.app.CameraParameters['experiments'].value): self.nr = 1
                     self.queue.put((self.nr, img.astype(numpy.float32)))  # TODO: ????
                     print("--------Acquiringthread--------")
                     print("Just Acquired an img and put it in the queue:")
@@ -206,6 +202,7 @@ class AcquireThreadAndor(AcquireThread):
             # put empty image to queue
             self.queue.put((- 1, None))
 
+        self.nr=0
         print("Exiting AndorImageProducerThread")
 
     def stop(self):
@@ -251,12 +248,19 @@ class ConsumerThread(threading.Thread):
         readImage.write_raw_image(filename, rawimg, True)
         self.message('S')
 
-    def saveimage(self, dir,filename,img):
+    def saveimage(self, dir,img):
         imagesavedir = dir
         imagesavefilename = "%s%s%s.sis" % (time.strftime("%Y%m%d%H%M%S"),"-ScanName","-Image-number")
         imagesavefilenamefull = os.path.normpath(os.path.join(imagesavedir, imagesavefilename))
         rawimg = img.astype(numpy.uint16)
         readImage.write_raw_image(imagesavefilenamefull, rawimg, False)
+
+    def saveimage_nr(self, dir, img, nr):
+        imagesavedir = dir
+        imagesavefilename = "%s%s%s%s.sis" % (time.strftime("%Y%m%d%H%M%S"), "-ScanName", "-Image-number",str(nr))
+        imagesavefilenamefull = os.path.normpath(os.path.join(imagesavedir, imagesavefilename))
+        #rawimg = img.astype(numpy.uint16)
+        readImage.write_raw_imagearrays(imagesavefilenamefull, img, nr,'abcdef',len('abcdef'))
 
 
     def stop(self):
@@ -341,17 +345,17 @@ class ConsumerThreadAndorFast(ConsumerThread):
         print("Exiting ImageConsumerThread")
 
 class ConsumerThreadIons(ConsumerThread):
-    """Acquire one images, calculate absorption image, save to file, display"""
+    """Consume images, calculate absorption image, save to file, display"""
     def run(self):
         self.running = True
+        imagearrays = []
         while self.running:
             try:
                 nr, img = self.get_image(timeout=10)
                 print("--------Consumerthread--------")
                 print("Taken image from Queue")
                 print(img)
-                time.sleep(1)
-                self.message('Acquiring')
+                self.message('Consuming')
                 if not self.running: break
                 print("image ok")
                 #self.save_abs_img(fileSettings.imagefile, img)
@@ -363,11 +367,21 @@ class ConsumerThreadIons(ConsumerThread):
 
             else:
                 #self.save_abs_img(fileSettings.imagefile, img)
-                self.saveimage(fileSettings.imagesavepath,'Cane.sis',img)
+                print("nr = ",nr)
+                if(nr!=self.app.CameraParameters['experiments'].value):
+                    imagearrays.append(img.astype(numpy.uint16))
+                    print("Just appended this image",img)
+                    print("imagesarrays=",imagearrays)
+                else:
+                    imagearrays.append(img)
+                    print("Just appended this image", img.astype(numpy.uint16))
+                    print("imagesarrays=", imagearrays)
+                    self.saveimage_nr(fileSettings.imagesavepath,imagearrays,nr)
+                    imagearrays = []
+                    print("--------Just saved an image array--------")
 
-                print("--------Just saved an image--------")
 
-        self.message('Exit')
+        self.message('Exit Consumer Thread')
         print("Exiting ImageConsumerThread")
 
 class Camera(CameraForm, CameraBase):
@@ -388,6 +402,7 @@ class Camera(CameraForm, CameraBase):
         self.globalVariablesUi = globalVariablesUi
         self.shutterUi = shutterUi
         self.ScanExperiment = ScanExperiment
+        self.ScanList=self.ScanExperiment.scanControlWidget.getScan().list
 
 
 
@@ -405,11 +420,7 @@ class Camera(CameraForm, CameraBase):
 
         self.setWindowTitle("Andor Camera")
 
-
-
         # Settings
-
-
         self.settingsUi = CameraSettings.CameraSettings(self.config,self.globalVariablesUi)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget(self.settingsUi)
@@ -420,10 +431,8 @@ class Camera(CameraForm, CameraBase):
         #self.tabifyDockWidget(self.centralwidget, self.settingsDock)
 
         # Queues for image acquisition
-        print("NumberofExperiments = ", self.settingsUi.settings.NumberOfExperiments)
-        print("Exposure time = ", self.settingsUi.settings.exposureTime)
-        print("EMGain = ", self.settingsUi.settings.EMGain)
-        self.imagequeue_andor = queue.Queue(1)#self.settingsUi.settings.NumberOfExperiments
+        self.currentfolder= ' '
+        self.imagequeue_andor = queue.Queue(int(self.CameraParameters['experiments'].value.magnitude))
         self.timing_andor = CamTiming(exposure=100, repetition=1, live=False)
         self.properties_andor = AndorProperties(ampgain=0, emgain=0)
         self.imaging_andor_useROI = False
@@ -489,6 +498,7 @@ class Camera(CameraForm, CameraBase):
             camandor.stop_cooling()
             AndorTemperatureThread(self).stop()
 
+
     def OnIdle(self, event):
         self.busy = 0
 
@@ -512,14 +522,16 @@ class Camera(CameraForm, CameraBase):
 
     def onLive(self):
         self.imaging_mode_andor == 'Live'
-        camandor.andormode='Live'
+        camandor.andormode=self.imaging_mode_andor
 
 
     def onAcquire(self):
         if self.actionAcquire.isChecked():
             self.imaging_mode_andor == 'TriggeredAcquisition'
-            camandor.andormode='TriggeredAcquisition'
+            print('==============Number of experiments = ', int(self.CameraParameters['experiments'].value.magnitude),'==============')
+            camandor.andormode = self.imaging_mode_andor
             self.start_acquisition_andor()
+
         else:
             self.stop_acquisition_andor()
 
@@ -544,19 +556,24 @@ class Camera(CameraForm, CameraBase):
 
 
     def stop_acquisition_andor(self):
-        self.imgconsumer_andor.stop()
+        print("The Imaging queue size is :", self.imagequeue_andor.qsize())
         self.imgproducer_andor.stop()
+        self.imgproducer_andor.running = False
+        time.sleep(5)
+
+        while self.imagequeue_andor.qsize()>0:#finish to save the images
+            print("The Imaging queue is blocked and the size is :", self.imagequeue_andor.qsize())
+            time.sleep(5)
+
+        self.imgconsumer_andor.stop()
         self.imgconsumer_andor.running=False
-        self.imgproducer_andor.running=False
+
 
 
         self.imgconsumer_andor.join(2)#2
         self.imgproducer_andor.join(6)#6
-
-
         #if self.imgproducer_andor.isAlive() or self.imgconsumer_andor.isAlive():
         #    print("could not stop Andor acquisition threads!", threading.enumerate())
-
         self.acquiring_andor = False
         #self.menu.EnableTop(self.ID_TimingAndor, True)
 

@@ -46,7 +46,7 @@ class Settings(object):
         # self.NumberOfExperiments = 200
         self.exposureTime=Parameter(name='Exposure time', dataType='magnitude', value=Q(5, 'ms'), tooltip="Exposure time")
         self.EMGain = Parameter(name='EMGain', dataType='magnitude', value=0, tooltip="EM gain")
-        self.NumberOfExperiments = Parameter(name='experiments', dataType='magnitude', value=200,tooltip="Number of experiments")
+        self.NumberOfExperiments = Parameter(name='experiments', dataType='magnitude', value=133,tooltip="Number of experiments")
 
         self.name = "CameraSettings"
 
@@ -116,7 +116,9 @@ class CameraSettings(UiForm,UiBase):
         self.ParameterTableModel.valueChanged.connect(partial(self.onDataChanged, self.ParameterTableModel.parameterDict))
 
         restoreGuiState(self, self.config.get('CameraSettings.guiState'))
+
     def onDataChanged(self,parameterDict):
+        print('Changed Camera Parameters')
         for key, param in self.parameterDict.items():
             print('{0}: {1}'.format(key, param.value))
 
