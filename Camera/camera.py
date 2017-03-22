@@ -162,6 +162,7 @@ class AcquireThreadAndor(AcquireThread):
     def run(self):
         self.running = True
         self.nr=0
+        self.scanx=None
         print('Starting Acquiring Thread and the mode is = ', camandor.andormode)
         with closing(self.cam.open()):
             if str(self.app.CameraParameters['Exposure time'].value.u) == 'us':   exp = self.app.CameraParameters['Exposure time'].value.magnitude * 0.001
@@ -194,13 +195,15 @@ class AcquireThreadAndor(AcquireThread):
                     # self.running=False
                     self.nr += 1
                     if (self.nr > self.app.CameraParameters['experiments'].value): self.nr = 1
-                    self.queue.put((self.nr, img.astype(numpy.float32)))  # TODO: ????
+                    self.scanx= self.app.ScanList[self.app.ScanExperiment.context.currentIndex-1]
+                    self.queue.put( (self.nr, img.astype(numpy.float32), self.scanx  ))  # TODO: ????
                     print("--------Acquiringthread--------")
+                    print("Current x Scan value = ",self.scanx)
                     print("Just Acquired an img and put it in the queue:")
                     print(img)
 
             # put empty image to queue
-            self.queue.put((- 1, None))
+            self.queue.put((- 1, None,None))
 
         self.nr=0
         print("Exiting AndorImageProducerThread")
@@ -228,8 +231,8 @@ class ConsumerThread(threading.Thread):
         """get image from queue, skip empty images (nr<0)"""
         nr = - 1
         while nr < 0:
-            nr, img = self.queue.get(block=True, timeout=timeout)
-        return nr, img
+            nr, img, scanx = self.queue.get(block=True, timeout=timeout)
+        return nr, img, scanx
 
     def message(self, msg):
         #wx.PostEvent(self.app, StatusMessageEvent(data=msg))
@@ -255,12 +258,13 @@ class ConsumerThread(threading.Thread):
         rawimg = img.astype(numpy.uint16)
         readImage.write_raw_image(imagesavefilenamefull, rawimg, False)
 
-    def saveimage_nr(self, dir, img, nr):
+    def saveimage_nr(self, dir, img, nr,scanx):
         imagesavedir = dir
         imagesavefilename = "%s%s%s%s.sis" % (time.strftime("%Y%m%d%H%M%S"), "-ScanName", "-Image-number",str(nr))
         imagesavefilenamefull = os.path.normpath(os.path.join(imagesavedir, imagesavefilename))
         #rawimg = img.astype(numpy.uint16)
-        readImage.write_raw_imagearrays(imagesavefilenamefull, img, nr,'abcdef',len('abcdef'))
+        s=str(scanx)
+        readImage.write_raw_imagearrays(imagesavefilenamefull, img, nr,s)
 
 
     def stop(self):
@@ -349,9 +353,12 @@ class ConsumerThreadIons(ConsumerThread):
     def run(self):
         self.running = True
         imagearrays = []
+
         while self.running:
+
             try:
-                nr, img = self.get_image(timeout=10)
+                nr,img,scanx = self.get_image(timeout=10)
+
                 print("--------Consumerthread--------")
                 print("Taken image from Queue")
                 print(img)
@@ -375,8 +382,8 @@ class ConsumerThreadIons(ConsumerThread):
                 else:
                     imagearrays.append(img)
                     print("Just appended this image", img.astype(numpy.uint16))
-                    print("imagesarrays=", imagearrays)
-                    self.saveimage_nr(fileSettings.imagesavepath,imagearrays,nr)
+                    print("imagesarrays=", imagearrays, "with scanx = ",scanx)
+                    self.saveimage_nr(fileSettings.imagesavepath,imagearrays,nr,scanx)
                     imagearrays = []
                     print("--------Just saved an image array--------")
 

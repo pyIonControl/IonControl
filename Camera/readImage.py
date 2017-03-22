@@ -162,7 +162,7 @@ def write_raw_image(filename, img, raw = False):
     print(img)
     fid.close()
 
-def write_raw_image_nr(filename, img, nr, text, lentext ,raw = False):
+def write_raw_image_nr(filename, img, nr, text ,raw = False):
     fid = open(filename, 'wb')#file(filename, 'wb')
     fid.write(b' '*10)#write 10 bytes
     #############write width height nr and lentext###################
@@ -197,7 +197,7 @@ def write_raw_image_nr(filename, img, nr, text, lentext ,raw = False):
     print(img)
     fid.close()
 
-def write_raw_imagearrays(filename, imgarr, nr, text, lentext ,raw = False):
+def write_raw_imagearrays(filename, imgarr, nr, text ,raw = False):
     fid = open(filename, 'wb')#file(filename, 'wb')
     fid.write(b' '*10)#write 10 bytes
     #############write width height nr and lentext###################
@@ -208,7 +208,7 @@ def write_raw_imagearrays(filename, imgarr, nr, text, lentext ,raw = False):
     wa.tofile(fid)
     nra = numpy.array([nr], dtype=numpy.uint16)
     nra.tofile(fid)
-    lt=numpy.array([lentext], dtype=numpy.uint16)
+    lt=numpy.array([len(text)], dtype=numpy.uint16)
     lt.tofile(fid)
 
     fid.write(b' ' * 10)#write 10 bytes
@@ -230,7 +230,7 @@ def write_raw_imagearrays(filename, imgarr, nr, text, lentext ,raw = False):
             img.tofile(fid)
         else:
             img.astype(uint16).tofile(fid)
-    print(imgarr)
+    #print(imgarr)
     fid.close()
 
 def loadimg(filename):
@@ -272,7 +272,7 @@ def test_read(filename):
 def test_save(filename, img):
     print("saving...")
     sys.stdout.flush()
-    write_raw_imagearrays(filename, img,2,'cane',len('cane'))
+    write_raw_imagearrays(filename, img,2,'cane')
     print("done")
     sys.stdout.flush()
 
@@ -302,7 +302,7 @@ if __name__ == '__main__':
     #filename='C:/IonControl/Camera/Images/YourMom.sis'
     #write_raw_image(filename, aa , raw=False)
 
-    filename = 'Z:\Lab\Andor Project/Images/20170321114744-ScanName-Image-number3.sis'
+    filename = 'Z:\Lab\Andor Project/Images/20170321213346-ScanName-Image-number3.sis'
     img = read_imagearrays(filename)
     test_save("Z:\Lab\Andor Project/Images/cane",img)
 
