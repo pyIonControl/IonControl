@@ -357,10 +357,12 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                 self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [0]*(row-lenobj)+[data])
             else:
                 self.model.nodeDict[topNode+'_'+child].content.trace[col][row] = data
-            try:
-                self.model.nodeDict[topNode+'_'+child].content.replot()
-            except:
-                pass
+            if len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]) == \
+               len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._yColumn]):
+                try:
+                    self.model.nodeDict[topNode+'_'+child].content.replot()
+                except:
+                    pass
         if saveEvery:
             self.saveAndUpdateFileList()
 
@@ -518,7 +520,6 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             self.addTrace(plottedTrace, pen=-1)
             self.updateNames()
 
-
     def openFile(self, filename, defaultpen=-1):
         """Essentially the same function used in Traceui, but category is forced to mimic the file name if there is only
            one child. This prevents bugs when loading traces with a single child and simplifies referencing of NTs"""
@@ -538,7 +539,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
                 return #If the filename and creation dates are the same, you're trying to open an existing trace.
         plottedTraceList = list()
-        category = self.getUniqueCategory(filename)
+        category = self.getUniqueCategory(filename) #this row differs from the Traceui version of this function
         for plotting in traceCollection.tracePlottingList:
             windowName = plotting.windowName if plotting.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
             name = plotting.name
