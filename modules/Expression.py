@@ -16,7 +16,7 @@ from collections import ChainMap
 import numpy
 import ply.lex as lex
 import ply.yacc as yacc
-
+import logging
 import expressionFunctions.UserFunctions as UserFunctions
 from expressionFunctions.ExprFuncDecorator import ExpressionFunctions, userfunc, UserFuncCls
 from modules.quantity import Q, is_Q
@@ -231,6 +231,19 @@ class Parser:
     def p_expression_name(self, t):
         'expression : NAME'
         t[0] = self.variableCM[t[1]]
+        if t[1] not in self.constLookup:
+            self.dependencies.add(t[1])
+
+    def p_expression_namewunit(self, t):
+        'expression : NAME NAME'
+        logger = logging.getLogger(__name__)
+        logger.warning( "Expression format '{0} {1}' is deprecated!".format(t[1], t[2]))
+        var = self.variableCM[t[1]]
+        if is_Q(var) and var.u == '':
+            var = Q(var.m, t[2])
+        else:
+            var = Q(var.m_as(t[2]), t[2])
+        t[0] = var
         if t[1] not in self.constLookup:
             self.dependencies.add(t[1])
 
