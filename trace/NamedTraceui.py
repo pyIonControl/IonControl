@@ -349,20 +349,25 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             col = self.model.nodeDict[topNode+'_'+child].content._xColumn
         elif fcol == 'y':
             col = self.model.nodeDict[topNode+'_'+child].content._yColumn
+        elif fcol == 'top':
+            col = self.model.nodeDict[topNode+'_'+child].content._topColumn
+        elif fcol == 'bottom':
+            col = self.model.nodeDict[topNode+'_'+child].content._bottomColumn
+        elif fcol == 'height':
+            col = self.model.nodeDict[topNode+'_'+child].content._heightColumn
         else:
             col = fcol
-        if col in self.model.nodeDict[topNode+'_'+child].content.trace:
-            lenobj = len(self.model.nodeDict[topNode+'_'+child].content.trace[col])
-            if row >= lenobj:
-                self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [0]*(row-lenobj)+[data])
-            else:
-                self.model.nodeDict[topNode+'_'+child].content.trace[col][row] = data
-            if len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]) == \
-               len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._yColumn]):
-                try:
-                    self.model.nodeDict[topNode+'_'+child].content.replot()
-                except:
-                    pass
+        lenobj = len(self.model.nodeDict[topNode+'_'+child].content.trace[col])
+        if row >= lenobj:
+            self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [0]*(row-lenobj)+[data])
+        else:
+            self.model.nodeDict[topNode+'_'+child].content.trace[col][row] = data
+        if len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]) == \
+           len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._yColumn]):
+            try:
+                self.model.nodeDict[topNode+'_'+child].content.replot()
+            except:
+                pass
         if saveEvery:
             self.saveAndUpdateFileList()
 
@@ -447,6 +452,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             rawColumnName = '{0}_raw'.format(yColumnName)
             plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
                                         pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
+                                        bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
+                                        heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
             plottedTrace.x = numpy.append(plottedTrace.x, range(self.childTableModel.childList[index][1]))
             plottedTrace.y = numpy.append(plottedTrace.y, self.childTableModel.childList[index][1]*[0.0])
@@ -486,6 +493,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                 rawColumnName = '{0}_raw'.format(yColumnName)
                 plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
                                             pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
+                                            bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
+                                            heightColumn=yColumnName+"_height",
                                             xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
                 plottedTrace.x = [0.]
                 plottedTrace.y = [0.]
@@ -502,6 +511,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             rawColumnName = '{0}_raw'.format(yColumnName)
             plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
                                         pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
+                                        bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
+                                        heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
             plottedTrace.x = [0.]
             plottedTrace.y = [0.]

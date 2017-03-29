@@ -249,6 +249,7 @@ class PlottedTrace(object):
             if self.hasHeightColumn:
                 self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), height=(self.height),
                                                            pen=self.penList[penindex][0])
+                self._graphicsView.addItem(self.errorBarItem)
             elif self.hasTopColumn and self.hasBottomColumn:
                 self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom),
                                                            pen=self.penList[penindex][0])
@@ -398,7 +399,7 @@ class PlottedTrace(object):
                 self.curve.setData( (self.x), (self.y) )
         if hasattr(self, 'errorBarItem') and self.errorBarItem is not None:
             if self.hasHeightColumn:
-                self.errorBarItem.setData(x=(self.x), y=(self.y), height=(self.trace.height))
+                self.errorBarItem.setData(x=(self.x), y=(self.y), height=(self.height))
             else:
                 self.errorBarItem.setOpts(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom))
         if self.fitFunction is not None:
