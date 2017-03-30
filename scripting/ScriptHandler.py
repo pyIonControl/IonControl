@@ -388,8 +388,10 @@ class ScriptHandler(QtCore.QObject):
             self.fitWidget.fit(plottedTrace)
             with QtCore.QMutexLocker(self.script.mutex):
                 self.script.fitResults.clear()
+                self.script.fitResults['error'] = dict()
                 for index, parameter in enumerate(plottedTrace.fitFunction.parameterNames):
                     self.script.fitResults[parameter] = plottedTrace.fitFunction.parameters[index]
+                    self.script.fitResults['error'][parameter] = plottedTrace.fitFunction.parametersConfidence[index]
             error = False
         return (error, message)
 
