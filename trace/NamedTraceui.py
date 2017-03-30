@@ -506,8 +506,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                             bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                             heightColumn=yColumnName+"_height",
                                             xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-                plottedTrace.x = [0.]
-                plottedTrace.y = [0.]
+                plottedTrace.x = []
+                plottedTrace.y = []
                 plottedTrace.traceCollection.x = plottedTrace.x
                 plottedTrace.traceCollection.y = plottedTrace.y
                 category = parentName
@@ -524,8 +524,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-            plottedTrace.x = [0.]
-            plottedTrace.y = [0.]
+            plottedTrace.x = []
+            plottedTrace.y = []
             plottedTrace.traceCollection.x = plottedTrace.x
             plottedTrace.traceCollection.y = plottedTrace.y
             plottedTrace.traceCollection.name = parentName
