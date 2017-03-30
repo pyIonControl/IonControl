@@ -87,7 +87,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                 not str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan' and \
                 not str(self.nodelookup[index.column()]['data'][index.row()]) == '':
             return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-        return QtCore.Qt.ItemIsSelectable
+        return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled #| QtCore.Qt.ItemIsEditable
 
     def constructArray(self, datain):
         if self.arraylen == 0 or not numpy.array_equal(self.nodelookup[self.arraylen-1]['parent'].traceCollection[self.nodelookup[self.arraylen-1]['parent']._xColumn], datain.traceCollection[datain._xColumn]):#datain.trace.x):
@@ -141,6 +141,12 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         return True
 
+    def disableCells(self, indices):
+        for i in indices:
+            self.nodelookup[i.column()]['data'][i.row()] = numpy.nan
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        return True
+
     def moveRow(self, rows, delta):
         if len(rows)>0 and (rows[0]>0 or delta>0) and (len(self.nodelookup[0]['data']) > max(rows)+1 or delta < 0):
             for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -179,6 +185,10 @@ class TraceTableEditor(QtWidgets.QWidget):
         self.clearContents.triggered.connect(self.onClearContents)
         self.addAction(self.clearContents)
 
+        self.disableCells = QtWidgets.QAction("Disable Cells (set to NaN)", self)
+        self.disableCells.triggered.connect(self.onDisableCells)
+        self.addAction(self.disableCells)
+
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
         self.filter.keyPressed.connect( self.onReorder )
         self.tableview.installEventFilter(self.filter)
@@ -207,6 +217,10 @@ class TraceTableEditor(QtWidgets.QWidget):
     def onClearContents(self):
         zeroColSelInd = self.tableview.selectedIndexes()
         self.tablemodel.clearContents(zeroColSelInd)
+
+    def onDisableCells(self):
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.disableCells(zeroColSelInd)
 
     def onReorder(self, key):
         if key in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:
