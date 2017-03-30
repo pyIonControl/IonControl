@@ -65,7 +65,7 @@ class Script(QtCore.QThread):
     consolePrintSignal = QtCore.pyqtSignal(str, bool, str) #args: String to write, True if no error occurred, color to use
     setAWGSignal = QtCore.pyqtSignal(str, str) #args: AWG name, AWG settings name
     programAWGSignal = QtCore.pyqtSignal(str) #arg: AWG name
-    namedTraceSignal = QtCore.pyqtSignal(str, str, int, float, str) #args: top node, child node, row, data and column (x or y)
+    namedTraceSignal = QtCore.pyqtSignal(str, str, int, float, str, bool) #args: top node, child node, row, data and column (x or y), ignore trailing nans when appending (bool)
     loadVoltageDefSignal = QtCore.pyqtSignal(str,str) #args: file name (sans '.txt'), path
 
     def __init__(self, fullname=Path(), code='', parent=None, homeDir=Path()):
@@ -561,13 +561,25 @@ class Script(QtCore.QThread):
         return self.stopped
 
     @scriptFunction(waitForGui=False)
-    def pushToNamedTrace(self, topNode, child, row, data, col='y'):
-        """pushToNamedTrace(topNode, child, row, data, col='y')
-        Push some data to a Named Trace. col specifies x or y data but can be a trace column dict key if desired.
+    def pushToNamedTrace(self, topNode, child, row, data, col='y', ignoreTrailingNaNs=True):
+        """pushToNamedTrace(topNode, child, index, data, col='y', ignoreTrailingNaNs=True)
+        Push data to a Named Trace at a specified index. If the index is longer than the Named Trace, the trace will
+        be padded with NaNs.
+
+        col specifies x or y data but can be a trace column dict key if desired. Currently supported column names are:
+            - 'x'   :: x axis data
+            - 'y'   :: y axis data
+            - 'top' :: upper bound error bar value
+            - 'bottom' :: lower bound error bar value
+            - 'height' :: symmetric error bar value (takes precedence over top and bottom)
+
+        If row = -1, data will be appended to the Named Trace. When ignoreTrailingNaNs is True, appended data
+        will be added after the last number and ignore trailing NaNs. When ignoreTrailingNaNs is False, data will
+        be appended after the trailing NaNs.
 
         Returns:
             bool: True"""
-        self.namedTraceSignal.emit(topNode, child, row, data, col)
+        self.namedTraceSignal.emit(topNode, child, row, data, col, ignoreTrailingNaNs)
         return True
 
 def checkScripting(func):

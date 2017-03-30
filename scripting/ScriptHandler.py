@@ -444,11 +444,11 @@ class ScriptHandler(QtCore.QObject):
         return (error, message)
 
 
-    @QtCore.pyqtSlot(str, str, int, float, str)
+    @QtCore.pyqtSlot(str, str, int, float, str, bool)
     @scriptCommand
-    def onPushToNamedTrace(self, topNode, child, row, data, col):
+    def onPushToNamedTrace(self, topNode, child, row, data, col, ignorenans):
         self.namedTraceList.add(topNode)
-        self.scanExperiment.namedTraceui.updateExternally(topNode, child, row, data, col)
+        self.scanExperiment.namedTraceui.updateExternally(topNode, child, row, data, col, ignoreTrailingNaNs=ignorenans)
         message = 'pushed value {0} to named trace {1}'.format(data, topNode+'_'+child)
         error = False
         return (error, message)

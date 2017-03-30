@@ -340,7 +340,12 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                     self.settings.filelist.append(self.model.nodeDict[k].children[0].content.traceCollection.filename)
         self.newDataAvailable = False
 
-    def updateExternally(self, topNode, child, row, data, fcol, saveEvery=False):
+    @staticmethod
+    def firstValidIndex(arr):
+        """finds next available index, ignoring trailing NaNs"""
+        return len(numpy.trim_zeros(~numpy.isnan(arr)*1,'b'))
+
+    def updateExternally(self, topNode, child, row, data, fcol, saveEvery=False, ignoreTrailingNaNs=True):
         """overwrites specific elements of a preexisting named trace.
            Used in scripting when pushing results to a named trace"""
         self.generateNewNamedTrace(topNode, child) #generates a new trace/modifies an existing trace if necessary otherwise does nothing
@@ -358,8 +363,13 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         else:
             col = fcol
         lenobj = len(self.model.nodeDict[topNode+'_'+child].content.trace[col])
+        if row < 0:
+            if ignoreTrailingNaNs: #chop NaNs from end of list before appending
+                row = self.firstValidIndex(self.model.nodeDict[topNode+'_'+child].content.trace[col])
+            else:
+                row = lenobj #count NaNs as part of list
         if row >= lenobj:
-            self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [0]*(row-lenobj)+[data])
+            self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [numpy.nan]*(row-lenobj)+[data])
         else:
             self.model.nodeDict[topNode+'_'+child].content.trace[col][row] = data
         if len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]) == \
