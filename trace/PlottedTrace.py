@@ -209,7 +209,7 @@ class PlottedTrace(object):
     def plotFitfunction(self, penindex):
         if self.fitFunction and self._graphicsView is not None:
             self.fitFunctionPenIndex = penindex
-            self.fitx = numpy.linspace(numpy.min(self.x), numpy.max(self.x), 300)
+            self.fitx = numpy.linspace(numpy.nanmin(self.x), numpy.nanmax(self.x), 300)
             self.fity = self.fitFunction.value(self.fitx)
             if self.fitcurve is not None:
                 self._graphicsView.removeItem(self.fitcurve)
@@ -217,7 +217,7 @@ class PlottedTrace(object):
  
     def replotFitFunction(self):
         if self.fitFunction and self._graphicsView is not None:
-            self.fitx = numpy.linspace(numpy.min(self.x), numpy.max(self.x), 300)
+            self.fitx = numpy.linspace(numpy.nanmin(self.x), numpy.nanmax(self.x), 300)
             self.fity = self.fitFunction.value(self.fitx)
             if self.fitcurve is not None:
                 self.fitcurve.setData( self.fitx, self.fity )
@@ -228,7 +228,7 @@ class PlottedTrace(object):
     def plotStepsFitfunction(self, penindex):
         if self.fitFunction and self._graphicsView is not None:
             self.fitFunctionPenIndex = penindex
-            self.fitx = numpy.linspace(numpy.min(self.x)+0.5, numpy.max(self.x)-1.5, len(self.x)-1 )
+            self.fitx = numpy.linspace(numpy.nanmin(self.x)+0.5, numpy.nanmax(self.x)-1.5, len(self.x)-1 )
             self.fity = self.fitFunction.value(self.fitx)
             if self.fitcurve is not None:
                 self._graphicsView.removeItem(self.fitcurve)
@@ -236,7 +236,7 @@ class PlottedTrace(object):
             
     def replotStepsFitFunction(self):
         if self.fitFunction and self._graphicsView is not None:
-            self.fitx = numpy.linspace(numpy.min(self.x)+0.5, numpy.max(self.x)-1.5, len(self.x)-1 )
+            self.fitx = numpy.linspace(numpy.nanmin(self.x)+0.5, numpy.nanmax(self.x)-1.5, len(self.x)-1 )
             self.fity = self.fitFunction.value(self.fitx)
             if self.fitcurve is not None:
                 self.fitcurve.setData( self.fitx, self.fity )
