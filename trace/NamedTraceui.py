@@ -372,6 +372,9 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             self.model.nodeDict[topNode+'_'+child].content.trace[col] = numpy.append(self.model.nodeDict[topNode+'_'+child].content.trace[col], [numpy.nan]*(row-lenobj)+[data])
         else:
             self.model.nodeDict[topNode+'_'+child].content.trace[col][row] = data
+        # The next two lines are a workaround for redundancy in columnspec with 'x' and 'y', need to clean this up at some point
+        self.model.nodeDict[topNode+'_'+child].content.trace.x = self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]
+        self.model.nodeDict[topNode+'_'+child].content.trace.y = self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._yColumn]
         if len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._xColumn]) == \
            len(self.model.nodeDict[topNode+'_'+child].content.trace[self.model.nodeDict[topNode+'_'+child].content._yColumn]):
             try:
@@ -465,10 +468,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-            plottedTrace.x = numpy.append(plottedTrace.x, range(self.childTableModel.childList[index][1]))
-            plottedTrace.y = numpy.append(plottedTrace.y, self.childTableModel.childList[index][1]*[0.0])
-            plottedTrace.traceCollection.x = plottedTrace.x
-            plottedTrace.traceCollection.y = plottedTrace.y
+            plottedTrace.traceCollection.x = numpy.append(plottedTrace.traceCollection.x, range(self.childTableModel.childList[index][1]))
+            plottedTrace.traceCollection.y = numpy.append(plottedTrace.traceCollection.y, self.childTableModel.childList[index][1]*[0.0])
             self.plottedTraceList.append(plottedTrace)
         parentName = self.getUniqueName(self.parentNameField.text())
         self.plottedTraceList[0].traceCollection.name = parentName
@@ -506,10 +507,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                             bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                             heightColumn=yColumnName+"_height",
                                             xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-                plottedTrace.x = []
-                plottedTrace.y = []
-                plottedTrace.traceCollection.x = plottedTrace.x
-                plottedTrace.traceCollection.y = plottedTrace.y
+                plottedTrace.traceCollection.x = numpy.array([])
+                plottedTrace.traceCollection.y = numpy.array([])
                 category = parentName
                 plottedTrace.category = category
                 self.addTrace(plottedTrace, pen=-1)
@@ -524,10 +523,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-            plottedTrace.x = []
-            plottedTrace.y = []
-            plottedTrace.traceCollection.x = plottedTrace.x
-            plottedTrace.traceCollection.y = plottedTrace.y
+            plottedTrace.traceCollection.x = numpy.array([])
+            plottedTrace.traceCollection.y = numpy.array([])
             plottedTrace.traceCollection.name = parentName
             plottedTrace.traceCollection.description["name"] = parentName
             plottedTrace.traceCollection.description["comment"] = ""
