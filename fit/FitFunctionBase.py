@@ -213,8 +213,11 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
         enabled = any( (any(bounds) for bounds in result) )
         return result if enabled else None
 
-    def leastsq(self, xin, yin, parameters=None, sigma=None):
-        x, y = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]), zip(xin,yin))))
+    def leastsq(self, xin, yin, parameters=None, sigma=None, filt=None):
+        if filt is None:
+            x, y = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]), zip(xin,yin))))
+        else:
+            x, y, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and x[2], zip(xin,yin,filt))))
         logger = logging.getLogger(__name__)
         # Ensure all values of sigma or non zero by replacing with the minimum nonzero value
         if sigma is not None and self.useErrorBars:

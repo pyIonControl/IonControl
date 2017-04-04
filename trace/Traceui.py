@@ -30,6 +30,7 @@ import subprocess
 from pathlib import Path
 import ctypes
 from modules.InkscapeConversion import getPdfMetaData, getSvgMetaData
+from gui.TraceFilterEditor import TraceFilterTableModel, TraceFilterEditor
 from functools import reduce
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
@@ -129,8 +130,13 @@ class TraceuiMixin:
 
         self.plotWithGnuplot = QtWidgets.QAction("Plot with gnuplot", self)
         self.plotWithGnuplot.triggered.connect(self.onPlotWithGnuplot)
+
         self.openDirectory = QtWidgets.QAction("Open containing directory", self)
         self.openDirectory.triggered.connect(self.openContainingDirectory)
+
+        self.filterData = QtWidgets.QAction("Filter fitted data", self)
+        self.filterData.triggered.connect(self.onEditFilterData)
+
 
     @doprofile
     def onDelete(self, _):
@@ -258,7 +264,14 @@ class TraceuiMixin:
             dataNodes = self.model.getDataNodes(node)
             for dataNode in dataNodes:
                 plottedTrace = dataNode.content
- 
+
+    def onEditFilterData(self):
+        """open up the trace table editor"""
+        selectedNodes = self.traceView.selectedNodes()
+        uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
+        self.tableEditor = TraceFilterEditor()
+        self.tableEditor.setupUi(uniqueSelectedNodes, self.model)
+
     def onApplyStyle(self):
         """Execute when apply style button is clicked. Changed style of selected traces."""
         selectedNodes = self.traceView.selectedNodes()
@@ -516,6 +529,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithMatplotlib)
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
+        self.traceView.addAction(self.filterData)
 # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg

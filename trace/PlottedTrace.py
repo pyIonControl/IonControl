@@ -54,6 +54,7 @@ class PlottedTrace(object):
         self.yAxisUnit = yAxisUnit
         self.lastPlotTime = time.time()
         self.needsReplot = False
+        self.filt = None
         # we use pointers to the relevant columns in trace
         if tracePlotting is not None:
             self.tracePlotting = tracePlotting
