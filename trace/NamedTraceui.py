@@ -468,8 +468,11 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
                                         xAxisUnit='', xAxisLabel=yColumnName, windowName=self.comboBox.currentText())
-            plottedTrace.traceCollection.x = numpy.append(plottedTrace.traceCollection.x, range(self.childTableModel.childList[index][1]))
-            plottedTrace.traceCollection.y = numpy.append(plottedTrace.traceCollection.y, self.childTableModel.childList[index][1]*[0.0])
+            if index == 0:
+                plottedTrace.traceCollection.x = numpy.array(range(self.childTableModel.childList[index][1]))
+                plottedTrace.traceCollection.y = numpy.array(self.childTableModel.childList[index][1]*[0.0])
+            plottedTrace.x = numpy.array(range(self.childTableModel.childList[index][1]))
+            plottedTrace.y = numpy.array(self.childTableModel.childList[index][1]*[0.0])
             self.plottedTraceList.append(plottedTrace)
         parentName = self.getUniqueName(self.parentNameField.text())
         self.plottedTraceList[0].traceCollection.name = parentName
