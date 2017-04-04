@@ -7,6 +7,7 @@ from PyQt5 import QtCore, QtWidgets, QtGui
 import numpy
 from uiModules.RotatedHeaderView import RotatedHeaderView
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
+from modules.Utility import unique
 strmap = lambda x: list(map(str, x))
 
 class RotatedHeaderShrink(RotatedHeaderView):
@@ -108,13 +109,6 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
                 return self.nodelookup[column]['name']+'.'+self.nodelookup[column]['xy']
         return QtCore.QAbstractTableModel.headerData(self, column, orientation, role)
 
-    def filterCells(self, indices):
-        for j in range(self.numcols):
-            for i in indices:
-                self.nodelookup[j]['filter'][i.row()] ^= True
-        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
-        return True
-
     def onClicked(self, index):
         if index.column() == self.numcols:
             val = False if self.nodelookup[0]['filter'][index.row()] else True
@@ -123,6 +117,29 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
             return True
         return False
+
+    def disableContents(self, indices):
+        for j in range(self.numcols):
+            for i in indices:
+                self.nodelookup[j]['filter'][i.row()] = False
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        return True
+
+    def enableContents(self, indices):
+        for j in range(self.numcols):
+            for i in indices:
+                self.nodelookup[j]['filter'][i.row()] = True
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        return True
+
+    def toggleContents(self, indices):
+        rows = sorted(unique([i.row() for i in indices]))
+        for i in rows:
+            val = False if self.nodelookup[0]['filter'][i] else True
+            for j in reversed(range(self.numcols)):
+                self.nodelookup[j]['filter'][i] = val
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        return True
 
 class TraceFilterEditor(QtWidgets.QWidget):
     finishedEditing = QtCore.pyqtSignal()
@@ -141,10 +158,34 @@ class TraceFilterEditor(QtWidgets.QWidget):
         layout.addWidget(self.tableview)
         self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
+        self.disableContents = QtWidgets.QAction("Disable contents", self)
+        self.disableContents.triggered.connect(self.onDisableContents)
+        self.addAction(self.disableContents)
+
+        self.enableContents = QtWidgets.QAction("Enable contents", self)
+        self.enableContents.triggered.connect(self.onEnableContents)
+        self.addAction(self.enableContents)
+
+        self.toggleContents = QtWidgets.QAction("Toggle contents", self)
+        self.toggleContents.triggered.connect(self.onToggleContents)
+        self.addAction(self.toggleContents)
+
         self.resize(950, 650)
         self.move(300, 300)
         self.setWindowTitle('Trace Table Editor')
         self.show()
+
+    def onDisableContents(self):
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.disableContents(zeroColSelInd)
+
+    def onEnableContents(self):
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.enableContents(zeroColSelInd)
+
+    def onToggleContents(self):
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.toggleContents(zeroColSelInd)
 
     def closeEvent(self, a):
         self.finishedEditing.emit()
