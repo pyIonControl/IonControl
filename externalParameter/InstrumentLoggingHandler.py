@@ -18,7 +18,7 @@ from .decimation import decimationDict
 from .calibration import calibrationDict
 from .persistence import persistenceDict
 from functools import partial
-from .externalParameter.InputData import InputData
+from .InputData import InputData
 
        
 class DataHandling(object):

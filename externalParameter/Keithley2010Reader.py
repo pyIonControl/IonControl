@@ -27,6 +27,7 @@ class Keithley2010Reader(object):
         self.settings.__dict__.setdefault('digits', 8)
         self.settings.__dict__.setdefault('averagePoints', 100 )
         self.settings.__dict__.setdefault('channelSettings',  dict())
+        self.settings.__dict__.setdefault('mode', 'Voltage:DC')
 
     def open(self):
         self.rm = visa.ResourceManager()

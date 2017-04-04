@@ -165,6 +165,7 @@ class VoltageLocalAdjust(Form, Base ):
     def restoreValue(self, channel):
         if self.savedValue[channel] is not None:
             self.channelDict[channel].gain = self.savedValue[channel]
+            self.channelDict[channel].recalculate()
         return True
     
     def strValue(self, channel):

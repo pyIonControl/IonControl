@@ -5,8 +5,8 @@
 # *****************************************************************
 from .ExternalParameterBase import ExternalParameterBase
 from queue import Queue
-from .externalParameter.InstrumentLoggingReader import InstrumentLoggingReader, processReturn
-from .externalParameter.ExternalParameterBase import InstrumentMeta
+from .InstrumentLoggingReader import InstrumentLoggingReader, processReturn
+from .ExternalParameterBase import InstrumentMeta
 
 class ReaderMeta(InstrumentMeta):
     def __new__(self, name, bases, dct):
