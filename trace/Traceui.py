@@ -6,6 +6,7 @@
 
 import logging
 import os.path
+import numpy
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from trace.BlockAutoRange import BlockAutoRangeList
@@ -137,6 +138,8 @@ class TraceuiMixin:
         self.filterData = QtWidgets.QAction("Filter fitted data", self)
         self.filterData.triggered.connect(self.onEditFilterData)
 
+        self.filterROI = QtWidgets.QAction("Filter ROI", self)
+        self.filterROI.triggered.connect(self.onFilterROI)
 
     @doprofile
     def onDelete(self, _):
@@ -271,6 +274,31 @@ class TraceuiMixin:
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         self.tableEditor = TraceFilterEditor()
         self.tableEditor.setupUi(uniqueSelectedNodes, self.model)
+        for node in uniqueSelectedNodes:
+            self.tableEditor.finishedEditing.connect(node.content.plot)
+
+    def onFilterROI(self):
+        selectedNodes = self.traceView.selectedNodes()
+        uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
+        wname = uniqueSelectedNodes[0].content.windowName
+        self.graphicsViewDict[wname]['widget'].onFilterROI()
+        self.graphicsViewDict[wname]['widget'].ROIBoundsSignal.connect(partial(self.filterBounds, wname, uniqueSelectedNodes))
+
+    def filterBounds(self, wname, nodes, xbounds, ybounds, filtDisable=True):
+        self.graphicsViewDict[wname]['widget'].ROIBoundsSignal.disconnect()
+        if xbounds:
+            for node in nodes:
+                if node.content.filt is None or filtDisable is False:
+                    node.content.filt = numpy.array([*map(lambda n: not n if filtDisable else n,
+                                                          map(lambda q: xbounds[0] < q[0] < xbounds[1] and
+                                                                        ybounds[0] < q[1] < ybounds[1],
+                                                              zip(node.content.x, node.content.y)))])
+                else:
+                    node.content.filt = numpy.array([*map(lambda n: not filtDisable if n[0] else n[1],
+                                                          zip([*map(lambda q: xbounds[0] < q[0] < xbounds[1] and
+                                                                        ybounds[0] < q[1] < ybounds[1],
+                                                              zip(node.content.x, node.content.y))], node.content.filt))])
+                node.content.plot()
 
     def onApplyStyle(self):
         """Execute when apply style button is clicked. Changed style of selected traces."""
@@ -530,6 +558,8 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
         self.traceView.addAction(self.filterData)
+        self.traceView.addAction(self.filterROI)
+
 # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg

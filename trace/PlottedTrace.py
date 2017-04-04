@@ -42,6 +42,7 @@ class PlottedTrace(object):
             self.penUsageDict = self._graphicsView.penUsageDict        # TODO circular reference
         self.trace = Trace
         self.curve = None
+        self.curve2 = None
         self.fitcurve = None
         self.errorBarItem = None
         self.style = self.Styles.lines if style is None else style
@@ -200,6 +201,10 @@ class PlottedTrace(object):
                 self._graphicsView.removeItem(self.curve)
                 self.curve = None
                 self.penUsageDict[self.curvePen] -= 1
+            if self.curve2 is not None:
+                self._graphicsView.removeItem(self.curve2)
+                self.curve2 = None
+                #self.penUsageDict[self.curvePen] -= 1
             if self.errorBarItem is not None:
                 self._graphicsView.removeItem(self.errorBarItem)  
                 self.errorBarItem = None
@@ -283,8 +288,16 @@ class PlottedTrace(object):
         if self._graphicsView is not None:
             if errorbars:
                 self.plotErrorBars(penindex)
-            self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
-                                                symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+            if self.filt is None or all(self.filt):
+                self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
+                                                    symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+            else:
+                x, y, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and x[2], zip(self.x,self.y,self.filt))))
+                self.curve = self._graphicsView.plot((x), (y), pen=None, symbol=self.penList[penindex][1],
+                                                     symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+                x2, y2, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and not x[2], zip(self.x,self.y,self.filt))))
+                self.curve2 = self._graphicsView.plot((x2), (y2), pen=None, symbol=self.penList[penindex][1],
+                                                     symbolPen=self.penList[penindex+1][2], symbolBrush=self.penList[penindex+1][3])
             if self.xAxisLabel:
                 if self.xAxisUnit:
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))

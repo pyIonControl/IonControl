@@ -24,6 +24,8 @@ import logging
 from pyqtgraphAddons.DateAxisItem import DateAxisItem
 from datetime import datetime
 from pyqtgraph.graphicsItems.AxisItem import AxisItem
+from uiModules.KeyboardFilter import KeyListFilter
+from functools import partial
 
 grid_opacity = 0.3
 import os
@@ -190,6 +192,8 @@ class CustomPlotItem(PlotItem):
 class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
     """This is the main widget for plotting data. It consists of a plot, a
        coordinate display, and custom buttons."""
+    ROIBoundsSignal = QtCore.pyqtSignal(list, list, bool) #list of strings with trace creation dates
+    #ROIBoundsCancel = QtCore.pyqtSignal() #list of strings with trace creation dates
     def __init__(self, parent=None, axisItems=None, name=None):
         pg.setConfigOption('background', 'w')
         pg.setConfigOption('foreground', 'k')
@@ -200,6 +204,9 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self._graphicsView.scene().sigMouseMoved.connect(self.onMouseMoved)
         self.template = "<span style='font-size: 10pt'>x={0}, <span style='color: red'>y={1}</span></span>"
         self.mousePoint = None
+        self.ROIEnabled = False
+        self.filterType = True
+        #self.ROIColor = "0A0"
         self.mousePointList = list()
         self._graphicsView.showGrid(x = True, y = True, alpha = grid_opacity) #grid defaults to on
 
@@ -256,6 +263,79 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self._graphicsView.ctrlMenu.addAction(action)
         self.timeAxis = False
 
+        filterAction = QtWidgets.QAction("Select Filter Region", self._graphicsView.ctrlMenu)
+        filterAction.triggered.connect( self.onFilterROI )
+        self._graphicsView.ctrlMenu.addAction(filterAction)
+        self.timeAxis = False
+
+        self.acceptROI = KeyListFilter( [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] )
+        self.acceptROI.keyPressed.connect( self.getROICoords )
+        self._graphicsView.installEventFilter(self.acceptROI)
+
+        self.cancelROI = KeyListFilter( [QtCore.Qt.Key_Escape] )
+        self.cancelROI.keyPressed.connect( self.removeROI )
+        self._graphicsView.installEventFilter(self.cancelROI)
+
+        self.toggleFilterType = KeyListFilter( [QtCore.Qt.Key_Space, QtCore.Qt.Key_T] )
+        self.toggleFilterType.keyPressed.connect( partial(self.onChangeFilterType, None) )
+        self._graphicsView.installEventFilter(self.toggleFilterType)
+
+        self.setDisableFilterType = KeyListFilter( [QtCore.Qt.Key_D] )
+        self.setDisableFilterType.keyPressed.connect( partial(self.onChangeFilterType, True) )
+        self._graphicsView.installEventFilter(self.setDisableFilterType)
+
+        self.setEnableFilterType = KeyListFilter( [QtCore.Qt.Key_E] )
+        self.setEnableFilterType.keyPressed.connect( partial(self.onChangeFilterType, False) )
+        self._graphicsView.installEventFilter(self.setEnableFilterType)
+
+    @property
+    def ROIColor(self):
+        if self.filterType:
+            return "A00"
+        else:
+            return "0A0"
+
+    def onChangeFilterType(self, ftype=None):
+        if ftype is None:
+            self.filterType = not self.filterType
+        else:
+            self.filterType = ftype
+        self.filtROI.setPen({'color': self.ROIColor, 'width': 2, 'style': QtCore.Qt.DashLine})
+
+    def onFilterROI(self):
+        if not self.ROIEnabled:
+            self.ROIEnabled = True
+            vR = self._graphicsView.vb.viewRange()
+            meanY = (vR[1][1]+vR[1][0])/2
+            meanX = (vR[0][1]+vR[0][0])/2
+            deltaY = (vR[1][1]-vR[1][0])/4
+            deltaX = (vR[0][1]-vR[0][0])/4
+            lowerLeftCorner = [meanX-deltaX, meanY-deltaY]
+            upperRightCorner = [2*deltaX, 2*deltaY]
+            self.filtROI = pg.ROI(lowerLeftCorner, upperRightCorner, removable=True)
+            self.filtROI.addScaleHandle([0, 0], [1, 1])
+            self.filtROI.addScaleHandle([0, 1], [1, 0])
+            self.filtROI.addScaleHandle([1, 0], [0, 1])
+            self.filtROI.addScaleHandle([1, 1], [0, 0])
+            self.filtROI.setPen({'color': self.ROIColor, 'width': 2, 'style': QtCore.Qt.DashLine})
+            self._graphicsView.addItem(self.filtROI)
+
+    def getROICoords(self):
+        if self.ROIEnabled:
+            xbounds = [self.filtROI.pos()[0], self.filtROI.pos()[0] + self.filtROI.size()[0]]
+            ybounds = [self.filtROI.pos()[1], self.filtROI.pos()[1] + self.filtROI.size()[1]]
+            self._graphicsView.removeItem(self.filtROI)
+            self.ROIBoundsSignal.emit(xbounds, ybounds, self.filterType)
+            self.ROIEnabled = False
+            self.filterType = True
+            return self.filtROI.getSceneHandlePositions()
+
+    def removeROI(self):
+        if self.ROIEnabled:
+            self.ROIBoundsSignal.emit([],[], False)
+            self._graphicsView.removeItem(self.filtROI)
+            self.ROIEnabled = False
+            self.filterType = True
 
     def onToggleTimeAxis(self):
         self.setTimeAxis( not self.timeAxis )
