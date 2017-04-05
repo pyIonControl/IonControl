@@ -275,7 +275,7 @@ class TraceuiMixin:
         self.tableEditor = TraceFilterEditor()
         self.tableEditor.setupUi(uniqueSelectedNodes, self.model)
         for node in uniqueSelectedNodes:
-            self.tableEditor.finishedEditing.connect(node.content.plot)
+            self.tableEditor.finishedEditing.connect(partial(node.content.plot, node.content.curvePen))
 
     def onFilterROI(self):
         selectedNodes = self.traceView.selectedNodes()
@@ -298,7 +298,7 @@ class TraceuiMixin:
                                                           zip([*map(lambda q: xbounds[0] < q[0] < xbounds[1] and
                                                                         ybounds[0] < q[1] < ybounds[1],
                                                               zip(node.content.x, node.content.y))], node.content.filt))])
-                node.content.plot()
+                node.content.plot(node.content.curvePen)
 
     def onApplyStyle(self):
         """Execute when apply style button is clicked. Changed style of selected traces."""
