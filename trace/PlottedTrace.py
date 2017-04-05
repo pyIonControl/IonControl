@@ -324,17 +324,6 @@ class PlottedTrace(object):
                 self._graphicsView.setLabel('left', text='')
                 self._graphicsView.showLabel('left', show=False)
 
-    def filterPen(self, inpen):
-        #outcolor = copy.deepcopy(inpen.color())
-        #outcolor.setCoutcolor.darker(200)
-        #outpen = copy.deepcopy(inpen)
-        origColor = inpen.color().getRgb()
-        newColor = tuple((origColor[i]+255)//3 for i in range(4))
-        outpen = mkPen(newColor, width=inpen.width(), style=inpen.style())
-        #outpen.setColor(outpen.color().darker(200))
-        #outpen.color().setAlpha(127)
-        return outpen
-
     def separateFilteredPoints(self):
         x, y, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and x[2], zip(self.x,self.y,self.filt))))
         x2, y2, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and not x[2], zip(self.x,self.y,self.filt))))
@@ -348,7 +337,6 @@ class PlottedTrace(object):
                 self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
                                                     symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
             else:
-                #x, y, xfilt, yfilt = self.separateFilteredPoints()
                 self.curve = self._graphicsView.plot((self.x[self.filt]), (self.y[self.filt]), pen=None, symbol=self.penList[penindex][1],
                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
                 self.curve2 = self._graphicsView.plot((self.x[~self.filt]), (self.y[~self.filt]), pen=None, symbol=self.penList[penindex][1],
@@ -379,12 +367,13 @@ class PlottedTrace(object):
                 self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
                                                       symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
             else:
-                #x, y, xfilt, yfilt = self.separateFilteredPoints()
-                x, y = sort_lists_by( (self.x[self.filt], self.y[self.filt]), key_list=0)
-                xfilt, yfilt = sort_lists_by( (self.x[~self.filt], self.y[~self.filt]), key_list=0)
+                x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
                 self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
                                                       symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                self.curve2 = self._graphicsView.plot( numpy.array(xfilt), numpy.array(yfilt), pen=self.penList[penindex][5], symbol=self.penList[penindex][1],
+                contiguousSlices = self.findContiguousArrays(numpy.array(filt))
+                for cslice in contiguousSlices:
+                    if not numpy.array(filt)[cslice][0]:
+                        self.curve = self._graphicsView.plot( numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5], symbol=self.penList[penindex][1],
                                                       symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6])
             if self.xAxisLabel:
                 if self.xAxisUnit:
