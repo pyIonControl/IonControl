@@ -141,11 +141,15 @@ class TraceuiMixin:
         self.filterROI = QtWidgets.QAction("Select ROI", self)
         self.filterROI.triggered.connect(self.onFilterROI)
 
+        self.removeFilterAction = QtWidgets.QAction("Remove filter", self)
+        self.removeFilterAction.triggered.connect(self.removeFilter)
+
         self.filtersAction = QtWidgets.QAction("Filter fitted data", self)
         filtersMenu = QtWidgets.QMenu(self)
         self.filtersAction.setMenu(filtersMenu)
         filtersMenu.addAction(self.filterData)
         filtersMenu.addAction(self.filterROI)
+        filtersMenu.addAction(self.removeFilterAction)
 
     @doprofile
     def onDelete(self, _):
@@ -304,6 +308,13 @@ class TraceuiMixin:
                                                           zip([*map(lambda q: xbounds[0] < q[0] < xbounds[1] and
                                                                         ybounds[0] < q[1] < ybounds[1],
                                                               zip(node.content.x, node.content.y))], node.content.filt))])
+                node.content.plot(node.content.curvePen)
+
+    def removeFilter(self):
+        selectedNodes = self.traceView.selectedNodes()
+        for node in selectedNodes:
+            if node.parent not in selectedNodes:
+                node.content.filt = None
                 node.content.plot(node.content.curvePen)
 
     def onApplyStyle(self):
