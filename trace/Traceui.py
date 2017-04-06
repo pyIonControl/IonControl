@@ -135,11 +135,17 @@ class TraceuiMixin:
         self.openDirectory = QtWidgets.QAction("Open containing directory", self)
         self.openDirectory.triggered.connect(self.openContainingDirectory)
 
-        self.filterData = QtWidgets.QAction("Filter fitted data", self)
+        self.filterData = QtWidgets.QAction("Filter editor", self)
         self.filterData.triggered.connect(self.onEditFilterData)
 
-        self.filterROI = QtWidgets.QAction("Filter ROI", self)
+        self.filterROI = QtWidgets.QAction("Select ROI", self)
         self.filterROI.triggered.connect(self.onFilterROI)
+
+        self.filtersAction = QtWidgets.QAction("Filter fitted data", self)
+        filtersMenu = QtWidgets.QMenu(self)
+        self.filtersAction.setMenu(filtersMenu)
+        filtersMenu.addAction(self.filterData)
+        filtersMenu.addAction(self.filterROI)
 
     @doprofile
     def onDelete(self, _):
@@ -557,8 +563,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithMatplotlib)
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
-        self.traceView.addAction(self.filterData)
-        self.traceView.addAction(self.filterROI)
+        self.traceView.addAction(self.filtersAction)
 
 # if __name__ == '__main__':
 #     import sys

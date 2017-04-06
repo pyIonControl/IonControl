@@ -19,6 +19,7 @@ from pyqtgraph.graphicsItems.ViewBox import ViewBox
 from PyQt5 import QtWidgets, QtCore, QtGui
 import math
 import numpy
+import itertools
 from modules.round import roundToNDigits
 import logging
 from pyqtgraphAddons.DateAxisItem import DateAxisItem
@@ -26,6 +27,7 @@ from datetime import datetime
 from pyqtgraph.graphicsItems.AxisItem import AxisItem
 from uiModules.KeyboardFilter import KeyListFilter
 from functools import partial
+from uiModules.FilterROI import FilterROI
 
 grid_opacity = 0.3
 import os
@@ -206,7 +208,6 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self.mousePoint = None
         self.ROIEnabled = False
         self.filterType = True
-        #self.ROIColor = "0A0"
         self.mousePointList = list()
         self._graphicsView.showGrid(x = True, y = True, alpha = grid_opacity) #grid defaults to on
 
@@ -263,10 +264,9 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self._graphicsView.ctrlMenu.addAction(action)
         self.timeAxis = False
 
-        filterAction = QtWidgets.QAction("Select Filter Region", self._graphicsView.ctrlMenu)
-        filterAction.triggered.connect( self.onFilterROI )
-        self._graphicsView.ctrlMenu.addAction(filterAction)
-        self.timeAxis = False
+        #filterAction = QtWidgets.QAction("Select Filter Region", self._graphicsView.ctrlMenu)
+        #filterAction.triggered.connect( self.onFilterROI )
+        #self._graphicsView.ctrlMenu.addAction(filterAction)
 
         self.acceptROI = KeyListFilter( [QtCore.Qt.Key_Enter, QtCore.Qt.Key_Return] )
         self.acceptROI.keyPressed.connect( self.getROICoords )
@@ -290,17 +290,15 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
 
     @property
     def ROIColor(self):
-        if self.filterType:
-            return "A00"
-        else:
-            return "0A0"
+        return "A00" if self.filterType else "0A0"
 
     def onChangeFilterType(self, ftype=None):
-        if ftype is None:
-            self.filterType = not self.filterType
-        else:
-            self.filterType = ftype
-        self.filtROI.setPen({'color': self.ROIColor, 'width': 2, 'style': QtCore.Qt.DashLine})
+        if self.ROIEnabled:
+            if ftype is None:
+                self.filterType = not self.filterType
+            else:
+                self.filterType = ftype
+            self.filtROI.setPen({'color': self.ROIColor, 'width': 2, 'style': QtCore.Qt.DashLine})
 
     def onFilterROI(self):
         if not self.ROIEnabled:
@@ -312,11 +310,15 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
             deltaX = (vR[0][1]-vR[0][0])/4
             lowerLeftCorner = [meanX-deltaX, meanY-deltaY]
             upperRightCorner = [2*deltaX, 2*deltaY]
-            self.filtROI = pg.ROI(lowerLeftCorner, upperRightCorner, removable=True)
-            self.filtROI.addScaleHandle([0, 0], [1, 1])
-            self.filtROI.addScaleHandle([0, 1], [1, 0])
-            self.filtROI.addScaleHandle([1, 0], [0, 1])
-            self.filtROI.addScaleHandle([1, 1], [0, 0])
+            self.filtROI = FilterROI(self, lowerLeftCorner, upperRightCorner, removable=True)
+            self.filtROI.handlePen = QtGui.QPen(QtGui.QColor(0,0,0))
+            self.filtROI.handleSize = 5
+            # next 3 lines are shorthand for constructing all scale handles on the ROI,
+            # pos is the handle position, spos is the position about which the handle scales
+            # if edge handles (as opposed to corner handles) need to be removed, get rid of .5 in the permutations call
+            handleCoords = [(0,0), (1,1), *itertools.permutations([0, .5, 1], 2)]
+            for pos, spos in map(lambda tp: [list(tp), list(map(lambda x: .5-1*(x-.5), tp))], handleCoords):
+                self.filtROI.addScaleHandle(pos, spos).pen.setWidth(2)
             self.filtROI.setPen({'color': self.ROIColor, 'width': 2, 'style': QtCore.Qt.DashLine})
             self._graphicsView.addItem(self.filtROI)
 
