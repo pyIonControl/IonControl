@@ -314,7 +314,8 @@ class TraceuiMixin:
         selectedNodes = self.traceView.selectedNodes()
         for node in selectedNodes:
             if node.parent not in selectedNodes:
-                node.content.filt = None
+                if node.content.filt is not None:
+                    node.content.filt |= True
                 node.content.plot(node.content.curvePen)
 
     def onApplyStyle(self):

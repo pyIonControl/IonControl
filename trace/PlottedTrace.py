@@ -32,8 +32,8 @@ class PlottedTrace(object):
     Types = enum.enum('default', 'steps')
     def __init__(self,Trace,graphicsView,penList=None,pen=0,style=None,plotType=None,
                  xColumn='x',yColumn='y',topColumn='top',bottomColumn='bottom',heightColumn='height',
-                 rawColumn='raw', tracePlotting=None, name="", xAxisLabel = None, xAxisUnit = None,
-                 yAxisLabel = None, yAxisUnit = None, fill=True, windowName=None):
+                 rawColumn='raw', filtColumn='filt', tracePlotting=None, name="", xAxisLabel = None,
+                 xAxisUnit = None, yAxisLabel = None, yAxisUnit = None, fill=True, windowName=None):
         self.category = None
         self.fill = fill
         if penList is None:
@@ -60,7 +60,7 @@ class PlottedTrace(object):
         self.yAxisUnit = yAxisUnit
         self.lastPlotTime = time.time()
         self.needsReplot = False
-        self.filt = None
+        #self.filt = None
         # we use pointers to the relevant columns in trace
         if tracePlotting is not None:
             self.tracePlotting = tracePlotting
@@ -70,6 +70,7 @@ class PlottedTrace(object):
             self._bottomColumn = tracePlotting.bottomColumn
             self._heightColumn = tracePlotting.heightColumn
             self._rawColumn = tracePlotting.rawColumn
+            self._filtColumn = tracePlotting.filtColumn
             self.type = tracePlotting.type
             self.xAxisLabel = tracePlotting.xAxisLabel
             self.xAxisUnit = tracePlotting.xAxisUnit
@@ -81,9 +82,10 @@ class PlottedTrace(object):
             self._bottomColumn = bottomColumn
             self._heightColumn = heightColumn
             self._rawColumn = rawColumn
+            self._filtColumn = filtColumn
             self.tracePlotting = TracePlotting(xColumn=self._xColumn, yColumn=self._yColumn, topColumn=self._topColumn, bottomColumn=self._bottomColumn,   # TODO double check for reference
-                                               heightColumn=self._heightColumn, rawColumn=self._rawColumn, name=name, type_=self.type, xAxisUnit=self.xAxisUnit, xAxisLabel=self.xAxisLabel,
-                                               windowName=windowName )
+                                               heightColumn=self._heightColumn, rawColumn=self._rawColumn, filtColumn=self._filtColumn, name=name, type_=self.type, xAxisUnit=self.xAxisUnit,
+                                               xAxisLabel=self.xAxisLabel, windowName=windowName )
             self.trace.addTracePlotting( self.tracePlotting )   # TODO check for reference
         self.windowName = windowName
         self.stylesLookup = { self.Styles.lines: partial( WeakMethod.ref(self.plotLines), errorbars=False),
@@ -190,7 +192,21 @@ class PlottedTrace(object):
     @raw.setter
     def raw(self, column):
         self.trace[self._rawColumn] = column
-        
+
+    @property
+    def filt(self):
+        ra = self.trace.get(self._filtColumn, None)
+        if ra is not None:
+            return ra > 0
+        return ra
+
+    @filt.setter
+    def filt(self, column):
+        if self._filtColumn is None:
+           self._filtColumn = self._yColumn+'_filt'
+           self.tracePlotting.filtColumn = self._filtColumn
+        self.trace[self._filtColumn] = column*1
+
     @property
     def isPlotted(self):
         return self.curvePen>0
