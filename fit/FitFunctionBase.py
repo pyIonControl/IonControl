@@ -216,8 +216,10 @@ class FitFunctionBase(object, metaclass=FitFunctionMeta):
     def leastsq(self, xin, yin, parameters=None, sigma=None, filt=None):
         if filt is None:
             x, y = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]), zip(xin,yin))))
-        else:
+        elif sigma is None:
             x, y, _ = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and x[2], zip(xin,yin,filt))))
+        else:
+            x, y, _, sigma = map(numpy.asarray, zip(*filter(lambda x: ~numpy.isnan(x[0]) and ~numpy.isnan(x[1]) and x[2], zip(xin,yin,filt,sigma))))
         logger = logging.getLogger(__name__)
         # Ensure all values of sigma or non zero by replacing with the minimum nonzero value
         if sigma is not None and self.useErrorBars:

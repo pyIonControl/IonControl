@@ -315,7 +315,7 @@ class TraceuiMixin:
         for node in selectedNodes:
             if node.parent not in selectedNodes:
                 if node.content.filt is not None:
-                    node.content.filt |= True
+                    node.content.filt = [1]*len(node.content.filt)
                 node.content.plot(node.content.curvePen)
 
     def onApplyStyle(self):

@@ -28,7 +28,7 @@ class PlottedTrace(object):
     Types = enum.enum('default', 'steps')
     def __init__(self,Trace,graphicsView,penList=None,pen=0,style=None,plotType=None,
                  xColumn='x',yColumn='y',topColumn='top',bottomColumn='bottom',heightColumn='height',
-                 rawColumn='raw', filtColumn='filt', tracePlotting=None, name="", xAxisLabel = None,
+                 rawColumn='raw', filtColumn=None, tracePlotting=None, name="", xAxisLabel = None,
                  xAxisUnit = None, yAxisLabel = None, yAxisUnit = None, fill=True, windowName=None):
         self.category = None
         self.fill = fill
