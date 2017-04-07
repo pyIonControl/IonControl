@@ -284,8 +284,6 @@ class TraceuiMixin:
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         self.tableEditor = TraceFilterEditor()
         self.tableEditor.setupUi(uniqueSelectedNodes, self.model)
-        for node in uniqueSelectedNodes:
-            self.tableEditor.finishedEditing.connect(partial(node.content.plot, node.content.curvePen))
 
     def onFilterROI(self):
         selectedNodes = self.traceView.selectedNodes()

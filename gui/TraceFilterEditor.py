@@ -8,6 +8,7 @@ import numpy
 from uiModules.RotatedHeaderView import RotatedHeaderView
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.Utility import unique
+from uiModules.KeyboardFilter import KeyListFilter
 strmap = lambda x: list(map(str, x))
 
 class RotatedHeaderShrink(RotatedHeaderView):
@@ -33,7 +34,7 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
         for node in uniqueSelectedNodes:
             dataNodes = model.getDataNodes(node)
             for dataNode in dataNodes:
-                self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
+                self.dataChanged.connect(lambda *x: dataNode.content.plot(dataNode.content.curvePen), QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
         self.numcols = len(self.nodelookup)
 
@@ -158,17 +159,29 @@ class TraceFilterEditor(QtWidgets.QWidget):
         layout.addWidget(self.tableview)
         self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
 
-        self.disableContents = QtWidgets.QAction("Disable contents", self)
+        self.disableContents = QtWidgets.QAction("Disable contents (d)", self)
         self.disableContents.triggered.connect(self.onDisableContents)
         self.addAction(self.disableContents)
 
-        self.enableContents = QtWidgets.QAction("Enable contents", self)
+        self.enableContents = QtWidgets.QAction("Enable contents (e)", self)
         self.enableContents.triggered.connect(self.onEnableContents)
         self.addAction(self.enableContents)
 
-        self.toggleContents = QtWidgets.QAction("Toggle contents", self)
+        self.toggleContents = QtWidgets.QAction("Toggle contents (space)", self)
         self.toggleContents.triggered.connect(self.onToggleContents)
         self.addAction(self.toggleContents)
+
+        self.toggleFilterType = KeyListFilter([QtCore.Qt.Key_Space, QtCore.Qt.Key_T])
+        self.toggleFilterType.keyPressed.connect(self.onToggleContents)
+        self.tableview.installEventFilter(self.toggleFilterType)
+
+        self.setDisableFilterType = KeyListFilter([QtCore.Qt.Key_D])
+        self.setDisableFilterType.keyPressed.connect(self.onDisableContents)
+        self.tableview.installEventFilter(self.setDisableFilterType)
+
+        self.setEnableFilterType = KeyListFilter([QtCore.Qt.Key_E])
+        self.setEnableFilterType.keyPressed.connect(self.onEnableContents)
+        self.tableview.installEventFilter(self.setEnableFilterType)
 
         self.resize(950, 650)
         self.move(300, 300)
