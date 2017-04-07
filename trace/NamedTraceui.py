@@ -198,6 +198,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithMatplotlib)
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
+        self.traceView.addAction(self.filtersAction)
 
         self.resetTraceOptions()
         try:
