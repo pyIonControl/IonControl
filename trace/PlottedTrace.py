@@ -17,15 +17,11 @@ import time
 from modules import WeakMethod
 from functools import partial
 from collections import deque
-from trace.pens import solidTransparentGrayPen, dashedTransparentGrayPen
-import copy
-from pyqtgraph import mkPen
-
 
 def sort_lists_by(lists, key_list=0, desc=False):
     return list(zip(*sorted(zip(*lists), reverse=desc,
                  key=lambda x: x[key_list])))
-    
+
 class PlottedTrace(object):
     Styles = enum.enum('lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars')
     PointsStyles = [ 1, 4 ]
@@ -60,7 +56,6 @@ class PlottedTrace(object):
         self.yAxisUnit = yAxisUnit
         self.lastPlotTime = time.time()
         self.needsReplot = False
-        #self.filt = None
         # we use pointers to the relevant columns in trace
         if tracePlotting is not None:
             self.tracePlotting = tracePlotting
@@ -195,17 +190,14 @@ class PlottedTrace(object):
 
     @property
     def filt(self):
-        ra = self.trace.get(self._filtColumn, None)
-        if ra is not None:
-            return ra > 0
-        return ra
+        return self.trace.get(self._filtColumn, None)
 
     @filt.setter
     def filt(self, column):
         if self._filtColumn is None:
            self._filtColumn = self._yColumn+'_filt'
            self.tracePlotting.filtColumn = self._filtColumn
-        self.trace[self._filtColumn] = column*1
+        self.trace[self._filtColumn] = column
 
     @property
     def isPlotted(self):
@@ -280,9 +272,9 @@ class PlottedTrace(object):
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt]), y=(self.y[self.filt]), height=(self.height[self.filt]),
+                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), height=(self.height[self.filt>0]),
                                                      pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[~self.filt]), y=(self.y[~self.filt]), height=(self.height[~self.filt]),
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), height=(self.height[self.filt<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
@@ -292,15 +284,15 @@ class PlottedTrace(object):
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt]), y=(self.y[self.filt]), top=(self.top[self.filt]), bottom=(self.bottom[self.filt]),
+                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), top=(self.top[self.filt>0]), bottom=(self.bottom[self.filt>0]),
                                                                pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[~self.filt]), y=(self.y[~self.filt]), top=(self.top[~self.filt]), bottom=(self.bottom[~self.filt]),
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), top=(self.top[self.filt<1]), bottom=(self.bottom[self.filt<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
 
     def findContiguousArrays(self, filt, extended=False):
-        df = filt[0:-1]^filt[1::]
+        df = filt[:-1]^filt[1:]
         rng = numpy.append(numpy.append(0.,numpy.array(range(1,len(filt)))[df]), len(filt))
         if extended:
             return [slice(int(rng[i]), int(min(rng[i+1]+1, len(filt)))) for i in range(len(rng)-1)]
@@ -316,7 +308,7 @@ class PlottedTrace(object):
             else:
                 x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
                 self.curve = self._graphicsView.plot(numpy.array(x), numpy.array(y), pen=self.penList[penindex][0])
-                contiguousSlices = self.findContiguousArrays(numpy.array(filt), extended=True)
+                contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0, extended=True)
                 for cslice in contiguousSlices:
                     if not numpy.array(filt)[cslice][0]:
                         self.auxiliaryCurves.append(self._graphicsView.plot(numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5]))
@@ -345,9 +337,9 @@ class PlottedTrace(object):
                 self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
                                                     symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
             else:
-                self.curve = self._graphicsView.plot((self.x[self.filt]), (self.y[self.filt]), pen=None, symbol=self.penList[penindex][1],
+                self.curve = self._graphicsView.plot((self.x[self.filt>0]), (self.y[self.filt>0]), pen=None, symbol=self.penList[penindex][1],
                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                self.auxiliaryCurves.append(self._graphicsView.plot((self.x[~self.filt]), (self.y[~self.filt]), pen=None, symbol=self.penList[penindex][1],
+                self.auxiliaryCurves.append(self._graphicsView.plot((self.x[self.filt<1]), (self.y[self.filt<1]), pen=None, symbol=self.penList[penindex][1],
                                                       symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
             if self.xAxisLabel:
                 if self.xAxisUnit:
@@ -378,7 +370,7 @@ class PlottedTrace(object):
                 x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
                 self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
                                                       symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                contiguousSlices = self.findContiguousArrays(numpy.array(filt))
+                contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0)
                 for cslice in contiguousSlices:
                     if not numpy.array(filt)[cslice][0]:
                         self.auxiliaryCurves.append(self._graphicsView.plot( numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5], symbol=self.penList[penindex][1],

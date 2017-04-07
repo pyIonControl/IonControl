@@ -111,7 +111,7 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
 
     def onClicked(self, index):
         if index.column() == self.numcols:
-            val = False if self.nodelookup[0]['filter'][index.row()] else True
+            val = 0 if self.nodelookup[0]['filter'][index.row()] else 1
             for j in range(self.numcols):
                 self.nodelookup[j]['filter'][index.row()] = val
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
@@ -121,21 +121,21 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
     def disableContents(self, indices):
         for j in range(self.numcols):
             for i in indices:
-                self.nodelookup[j]['filter'][i.row()] = False
+                self.nodelookup[j]['filter'][i.row()] = 0
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         return True
 
     def enableContents(self, indices):
         for j in range(self.numcols):
             for i in indices:
-                self.nodelookup[j]['filter'][i.row()] = True
+                self.nodelookup[j]['filter'][i.row()] = 1
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         return True
 
     def toggleContents(self, indices):
         rows = sorted(unique([i.row() for i in indices]))
         for i in rows:
-            val = False if self.nodelookup[0]['filter'][i] else True
+            val = 0 if self.nodelookup[0]['filter'][i] else 1
             for j in reversed(range(self.numcols)):
                 self.nodelookup[j]['filter'][i] = val
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())

@@ -299,12 +299,12 @@ class TraceuiMixin:
         if xbounds:
             for node in nodes:
                 if node.content.filt is None or filtDisable is False:
-                    node.content.filt = numpy.array([*map(lambda n: not n if filtDisable else n,
+                    node.content.filt = numpy.array([*map(lambda n: 1*(not n if filtDisable else n),
                                                           map(lambda q: xbounds[0] < q[0] < xbounds[1] and
                                                                         ybounds[0] < q[1] < ybounds[1],
                                                               zip(node.content.x, node.content.y)))])
                 else:
-                    node.content.filt = numpy.array([*map(lambda n: not filtDisable if n[0] else n[1],
+                    node.content.filt = numpy.array([*map(lambda n: 1*(not filtDisable if n[0] else n[1]),
                                                           zip([*map(lambda q: xbounds[0] < q[0] < xbounds[1] and
                                                                         ybounds[0] < q[1] < ybounds[1],
                                                               zip(node.content.x, node.content.y))], node.content.filt))])
