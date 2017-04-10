@@ -116,10 +116,12 @@ class MasterSettings(AttributeComparisonEquality):
     def __init__(self):
         self.currentSettingName = None
         self.autoSave = False
+        self.columnWidths = [0]*6
 
     def __setstate__(self, d):
         self.__dict__ = d
         self.__dict__.setdefault( 'autoSave', False )
+        self.__dict__.setdefault( 'columnWidths', [0]*6)
 
 class TodoList(Form, Base):
     def __init__(self,scanModules,config,currentScan,setCurrentScan,globalVariablesUi,scriptingUi,parent=None):
@@ -256,6 +258,9 @@ class TodoList(Form, Base):
 
         #
         restoreGuiState( self, self.config.get('Todolist.guiState'))
+        for i,v in enumerate(self.masterSettings.columnWidths):
+            if v > 0:
+                self.tableView.setColumnWidth(i, v)
 
         # Copy rows
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
@@ -709,5 +714,7 @@ class TodoList(Form, Base):
     def saveConfig(self):
         self.config['TodolistSettings'] = self.settings
         self.config['TodolistSettings.Cache'] = self.settingsCache
+        for i in range(len(self.masterSettings.columnWidths)):
+            self.masterSettings.columnWidths[i] = self.tableView.columnWidth(i)
         self.config['Todolist.MasterSettings'] = self.masterSettings
         self.config['Todolist.guiState'] = saveGuiState( self )
