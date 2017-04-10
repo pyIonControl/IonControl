@@ -93,10 +93,15 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
             self.currx = self.arraylen
             if datain.filt is None:
                 datain.filt = numpy.array([1]*len(datain.traceCollection[datain._xColumn]))
+            elif not isinstance(datain.filt, numpy.ndarray):
+                datain.filt = numpy.array(datain.filt)
             self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'x', 'data': datain.traceCollection[datain._xColumn], 'column': datain._xColumn, 'parent': datain, 'xparent': self.currx, 'filter': datain.filt}
             self.arraylen += 1
         if datain.filt is None:
             datain.filt = numpy.array([1]*len(datain.traceCollection[datain._xColumn]))
+        elif not isinstance(datain.filt, numpy.ndarray):
+            datain.filt = numpy.array(datain.filt)
+        self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'x', 'data': datain.traceCollection[datain._xColumn], 'column': datain._xColumn, 'parent': datain, 'xparent': self.currx, 'filter': datain.filt}
         self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'y', 'data': datain.traceCollection[datain._yColumn], 'column': datain._yColumn, 'parent': datain, 'xparent': self.currx, 'filter': datain.filt}
         self.arraylen += 1
 

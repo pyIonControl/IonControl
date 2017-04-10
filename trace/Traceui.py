@@ -287,7 +287,14 @@ class TraceuiMixin:
 
     def onFilterROI(self):
         selectedNodes = self.traceView.selectedNodes()
-        uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
+        uniqueSelectedNodesInt = [node for node in selectedNodes if node.parent not in selectedNodes and node.parent]
+        uniqueSelectedNodes = []
+        for node in uniqueSelectedNodesInt:
+            if node.nodeType == 0:
+                for child in node.children:
+                    uniqueSelectedNodes.append(child)
+            else:
+                uniqueSelectedNodes.append(node)
         wname = uniqueSelectedNodes[0].content.windowName
         self.graphicsViewDict[wname]['widget'].onFilterROI()
         self.graphicsViewDict[wname]['widget'].ROIBoundsSignal.connect(partial(self.filterBounds, wname, uniqueSelectedNodes))
@@ -311,10 +318,15 @@ class TraceuiMixin:
     def removeFilter(self):
         selectedNodes = self.traceView.selectedNodes()
         for node in selectedNodes:
-            if node.parent not in selectedNodes:
-                if node.content.filt is not None:
+            if node.parent not in selectedNodes and node.parent:
+                if node.nodeType == 0:
+                    for child in node.children:
+                        if child.content.filt is not None:
+                            child.content.filt = [1]*len(child.content.filt)
+                            child.content.plot(child.content.curvePen)
+                elif node.content.filt is not None:
                     node.content.filt = [1]*len(node.content.filt)
-                node.content.plot(node.content.curvePen)
+                    node.content.plot(node.content.curvePen)
 
     def onApplyStyle(self):
         """Execute when apply style button is clicked. Changed style of selected traces."""
