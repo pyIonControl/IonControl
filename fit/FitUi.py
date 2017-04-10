@@ -116,9 +116,9 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.addAction( self.autoSaveAction )
 
         # setup actions for copying fit results/parameters from their respective tables
-        self.copyResultsAction = QtWidgets.QAction("Copy to clipboard", self)
+        self.copyResultsAction = QtWidgets.QAction("copy to clipboard", self)
         self.copyResultsAction.triggered.connect(lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel))
-        self.copyParameterAction = QtWidgets.QAction("Copy to clipboard", self)
+        self.copyParameterAction = QtWidgets.QAction("copy to clipboard", self)
         self.copyParameterAction.triggered.connect(lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel))
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.parameterTableView, lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.resultsTableView, lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
