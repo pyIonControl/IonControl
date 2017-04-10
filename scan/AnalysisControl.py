@@ -365,7 +365,7 @@ class AnalysisControl(ControlForm, ControlBase ):
                     sigma = plot.height
                 elif plot.hasTopColumn and plot.hasBottomColumn:
                     sigma = abs(plot.top + plot.bottom)
-                self.fitfunction.leastsq(plot.x, plot.y, sigma=sigma)
+                self.fitfunction.leastsq(plot.x, plot.y, sigma=sigma, filt=plot.filt)
                 plot.fitFunction = copy.deepcopy(self.fitfunction)
                 plot.plot(-2)
                 evaluation.fitfunction = StoredFitFunction.fromFitfunction(self.fitfunction)
@@ -385,7 +385,7 @@ class AnalysisControl(ControlForm, ControlBase ):
                     sigma = plot.height
                 elif plot.hasTopColumn and plot.hasBottomColumn:
                     sigma = abs(plot.top + plot.bottom)
-                fitfunction.leastsq(plot.x, plot.y, sigma=sigma)
+                fitfunction.leastsq(plot.x, plot.y, sigma=sigma, filt=plot.filt)
                 plot.fitFunction = fitfunction
                 plot.plot(-2)
                 evaluation.fitfunction = StoredFitFunction.fromFitfunction(fitfunction)
