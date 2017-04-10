@@ -217,7 +217,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
             sigma = plottedTrace.height
         elif plottedTrace.hasTopColumn and plottedTrace.hasBottomColumn:
             sigma = abs(plottedTrace.top + plottedTrace.bottom)
-        self.fitfunction.leastsq(plottedTrace.x, plottedTrace.y, sigma=sigma)
+        self.fitfunction.leastsq(plottedTrace.x, plottedTrace.y, sigma=sigma, filt=plottedTrace.filt)
         plottedTrace.fitFunction = copy.deepcopy(self.fitfunction)
         plottedTrace.plot(-2)
         self.fitfunctionTableModel.fitDataChanged()

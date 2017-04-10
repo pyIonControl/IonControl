@@ -23,6 +23,14 @@ from pyqtgraph import mkPen, mkBrush
 
 from ui import Experiment_rc #@UnusedImport
 
+def filterPen(inpen, isbrush=False):
+    if inpen is None:
+        return None
+    origColor = inpen.color().getRgb()
+    newColor = tuple((origColor[i]+510)//3 if i < 3 else 255 for i in range(4))
+    if isbrush:
+        return mkBrush(newColor)
+    return mkPen(newColor, width=inpen.width(), style=inpen.style())
 
 yellow = (180, 180, 0, 255)
 orange = (247, 153, 0)
@@ -37,6 +45,7 @@ aquamarine = (0, 200, 145, 255)
 lightblue = (0, 191, 255, 255)
 purple = (144, 0, 255, 255)
 darkpink = (255, 0, 157, 255)
+transparentgray = (127, 127, 127, 127)
 
 blank = None
 penWidth = 2
@@ -82,30 +91,33 @@ dashedPurplePen = mkPen(purple, width=penWidth, style=dashed)
 solidDarkPinkPen = mkPen(darkpink, width=penWidth, style=solid)
 dashedDarkPinkPen = mkPen(darkpink, width=penWidth, style=dashed)
 
+solidTransparentGrayPen = mkPen(transparentgray, width=penWidth, style=solid)
+dashedTransparentGrayPen = mkPen(transparentgray, width=penWidth, style=dashed)
+
 penList = [ (solidYellowPen,),
-            (solidBluePen, 'd', solidBluePen, blank, blue),
-            (solidRedPen, 'o', solidRedPen, blank, red),
-            (solidGreenPen, 't', solidGreenPen, blank, green),
-            (solidOrangePen, 's', solidOrangePen, blank, yellow),
-            (solidCyanPen, 's', None, cyanBrush, cyan),
-            (solidMagentaPen, 'o', None, magentaBrush, magenta),
-            (solidBlackPen, 't', None, blackBrush, black),
-            (solidAquamarinePen, 's', solidAquamarinePen, blank, aquamarine),
-            (solidLightBluePen, 'o', solidLightBluePen, blank, lightblue),
-            (solidPurplePen, 't', solidPurplePen, blank, purple),
-            (solidDarkPinkPen, 'd', solidDarkPinkPen, blank, darkpink),
-            (dashedYellowPen, 's', dashedYellowPen, blank, yellow),
-            (dashedRedPen, 'o', dashedRedPen, blank, red),
-            (dashedGreenPen, 't', dashedGreenPen, blank, green),
-            (dashedBluePen, 'd', dashedBluePen, blank, blue),
-            (dashedCyanPen, 's', None, cyanBrush, cyan),
-            (dashedMagentaPen, 'o', None, magentaBrush, magenta),
-            (dashedBlackPen, 't', None, blackBrush, black) ,
-            (dashedOrangePen, 's', dashedOrangePen, blank, orange),
-            (dashedAquamarinePen, 's', dashedAquamarinePen, blank, aquamarine),
-            (dashedLightBluePen, 'o', dashedLightBluePen, blank, lightblue),
-            (dashedPurplePen, 't', dashedPurplePen, blank, purple),
-            (dashedDarkPinkPen, 't', dashedDarkPinkPen, blank, darkpink)]
+            (solidBluePen, 'd', solidBluePen, blank, blue, filterPen(solidBluePen), filterPen(blank, isbrush=True)),
+            (solidRedPen, 'o', solidRedPen, blank, red, filterPen(solidRedPen), filterPen(blank, isbrush=True)),
+            (solidGreenPen, 't', solidGreenPen, blank, green, filterPen(solidGreenPen), filterPen(blank, isbrush=True)),
+            (solidOrangePen, 's', solidOrangePen, blank, yellow, filterPen(solidOrangePen), filterPen(blank, isbrush=True)),
+            (solidCyanPen, 's', None, cyanBrush, cyan, filterPen(solidCyanPen), filterPen(cyanBrush, isbrush=True)),
+            (solidMagentaPen, 'o', None, magentaBrush, magenta, filterPen(solidMagentaPen), filterPen(magentaBrush, isbrush=True)),
+            (solidBlackPen, 't', None, blackBrush, black, filterPen(solidBlackPen), filterPen(blackBrush, isbrush=True)),
+            (solidAquamarinePen, 's', solidAquamarinePen, blank, aquamarine, filterPen(solidAquamarinePen), filterPen(blank, isbrush=True)),
+            (solidLightBluePen, 'o', solidLightBluePen, blank, lightblue, filterPen(solidLightBluePen), filterPen(blank, isbrush=True)),
+            (solidPurplePen, 't', solidPurplePen, blank, purple, filterPen(solidPurplePen), filterPen(blank, isbrush=True)),
+            (solidDarkPinkPen, 'd', solidDarkPinkPen, blank, darkpink, filterPen(solidDarkPinkPen), filterPen(blank, isbrush=True)),
+            (dashedYellowPen, 's', dashedYellowPen, blank, yellow, filterPen(dashedYellowPen), filterPen(blank, isbrush=True)),
+            (dashedRedPen, 'o', dashedRedPen, blank, red, filterPen(dashedRedPen), filterPen(blank, isbrush=True)),
+            (dashedGreenPen, 't', dashedGreenPen, blank, green, filterPen(dashedGreenPen), filterPen(blank, isbrush=True)),
+            (dashedBluePen, 'd', dashedBluePen, blank, blue, filterPen(dashedBluePen), filterPen(blank, isbrush=True)),
+            (dashedCyanPen, 's', None, cyanBrush, cyan, filterPen(dashedCyanPen), filterPen(cyanBrush, isbrush=True)),
+            (dashedMagentaPen, 'o', None, magentaBrush, magenta, filterPen(dashedMagentaPen), filterPen(magentaBrush, isbrush=True)),
+            (dashedBlackPen, 't', None, blackBrush, black, filterPen(dashedBlackPen), filterPen(blackBrush, isbrush=True)) ,
+            (dashedOrangePen, 's', dashedOrangePen, blank, orange, filterPen(dashedOrangePen), filterPen(blank, isbrush=True)),
+            (dashedAquamarinePen, 's', dashedAquamarinePen, blank, aquamarine, filterPen(dashedAquamarinePen), filterPen(blank, isbrush=True)),
+            (dashedLightBluePen, 'o', dashedLightBluePen, blank, lightblue, filterPen(dashedLightBluePen), filterPen(blank, isbrush=True)),
+            (dashedPurplePen, 't', dashedPurplePen, blank, purple, filterPen(dashedPurplePen), filterPen(blank, isbrush=True)),
+            (dashedDarkPinkPen, 't', dashedDarkPinkPen, blank, darkpink, filterPen(dashedDarkPinkPen), filterPen(blank, isbrush=True))]
 
 class penicons:
     def penicons(self):

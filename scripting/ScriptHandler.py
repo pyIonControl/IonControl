@@ -388,8 +388,10 @@ class ScriptHandler(QtCore.QObject):
             self.fitWidget.fit(plottedTrace)
             with QtCore.QMutexLocker(self.script.mutex):
                 self.script.fitResults.clear()
+                self.script.fitResults['error'] = dict()
                 for index, parameter in enumerate(plottedTrace.fitFunction.parameterNames):
                     self.script.fitResults[parameter] = plottedTrace.fitFunction.parameters[index]
+                    self.script.fitResults['error'][parameter] = plottedTrace.fitFunction.parametersConfidence[index]
             error = False
         return (error, message)
 
@@ -444,11 +446,11 @@ class ScriptHandler(QtCore.QObject):
         return (error, message)
 
 
-    @QtCore.pyqtSlot(str, str, int, float, str)
+    @QtCore.pyqtSlot(str, str, int, float, str, bool)
     @scriptCommand
-    def onPushToNamedTrace(self, topNode, child, row, data, col):
+    def onPushToNamedTrace(self, topNode, child, row, data, col, ignorenans):
         self.namedTraceList.add(topNode)
-        self.scanExperiment.namedTraceui.updateExternally(topNode, child, row, data, col)
+        self.scanExperiment.namedTraceui.updateExternally(topNode, child, row, data, col, ignoreTrailingNaNs=ignorenans)
         message = 'pushed value {0} to named trace {1}'.format(data, topNode+'_'+child)
         error = False
         return (error, message)

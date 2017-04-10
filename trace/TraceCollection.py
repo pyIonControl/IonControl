@@ -59,14 +59,15 @@ class ColumnSpec(list):
     
 class TracePlotting(object):
     Types = enum('default','steps')
-    def __init__(self, xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,
-                 rawColumn=None,name="",type_ =None, xAxisUnit=None, xAxisLabel=None, windowName=None ):       
+    def __init__(self, xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None, rawColumn=None,
+                 filtColumn=None, name="",type_ =None, xAxisUnit=None, xAxisLabel=None, windowName=None ):
         self.xColumn = xColumn
         self.yColumn = yColumn
         self.topColumn = topColumn
         self.bottomColumn = bottomColumn
         self.heightColumn = heightColumn
         self.rawColumn = rawColumn
+        self.filtColumn = filtColumn
         self.fitFunction = None
         self.name = name
         self.xAxisUnit = xAxisUnit
@@ -80,7 +81,7 @@ class TracePlotting(object):
         self.__dict__.setdefault( 'xAxisLabel', None )
         self.__dict__.setdefault( 'windowName', None)
         
-    attrFields = ['xColumn','yColumn','topColumn', 'bottomColumn','heightColumn', 'name', 'type', 'xAxisUnit', 'xAxisLabel', 'windowName']
+    attrFields = ['xColumn','yColumn','topColumn', 'bottomColumn','heightColumn', 'filtColumn', 'name', 'type', 'xAxisUnit', 'xAxisLabel', 'windowName']
 
 class TracePlottingList(list):        
     def toXmlElement(self, root):
@@ -324,7 +325,7 @@ class TraceCollection(keydefaultdict):
             self.description["fitfunction"] = self.fitfunction
         if filename:
             of = open(filename,'w')
-            columnspec = ColumnSpec(self.keys())
+            columnspec = ColumnSpec(key for key in self.keys() if key is not None)
             self.description["columnspec"] = columnspec #",".join(columnspec)
             self.saveTraceHeaderXml(of)
             for l in zip_longest(*list(self.values()), fillvalue=float('NaN')):
@@ -470,7 +471,7 @@ class TraceCollection(keydefaultdict):
             self[colname] = numpy.array(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-        self.description["tracePlottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None, rawColumn=None,name="")]
+        self.description["tracePlottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name="")]
             
     def setPlotfunction(self, callback):
         self.plotfunction = callback
