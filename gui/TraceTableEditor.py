@@ -9,7 +9,10 @@ from uiModules.RotatedHeaderView import RotatedHeaderView
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
+import copy
 from functools import partial
+from collections import deque
+
 strmap = lambda x: list(map(str, x))
 
 class RotatedHeaderShrink(RotatedHeaderView):
@@ -18,10 +21,13 @@ class RotatedHeaderShrink(RotatedHeaderView):
         super().setSectionResizeMode(3)
 
 class NamedTraceTableModel(QtCore.QAbstractTableModel):
+    updateUndo = QtCore.pyqtSignal()
     def __init__(self, uniqueSelectedNodes, model, parent=None, *args):
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.arraydata = []
         self.nodelookup = dict()
+        self.undoStack = deque()
+        self.redoStack = deque()
         self.arraylen = 0
         self.model = model
         self.dataLookup = {
@@ -32,10 +38,48 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for node in uniqueSelectedNodes:
             dataNodes = model.getDataNodes(node)
             for dataNode in dataNodes:
+                #self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
                 self.dataChanged.connect(lambda *x: dataNode.content.plot(dataNode.content.curvePen), QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
+        self.updateUndo.connect(self.pushToUndoStack)
         maxlen = max([len(self.nodelookup[i]['data']) for i in range(len(self.nodelookup))])
         self.padwithNaN(maxlen)
+        self.initialData = self.getRelevantNodeLookupData()
+
+    def overwriteNodeLookupData(self, newLU, oldLU=None):
+        if oldLU is None:
+            oldLU = self.nodelookup
+        for k,v in newLU.items():
+            oldLU[k]['data'][:] = v[:]
+
+    def getRelevantNodeLookupData(self):
+        return {k:copy.copy(v['data']) for k,v in self.nodelookup.items()}
+
+    def pushToUndoStack(self):
+        self.undoStack.append(self.getRelevantNodeLookupData())
+        self.redoStack.clear()
+
+    def popFromUndoStack(self):
+        if self.undoStack:
+            self.redoStack.append(self.undoStack.pop())
+            if self.undoStack:
+                self.overwriteNodeLookupData(self.undoStack[-1])
+            else:
+                self.overwriteNodeLookupData(self.initialData)
+        else:
+            self.overwriteNodeLookupData(self.initialData)
+
+    def undo(self):
+        self.popFromUndoStack()
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.layoutChanged.emit()
+
+    def redo(self):
+        if self.redoStack:
+            self.overwriteNodeLookupData(self.redoStack.pop())
+            self.undoStack.append(self.getRelevantNodeLookupData())
+            self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.layoutChanged.emit()
 
     def padwithNaN(self, maxlen):
         for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -69,6 +113,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             return self.dataLookup.get(role, lambda index: None)(index)
 
     def setData(self, index, value, role):
+        origData = self.nodelookup[index.column()]['data'][index.row()]
         if role == QtCore.Qt.EditRole:
             self.nodelookup[index.column()]['data'][index.row()] = float(value)
             if self.nodelookup[index.column()]['xy'] == 'x':
@@ -77,6 +122,8 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                     if self.nodelookup[i]['xparent'] == parentx:
                         self.nodelookup[i]['parent'].traceCollection[self.nodelookup[i]['parent']._xColumn][index.row()] = float(value)
             self.dataChanged.emit(index, index)
+            if float(value) != origData:
+                self.updateUndo.emit()
             return True
         return False
 
@@ -113,6 +160,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for k, v in self.nodelookup.items():
             self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         self.layoutChanged.emit()
         return range(position[0].row(), numRows)
 
@@ -133,6 +181,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for k, v in self.nodelookup.items():
             self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         self.layoutChanged.emit()
         return range(position, rows)
 
@@ -140,12 +189,14 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for i in indices:
             self.nodelookup[i.column()]['data'][i.row()] = float(0.0)
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         return True
 
     def disableCells(self, indices):
         for i in indices:
             self.nodelookup[i.column()]['data'][i.row()] = numpy.nan
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         return True
 
     def moveRow(self, rows, delta):
@@ -155,6 +206,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                     for row in rows:
                         self.nodelookup[0]['parent'].traceCollection[k][row], self.nodelookup[0]['parent'].traceCollection[k][row+delta] = self.nodelookup[0]['parent'].traceCollection[k][row+delta], self.nodelookup[0]['parent'].traceCollection[k][row]
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.updateUndo.emit()
             return True
         return False
 
@@ -196,6 +248,8 @@ class TraceTableEditor(QtWidgets.QWidget):
 
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Undo), self, self.tablemodel.undo)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Redo), self, self.tablemodel.redo)
 
         self.resize(950, 650)
         self.move(300, 300)
