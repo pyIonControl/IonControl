@@ -76,6 +76,7 @@ class TraceuiMixin:
         graphicsViewDict (dict): dict of available plot windows
     """
     openMeasurementLog = QtCore.pyqtSignal(list) #list of strings with trace creation dates
+    exitSignal = QtCore.pyqtSignal()
     def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
         self.penicons = penicons
         self.config = config
@@ -272,7 +273,7 @@ class TraceuiMixin:
 
     def onPlotWithMatplotlib(self):
         from trace.MatplotlibInterface import MatplotWindow
-        mpw = MatplotWindow()
+        mpw = MatplotWindow(exitSig=self.exitSignal)
         mpw.show()
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]

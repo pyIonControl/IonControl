@@ -9,8 +9,10 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 import matplotlib.pyplot as plt
 
 class MatplotWindow(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, exitSig=None):
         super().__init__(parent)
+        if exitSig is not None:
+            exitSig.connect(self.close)
         self.fig = plt.figure()
         self.canvas = FigureCanvas(self.fig)
         self.toolbar = NavigationToolbar(self.canvas, self)
@@ -20,7 +22,7 @@ class MatplotWindow(QtWidgets.QDialog):
         self.setLayout(layout)
 
         self.styleNames = {k:v for k,v in enumerate(['lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars'])}
-        self.styleDict = {'lines': lambda trc: {'ls': '-' if trc.penList[trc.curvePen][0].style is QtCore.Qt.SolidLine else '--'},
+        self.styleDict = {'lines': lambda trc: {'ls': '-' if trc.penList[trc.curvePen][0].style() == QtCore.Qt.SolidLine else '--'},
                           'points': lambda trc: {'marker': trc.penList[trc.curvePen][1] if trc.penList[trc.curvePen][1] != 't' else 'v', 'fillstyle': 'none' if trc.penList[trc.curvePen][3] is None else 'full'},
                           'linespoints': lambda trc: {**self.styleDict['lines'](trc),**self.styleDict['points'](trc)},
                           'lines_with_errorbars': lambda trc: self.styleDict['lines'](trc),
