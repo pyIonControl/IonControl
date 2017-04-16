@@ -271,12 +271,16 @@ class TraceuiMixin:
                 proc.stdin.flush()
 
     def onPlotWithMatplotlib(self):
+        from trace.MatplotlibInterface import MatplotWindow
+        mpw = MatplotWindow()
+        mpw.show()
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         for node in uniqueSelectedNodes:
             dataNodes = self.model.getDataNodes(node)
             for dataNode in dataNodes:
                 plottedTrace = dataNode.content
+                mpw.plot(plottedTrace)
 
     def onEditFilterData(self):
         """open up the trace table editor"""
