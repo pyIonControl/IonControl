@@ -412,6 +412,7 @@ class TodoList(Form, Base):
 
     def generatorSynchronized(self):
         return (isinstance(self.activeItem, StopNode)
+                or self.activeItem is None
                 or self.activeItem.parent == self.currentItem
                 or self.activeItem == self.currentItem
                 and isinstance(self.todoListGenerator, collections.Iterable)
