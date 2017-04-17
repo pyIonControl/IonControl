@@ -309,7 +309,7 @@ class FileTreeMixin:
         self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
         self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
         self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
-        if items[0].isdir == False:
+        if not items or items[0].isdir == False:
             menu.addAction(self.expandTree)
             menu.addAction(self.collapseTree)
         else:
