@@ -38,8 +38,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for node in uniqueSelectedNodes:
             dataNodes = model.getDataNodes(node)
             for dataNode in dataNodes:
-                #self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
-                self.dataChanged.connect(lambda *x: dataNode.content.plot(dataNode.content.curvePen), QtCore.Qt.UniqueConnection)
+                self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
         self.updateUndo.connect(self.pushToUndoStack)
         maxlen = max([len(self.nodelookup[i]['data']) for i in range(len(self.nodelookup))])
