@@ -3,6 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from collections import OrderedDict
+
 import logging
 
 from PyQt5 import QtGui, QtCore
@@ -78,7 +80,7 @@ class SelectionUi(SelectionForm, SelectionBase):
         self.tableView.selectionModel().currentChanged.connect( self.onActiveInstrumentChanged )
 
     def outputChannels(self):
-        self._outputChannels =  dict(itertools.chain(*[p.outputChannelList() for p in self.enabledParametersObjects.values()]))        
+        self._outputChannels = OrderedDict(itertools.chain(*[p.outputChannelList() for p in self.enabledParametersObjects.values()]))
         return self._outputChannels
         
     def inputChannels(self):
