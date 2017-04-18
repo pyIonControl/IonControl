@@ -174,6 +174,19 @@ class AnalysisControl(ControlForm, ControlBase ):
         self.autoSave()
         self.currentAnalysisChanged.emit( self.currentAnalysisName )
 
+        # setup actions for copying fit results/parameters from their respective tables
+        self.parameterTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.parameterTableView.customContextMenuRequested.connect(self.parameterRightClickMenu)
+        self.resultsTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.resultsTableView.customContextMenuRequested.connect(self.resultsRightClickMenu)
+        self.copyResultsAction = QtWidgets.QAction("copy to clipboard", self)
+        self.copyResultsAction.triggered.connect(lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel))
+        self.copyParameterAction = QtWidgets.QAction("copy to clipboard", self)
+        self.copyParameterAction.triggered.connect(lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel))
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.parameterTableView, lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.resultsTableView, lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
+
+
     def onUseErrorBars(self, state):
         if self.fitfunction is not None:
             self.fitfunction.useErrorBars = state==QtCore.Qt.Checked
@@ -484,7 +497,43 @@ class AnalysisControl(ControlForm, ControlBase ):
         if self.fitfunction is not None:
             self.fitfunction.startParameters = copy.deepcopy(self.fitfunction.parameters)
             self.fitfunctionTableModel.startDataChanged()
-    
+
+    def copyToClipboard(self, tableview, model):
+        """ Copy value to clipboard as a string. """
+        clip = QtWidgets.QApplication.clipboard()
+        indices = tableview.selectedIndexes()
+        role = QtCore.Qt.DisplayRole
+        if len(indices) == 1: # just copy the text in the selected box
+            clip.setText(str(model.data(indices[0], role)))
+        else: # copy contents of selected boxes into a table (nested lists)
+            # the following code sorts indices by row (then column) and constructs nested lists to be copied
+            sortedIndices = sorted(indices, key=lambda ind: ind.row()*100+ind.column())
+            finalDataList = []
+            innerDataList = []
+            initRow = sortedIndices[0].row()
+            for ind in sortedIndices:
+                if ind.row() != initRow:
+                    finalDataList.append(innerDataList)
+                    innerDataList = []
+                    initRow = ind.row()
+                innerDataList.append(model.data(ind, role))
+            finalDataList.append(innerDataList)
+            clip.setText(str(finalDataList))
+
+    def parameterRightClickMenu(self, pos):
+        """a CustomContextMenu for copying parameters from fit parameter table"""
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.autoSaveAction)
+        menu.addAction(self.copyParameterAction)
+        menu.exec_(self.parameterTableView.mapToGlobal(pos))
+
+    def resultsRightClickMenu(self, pos):
+        """a CustomContextMenu for copying parameters from fit results table"""
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.autoSaveAction)
+        menu.addAction(self.copyResultsAction)
+        menu.exec_(self.resultsTableView.mapToGlobal(pos))
+
 if __name__=="__main__":
     import sys
     config = dict()

@@ -853,6 +853,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         self.analysisControlWidget.saveConfig()
         
     def onClose(self):
+        self.traceui.exitSignal.emit()
+        self.namedTraceui.exitSignal.emit()
         self.namedTraceui.onClose()
         if self.dataStore:
             self.dataStore.close_session()
