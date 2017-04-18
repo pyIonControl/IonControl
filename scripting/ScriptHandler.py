@@ -182,7 +182,9 @@ class ScriptHandler(QtCore.QObject):
         return False, "{0}{1} executed".format(funcname, args)
 
     def getGlobal(self, name):
-        return self.globalVariablesUi.globalDict[name]
+        if name in self.globalVariablesUi.globalDict.keys():
+            return self.globalVariablesUi.globalDict[name]
+        return None
 
     @QtCore.pyqtSlot(list)
     @scriptCommand
