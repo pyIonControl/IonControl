@@ -184,7 +184,7 @@ class ScriptHandler(QtCore.QObject):
     def getGlobal(self, name):
         if name in self.globalVariablesUi.globalDict.keys():
             return self.globalVariablesUi.globalDict[name]
-        return None
+        return ScriptException("Global '{}' does not exist!".format(name))
 
     @QtCore.pyqtSlot(list)
     @scriptCommand
