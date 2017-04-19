@@ -182,6 +182,8 @@ class ScriptHandler(QtCore.QObject):
         return False, "{0}{1} executed".format(funcname, args)
 
     def getGlobal(self, name):
+        """Return the value of a global variable, returns a quantity 'q' with 
+        magnitude given by q.m and units given by q.u"""
         if name in self.globalVariablesUi.globalDict.keys():
             return self.globalVariablesUi.globalDict[name]
         return ScriptException("Global '{}' does not exist!".format(name))
