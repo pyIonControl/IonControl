@@ -20,16 +20,16 @@ class MatplotWindow(QtWidgets.QDialog):
         self.toolbar = NavigationToolbar(self.canvas, self)
         self.button = QtGui.QPushButton('Plot')
         self.button.clicked.connect(self.replot)
-        #setup editor
+
         self.textEdit = PulseProgramSourceEdit()
-        self.textEdit.setupUi(self.textEdit, extraKeywords1=[], extraKeywords2=[])#scriptFunctions)
+        self.textEdit.setupUi(self.textEdit, extraKeywords1=[], extraKeywords2=[])
         self.textEdit.textEdit.currentLineMarkerNum = 9
-        self.textEdit.textEdit.markerDefine(QsciScintilla.Background, self.textEdit.textEdit.currentLineMarkerNum) #This is a marker that highlights the background
+        self.textEdit.textEdit.markerDefine(QsciScintilla.Background, self.textEdit.textEdit.currentLineMarkerNum)
         self.textEdit.textEdit.setMarkerBackgroundColor(QtGui.QColor(0xd0, 0xff, 0xd0), self.textEdit.textEdit.currentLineMarkerNum)
         self.plottedTraces = []
         self.traceind = 0
         self.code = ""
-        self.header = """# Previous definitions:\n# import matplotlib.pyplot as plt\n# fig = plt.figure()\n# canvas = FigureCanvas(fig)\n\nax = fig.add_subplot(111)\n"""
+        self.header = """# Previous definitions:\n# import matplotlib.pyplot as plt\n# fig = plt.figure()\n# canvas = FigureCanvas(fig)\n\nplt.clf()\nax = fig.add_subplot(111)\n"""
         self.footer = """\ncanvas.draw()"""
 
         layout = QtGui.QVBoxLayout()
@@ -56,6 +56,14 @@ class MatplotWindow(QtWidgets.QDialog):
     def plot(self, plottedtrace):
         self.plottedTraces.append(plottedtrace)
         plottedTraces = self.plottedTraces
+        if self.traceind == 0:
+            xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel is not None else ""
+            xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit is not None else ""
+            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel is not None else ""
+            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit is not None else ""
+            plt.xlabel(xlab+xunit)
+            plt.ylabel(ylab+yunit)
+            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\n".format(xlab+xunit,ylab+yunit)
         style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
         style.update(self.styleLookup(plottedtrace))
         ax = self.fig.add_subplot(111)
@@ -67,10 +75,9 @@ class MatplotWindow(QtWidgets.QDialog):
         self.traceind += 1
 
     def replot(self):
-        plt.clf()
         plottedTraces = self.plottedTraces
         canvas = self.canvas
         fig = self.fig
-        d = dict(locals(), **globals()) #Executing in this scope allows a function defined in the script to call another function defined in the script
+        d = dict(locals(), **globals()) # allow definitions in scope to be accessed by console
         self.code = self.textEdit.textEdit.text()
-        exec(self.code, d, d) #run the script
+        exec(self.code, d, d)
