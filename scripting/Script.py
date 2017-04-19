@@ -231,6 +231,8 @@ class Script(QtCore.QThread):
         get current value of global 'name'"""
         self.genericCallSignal.emit('getGlobal', (name,), dict())
         self.genericWait.wait(self.mutex)
+        if isinstance(self.genericResult, ScriptException):
+            self.exception = self.genericResult
         return self.genericResult
 
     @scriptFunction()

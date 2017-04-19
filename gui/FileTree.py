@@ -53,7 +53,7 @@ def checkTree(widget, pathobj, fileChanges=[]):
     for childind in childrange:
         oldpath = Path(widget.child(childind).path)
         if pathobj != oldpath.parent:
-            newpath = sequenceFile(pathobj.joinpath(oldpath.name))
+            newpath = pathobj.joinpath(oldpath.name)
             fileChanges.append((oldpath, newpath))
             if oldpath.exists(): #check if file has already been moved
                 oldpath.rename(newpath)
@@ -282,7 +282,7 @@ class FileTreeMixin:
     def onItemChanged(self, item):
         """checks to see if file or directory name was changed by the user"""
         if item.isdir and item.text(0) != Path(item.path).stem:
-            newpath = sequenceFile(Path(item.path).parent.joinpath(item.text(0)))
+            newpath = Path(item.path).parent.joinpath(item.text(0))
             Path(item.path).rename(newpath)
             item.path = str(newpath)
             item.setText(0, newpath.stem)
@@ -309,7 +309,7 @@ class FileTreeMixin:
         self.collapseTree.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, True, False))
         self.expandChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, True))
         self.collapseChild.triggered.connect(lambda: onExpandOrCollapse(self.fileTreeWidget, False, False))
-        if items[0].isdir == False:
+        if not items or items[0].isdir == False:
             menu.addAction(self.expandTree)
             menu.addAction(self.collapseTree)
         else:
