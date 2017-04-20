@@ -3,10 +3,12 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
+from pulseProgram.PulseProgramSourceEdit import PulseProgramSourceEdit
+from PyQt5.Qsci import QsciScintilla
 
 class MatplotWindow(QtWidgets.QDialog):
     def __init__(self, parent=None, exitSig=None):
@@ -16,9 +18,25 @@ class MatplotWindow(QtWidgets.QDialog):
         self.fig = plt.figure()
         self.canvas = FigureCanvas(self.fig)
         self.toolbar = NavigationToolbar(self.canvas, self)
-        layout = QtWidgets.QVBoxLayout()
+        self.button = QtGui.QPushButton('Plot')
+        self.button.clicked.connect(self.replot)
+
+        self.textEdit = PulseProgramSourceEdit()
+        self.textEdit.setupUi(self.textEdit, extraKeywords1=[], extraKeywords2=[])
+        self.textEdit.textEdit.currentLineMarkerNum = 9
+        self.textEdit.textEdit.markerDefine(QsciScintilla.Background, self.textEdit.textEdit.currentLineMarkerNum)
+        self.textEdit.textEdit.setMarkerBackgroundColor(QtGui.QColor(0xd0, 0xff, 0xd0), self.textEdit.textEdit.currentLineMarkerNum)
+        self.plottedTraces = []
+        self.traceind = 0
+        self.code = ""
+        self.header = """# Previous definitions:\n# import matplotlib.pyplot as plt\n# fig = plt.figure()\n# canvas = FigureCanvas(fig)\n\nplt.clf()\nax = fig.add_subplot(111)\n"""
+        self.footer = """\ncanvas.draw()"""
+
+        layout = QtGui.QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addWidget(self.canvas)
+        layout.addWidget(self.textEdit)
+        layout.addWidget(self.button)
         self.setLayout(layout)
 
         self.styleNames = {k:v for k,v in enumerate(['lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars'])}
@@ -36,8 +54,30 @@ class MatplotWindow(QtWidgets.QDialog):
         return (i/255 for i in plottedtrace.penList[plottedtrace.curvePen][4])
 
     def plot(self, plottedtrace):
-        style = self.styleLookup(plottedtrace)
+        self.plottedTraces.append(plottedtrace)
+        plottedTraces = self.plottedTraces
+        if self.traceind == 0:
+            xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel is not None else ""
+            xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit is not None else ""
+            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel is not None else ""
+            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit is not None else ""
+            plt.xlabel(xlab+xunit)
+            plt.ylabel(ylab+yunit)
+            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\n".format(xlab+xunit,ylab+yunit)
+        style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
+        style.update(self.styleLookup(plottedtrace))
         ax = self.fig.add_subplot(111)
-        ax.plot(plottedtrace.x, plottedtrace.y, color=self.translateColor(plottedtrace), **style)
+        ax.plot(plottedtrace.x, plottedtrace.y, **style)
         self.canvas.draw()
+        styleStr = ', '.join([k+'='+str(v if not isinstance(v,str) else "'{}'".format(v)) for k,v in style.items()])
+        self.code += """ax.plot(plottedTraces[{0}].x, plottedTraces[{0}].y, {1})\n""".format(self.traceind, styleStr)
+        self.textEdit.setPlainText(self.header+self.code+self.footer)
+        self.traceind += 1
 
+    def replot(self):
+        plottedTraces = self.plottedTraces
+        canvas = self.canvas
+        fig = self.fig
+        d = dict(locals(), **globals()) # allow definitions in scope to be accessed by console
+        self.code = self.textEdit.textEdit.text()
+        exec(self.code, d, d)
