@@ -240,6 +240,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             widget.stashChanged.connect(self.onStashChanged)
 
         self.scanExperiment = self.tabDict["Scan"]
+        self.scanExperiment.updateScanTarget('Global', self.globalVariablesUi.globalDict.outputChannels())
 
         self.shutterUi, self.shutterDockWidget = self.instantiateShutterUi(self.pulser, 'Shutters', "ShutterUi", self.config, self.globalVariablesUi.globalDict, self.shutterNameDict, self.shutterNameSignal)
 
