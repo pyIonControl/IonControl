@@ -574,6 +574,21 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.resizeColumnsToContents()
         return plottedTraceList
 
+    def rightClickMenu(self, pos):
+        """a CustomContextMenu for right click"""
+        items = self.traceView.selectedNodes()
+        menu = QtWidgets.QMenu()
+        if items:
+            menu.addAction(self.editData)
+            menu.addAction(self.saveTrace)
+            menu.addAction(self.plotWithMatplotlib)
+            menu.addAction(self.plotWithGnuplot)
+            menu.addAction(self.openDirectory)
+            menu.addAction(self.filtersAction)
+        menu.exec_(self.traceView.mapToGlobal(pos))
+
+
+
     def onClose(self):
         if self.tableEditor is not None:
             self.tableEditor.close()

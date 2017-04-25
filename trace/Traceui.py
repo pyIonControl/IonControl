@@ -123,7 +123,8 @@ class TraceuiMixin:
         self.traceView.selectionModel().selectionChanged.connect(self.onActiveTraceChanged)
         self.measurementLogButton.clicked.connect(self.onMeasurementLog)
 
-        self.traceView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.traceView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.traceView.customContextMenuRequested.connect(self.rightClickMenu)
 
         self.measurementLogButton.setVisible(self.hasMeasurementLog)
 
@@ -592,7 +593,27 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.openDirectory)
         self.traceView.addAction(self.filtersAction)
 
-# if __name__ == '__main__':
+    def rightClickMenu(self, pos):
+        """a CustomContextMenu for right click"""
+        items = self.traceView.selectedNodes()
+        menu = QtWidgets.QMenu()
+        if not items:
+            menu.addAction(self.unplotSettingsAction)
+            menu.addAction(self.collapseLastTraceAction)
+            menu.addAction(self.expandNewAction)
+        else:
+            menu.addAction(self.unplotSettingsAction)
+            menu.addAction(self.collapseLastTraceAction)
+            menu.addAction(self.expandNewAction)
+            menu.addAction(self.plotWithMatplotlib)
+            menu.addAction(self.plotWithGnuplot)
+            menu.addAction(self.openDirectory)
+            menu.addAction(self.filtersAction)
+        menu.exec_(self.traceView.mapToGlobal(pos))
+
+
+
+        # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg
 #     from uiModules.CoordinatePlotWidget import CoordinatePlotWidget
