@@ -303,6 +303,7 @@ class TodoList(Form, Base):
         except ValueError:
             raise ValueError("Invalid data on clipboard. Cannot paste into TODO list")
         self.tableModel.copy_rows(row_list)
+        self.tableView.expandAll()
 
     def startTodoList(self, *args):
         """When the play button is clicked, synchronizes current generator item with current active item then runs"""
@@ -525,12 +526,38 @@ class TodoList(Form, Base):
         self.onSaveTodoList()
         self.checkSettingsSavable()
 
+    def topLevelIndex(self, index):
+        if index.parent().row() != -1:
+            return self.topLevelIndex(index.parent())
+        return index
+
     def onDropMeasurement(self):
-        for index in sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]), reverse=True):
-            self.tableModel.dropMeasurement(index)
+        validIndexes = [] # a list of valid top level indices
+        selectedIndexes = self.tableView.selectedIndexes()
+        for nodeIndex in selectedIndexes:
+            if nodeIndex.parent().row() == -1: # if node is at the top level, allow it to be dropped
+                validIndexes.append(nodeIndex.row())
+            elif self.topLevelIndex(nodeIndex).internalId() not in [node.internalId() for node in selectedIndexes]:
+                # raise a warning if trying to drop a measurement from a subtodo list,
+                # but if child node's parent is also being dropped, ignore the warning.
+                logger = logging.getLogger(__name__)
+                logger.warning('Cannot drop elements from nested todo lists, modify the original instead.')
+        for index in sorted(unique(validIndexes), reverse=True):
+            self.tableModel.dropMeasurement(index) #drop indices in reverse order to avoid indexing errors
         numEntries = self.tableModel.rowCount()
-        if self.settings.currentIndex >= numEntries:
+        origParentIndex = self.settings.currentIndex[0]
+        self.settings.currentIndex[0] = max(0,self.settings.currentIndex[0] -
+                                            len(list(filter(lambda x: x <self.settings.currentIndex[0], validIndexes))))
+        if self.settings.currentIndex[0] >= numEntries:
+            # if the current index is at the end of the todo list and the
+            # last index is dropped, set the active item index to 0
             self.settings.currentIndex = [0]
+        elif len(self.settings.currentIndex) > 1 and origParentIndex in validIndexes:
+            # if current item was in a nested todo list, which was removed,
+            # set index to the parent of the next todo list entry
+            self.settings.currentIndex = [self.settings.currentIndex[0]]
+        self.currentItem = self.tableModel.recursiveLookup(self.settings.currentIndex)
+        self.synchronizeGeneratorWithSelectedItem()
         self.checkSettingsSavable()
 
     def checkReadyToRun(self, state, _=True ):
