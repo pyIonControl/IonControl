@@ -35,8 +35,9 @@ class DACControllerServer(ServerProcess, OKBase):
         if data is not None:
             for s in sliceview(data, 8):
                 d = CRCData(*struct.unpack('II', s))
+                #if d.shuttling != 0xffffffff:
                 print("CRC info:", d)
-                self.dataQueue.put(d)
+                #self.dataQueue.put(d)
 
     def writeVoltage(self, address, line):
         if self.xem:
