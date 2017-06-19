@@ -6,6 +6,7 @@
 
 import logging
 import os.path
+import numpy
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from trace.BlockAutoRange import BlockAutoRangeList
@@ -30,6 +31,7 @@ import subprocess
 from pathlib import Path
 import ctypes
 from modules.InkscapeConversion import getPdfMetaData, getSvgMetaData
+from gui.TraceFilterEditor import TraceFilterTableModel, TraceFilterEditor
 from functools import reduce
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/Traceui.ui')
@@ -74,6 +76,7 @@ class TraceuiMixin:
         graphicsViewDict (dict): dict of available plot windows
     """
     openMeasurementLog = QtCore.pyqtSignal(list) #list of strings with trace creation dates
+    exitSignal = QtCore.pyqtSignal()
     def __init__(self, penicons, config, experimentName, graphicsViewDict, parent=None, lastDir=None, hasMeasurementLog=False, highlightUnsaved=False, preferences=None):
         self.penicons = penicons
         self.config = config
@@ -120,7 +123,8 @@ class TraceuiMixin:
         self.traceView.selectionModel().selectionChanged.connect(self.onActiveTraceChanged)
         self.measurementLogButton.clicked.connect(self.onMeasurementLog)
 
-        self.traceView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.traceView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.traceView.customContextMenuRequested.connect(self.rightClickMenu)
 
         self.measurementLogButton.setVisible(self.hasMeasurementLog)
 
@@ -129,8 +133,25 @@ class TraceuiMixin:
 
         self.plotWithGnuplot = QtWidgets.QAction("Plot with gnuplot", self)
         self.plotWithGnuplot.triggered.connect(self.onPlotWithGnuplot)
+
         self.openDirectory = QtWidgets.QAction("Open containing directory", self)
         self.openDirectory.triggered.connect(self.openContainingDirectory)
+
+        self.filterData = QtWidgets.QAction("Filter editor", self)
+        self.filterData.triggered.connect(self.onEditFilterData)
+
+        self.filterROI = QtWidgets.QAction("Select ROI", self)
+        self.filterROI.triggered.connect(self.onFilterROI)
+
+        self.removeFilterAction = QtWidgets.QAction("Remove filter", self)
+        self.removeFilterAction.triggered.connect(self.removeFilter)
+
+        self.filtersAction = QtWidgets.QAction("Filter fitted data", self)
+        filtersMenu = QtWidgets.QMenu(self)
+        self.filtersAction.setMenu(filtersMenu)
+        filtersMenu.addAction(self.filterData)
+        filtersMenu.addAction(self.filterROI)
+        filtersMenu.addAction(self.removeFilterAction)
 
     @doprofile
     def onDelete(self, _):
@@ -252,13 +273,67 @@ class TraceuiMixin:
                 proc.stdin.flush()
 
     def onPlotWithMatplotlib(self):
+        from trace.MatplotlibInterface import MatplotWindow
+        mpw = MatplotWindow(exitSig=self.exitSignal)
+        mpw.show()
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         for node in uniqueSelectedNodes:
             dataNodes = self.model.getDataNodes(node)
             for dataNode in dataNodes:
                 plottedTrace = dataNode.content
- 
+                mpw.plot(plottedTrace)
+
+    def onEditFilterData(self):
+        """open up the trace table editor"""
+        selectedNodes = self.traceView.selectedNodes()
+        uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
+        self.tableEditor = TraceFilterEditor()
+        self.tableEditor.setupUi(uniqueSelectedNodes, self.model)
+
+    def onFilterROI(self):
+        selectedNodes = self.traceView.selectedNodes()
+        uniqueSelectedNodesInt = [node for node in selectedNodes if node.parent not in selectedNodes and node.parent]
+        uniqueSelectedNodes = []
+        for node in uniqueSelectedNodesInt:
+            if node.nodeType == 0:
+                for child in node.children:
+                    uniqueSelectedNodes.append(child)
+            else:
+                uniqueSelectedNodes.append(node)
+        wname = uniqueSelectedNodes[0].content.windowName
+        self.graphicsViewDict[wname]['widget'].onFilterROI()
+        self.graphicsViewDict[wname]['widget'].ROIBoundsSignal.connect(partial(self.filterBounds, wname, uniqueSelectedNodes))
+
+    def filterBounds(self, wname, nodes, xbounds, ybounds, filtDisable=True):
+        self.graphicsViewDict[wname]['widget'].ROIBoundsSignal.disconnect()
+        if xbounds:
+            for node in nodes:
+                if node.content.filt is None or filtDisable is False:
+                    node.content.filt = numpy.array([*map(lambda n: 1*(not n if filtDisable else n),
+                                                          map(lambda q: xbounds[0] < q[0] < xbounds[1] and
+                                                                        ybounds[0] < q[1] < ybounds[1],
+                                                              zip(node.content.x, node.content.y)))])
+                else:
+                    node.content.filt = numpy.array([*map(lambda n: 1*(not filtDisable if n[0] else n[1]),
+                                                          zip([*map(lambda q: xbounds[0] < q[0] < xbounds[1] and
+                                                                        ybounds[0] < q[1] < ybounds[1],
+                                                              zip(node.content.x, node.content.y))], node.content.filt))])
+                node.content.plot(node.content.curvePen)
+
+    def removeFilter(self):
+        selectedNodes = self.traceView.selectedNodes()
+        for node in selectedNodes:
+            if node.parent not in selectedNodes and node.parent:
+                if node.nodeType == 0:
+                    for child in node.children:
+                        if child.content.filt is not None:
+                            child.content.filt = [1]*len(child.content.filt)
+                            child.content.plot(child.content.curvePen)
+                elif node.content.filt is not None:
+                    node.content.filt = [1]*len(node.content.filt)
+                    node.content.plot(node.content.curvePen)
+
     def onApplyStyle(self):
         """Execute when apply style button is clicked. Changed style of selected traces."""
         selectedNodes = self.traceView.selectedNodes()
@@ -516,7 +591,29 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithMatplotlib)
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
-# if __name__ == '__main__':
+        self.traceView.addAction(self.filtersAction)
+
+    def rightClickMenu(self, pos):
+        """a CustomContextMenu for right click"""
+        items = self.traceView.selectedNodes()
+        menu = QtWidgets.QMenu()
+        if not items:
+            menu.addAction(self.unplotSettingsAction)
+            menu.addAction(self.collapseLastTraceAction)
+            menu.addAction(self.expandNewAction)
+        else:
+            menu.addAction(self.unplotSettingsAction)
+            menu.addAction(self.collapseLastTraceAction)
+            menu.addAction(self.expandNewAction)
+            menu.addAction(self.plotWithMatplotlib)
+            menu.addAction(self.plotWithGnuplot)
+            menu.addAction(self.openDirectory)
+            menu.addAction(self.filtersAction)
+        menu.exec_(self.traceView.mapToGlobal(pos))
+
+
+
+        # if __name__ == '__main__':
 #     import sys
 #     import pyqtgraph as pg
 #     from uiModules.CoordinatePlotWidget import CoordinatePlotWidget

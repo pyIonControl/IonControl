@@ -90,6 +90,7 @@ class AWGWaveform(object):
         for node in nodeList:
             if node.nodeType==nodeTypes.segment:
                 _, nodeDependencies = node.expression.evaluate(node.equation, listDependencies=True, variabledict=defaultdict(int))
+                nodeDependencies.discard('__exprfunc__')
                 self.dependencies.update(nodeDependencies)
                 if isIdentifier(node.duration):
                     self.dependencies.add(node.duration)
@@ -120,7 +121,7 @@ class AWGWaveform(object):
                     sampleList = numpy.append(sampleList, newSamples)
                 elif node.nodeType==nodeTypes.segmentSet:
                     repMag = self.settings.varDict[node.repetitions]['value'] if isIdentifier(node.repetitions) else self.expression.evaluateAsMagnitude(node.repetitions)
-                    repetitions = int(repMag.to_base_units().val) #convert to float, then to integer
+                    repetitions = int(repMag.to_base_units().magnitude) #convert to float, then to integer
                     for n in range(repetitions):
                         startStep, newSamples = self.evaluateSegments(node.children, startStep) #recursive
                         sampleList = numpy.append(sampleList, newSamples)

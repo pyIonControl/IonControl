@@ -116,10 +116,12 @@ class MasterSettings(AttributeComparisonEquality):
     def __init__(self):
         self.currentSettingName = None
         self.autoSave = False
+        self.columnWidths = [0]*6
 
     def __setstate__(self, d):
         self.__dict__ = d
         self.__dict__.setdefault( 'autoSave', False )
+        self.__dict__.setdefault( 'columnWidths', [0]*6)
 
 class TodoList(Form, Base):
     def __init__(self,scanModules,config,currentScan,setCurrentScan,globalVariablesUi,scriptingUi,parent=None):
@@ -256,6 +258,9 @@ class TodoList(Form, Base):
 
         #
         restoreGuiState( self, self.config.get('Todolist.guiState'))
+        for i,v in enumerate(self.masterSettings.columnWidths):
+            if v > 0:
+                self.tableView.setColumnWidth(i, v)
 
         # Copy rows
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard, context=QtCore.Qt.WidgetWithChildrenShortcut)
@@ -298,6 +303,7 @@ class TodoList(Form, Base):
         except ValueError:
             raise ValueError("Invalid data on clipboard. Cannot paste into TODO list")
         self.tableModel.copy_rows(row_list)
+        self.tableView.expandAll()
 
     def startTodoList(self, *args):
         """When the play button is clicked, synchronizes current generator item with current active item then runs"""
@@ -394,16 +400,20 @@ class TodoList(Form, Base):
         """Steps through the todo list generator until it hits currentItem.
            This is necessary to start a todo list from subtodo lists"""
         self.todoListGenerator = self.tableModel.entryGenerator(self.currentItem)
-        self.activeItem = next(self.todoListGenerator)
-        while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
-            try:
-                self.activeItem = next(self.todoListGenerator)
-            except StopIteration:
-                break
-        self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+        try:
+            self.activeItem = next(self.todoListGenerator)
+            while not (isinstance(self.activeItem, StopNode) or self.activeItem.parent == self.currentItem or self.activeItem == self.currentItem):
+                try:
+                    self.activeItem = next(self.todoListGenerator)
+                except StopIteration:
+                    break
+            self.setActiveItem(self.activeItem, self.statemachine.currentState=='MeasurementRunning')
+        except StopIteration:
+            pass
 
     def generatorSynchronized(self):
         return (isinstance(self.activeItem, StopNode)
+                or self.activeItem is None
                 or self.activeItem.parent == self.currentItem
                 or self.activeItem == self.currentItem
                 and isinstance(self.todoListGenerator, collections.Iterable)
@@ -516,12 +526,38 @@ class TodoList(Form, Base):
         self.onSaveTodoList()
         self.checkSettingsSavable()
 
+    def topLevelIndex(self, index):
+        if index.parent().row() != -1:
+            return self.topLevelIndex(index.parent())
+        return index
+
     def onDropMeasurement(self):
-        for index in sorted(unique([ i.row() for i in self.tableView.selectedIndexes() ]), reverse=True):
-            self.tableModel.dropMeasurement(index)
+        validIndexes = [] # a list of valid top level indices
+        selectedIndexes = self.tableView.selectedIndexes()
+        for nodeIndex in selectedIndexes:
+            if nodeIndex.parent().row() == -1: # if node is at the top level, allow it to be dropped
+                validIndexes.append(nodeIndex.row())
+            elif self.topLevelIndex(nodeIndex).internalId() not in [node.internalId() for node in selectedIndexes]:
+                # raise a warning if trying to drop a measurement from a subtodo list,
+                # but if child node's parent is also being dropped, ignore the warning.
+                logger = logging.getLogger(__name__)
+                logger.warning('Cannot drop elements from nested todo lists, modify the original instead.')
+        for index in sorted(unique(validIndexes), reverse=True):
+            self.tableModel.dropMeasurement(index) #drop indices in reverse order to avoid indexing errors
         numEntries = self.tableModel.rowCount()
-        if self.settings.currentIndex >= numEntries:
+        origParentIndex = self.settings.currentIndex[0]
+        self.settings.currentIndex[0] = max(0,self.settings.currentIndex[0] -
+                                            len(list(filter(lambda x: x <self.settings.currentIndex[0], validIndexes))))
+        if self.settings.currentIndex[0] >= numEntries:
+            # if the current index is at the end of the todo list and the
+            # last index is dropped, set the active item index to 0
             self.settings.currentIndex = [0]
+        elif len(self.settings.currentIndex) > 1 and origParentIndex in validIndexes:
+            # if current item was in a nested todo list, which was removed,
+            # set index to the parent of the next todo list entry
+            self.settings.currentIndex = [self.settings.currentIndex[0]]
+        self.currentItem = self.tableModel.recursiveLookup(self.settings.currentIndex)
+        self.synchronizeGeneratorWithSelectedItem()
         self.checkSettingsSavable()
 
     def checkReadyToRun(self, state, _=True ):
@@ -706,5 +742,7 @@ class TodoList(Form, Base):
     def saveConfig(self):
         self.config['TodolistSettings'] = self.settings
         self.config['TodolistSettings.Cache'] = self.settingsCache
+        for i in range(len(self.masterSettings.columnWidths)):
+            self.masterSettings.columnWidths[i] = self.tableView.columnWidth(i)
         self.config['Todolist.MasterSettings'] = self.masterSettings
         self.config['Todolist.guiState'] = saveGuiState( self )

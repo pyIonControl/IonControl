@@ -134,6 +134,7 @@ class MagnitudeSpinBox(QtWidgets.QAbstractSpinBox):
 
     def wheelEvent(self, wheelEvent):
         self.stepBy(copysign(1, wheelEvent.angleDelta().y()))
+        wheelEvent.accept()
 
 
 if __name__ == "__main__":

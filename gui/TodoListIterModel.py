@@ -140,8 +140,10 @@ class TodoListNode(BaseNode):
                 return self.childNodes[rowlist[0]]
             except:
                 pass
-        return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
-
+        try:
+            return self.childNodes[rowlist[0]].recursiveLookup(rowlist[1:])
+        except:
+            pass
 
 class TodoListBaseModel(QtCore.QAbstractItemModel):
     def __init__(self, globalDict):
@@ -196,7 +198,7 @@ class TodoListBaseModel(QtCore.QAbstractItemModel):
             try:
                 return self.rootNodes[rowlist[0]]
             except:
-                pass
+                return None
         return self.rootNodes[rowlist[0]].recursiveLookup(rowlist[1:])
 
 class TodoListTableModel(TodoListBaseModel):

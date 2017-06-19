@@ -105,11 +105,24 @@ class FitUi(fitForm, QtWidgets.QWidget):
         self.useErrorBarsCheckBox.stateChanged.connect( self.onUseErrorBars )
         # Context Menu
         self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
+        self.parameterTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.parameterTableView.customContextMenuRequested.connect(self.parameterRightClickMenu)
+        self.resultsTableView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.resultsTableView.customContextMenuRequested.connect(self.resultsRightClickMenu)
         self.autoSaveAction = QtWidgets.QAction( "auto save", self)
         self.autoSaveAction.setCheckable(True)
         self.autoSaveAction.setChecked(self.parameters.autoSave )
         self.autoSaveAction.triggered.connect( self.onAutoSave )
         self.addAction( self.autoSaveAction )
+
+        # setup actions for copying fit results/parameters from their respective tables
+        self.copyResultsAction = QtWidgets.QAction("copy to clipboard", self)
+        self.copyResultsAction.triggered.connect(lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel))
+        self.copyParameterAction = QtWidgets.QAction("copy to clipboard", self)
+        self.copyParameterAction.triggered.connect(lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel))
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.parameterTableView, lambda: self.copyToClipboard(self.parameterTableView, self.fitfunctionTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self.resultsTableView, lambda: self.copyToClipboard(self.resultsTableView, self.fitResultsTableModel), context=QtCore.Qt.WidgetWithChildrenShortcut)
+
         restoreGuiState( self, self.config.get(self.configname+".guiState") )
         if not showCombos:
             self.fitSelectionComboBox.setVisible( False )
@@ -217,7 +230,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
             sigma = plottedTrace.height
         elif plottedTrace.hasTopColumn and plottedTrace.hasBottomColumn:
             sigma = abs(plottedTrace.top + plottedTrace.bottom)
-        self.fitfunction.leastsq(plottedTrace.x, plottedTrace.y, sigma=sigma)
+        self.fitfunction.leastsq(plottedTrace.x, plottedTrace.y, sigma=sigma, filt=plottedTrace.filt)
         plottedTrace.fitFunction = copy.deepcopy(self.fitfunction)
         plottedTrace.plot(-2)
         self.fitfunctionTableModel.fitDataChanged()
@@ -330,4 +343,41 @@ class FitUi(fitForm, QtWidgets.QWidget):
             definition = StoredFitFunction.fromFitfunction(self.fitfunctionCache[k])
             definition.name = k
             self.parameterDefinitions[k] = definition
+
+    def copyToClipboard(self, tableview, model):
+        """ Copy value to clipboard as a string. """
+        clip = QtWidgets.QApplication.clipboard()
+        indices = tableview.selectedIndexes()
+        role = QtCore.Qt.DisplayRole
+        if len(indices) == 1: # just copy the text in the selected box
+            clip.setText(str(model.data(indices[0], role)))
+        else: # copy contents of selected boxes into a table (nested lists)
+            # the following code sorts indices by row (then column) and constructs nested lists to be copied
+            sortedIndices = sorted(indices, key=lambda ind: ind.row()*100+ind.column())
+            finalDataList = []
+            innerDataList = []
+            initRow = sortedIndices[0].row()
+            for ind in sortedIndices:
+                if ind.row() != initRow:
+                    finalDataList.append(innerDataList)
+                    innerDataList = []
+                    initRow = ind.row()
+                innerDataList.append(model.data(ind, role))
+            finalDataList.append(innerDataList)
+            clip.setText(str(finalDataList))
+
+    def parameterRightClickMenu(self, pos):
+        """a CustomContextMenu for copying parameters from fit parameter table"""
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.autoSaveAction)
+        menu.addAction(self.copyParameterAction)
+        menu.exec_(self.parameterTableView.mapToGlobal(pos))
+
+    def resultsRightClickMenu(self, pos):
+        """a CustomContextMenu for copying parameters from fit results table"""
+        menu = QtWidgets.QMenu()
+        menu.addAction(self.autoSaveAction)
+        menu.addAction(self.copyResultsAction)
+        menu.exec_(self.resultsTableView.mapToGlobal(pos))
+
 

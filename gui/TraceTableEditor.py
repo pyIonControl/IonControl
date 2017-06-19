@@ -9,6 +9,10 @@ from uiModules.RotatedHeaderView import RotatedHeaderView
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from uiModules.KeyboardFilter import KeyListFilter
 from modules.Utility import unique
+import copy
+from functools import partial
+from collections import deque
+
 strmap = lambda x: list(map(str, x))
 
 class RotatedHeaderShrink(RotatedHeaderView):
@@ -17,10 +21,13 @@ class RotatedHeaderShrink(RotatedHeaderView):
         super().setSectionResizeMode(3)
 
 class NamedTraceTableModel(QtCore.QAbstractTableModel):
+    updateUndo = QtCore.pyqtSignal()
     def __init__(self, uniqueSelectedNodes, model, parent=None, *args):
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
         self.arraydata = []
         self.nodelookup = dict()
+        self.undoStack = deque()
+        self.redoStack = deque()
         self.arraylen = 0
         self.model = model
         self.dataLookup = {
@@ -33,8 +40,47 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             for dataNode in dataNodes:
                 self.dataChanged.connect(dataNode.content.replot, QtCore.Qt.UniqueConnection)
                 self.constructArray(dataNode.content)
+        self.filterUnnecessaryNaNs()
+        self.updateUndo.connect(self.pushToUndoStack)
         maxlen = max([len(self.nodelookup[i]['data']) for i in range(len(self.nodelookup))])
         self.padwithNaN(maxlen)
+        self.initialData = self.getRelevantNodeLookupData()
+
+    def overwriteNodeLookupData(self, newLU, oldLU=None):
+        if oldLU is None:
+            oldLU = self.nodelookup
+        for k,v in newLU.items():
+            oldLU[k]['parent'].traceCollection[oldLU[k]['column']] = v
+            oldLU[k]['data'] = oldLU[k]['parent'].traceCollection[oldLU[k]['column']]
+
+    def getRelevantNodeLookupData(self):
+        return {k:copy.copy(v['data']) for k,v in self.nodelookup.items()}
+
+    def pushToUndoStack(self):
+        self.undoStack.append(self.getRelevantNodeLookupData())
+        self.redoStack.clear()
+
+    def popFromUndoStack(self):
+        if self.undoStack:
+            self.redoStack.append(self.undoStack.pop())
+            if self.undoStack:
+                self.overwriteNodeLookupData(self.undoStack[-1])
+            else:
+                self.overwriteNodeLookupData(self.initialData)
+        else:
+            self.overwriteNodeLookupData(self.initialData)
+
+    def undo(self):
+        self.popFromUndoStack()
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.layoutChanged.emit()
+
+    def redo(self):
+        if self.redoStack:
+            self.overwriteNodeLookupData(self.redoStack.pop())
+            self.undoStack.append(self.getRelevantNodeLookupData())
+            self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.layoutChanged.emit()
 
     def padwithNaN(self, maxlen):
         for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -68,6 +114,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             return self.dataLookup.get(role, lambda index: None)(index)
 
     def setData(self, index, value, role):
+        origData = self.nodelookup[index.column()]['data'][index.row()]
         if role == QtCore.Qt.EditRole:
             self.nodelookup[index.column()]['data'][index.row()] = float(value)
             if self.nodelookup[index.column()]['xy'] == 'x':
@@ -76,6 +123,8 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                     if self.nodelookup[i]['xparent'] == parentx:
                         self.nodelookup[i]['parent'].traceCollection[self.nodelookup[i]['parent']._xColumn][index.row()] = float(value)
             self.dataChanged.emit(index, index)
+            if float(value) != origData:
+                self.updateUndo.emit()
             return True
         return False
 
@@ -87,7 +136,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                 not str(self.nodelookup[index.column()]['data'][index.row()]) == 'nan' and \
                 not str(self.nodelookup[index.column()]['data'][index.row()]) == '':
             return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
-        return QtCore.Qt.ItemIsSelectable
+        return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled #| QtCore.Qt.ItemIsEditable
 
     def constructArray(self, datain):
         if self.arraylen == 0 or not numpy.array_equal(self.nodelookup[self.arraylen-1]['parent'].traceCollection[self.nodelookup[self.arraylen-1]['parent']._xColumn], datain.traceCollection[datain._xColumn]):#datain.trace.x):
@@ -96,6 +145,20 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
             self.arraylen += 1
         self.nodelookup[self.arraylen] = {'name': datain.name, 'xy': 'y', 'data': datain.traceCollection[datain._yColumn], 'column': datain._yColumn, 'parent': datain, 'xparent': self.currx}
         self.arraylen += 1
+
+    def numTrailingNaNs(self, arr):
+        """find the number of trailing NaNs for filtering unnecessary NaNs"""
+        return len(numpy.trim_zeros(numpy.isnan(arr)*1,'f'))
+
+    def filterUnnecessaryNaNs(self):
+        """NaNs show up when editing two traces with different lengths. if editing a single shorter subtrace 
+           or multiple shorter subtraces, trailing NaNs are stripped"""
+        nanlist = [self.numTrailingNaNs(self.nodelookup[k]['data']) for k in self.nodelookup.keys()]
+        minNaNs = min(nanlist)
+        if minNaNs > 0:
+            for k in self.nodelookup.keys():
+                self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']][:-minNaNs]
+                self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
 
     def headerData(self, column, orientation, role=QtCore.Qt.DisplayRole):
         if role != QtCore.Qt.DisplayRole:
@@ -106,14 +169,19 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
 
     def insertRow(self, position, index=QtCore.QModelIndex()):
         numRows = len(self.nodelookup[0]['data'])
-        for k, v in self.nodelookup[position[0].column()]['parent'].traceCollection.items():
-            if type(v) is numpy.ndarray and len(v) > 0:
-                self.nodelookup[position[0].column()]['parent'].traceCollection[k] = numpy.insert(v, position[0].row()+1, 0.0 if str(v[position[0].row()]) != 'nan' else 'nan')
-        for k, v in self.nodelookup.items():
+        for k in self.nodelookup.keys():
+            v = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
+            if len(v) == 0:
+                self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.append(v, 0.0)
+                retval = range(0,1)
+            else:
+                self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.insert(v, position[0].row()+1, 0.0 if str(v) != 'nan' else 'nan')
+                retval = range(position[0].row(), numRows)
             self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         self.layoutChanged.emit()
-        return range(position[0].row(), numRows)
+        return retval
 
     def copy_rows(self, rows, position):
         for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -126,12 +194,11 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         return True
 
     def removeRows(self, position, rows=1, index=QtCore.QModelIndex()):
-        for k, v in self.nodelookup[0]['parent'].traceCollection.items():
-            if type(v) is numpy.ndarray and len(v) > 0:
-                self.nodelookup[0]['parent'].traceCollection[k] = numpy.delete(self.nodelookup[0]['parent'].traceCollection[k], range(position, position+rows))
-        for k, v in self.nodelookup.items():
+        for k in range(len(self.nodelookup)):
+            self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.delete(self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']], range(position, position+rows))
             self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         self.layoutChanged.emit()
         return range(position, rows)
 
@@ -139,6 +206,14 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         for i in indices:
             self.nodelookup[i.column()]['data'][i.row()] = float(0.0)
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
+        return True
+
+    def disableCells(self, indices):
+        for i in indices:
+            self.nodelookup[i.column()]['data'][i.row()] = numpy.nan
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.updateUndo.emit()
         return True
 
     def moveRow(self, rows, delta):
@@ -148,6 +223,7 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
                     for row in rows:
                         self.nodelookup[0]['parent'].traceCollection[k][row], self.nodelookup[0]['parent'].traceCollection[k][row+delta] = self.nodelookup[0]['parent'].traceCollection[k][row+delta], self.nodelookup[0]['parent'].traceCollection[k][row]
             self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+            self.updateUndo.emit()
             return True
         return False
 
@@ -179,12 +255,18 @@ class TraceTableEditor(QtWidgets.QWidget):
         self.clearContents.triggered.connect(self.onClearContents)
         self.addAction(self.clearContents)
 
+        self.disableCells = QtWidgets.QAction("Disable Cells (set to NaN)", self)
+        self.disableCells.triggered.connect(self.onDisableCells)
+        self.addAction(self.disableCells)
+
         self.filter = KeyListFilter( [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown] )
         self.filter.keyPressed.connect( self.onReorder )
         self.tableview.installEventFilter(self.filter)
 
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Copy), self, self.copy_to_clipboard)
         QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Paste), self, self.paste_from_clipboard)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Undo), self, self.tablemodel.undo)
+        QtWidgets.QShortcut(QtGui.QKeySequence(QtGui.QKeySequence.Redo), self, self.tablemodel.redo)
 
         self.resize(950, 650)
         self.move(300, 300)
@@ -207,6 +289,10 @@ class TraceTableEditor(QtWidgets.QWidget):
     def onClearContents(self):
         zeroColSelInd = self.tableview.selectedIndexes()
         self.tablemodel.clearContents(zeroColSelInd)
+
+    def onDisableCells(self):
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.disableCells(zeroColSelInd)
 
     def onReorder(self, key):
         if key in [QtCore.Qt.Key_PageUp, QtCore.Qt.Key_PageDown]:

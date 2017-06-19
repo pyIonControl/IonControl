@@ -21,19 +21,22 @@ class ShutterUi(ShutterForm, ShutterBase):
     def __init__(self, pulserHardware, configName, outputname, config, dataContainer, size=32, parent=None):
         ShutterBase.__init__(self, parent)
         ShutterForm.__init__(self)
+        self.config = config
+        self.size = size
+        self.configname = '{0}.{1}.Value'.format(configName, outputname)
+        self.customNamesConfigName = '{0}.{1}.CustomNames'.format(configName, outputname)
+        self.ourCustomNameDict = None
         if dataContainer[0] is None:
-            dataContainer = (ChannelNameDict(), dataContainer[1])
             pulserConfig = pulserHardware.pulserConfiguration()
-            dataContainer[0].defaultDict = pulserConfig.shutterBits if pulserConfig else dict()
+            defaultNameDict = pulserConfig.shutterBits if pulserConfig else dict()
+            self.ourCustomNameDict = self.config.get(self.customNamesConfigName, dict())
+            dataContainer = (ChannelNameDict(CustomDict=self.ourCustomNameDict, DefaultDict=defaultNameDict), dataContainer[1])
         self.pulserHardware = pulserHardware
         self.outputname = outputname
-        self.config = config
-        self.configname = '{0}.{1}.Value'.format(configName, outputname)
-        self.dataContainer = dataContainer
-        self.size = size
         self.bitsLookup = sorted(dataContainer[0].defaultDict.keys())
         self.size = max(size, self.bitsLookup[-1] + 1) if self.bitsLookup else size
-        
+        self.dataContainer = dataContainer
+
     def setupUi(self,parent,dynupdate=False):
         logger = logging.getLogger(__name__)
         ShutterForm.setupUi(self, parent)
@@ -51,6 +54,8 @@ class ShutterUi(ShutterForm, ShutterBase):
         
     def saveConfig(self):
         self.config[self.configname] = self.shutterTableModel.shutter
+        if self.ourCustomNameDict is not None:
+            self.config[self.customNamesConfigName] = self.ourCustomNameDict
         
     def __repr__(self):
         r = "{0}\n".format(self.__class__)

@@ -853,6 +853,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         self.analysisControlWidget.saveConfig()
         
     def onClose(self):
+        self.traceui.exitSignal.emit()
+        self.namedTraceui.exitSignal.emit()
         self.namedTraceui.onClose()
         if self.dataStore:
             self.dataStore.close_session()
@@ -916,12 +918,15 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
 
     def registerMeasurement(self, failedList):
         failedEntry = ", ".join((name for target, name in failedList)) if failedList else None
+        startDate = self.context.plottedTraceList[0].traceCollection.description['traceCreation'] if self.context.plottedTraceList else datetime.now(pytz.utc)
+        comment = self.context.plottedTraceList[0].trace.comment if self.context.plottedTraceList else None
+        filename = self.context.plottedTraceList[0].traceCollection.filename if self.context.plottedTraceList else "none"
         measurement = Measurement(scanType= 'Scan', scanName=self.context.scan.settingsName, scanParameter=self.context.scan.scanParameter, scanTarget=self.context.scan.scanTarget,
                                   scanPP = self.context.scan.loadPPName,
                                   evaluation=self.context.evaluation.settingsName,
-                                  startDate=self.context.plottedTraceList[0].traceCollection.description['traceCreation'] if self.context.plottedTraceList else datetime.now(pytz.utc),
-                                  duration=None, filename=self.context.plottedTraceList[0].traceCollection.filename if self.context.plottedTraceList else "none",
-                                  comment=None, longComment=None, failedAnalysis=failedEntry)
+                                  startDate=startDate,
+                                  duration=None, filename=filename,
+                                  comment=comment, longComment=None, failedAnalysis=failedEntry)
         # add parameters
         space = self.measurementLog.container.getSpace('PulseProgram')
         if self.pulseProgramIdentifier:

@@ -31,7 +31,7 @@ class TerranovaReader:
         return self.conn.read(length)
                 
     def value(self):
-        reply = self.query("F")  
+        reply = self.query(b"F").decode('ascii').rstrip('\n\r')
         m = re.match('\s*(\d+)\s+([-0-9]+)\s*', reply)
         mantissa = float(m.group(1))
         exponent = int(m.group(2))

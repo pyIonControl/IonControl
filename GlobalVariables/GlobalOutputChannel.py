@@ -7,12 +7,11 @@ from externalParameter.OutputChannel import OutputChannel
 from modules.quantity import Q
 
 
-class VoltageOutputChannel:
-    def __init__(self, device, deviceName, channelName, globalDict):
+class GlobalOutputChannel:
+    def __init__(self, device, channelName):
         self.device = device
-        self.deviceName = deviceName
         self.channelName = channelName
-        #super(VoltageOutputChannel, self).__init__(device, deviceName, channelName, globalDict)
+        self._savedValue = None
 
     @property
     def name(self):
@@ -20,19 +19,19 @@ class VoltageOutputChannel:
 
     @property
     def value(self):
-        return self.device.getValue(self.channelName)
+        return self.device[self.channelName]
 
     @property
     def externalValue(self):
-        return self.device.currentValue(self.channelName)
+        return self.device[self.channelName]
     
-    @property
-    def strValue(self):
-        return self.device.strValue(self.channelName)
-    
-    @strValue.setter
-    def strValue(self, sval):
-        self.device.setStrValue(self.channelName, sval)
+    # @property
+    # def strValue(self):
+    #     raise NotImplementedError()
+    #
+    # @strValue.setter
+    # def strValue(self, sval):
+    #     raise NotImplementedError()
         
     @property
     def dimension(self):
@@ -44,6 +43,7 @@ class VoltageOutputChannel:
     
     @property
     def observable(self):
+        raise NotImplementedError()
         return self.device.displayValueObservable[self.channelName]
     
     @property
@@ -51,7 +51,8 @@ class VoltageOutputChannel:
         return False
 
     def saveValue(self, overwrite=True):
-        self.device.saveValue(self.channelName)
+        if self._savedValue is None or overwrite:
+            self._savedValue = self.device[self.channelName]
 
     def restoreValue(self):
         """
@@ -59,7 +60,10 @@ class VoltageOutputChannel:
         if the stored value is reached returns True, otherwise False. Needs to be called repeatedly
         until it returns True in order to restore the saved value.
         """
-        return self.device.restoreValue(self.channelName)
+        value = self._savedValue
+        self._savedValue = None
+        self.device[self.channelName] = value
+        return value
 
     def setValue(self, targetValue):
         """
@@ -67,5 +71,5 @@ class VoltageOutputChannel:
         it should return False. The user should call repeatedly until the intended value is reached
         and True is returned.
         """
-        self.device.setValue(self.channelName, targetValue)
+        self.device[self.channelName] = targetValue
         return True

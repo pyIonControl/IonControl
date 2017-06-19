@@ -4,6 +4,8 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 from PyQt5 import QtCore
+
+from GlobalVariables.GlobalOutputChannel import GlobalOutputChannel
 from externalParameter.persistence import DBPersist
 from externalParameter.decimation import StaticDecimation
 from modules.quantity import is_Q, Q
@@ -132,3 +134,8 @@ class GlobalVariablesLookup(MutableMapping):
         elif key == '__namedtrace__' or '_NT_' in key or key in NamedTraceDict:
             return NamedTraceUpdate.dataChanged
         return self.globalDict[key].valueChanged
+
+    def outputChannels(self):
+        self._outputChannels = {key: GlobalOutputChannel(self, key) for key in self.globalDict.keys()}
+        return self._outputChannels
+
