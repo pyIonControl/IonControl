@@ -160,12 +160,15 @@ class VoltageLocalAdjust(Form, Base ):
         return self.channelDict[channel].gain.value
     
     def saveValue(self, channel):
-        self.savedValue[channel] = copy.deepcopy(self.channelDict[channel].gain)
+        self.savedValue[channel] = (self.channelDict[channel].gain._string, self.channelDict[channel].gain._value)
 
     def restoreValue(self, channel):
         if self.savedValue[channel] is not None:
-            self.channelDict[channel].gain = self.savedValue[channel]
-            self.channelDict[channel].recalculate()
+            string, value = self.savedValue[channel]
+            if string is not None:
+                self.channelDict[channel].gain.string = string
+            else:
+                self.channelDict[channel].gain.value = value
         return True
     
     def strValue(self, channel):
