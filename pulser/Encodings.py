@@ -29,7 +29,7 @@ class EncodingError(Exception):
 
 class Encoding:
     def __init__(self, maxvalue=None, bits=16, unit='', signed=True, representation=Representation.TwosComplement,
-                 step=None, periodic=False):
+                 step=None, periodic=False, maskbits=None):
         self.bits = bits
         self.unit = unit
         self.signed = signed
@@ -42,7 +42,7 @@ class Encoding:
             self.maxvalue = value(maxvalue, unit)
             self.minvalue = -self.maxvalue if signed else 0
             self.step = (self.maxvalue - self.minvalue) / (1 << self.bits) if step is None else step
-        self.mask = (1 << self.bits) - 1
+        self.mask = ((1 << maskbits) - 1) if maskbits is not None else ((1 << self.bits) - 1)
         self.offsetValue = self.minvalue if representation == Representation.Offset and signed else 0
 
     def encode(self, v):
@@ -92,6 +92,7 @@ unsigned64 = BinaryEncoding((1 << 64) - 1, 64, step=1, signed=False)
 signagnostic64 = BinaryEncoding((1 << 64) - 1, 64, step=1, signed=True)
 
 EncodingDict = {'AD9912_FRQ': Encoding(Q(1, 'GHz'), 48, 'Hz', signed=False),
+                'AD9912_FRQ_SIGN': Encoding(Q(1, 'GHz'), 48, 'Hz', signed=True, maskbits=64),
                 'AD9910_FRQ': Encoding(Q(1, 'GHz'), 32, 'Hz', signed=False),
                 'AD9912_PHASE': Encoding(Q(360), 14, '', signed=False, periodic=True),
                 'AD9910_PHASE': Encoding(Q(360), 16, '', signed=False, periodic=True),

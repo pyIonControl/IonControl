@@ -395,7 +395,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 logging.getLogger(__name__).info("Writing {0} bytes to RAM ({1}%)".format(len(data)*8, 100*len(data)/(2**24) ))
                 self.pulserHardware.ppWriteRamWordList(data, 0, check=True)
                 datacopy = [0]*len(data)
-                datacopy = self.pulserHardware.ppReadRamWordList(datacopy, 0)
+                datacopy = [v & 0xffffffffffffffff for v in self.pulserHardware.ppReadRamWordList(datacopy, 0)]
                 if data!=datacopy:
                     logger.info("original: {0}".format(data) if len(data)<202 else "original {0} ... {1}".format(data[0:100], data[-100:]) )
                     logger.info("received: {0}".format(datacopy) if len(datacopy)<202 else "received {0} ... {1}".format(datacopy[0:100], datacopy[-100:]) )
