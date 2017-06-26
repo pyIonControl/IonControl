@@ -97,7 +97,8 @@ class TracePlottingList(list):
         for traceplotting in self:
             g = mygroup.require_group(traceplotting.name)
             for name in TracePlotting.attrFields:
-                g.attrs[name] = getattr(traceplotting, name)
+                attr = getattr(traceplotting, name)
+                g.attrs[name] = attr if attr is not None else ''
             if traceplotting.fitFunction:
                 traceplotting.fitFunction.toHdf5(g)
 

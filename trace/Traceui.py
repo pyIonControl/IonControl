@@ -500,6 +500,18 @@ class TraceuiMixin:
                     if svgnames:
                         for svgname in svgnames:
                             self.openFile(svgname)
+                elif Path(fname).suffix == '.py':
+                    code = Path(fname).read_text()
+                    files = code.split('"""\n')[1].split('\n')[:-1]
+                    shortenedCode = code.split('\n')[2+len(files):]
+                    plottedTraces = [self.openFile(f)[0] for f in files]
+                    from trace.MatplotlibInterface import MatplotWindow
+                    mpw = MatplotWindow(exitSig=self.exitSignal)
+                    mpw.show()
+                    for pt in plottedTraces:
+                        mpw.plot(pt)
+                    mpw.textEdit.setPlainText('\n'.join(shortenedCode))
+                    mpw.replot()
                 else:
                     self.openFile(fname)
 

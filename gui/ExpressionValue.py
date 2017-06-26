@@ -175,6 +175,9 @@ class ExpressionValue(QtCore.QObject):
         result = ExpressionValue(globalDict=self.globalDict)
         memo[id(self)] = result
         result.name = deepcopy(self.name)
-        result._string = deepcopy(self._string)
-        result._value = deepcopy(self._value)
+        if self._globalDict is not None:
+            result.string = deepcopy(self._string)
+        else:
+            result._string = deepcopy(self._string)
+            result._value = deepcopy(self._value)
         return result

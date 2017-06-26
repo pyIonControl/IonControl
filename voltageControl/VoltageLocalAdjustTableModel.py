@@ -22,7 +22,7 @@ class VoltageLocalAdjustTableModel(QtCore.QAbstractTableModel):
         textBG = QtGui.QColor(QtCore.Qt.green).lighter(175)
         self.backgroundLookup = { True:textBG, False:defaultBG}
         self.dataLookup = {  (QtCore.Qt.DisplayRole, 0): lambda row: self.localAdjustList[row].name,
-                             (QtCore.Qt.DisplayRole, 1): lambda row: str(self.localAdjustList[row].gainValue),
+                             (QtCore.Qt.DisplayRole, 1): lambda row: str(self.localAdjustList[row].gain.value),
                              (QtCore.Qt.DisplayRole, 2): lambda row: str(self.localAdjustList[row].path),
                              (QtCore.Qt.EditRole, 2): lambda row: str(self.localAdjustList[row].path),
                              (QtCore.Qt.EditRole, 1): lambda row: self.localAdjustList[row].gain.string,                            
