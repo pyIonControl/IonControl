@@ -8,8 +8,8 @@
         <Parameter address="0x22" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 0" shift="0" name="Ch 0 delay Coefficient" encoding="TIME" enabled="True"/>
         <Parameter address="0x23" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 0" shift="0" name="Ch 0 offset Coefficient" encoding="ADC7606_VOLTAGE" enabled="True"/>
 
-        <Parameter address="0x24" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 p Coefficient" encoding="None" enabled="True"/>
-        <Parameter address="0x25" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 i Coefficient" encoding="None" enabled="True"/>
+        <Parameter address="0x24" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 p Coefficient" encoding="signed32" enabled="True"/>
+        <Parameter address="0x25" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 i Coefficient" encoding="signed32" enabled="True"/>
         <Parameter address="0x26" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 delay Coefficient" encoding="TIME" enabled="True"/>
         <Parameter address="0x27" default="0" bitmask="0xffffffffffffffff" categories="PI Loop Parameters, Channel 1" shift="0" name="Ch 1 offset Coefficient" encoding="ADC7606_VOLTAGE" enabled="True"/>
 

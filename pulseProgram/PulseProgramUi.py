@@ -131,11 +131,13 @@ class PulseProgramUi(PulseProgramWidget, PulseProgramBase):
             builtinWords.append(key)
 
     SourceMode = enum('pp', 'ppp') 
-    def __init__(self, config, parameterdict, channelNameData):
+    def __init__(self, config, parameterdict, channelNameData, pulser=None):
         PulseProgramWidget.__init__(self)
         PulseProgramBase.__init__(self)
         self.dependencyGraph = DiGraph()
-        self.pulseProgram = PulseProgram.PulseProgram()
+        self.pulser = pulser
+        self.numDDSChannels = len(self.pulser.pulserConfiguration().ddsChannels)
+        self.pulseProgram = PulseProgram.PulseProgram(ddsnum=self.numDDSChannels)
         self.sourceCodeEdits = dict()
         self.pppCodeEdits = dict()
         self.config = config
@@ -873,7 +875,7 @@ class PulseProgramSetUi(QtWidgets.QDialog):
     class Parameters:
         pass
     
-    def __init__(self, config, channelNameData):
+    def __init__(self, config, channelNameData, pulser=None):
         super(PulseProgramSetUi, self).__init__()
         self.config = config
         self.configname = 'PulseProgramSetUi'
@@ -881,6 +883,7 @@ class PulseProgramSetUi(QtWidgets.QDialog):
         self.lastExperimentFile = dict()     # ExperimentName -> last pp file used for this experiment
         self.isShown = False
         self.channelNameData = channelNameData
+        self.pulser = pulser
     
     def setupUi(self, parent):
         self.horizontalLayout = QtWidgets.QHBoxLayout(parent)
@@ -892,7 +895,7 @@ class PulseProgramSetUi(QtWidgets.QDialog):
 
     def addExperiment(self, experiment, globalDict=dict(), globalVariablesChanged=None):
         if not experiment in self.pulseProgramSet:
-            programUi = PulseProgramUi(self.config, globalDict, self.channelNameData)
+            programUi = PulseProgramUi(self.config, globalDict, self.channelNameData, pulser=self.pulser)
             programUi.globalVariablesChanged = globalVariablesChanged
             programUi.setupUi(experiment, programUi)
             programUi.myindex = self.tabWidget.addTab(programUi, experiment)
