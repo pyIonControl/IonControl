@@ -10,8 +10,8 @@ from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 win = pg.plot()
 win.setWindowTitle('pyqtgraph example: GSTGraphItem')
 
-x = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (0, 0, 1, 1)]
-y = [0, 1, 2, 3]
+x = [(0, 0, 0, 0), (1, 1, 0, 0), (2, 2, 0, 0), (0, 0, 1, 1), (0, 0, 2, 2), (1, 1, 2, 2)]
+y = [0, 1, 2, 3, 4, 5]
 
 #bg1 = GSTGraphItem(x=x, y=y)
 #win.addItem(bg1)

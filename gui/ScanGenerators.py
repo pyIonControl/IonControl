@@ -89,6 +89,13 @@ class ParameterScanGenerator:
                 
     def expected(self, index):
         return None
+
+    def gateSequence(self, index):
+        return None
+
+    def gateSequenceIndex(self, index):
+        return (index, )
+
                 
 class StepInPlaceGenerator:
     def __init__(self, scan):
@@ -143,6 +150,13 @@ class StepInPlaceGenerator:
     def expected(self, index):
         return None
 
+    def gateSequence(self, index):
+        return None
+
+    def gateSequenceIndex(self, index):
+        return (index, )
+
+
 class FreerunningGenerator:
     expression = Expression()
     def __init__(self, scan):
@@ -184,6 +198,12 @@ class FreerunningGenerator:
 
     def expected(self, index):
         return None
+
+    def gateSequence(self, index):
+        return None
+
+    def gateSequenceIndex(self, index):
+        return (index, )
 
 class GateSequenceScanGenerator:
     def __init__(self, scan):
@@ -271,6 +291,14 @@ class GateSequenceScanGenerator:
             except (IndexError, KeyError):
                 expected = None
             return expected
-        return None 
+        return None
+
+    def gateSequence(self, index):
+        # TODO: implement
+        return None
+
+    def gateSequenceIndex(self, index):
+        # TODO: implement
+        return None
         
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   

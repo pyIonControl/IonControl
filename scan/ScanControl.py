@@ -60,7 +60,9 @@ class Scan:
         self.loadPP = False
         self.loadPPName = ""
         self.saveRawData = False
+        self.saveQubitData = False
         self.rawFilename = ""
+        self.qubitFilename = ""
         # GateSequence Settings
         self.gateSequenceSettings = GateSequenceUi.Settings()
         self.scanSegmentList = [ScanSegmentDefinition()]
@@ -86,6 +88,8 @@ class Scan:
         self.__dict__.setdefault('scanTarget', None)
         self.__dict__.setdefault('saveRawData', False)
         self.__dict__.setdefault('rawFilename', "")
+        self.__dict__.setdefault('saveQubitData', False)
+        self.__dict__.setdefault('qubitFilename', '')
         self.__dict__.setdefault('maxPoints', 0)
         self.__dict__.setdefault('parallelInternalScanParameter', "None")
 
@@ -104,7 +108,8 @@ class Scan:
         
     stateFields = ['scanParameter', 'scanTarget', 'scantype', 'scanMode', 'filename', 'histogramFilename',
                    'autoSave', 'histogramSave', 'xUnit', 'xExpression', 'loadPP', 'loadPPName',
-                   'gateSequenceSettings', 'scanSegmentList', 'saveRawData', 'rawFilename', 'maxPoints', 'parallelInternalScanParameter']
+                   'gateSequenceSettings', 'scanSegmentList', 'saveRawData', 'rawFilename', 'saveQubitData',
+                   'qubitFilename', 'maxPoints', 'parallelInternalScanParameter']
 
     documentationList = ['scanParameter', 'scanTarget', 'scantype', 'scanMode',
                          'xUnit', 'xExpression', 'loadPP', 'loadPPName', 'parallelInternalScanParameter']
@@ -204,10 +209,12 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         self.scanTypeCombo.currentIndexChanged[int].connect( functools.partial(self.onCurrentIndexChanged, 'scantype') )
         self.autoSaveCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'autoSave') )
         self.saveRawCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'saveRawData') )
+        self.saveQubitCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'saveQubitData'))
         self.histogramSaveCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'histogramSave') )
         self.scanModeComboBox.currentIndexChanged[int].connect( self.onModeChanged )
         self.filenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.filenameEdit, 'filename') )
         self.rawFilenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.rawFilenameEdit, 'rawFilename') )
+        self.qubitFilenameEdit.editingFinished.connect(functools.partial(self.onEditingFinished, self.qubitFilenameEdit, 'qubitFilename'))
         self.histogramFilenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.histogramFilenameEdit, 'histogramFilename') )
         self.xUnitEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.xUnitEdit, 'xUnit') )
         self.xExprEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.xExprEdit, 'xExpression') )
@@ -285,6 +292,7 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         self.scanTypeCombo.setCurrentIndex(self.settings.scantype )
         self.autoSaveCheckBox.setChecked(self.settings.autoSave)
         self.saveRawCheckBox.setChecked(self.settings.saveRawData)
+        self.saveQubitCheckBox.setChecked(self.settings.saveQubitData)
         self.histogramSaveCheckBox.setChecked(self.settings.histogramSave)
         if self.settings.scanTarget:
             self.settings.scanParameter = self.doChangeScanTarget(self.settings.scanTarget, self.settings.scanParameter)
@@ -296,6 +304,7 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         filename = getattr(self.settings, 'filename', '')
         self.filenameEdit.setText(filename if filename else '')
         self.rawFilenameEdit.setText( getattr(self.settings, 'rawFilename', '') )
+        self.qubitFilenameEdit.setText(getattr(self.settings, 'qubitFilename', '') )
         self.histogramFilenameEdit.setText( getattr(self.settings, 'histogramFilename', '') )
         self.scanTypeCombo.setEnabled(self.settings.scanMode in [0, 1])
         self.xUnitEdit.setText( self.settings.xUnit )

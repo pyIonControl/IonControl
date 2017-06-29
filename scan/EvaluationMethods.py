@@ -12,6 +12,8 @@ algorithms are expected to defined the fileds as stated in MeanEvaluation
 
 """
 import math
+from collections import Counter
+from itertools import repeat
 
 import numpy
 
@@ -169,18 +171,26 @@ class ThresholdEvaluation(EvaluationBase):
     def setDefault(self):
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
-        
-    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
-        countarray = evaluation.getChannelData(data)
-        if not countarray:
-            return 0, None, 0
-        N = float(len(countarray))
+        self.settings.setdefault('timestamp_id', 0)
+
+    def _evaluate(self, data, evaluation, countarray):
+        if evaluation.name in data.evaluated:
+            return data.evaluated[evaluation.name]
         if self.settings['invert']:
             discriminated = [ 0 if count > self.settings['threshold'] else 1 for count in countarray ]
         else:
             discriminated = [ 1 if count > self.settings['threshold'] else 0 for count in countarray ]
         if evaluation.name:
             data.evaluated[evaluation.name] = discriminated
+        return discriminated
+
+
+    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
+        countarray = evaluation.getChannelData(data)
+        if not countarray:
+            return 0, None, 0
+        N = float(len(countarray))
+        discriminated = self._evaluate(data, evaluation, countarray)
         x = numpy.sum( discriminated )
         p = x/N
         # Wilson score interval with continuity correction
@@ -191,6 +201,18 @@ class ThresholdEvaluation(EvaluationBase):
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0            
         return p, (p-bottom, top-p), x
 
+    def qubitEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
+        countarray = evaluation.getChannelData(data)
+        timestamps = data.timeTick.get(self.settings['timestamp_id'], None)
+        # we will return 3-tuple of lists: value, repeats, timestamp
+        # if we do not find a timestamp we will accumulate the data, otherwise send back every event
+        discriminated = self._evaluate(data, evaluation, countarray)
+        if timestamps is None or len(timestamps) != len(countarray):
+            c = Counter(discriminated)
+            return c.keys(), c.values(), repeat(data._creationtime, len(c))
+        else:
+            return discriminated, repeat(1, len(discriminated), timestamps)
+
     def parameters(self):
         parameterDict = super(ThresholdEvaluation, self).parameters()
         name='threshold'
@@ -198,6 +220,7 @@ class ThresholdEvaluation(EvaluationBase):
                                         value=self.settings[name], text=self.settings.get( (name, 'text') ),
                                         tooltip='Threshold evaluation (the threshold value itself is excluded)')
         parameterDict['invert'] = Parameter(name='invert', dataType='bool', value=self.settings['invert'])
+        parameterDict['timestamp_id'] = Parameter(name='timestamp_id', dataType='magnitude', value=self.settings['timestamp_id'])
         return parameterDict
 
 class RangeEvaluation(EvaluationBase):

@@ -3,7 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+import json
 from collections import defaultdict
 from datetime import datetime
 from dateutil import parser
@@ -80,16 +80,38 @@ class TracePlotting(object):
         self.__dict__.setdefault( 'xAxisUnit', None )
         self.__dict__.setdefault( 'xAxisLabel', None )
         self.__dict__.setdefault( 'windowName', None)
-        
+
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'TracePlotting',
+                               dict((name, str(getattr(self, name))) for name in self.attrFields))
+        if self.fitFunction:
+            self.fitFunction.toXmlElement(e)
+        return e
+
     attrFields = ['xColumn','yColumn','topColumn', 'bottomColumn','heightColumn', 'filtColumn', 'name', 'type', 'xAxisUnit', 'xAxisLabel', 'windowName']
+
+
+class StructurePlotting:
+    def __init__(self, key):
+        self.key = key
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.__dict__.setdefault('key', None)
+
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'StructurePlotting',
+                               dict((name, str(getattr(self, name))) for name in self.attrFields))
+        return e
+
+    attrFields = ['key']
+
 
 class TracePlottingList(list):        
     def toXmlElement(self, root):
         myElement = ElementTree.SubElement(root, 'TracePlottingList', {})
         for traceplotting in self:
-            traceplottingElement = ElementTree.SubElement(myElement, 'TracePlotting', dict( (name,str(getattr(traceplotting,name))) for name in TracePlotting.attrFields))
-            if traceplotting.fitFunction:
-                traceplotting.fitFunction.toXmlElement(traceplottingElement)
+            traceplotting.toXML(myElement)
         return myElement
 
     def toHdf5(self, group):
@@ -111,6 +133,10 @@ class TracePlottingList(list):
             plotting.type = int(plotting.type) if hasattr(plotting,'type') else 0
             if plottingelement.find("FitFunction") is not None:
                 plotting.fitFunction = FitFunctions.fromXmlElement( plottingelement.find("FitFunction") )
+            l.append(plotting)
+        for plottingelement in element.finadall("StructurePlotting"):
+            plotting = StructurePlotting()
+            plotting.__dict__.update(plottingelement.attrib)
             l.append(plotting)
         return l
 
@@ -186,6 +212,7 @@ class TraceCollection(keydefaultdict):
         self.rawdata = None
         self.description["tracePlottingList"] = TracePlottingList()
         self.record_timestamps = record_timestamps
+        self.structuredData = keydefaultdict(dict)  #  Can contained structured data that can be json dumped
 
     def __bool__(self):
         return True  # to remain backwards compatible with previous behavior
@@ -196,7 +223,7 @@ class TraceCollection(keydefaultdict):
             return numpy.arange(0, len(d['x']), 1)
         return numpy.array([])
 
-    def varFromXmlElement(self, element, description):       
+    def varFromXmlElement(self, element, description):
         name = element.attrib['name']
         mytype = element.attrib['type']
         if mytype=='dict':
@@ -373,6 +400,9 @@ class TraceCollection(keydefaultdict):
         self.description.sort()
         for name, value in self.description.items():
             self.saveDescriptionElement(name, value, varsElement)
+        structuredElement = ElementTree.SubElement(root, "StructuredData", {})
+        for name, value in self.structuredData.items():
+            self.saveDescriptionElement(name, value, structuredElement)
         outfile.write(prettify(root,'# '))
 
     def saveMetadata(self, f):
@@ -392,9 +422,12 @@ class TraceCollection(keydefaultdict):
         else:
             variables.attrs[name] = str(value)
 
-    def saveDescriptionElement(self, name, value, element):
+    def saveDescriptionElement(self, name, value, element, use_json=False):
         if hasattr(value,'toXmlElement'):
             value.toXmlElement(element)
+        elif use_json:
+            e = ElementTree.SubElement(element, 'Element', {'name': name, 'type': 'json'})
+            e.text = json.dumps(value)
         elif isinstance(value, dict):
             subElement = ElementTree.SubElement(element, 'Element', {'name': name, 'type': 'dict'})
             for subname, subvalue in value.items():
@@ -451,6 +484,8 @@ class TraceCollection(keydefaultdict):
         self.description["tracePlottingList"] = TracePlottingList.fromXmlElement(tpelement) if tpelement is not None else None
         for element in root.findall("./Variables/Element"):
             self.varFromXmlElement(element, self.description)
+        for element in root.findall("./StructuredData/Element"):
+            self.structuredData[element.name] = json.loads(element.text)
 
     def loadTraceText(self, stream):
         data = []

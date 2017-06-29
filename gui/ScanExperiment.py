@@ -12,7 +12,7 @@ echo those on the pipe output followed by the measurement results.
 It is expected to send an endlabel (0xffffffff) when finished.
 
 """
-
+import json
 from datetime import datetime, timedelta
 import functools
 import logging
@@ -37,6 +37,7 @@ from pyqtgraph.graphicsItems.ViewBox import ViewBox
 from pyqtgraph.exporters.ImageExporter import ImageExporter
 from pyqtgraph.exporters.SVGExporter import SVGExporter
 
+from trace.PlottedStructure import PlottedStructure
 from .AverageViewTable import AverageViewTable
 from . import MainWindowWidget
 from trace import RawData
@@ -94,6 +95,7 @@ class ScanExperimentContext(object):
         self.globalOverrides = list()
         self.revertGlobalsValues = list()
         self.analysisName = None
+        self.qubitData = dict()
 
     def overrideGlobals(self, globalDict):
         self.revertGlobals(globalDict)  # make sure old values were reverted e.g. when calling start on a running scan
@@ -572,6 +574,18 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.displayUi.add(  [ e[0] for e in evaluated ] )
             self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize  )
             self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList )
+        # qubit evaluation
+        gateSequence = self.context.generator.gateSequence(self.context.currentIndex)
+        gateSequenceIndex = self.context.generator.gateSequenceIndex(self.context.currentIndex)
+        for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
+            if hasattr(algo, 'qubitEvaluate'):
+                values, repeats, timestaps = algo.qubitEvaluate(data, evaluation, ppDict=replacementDict, globalDict=self.globalVariables)
+                gsdata = self.context.qubitData[gateSequence]
+                gsdata['value'].extend(values)
+                gsdata['repeats'].extend(repeats)
+                gsdata['timestamps'].extend(timestaps)
+                gsdata['sequence_index'] = gateSequenceIndex
+                break  # we just use the first algorithm that implements qubitEvaluate
         if data.other:
             logger.info( "Other: {0}".format( data.other ) )
         self.context.currentIndex += 1
@@ -611,6 +625,10 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     else:
                         self.plotDict["Scan Data"]["view"].enableAutoRange(axis=ViewBox.XAxis)     
                     self.context.plottedTraceList.append( plottedTrace )
+            if self.context.qubitData:
+                traceCollection.structuredData['qubitData'] = self.context.qubitData
+                plottedStructure = PlottedStructure('qubitData')
+                self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
             self.context.plottedTraceList[0].traceCollection.description["PulseProgram"] = self.pulseProgramUi.description()
@@ -650,6 +668,9 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 self.context.rawDataFile.close()
                 self.context.rawDataFile = None
                 logging.getLogger(__name__).info("Closed raw data file")
+            if self.context.scan.saveQubitData and self.context.scan.qubitFilename:
+                with open(DataDirectory.DataDirectory().sequencefile(self.context.scan.qubitFilename)[0], 'w') as f:
+                    json.dump(self.context.qubitData, f)
             for trace in ([self.context.currentTimestampTrace]+[self.context.plottedTraceList[0].traceCollection] if self.context.plottedTraceList else[]):
                 if trace:
                     trace.description["traceFinalized"] = datetime.now(pytz.utc)
