@@ -29,7 +29,8 @@ Form, Base = PyQt5.uic.loadUiType(uipath)
 
 
 class Settings:
-    stateFields = [ 'enabled', 'gate', 'gateDefinition', 'gateSequence', 'active', 'startAddressParam', 'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache' ]
+    stateFields = [ 'enabled', 'gate', 'gateDefinition', 'gateSequence', 'active', 'startAddressParam',
+                    'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache' ]
     XMLTagName = "GateSequence"
     def __init__(self):
         self.enabled = False
@@ -43,6 +44,16 @@ class Settings:
         self.gateDefinitionCache = HashableDict()
         self.thisSequenceRepetition = 10
         self.debug = False
+        self.generatorType = 'GateSequenceList'
+        self.gateSet = ''
+        self.preparationFiducials = ''
+        self.preparationFiducialsIsFile = False
+        self.measurementFiducials = ''
+        self.measurementFiducialsIsFile = False
+        self.germs = ''
+        self.germsIsFile = False
+        self.lengths = ''
+
         
     def __setstate__(self, d):
         self.__dict__ = d
