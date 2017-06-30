@@ -7,6 +7,7 @@
 import logging
 import operator
 import os.path
+from functools import partial
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
@@ -30,7 +31,9 @@ Form, Base = PyQt5.uic.loadUiType(uipath)
 
 class Settings:
     stateFields = [ 'enabled', 'gate', 'gateDefinition', 'gateSequence', 'active', 'startAddressParam',
-                    'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache' ]
+                    'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache',
+                    'generatorType', 'gateSet', 'preparationFiducials', 'measurementFiducials',
+                    'germs', 'lengths', 'keepFraction', 'keepSeed']
     XMLTagName = "GateSequence"
     def __init__(self):
         self.enabled = False
@@ -47,14 +50,17 @@ class Settings:
         self.generatorType = 'GateSequenceList'
         self.gateSet = ''
         self.preparationFiducials = ''
-        self.preparationFiducialsIsFile = False
         self.measurementFiducials = ''
-        self.measurementFiducialsIsFile = False
         self.germs = ''
-        self.germsIsFile = False
         self.lengths = ''
+        self.keepFraction = 1
+        self.keepSeed = 0
+        self.gateSetCache = HashableDict()
+        self.preparationFiducialsCache = HashableDict()
+        self.measurementFiducialsCache = HashableDict()
+        self.germsCache = HashableDict()
+        self.lengthsCache = HashableDict()
 
-        
     def __setstate__(self, d):
         self.__dict__ = d
         for cache in [self.gateDefinitionCache, self.gateSequenceCache]:
@@ -64,7 +70,15 @@ class Settings:
         if not isinstance(self.gateSequenceCache, HashableDict):
             self.gateSequenceCache = HashableDict(self.gateSequenceCache)
         if not isinstance(self.gateDefinitionCache, HashableDict):
-            self.gateDefinitionCache =  HashableDict( self.gateDefinitionCache )
+            self.gateDefinitionCache = HashableDict( self.gateDefinitionCache )
+        self.__dict__.setdefault('generatorType', 'GateSequenceList')
+        self.__dict__.setdefault('gateSet', '')
+        self.__dict__.setdefault('preparationFiducials', '')
+        self.__dict__.setdefault('measurementFiducials', '')
+        self.__dict__.setdefault('germs', '')
+        self.__dict__.setdefault('lengths', '')
+        self.__dict__.setdefault('keepFraction', 1)
+        self.__dict__.setdefault('keepSeed', 0)
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and tuple(getattr(self, field) for field in self.stateFields)==tuple(getattr(other, field) for field in self.stateFields)
@@ -134,22 +148,28 @@ class GateSequenceUi(Form, Base):
 
     def setupUi(self, parent):
         super(GateSequenceUi, self).setupUi(parent)
-        self.setSettings( self.settings )
-        self.GateSequenceEnableCheckBox.stateChanged.connect( self.onEnableChanged )
-        self.GateDefinitionButton.clicked.connect( self.onLoadGateDefinition )
-        self.GateSequenceButton.clicked.connect( self.onLoadGateSequenceList )
-        self.FullListRadioButton.toggled.connect( self.onRadioButtonToggled )
-        self.GateEdit.editingFinished.connect( self.onGateEditChanged )
-        self.StartAddressBox.currentIndexChanged['QString'].connect( self.onStartAddressParam )
-        self.repetitionSpinBox.valueChanged.connect( self.onRepetitionChanged )
-        self.GateSequenceBox.currentIndexChanged[str].connect( self.onGateSequenceChanged )
-        self.GateDefinitionBox.currentIndexChanged[str].connect( self.onGateDefinitionChanged )
-        self.debugCheckBox.stateChanged.connect( self.onDebugChanged )
+        self.setSettings(self.settings)
+        self.GateSequenceEnableCheckBox.stateChanged.connect(self.onEnableChanged)
+        self.GateDefinitionButton.clicked.connect(partial(self.onLoadGeneric, self.GateDefinitionBox, self.settings.gateDefinitionCache, self.loadGateDefinition, message="Open Gate Definition:"))
+        self.GateSequenceButton.clicked.connect(partial(self.onLoadGeneric, self.GateSequenceBox, self.settings.gateSequenceCache, self.loadGateSequenceList, message="Open Gate Sequence File:"))
+        self.FullListRadioButton.toggled.connect(self.onRadioButtonToggled)
+        self.GateSetButton.clicked.connect(partial(self.onLoadGeneric, self.GateSetBox, self.settings.gateSetCache, self.loadGateSet, message="Open Gate Set:"))
+        self.PreparationButton.clicked.connect(partial(self.onLoadGeneric, self.PreparationBox, self.settings.preparationFiducialCache, self.loadPreparation, message="Open Preparation Fiducials:"))
+        self.MeasurementButton.clicked.connect(partial(self.onLoadGeneric, self.MeasurementBox, self.settings.measurementFiducialCache, self.loadMeasurement, message="Open Measurement Fiducials:"))
+        self.GermsButton.clicked.connect(self.onLoadGerms)
+        self.GateEdit.editingFinished.connect(self.onGateEditChanged)
+        self.StartAddressBox.currentIndexChanged['QString'].connect(self.onStartAddressParam)
+        self.repetitionSpinBox.valueChanged.connect(self.onRepetitionChanged)
+        self.GateSequenceBox.currentIndexChanged[str].connect(self.onGateSequenceChanged)
+        self.GateDefinitionBox.currentIndexChanged[str].connect(self.onGateDefinitionChanged)
+        self.debugCheckBox.stateChanged.connect(self.onDebugChanged)
         self.project = getProject()
-        self.defaultGateSequencesDir = self.project.configDir+'/GateSequences'
+        self.defaultGateSequencesDir = self.project.configDir + '/GateSequences'
         if not os.path.exists(self.defaultGateSequencesDir):
-            exampleGateSequencesDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', 'config/GateSequences')) #/IonControl/config/GateSequences directory
-            shutil.copytree(exampleGateSequencesDir, self.defaultGateSequencesDir) #Copy over all example gate sequence files
+            # /IonControl/config/GateSequences directory
+            exampleGateSequencesDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','config/GateSequences'))
+            shutil.copytree(exampleGateSequencesDir,
+                            self.defaultGateSequencesDir)  # Copy over all example gate sequence files
 
     def getSettings(self):
         logger = logging.getLogger(__name__)
@@ -222,7 +242,8 @@ class GateSequenceUi(Form, Base):
         
     def onEnableChanged(self, state):
         self.settings.enabled = state == QtCore.Qt.Checked
-        self.GateSequenceFrame.setEnabled( self.settings.enabled )
+        self.GateSequenceFrame.setEnabled(self.settings.enabled)
+        self.sequenceOriginWidget.setEnabled(self.settings.enabled)
         self.updateDatastructures()
         self.valueChanged.emit()          
         
@@ -233,18 +254,6 @@ class GateSequenceUi(Form, Base):
     def close(self):
         self.config[self.configname] = self.settings
                 
-    def onLoadGateDefinition(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Gate definition file:", self.defaultGateSequencesDir)
-        if path!="":
-            filedir, filename = os.path.split(path)
-            self.settings.lastDir = filedir
-            self.loadGateDefinition(path)
-            if filename not in self.settings.gateDefinitionCache:
-                self.settings.gateDefinitionCache[filename] = path
-                self.GateDefinitionBox.addItem(filename)
-                self.GateDefinitionBox.setCurrentIndex( self.GateDefinitionBox.findText(filename))
-        self.valueChanged.emit()          
-
     def loadGateDefinition(self, path):
         self.gatedef.loadGateDefinition(path)    
         _, filename = os.path.split(path)
@@ -257,19 +266,19 @@ class GateSequenceUi(Form, Base):
         self.gatedef.loadGateDefinition(None)    
         self.GateDefinitionBox.setCurrentIndex(-1)
         self.valueChanged.emit()      
-    
-    def onLoadGateSequenceList(self):
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open Gate Set file:", self.defaultGateSequencesDir)
-        if path!="":
+
+    def onLoadGeneric(self, combobox, cache, loader, message="Open"):
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, message, self.defaultGateSequencesDir)
+        if path:
             filedir, filename = os.path.split(path)
             self.settings.lastDir = filedir
-            self.loadGateSequenceList(path)
-            if filename not in self.settings.gateSequenceCache:
-                self.settings.gateSequenceCache[filename] = path
-                self.GateSequenceBox.addItem(filename)
-                self.GateSequenceBox.setCurrentIndex( self.GateSequenceBox.findText(filename))
-        self.valueChanged.emit()          
-            
+            loader(path)
+            if filename not in cache:
+                cache[filename] = path
+                combobox.addItem(filename)
+                combobox.setCurrentIndex(self.GateSequenceBox.findText(filename))
+        self.valueChanged.emit()
+
     def loadGateSequenceList(self, path):
         logger = logging.getLogger(__name__)
         self.gateSequenceContainer.loadXml(path)
@@ -277,7 +286,28 @@ class GateSequenceUi(Form, Base):
         _, filename = os.path.split(path)
         self.settings.gateSequence = filename
         self.GateSequenceBox.setCurrentIndex(self.GateSequenceBox.findText(filename))
-        
+
+    def loadGateSet(self, path):
+        self.gateSequenceContainer.loadGateSet(path)
+        _, filename = os.path.split(path)
+        self.settings.gateSet = filename
+        self.GateSetBox.setCurrentIndex(self.GateSetBox.findText(filename))
+
+    def loadPreparation(self, path_or_literal):
+        file_or_literal = self.gateSequenceContainer.setPreparation(path_or_literal)
+        self.settings.preparationFiducials = file_or_literal
+        self.PreparationFiducialsBox.setCurrentIndex(self.PreparationFiducialsBox.findText(file_or_literal))
+
+    def loadMeasurement(self, path_or_literal):
+        file_or_literal = self.gateSequenceContainer.setMeasurement(path_or_literal)
+        self.settings.measurementFiducials = file_or_literal
+        self.MeasurementFiducialsBox.setCurrentIndex(self.MeasurementFiducialsBox.findText(file_or_literal))
+
+    def loadGerms(self, path_or_literal):
+        file_or_literal = self.gateSequenceContainer.setGerms(path_or_literal)
+        self.settings.germs = file_or_literal
+        self.GermsBox.setCurrentIndex(self.GermsBox.findText(file_or_literal))
+
     def clearGateSequenceList(self):
         self.gateSequenceContainer.loadXml(None)
         self.GateSequenceBox.setCurrentIndex(-1)
