@@ -68,6 +68,13 @@
         </property>
        </widget>
       </item>
+      <item row="2" column="1" colspan="3">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Gate Definition</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1" colspan="2">
        <widget class="QComboBox" name="StartAddressBox">
         <property name="sizePolicy">
@@ -85,10 +92,37 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="3">
-       <widget class="QLabel" name="label">
+      <item row="5" column="1" colspan="2">
+       <widget class="QComboBox" name="GateSetBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frame">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="3">
+       <widget class="QToolButton" name="GateSetButton">
         <property name="text">
-         <string>Gate Definition</string>
+         <string>...</string>
+        </property>
+        <property name="icon">
+         <iconset resource="Experiment.qrc">
+          <normaloff>:/openicon/icons/document-open-5.png</normaloff>:/openicon/icons/document-open-5.png</iconset>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Gate Set</string>
         </property>
        </widget>
       </item>
@@ -211,40 +245,6 @@
        <string>GST</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Gate Set</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QComboBox" name="GateSetBox">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="frame">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QToolButton" name="GateSetButton">
-         <property name="text">
-          <string>...</string>
-         </property>
-         <property name="icon">
-          <iconset resource="Experiment.qrc">
-           <normaloff>:/openicon/icons/document-open-5.png</normaloff>:/openicon/icons/document-open-5.png</iconset>
-         </property>
-         <property name="autoRaise">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="label_5">
          <property name="text">
@@ -380,7 +380,7 @@
         </widget>
        </item>
        <item row="9" column="2">
-        <widget class="QToolButton" name="LengthButton">
+        <widget class="QToolButton" name="LengthsButton">
          <property name="text">
           <string>Lengths</string>
          </property>

@@ -7,6 +7,7 @@
 import logging
 import operator
 import os.path
+from enum import Enum
 from functools import partial
 
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -30,11 +31,16 @@ Form, Base = PyQt5.uic.loadUiType(uipath)
 
 
 class Settings:
-    stateFields = [ 'enabled', 'gate', 'gateDefinition', 'gateSequence', 'active', 'startAddressParam',
-                    'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache',
-                    'generatorType', 'gateSet', 'preparationFiducials', 'measurementFiducials',
-                    'germs', 'lengths', 'keepFraction', 'keepSeed']
+    stateFields = ['enabled', 'gate', 'gateDefinition', 'gateSequence', 'active', 'startAddressParam',
+                   'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache',
+                   'generatorType', 'gateSet', 'preparationFiducials', 'measurementFiducials',
+                   'germs', 'lengths', 'keepFraction', 'keepSeed', 'preparationFiducialsCache',
+                   'measurementFiducialsCache', 'germsCache', 'lengthsCache', 'gateSetCache']
     XMLTagName = "GateSequence"
+    class GeneratorType(Enum):
+        GateSequenceList = 0
+        GST = 1
+
     def __init__(self):
         self.enabled = False
         self.gate = []
@@ -47,7 +53,7 @@ class Settings:
         self.gateDefinitionCache = HashableDict()
         self.thisSequenceRepetition = 10
         self.debug = False
-        self.generatorType = 'GateSequenceList'
+        self.generatorType = self.GeneratorType.GateSequenceList
         self.gateSet = ''
         self.preparationFiducials = ''
         self.measurementFiducials = ''
@@ -71,7 +77,7 @@ class Settings:
             self.gateSequenceCache = HashableDict(self.gateSequenceCache)
         if not isinstance(self.gateDefinitionCache, HashableDict):
             self.gateDefinitionCache = HashableDict( self.gateDefinitionCache )
-        self.__dict__.setdefault('generatorType', 'GateSequenceList')
+        self.__dict__.setdefault('generatorType', self.GeneratorType.GateSequenceList)
         self.__dict__.setdefault('gateSet', '')
         self.__dict__.setdefault('preparationFiducials', '')
         self.__dict__.setdefault('measurementFiducials', '')
@@ -79,6 +85,13 @@ class Settings:
         self.__dict__.setdefault('lengths', '')
         self.__dict__.setdefault('keepFraction', 1)
         self.__dict__.setdefault('keepSeed', 0)
+        self.__dict__.setdefault('preparationFiducialsCache', HashableDict())
+        self.__dict__.setdefault('measurementFiducialsCache', HashableDict())
+        self.__dict__.setdefault('germsCache', HashableDict())
+        self.__dict__.setdefault('lengthsCache', HashableDict())
+        self.__dict__.setdefault('gateSetCache', HashableDict())
+        if isinstance(self.generatorType, str):
+            self.generatorType = self.GeneratorType.GateSequenceList
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and tuple(getattr(self, field) for field in self.stateFields)==tuple(getattr(other, field) for field in self.stateFields)
@@ -150,19 +163,23 @@ class GateSequenceUi(Form, Base):
         super(GateSequenceUi, self).setupUi(parent)
         self.setSettings(self.settings)
         self.GateSequenceEnableCheckBox.stateChanged.connect(self.onEnableChanged)
-        self.GateDefinitionButton.clicked.connect(partial(self.onLoadGeneric, self.GateDefinitionBox, self.settings.gateDefinitionCache, self.loadGateDefinition, message="Open Gate Definition:"))
-        self.GateSequenceButton.clicked.connect(partial(self.onLoadGeneric, self.GateSequenceBox, self.settings.gateSequenceCache, self.loadGateSequenceList, message="Open Gate Sequence File:"))
+        self.GateDefinitionButton.clicked.connect(partial(self.onLoadGeneric, self.GateDefinitionBox, 'gateDefinitionCache', self.loadGateDefinition, message="Open Gate Definition:"))
+        self.GateSequenceButton.clicked.connect(partial(self.onLoadGeneric, self.GateSequenceBox, 'gateSequenceCache', self.loadGateSequenceList, message="Open Gate Sequence File:"))
         self.FullListRadioButton.toggled.connect(self.onRadioButtonToggled)
-        self.GateSetButton.clicked.connect(partial(self.onLoadGeneric, self.GateSetBox, self.settings.gateSetCache, self.loadGateSet, message="Open Gate Set:"))
-        self.PreparationButton.clicked.connect(partial(self.onLoadGeneric, self.PreparationBox, self.settings.preparationFiducialCache, self.loadPreparation, message="Open Preparation Fiducials:"))
-        self.MeasurementButton.clicked.connect(partial(self.onLoadGeneric, self.MeasurementBox, self.settings.measurementFiducialCache, self.loadMeasurement, message="Open Measurement Fiducials:"))
-        self.GermsButton.clicked.connect(self.onLoadGerms)
+        self.GateSetButton.clicked.connect(partial(self.onLoadGeneric, self.GateSetBox, 'gateSetCache', self.loadGateSet, message="Open Gate Set:"))
+        self.PreparationButton.clicked.connect(partial(self.onLoadGeneric, self.PreparationBox, 'preparationFiducialsCache', self.loadPreparation, message="Open Preparation Fiducials:"))
+        self.MeasurementButton.clicked.connect(partial(self.onLoadGeneric, self.MeasurementBox, 'measurementFiducialsCache', self.loadMeasurement, message="Open Measurement Fiducials:"))
+        self.GermsButton.clicked.connect(partial(self.onLoadGeneric, self.GermsBox, 'germsCache', self.loadGerms, message="Open Germs:"))
+        self.LengthsButton.clicked.connect(partial(self.onLoadGeneric, self.LengthsBox, 'lengthsCache', self.loadLengths, message="Open Lengths:"))
         self.GateEdit.editingFinished.connect(self.onGateEditChanged)
         self.StartAddressBox.currentIndexChanged['QString'].connect(self.onStartAddressParam)
         self.repetitionSpinBox.valueChanged.connect(self.onRepetitionChanged)
         self.GateSequenceBox.currentIndexChanged[str].connect(self.onGateSequenceChanged)
         self.GateDefinitionBox.currentIndexChanged[str].connect(self.onGateDefinitionChanged)
+        self.sequenceOriginWidget.currentChanged.connect(self.onChangeSource)
         self.debugCheckBox.stateChanged.connect(self.onDebugChanged)
+        self.keepFractionBox.valueChanged.connect(partial(setattr, self, 'keepFraction'))
+        self.keepSeedBox.valueChanged.connect(partial(setattr, self, 'keepSeed'))
         self.project = getProject()
         self.defaultGateSequencesDir = self.project.configDir + '/GateSequences'
         if not os.path.exists(self.defaultGateSequencesDir):
@@ -170,6 +187,12 @@ class GateSequenceUi(Form, Base):
             exampleGateSequencesDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','config/GateSequences'))
             shutil.copytree(exampleGateSequencesDir,
                             self.defaultGateSequencesDir)  # Copy over all example gate sequence files
+
+    def onChangeSource(self, index):
+        try:
+            self.settings.generatorType = Settings.GeneratorType(index)
+        except ValueError:
+            self.settings.generatorType = Settings.GeneratorType.GateSequenceList
 
     def getSettings(self):
         logger = logging.getLogger(__name__)
@@ -181,6 +204,7 @@ class GateSequenceUi(Form, Base):
         logger.debug( str( settings) )
         logger.debug( "GateSequenceUi SetSettings {0}".format( settings.__dict__ ) )
         self.settings = settings
+        self.sequenceOriginWidget.setCurrentIndex(self.settings.generatorType.value)
         self.GateSequenceEnableCheckBox.setChecked( self.settings.enabled )
         self.GateSequenceFrame.setEnabled( self.settings.enabled )
         self.GateEdit.setText( ", ".join(self.settings.gate ))
@@ -196,6 +220,17 @@ class GateSequenceUi(Form, Base):
             self.updateDatastructures()
         except IOError as err:
             logger.warning( "{0} during loading of GateSequence Files, ignored.".format(err) )
+        updateComboBoxItems(self.PreparationBox, list(self.settings.preparationFiducialsCache.keys()))
+        updateComboBoxItems(self.MeasurementBox, list(self.settings.measurementFiducialsCache.keys()))
+        updateComboBoxItems(self.GermsBox, list(self.settings.germsCache.keys()))
+        updateComboBoxItems(self.LengthsBox, list(self.settings.lengthsCache.keys()))
+        self.loadGateSet(self.settings.gateSetCache.get(self.settings.gateSet))
+        self.loadPreparation(self.settings.preparationFiducialsCache.get(self.settings.preparationFiducials))
+        self.loadMeasurement(self.settings.measurementFiducialsCache.get(self.settings.measurementFiducials))
+        self.loadGerms(self.settings.germsCache.get(self.settings.germs))
+        self.loadLengths(self.settings.lengthsCache.get(self.settings.lengths))
+        self.keepFractionBox.setValue(self.settings.keepFraction)
+        self.keepSeedBox.setValue(self.settings.keepSeed)
         with BlockSignals(self.FullListRadioButton) as w:
             if self.settings.active == self.Mode.FullList:
                 self.FullListRadioButton.setChecked(True)
@@ -267,7 +302,8 @@ class GateSequenceUi(Form, Base):
         self.GateDefinitionBox.setCurrentIndex(-1)
         self.valueChanged.emit()      
 
-    def onLoadGeneric(self, combobox, cache, loader, message="Open"):
+    def onLoadGeneric(self, combobox, cache_name, loader, message="Open"):
+        cache = getattr(self.settings, cache_name)
         path, _ = QtWidgets.QFileDialog.getOpenFileName(self, message, self.defaultGateSequencesDir)
         if path:
             filedir, filename = os.path.split(path)
@@ -276,7 +312,7 @@ class GateSequenceUi(Form, Base):
             if filename not in cache:
                 cache[filename] = path
                 combobox.addItem(filename)
-                combobox.setCurrentIndex(self.GateSequenceBox.findText(filename))
+            combobox.setCurrentIndex(combobox.findText(filename))
         self.valueChanged.emit()
 
     def loadGateSequenceList(self, path):
@@ -288,25 +324,35 @@ class GateSequenceUi(Form, Base):
         self.GateSequenceBox.setCurrentIndex(self.GateSequenceBox.findText(filename))
 
     def loadGateSet(self, path):
-        self.gateSequenceContainer.loadGateSet(path)
-        _, filename = os.path.split(path)
-        self.settings.gateSet = filename
-        self.GateSetBox.setCurrentIndex(self.GateSetBox.findText(filename))
+        if path:
+            self.gateSequenceContainer.loadGateSet(path)
+            _, filename = os.path.split(path)
+            self.settings.gateSet = filename
+            self.GateSetBox.setCurrentIndex(self.GateSetBox.findText(filename))
 
     def loadPreparation(self, path_or_literal):
-        file_or_literal = self.gateSequenceContainer.setPreparation(path_or_literal)
-        self.settings.preparationFiducials = file_or_literal
-        self.PreparationFiducialsBox.setCurrentIndex(self.PreparationFiducialsBox.findText(file_or_literal))
+        if path_or_literal:
+            file_or_literal = self.gateSequenceContainer.setPreparation(path_or_literal)
+            self.settings.preparationFiducials = file_or_literal
+            self.PreparationFiducialsBox.setCurrentIndex(self.PreparationFiducialsBox.findText(file_or_literal))
 
     def loadMeasurement(self, path_or_literal):
-        file_or_literal = self.gateSequenceContainer.setMeasurement(path_or_literal)
-        self.settings.measurementFiducials = file_or_literal
-        self.MeasurementFiducialsBox.setCurrentIndex(self.MeasurementFiducialsBox.findText(file_or_literal))
+        if path_or_literal:
+            file_or_literal = self.gateSequenceContainer.setMeasurement(path_or_literal)
+            self.settings.measurementFiducials = file_or_literal
+            self.MeasurementFiducialsBox.setCurrentIndex(self.MeasurementFiducialsBox.findText(file_or_literal))
 
     def loadGerms(self, path_or_literal):
-        file_or_literal = self.gateSequenceContainer.setGerms(path_or_literal)
-        self.settings.germs = file_or_literal
-        self.GermsBox.setCurrentIndex(self.GermsBox.findText(file_or_literal))
+        if path_or_literal:
+            file_or_literal = self.gateSequenceContainer.setGerms(path_or_literal)
+            self.settings.germs = file_or_literal
+            self.GermsBox.setCurrentIndex(self.GermsBox.findText(file_or_literal))
+
+    def loadLengths(self, path_or_literal):
+        if path_or_literal:
+            file_or_literal = self.gateSequenceContainer.setLengths(path_or_literal)
+            self.settings.lengths = file_or_literal
+            self.LengthsBox.setCurrentIndex(self.GermsBox.findText(file_or_literal))
 
     def clearGateSequenceList(self):
         self.gateSequenceContainer.loadXml(None)
