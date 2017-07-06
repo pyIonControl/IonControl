@@ -16,25 +16,26 @@ class GateSequenceCompiler(object):
     def __init__(self, pulseProgram ):
         self.pulseProgram = pulseProgram
         self.compiledGates = dict()
-        
+
     """Compile all gate sequences into binary representation
         returns tuple of start address list and bytearray data"""
-    def gateSequencesCompile(self, gatesets ):
+
+    def gateSequencesCompile(self, gatesets):
         logger = logging.getLogger(__name__)
-        logger.info( "compiling {0} gateSequences.".format(len(gatesets.GateSequenceDict)) )
-        self.gateCompile( gatesets.gateDefinition )
+        logger.info("compiling {0} gateSequences.".format(len(gatesets.sequenceList)))
+        self.gateCompile(gatesets.gateDefinition)
         addresses = list()
         data = list()
         index = 0
-        for gateset in list(gatesets.GateSequenceDict.values()):
-            gatesetdata = self.gateSequenceCompile( gateset )
+        for gatestring in gatesets.sequenceList:
+            gatestringdata = self.gateSequenceCompile(gatestring)
             addresses.append(index)
-            data.extend(gatesetdata)
-            index += len(gatesetdata)*8
+            data.extend(gatestringdata)
+            index += len(gatestringdata) * 8
         return addresses, data
-    
+
     """Compile one gateset into its binary representation"""
-    def gateSequenceCompile(self, gateset ):
+    def gateSequenceCompile(self, gateset):
         data = list()
         length = 0
         for gate in gateset:
@@ -57,39 +58,38 @@ class GateSequenceCompiler(object):
                 if name!=pulseList[ gateLength % self.pulseListLength ].name:
                     raise GateSequenceCompilerException("In gate {0} entry {1} found '{2}' expected '{3}'".format(gatename, gateLength, name, pulseList[ gateLength % self.pulseListLength ]))
                 encoding = gateDefinition.PulseDefinition[name].encoding
-                data.append( self.pulseProgram.convertParameter( result, encoding ) ) 
+                data.append( self.pulseProgram.convertParameter( result, encoding ) )
                 gateLength += 1
             if gateLength % self.pulseListLength != 0:
                 raise GateSequenceCompilerException("In gate {0} number of entries ({1}) is not a multiple of the pulse definition length ({2})".format(gatename, gateLength, self.pulseListLength))
             self.compiledGates[gatename] = data
             logger.info( "compiled {0} to {1}".format(gatename, data) )
-                
-        
+
+
 if __name__=="__main__":
     from pulseProgram.PulseProgram import PulseProgram
     from gateSequence.GateDefinition import GateDefinition
     from gateSequence.GateSequenceContainer import GateSequenceContainer
-    
+
     pp = PulseProgram()
     pp.debug = False
     pp.loadSource(r"C:\Users\Public\Documents\experiments\QGA\config\PulsePrograms\YbGateSequenceTomography.pp")
-    
+
     gatedef = GateDefinition()
-    gatedef.loadGateDefinition(r"C:\Users\Public\Documents\experiments\QGA\config\GateSequences\StandardGateDefinitions.xml")    
+    gatedef.loadGateDefinition(r"C:\Users\Public\Documents\experiments\QGA\config\GateSequences\StandardGateDefinitions.xml")
     gatedef.printGates()
-    
+
     container = GateSequenceContainer(gatedef)
     container.loadXml(r"C:\Users\Public\Documents\experiments\QGA\config\GateSequences\GateSequenceDefinition.xml")
-    container.validate()  
+    container.validate()
     #print container
-    
+
     compiler = GateSequenceCompiler(pp)
     compiler.gateCompile( container.gateDefinition )
     print(compiler.gateSequenceCompile( container.GateSequenceDict['S11']))
-    
+
     address, data = compiler.GateSequencesCompile( container )
     print(address)
     print(data)
 
 
-    

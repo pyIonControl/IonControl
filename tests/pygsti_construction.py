@@ -48,7 +48,7 @@ pygsti.io.write_gatestring_list("tutorial_files/MyFiducials.txt", fiducials, "My
 pygsti.io.write_gatestring_list("tutorial_files/MyGerms.txt", germs, "My germ gate strings")
 
 listOfExperiments = pygsti.construction.make_lsgst_structs(gateset1.gates.keys(),
-                                                                   fiducials, fiducials, germs, maxLengths)
+                                                                   fiducials, fiducials, germs, maxLengths, nest=True)
 # myset = dict((ex, idx) for idx, ex in enumerate(listOfExperiments))
 
 

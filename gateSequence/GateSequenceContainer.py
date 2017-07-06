@@ -11,24 +11,40 @@ import xml.etree.ElementTree as etree
 
 from pygsti.objects import GateString
 from pygsti.io import load_gateset, load_gatestring_list
+from pygsti.construction import make_lsgst_structs
 
 
-class GateSequenceOrderedDict(OrderedDict):
-    pass
+def split(text):
+    ''''Split a list if , are present it will use , as separator else whitespace'''
+    if text.find(',')>=0:
+        return map(operator.methodcaller('strip'), text.split(','))
+    return text.split()
+
 
 class GateSequenceException(Exception):
     pass
 
+
 class GateSequenceContainer:
-    def __init__(self, gateDefinition ):
+    def __init__(self, gateDefinition):
         self.gateDefinition = gateDefinition
-        self.GateSequenceDict = GateSequenceOrderedDict()
+        self._gate_string_list = None
+        self._gate_string_struct = None
         self.GateSequenceAttributes = OrderedDict()
         self._usePyGSTi = False
         self.gateSet = None
         self.prep = None
         self.meas = None
         self.filename = None
+        self.germs = None
+        self.maxLengths = None
+
+    @property
+    def sequenceList(self):
+        if self._usePyGSTi:
+            return self._gate_string_struct.allstrs
+        else:
+            return self._gate_string_list
 
     @property
     def usePyGSTi(self):
@@ -40,26 +56,31 @@ class GateSequenceContainer:
         if not self._usePyGSTi and self.filename:
             self.loadXml(self.filename)
         else:
-            pass
+            self.update_pyGSTi()
 
-        
+    def update_pyGSTi(self):
+        if self.gateSet and self.prep and self.meas and self.germs and self.maxLengths:
+            self._gate_string_struct = make_lsgst_structs(self.gateSet.gates.keys(), self.prep, self.meas,
+                                                          self.germs, self.maxLengths)[-1]
+        else:
+            self._gate_string_struct = None
+
     def __repr__(self):
         return self.GateSequenceDict.__repr__()
     
     def loadXml(self, filename):
         self.filename = filename
-        self.GateSequenceDict = GateSequenceOrderedDict()
+        self._gate_string_list = list()
         if filename is not None:
             tree = etree.parse(filename)
             root = tree.getroot()
-            
             # load pulse definition
             for gateset in root:
                 if gateset.text:
-                    self.GateSequenceDict.update( { gateset.attrib['name']: list(map(operator.methodcaller('strip'), gateset.text.split(',')))} )
+                    t = "".join(map(operator.methodcaller('strip'), gateset.text.split(',')))
+                    self._gate_string_list.append(GateString(None, t))
                 else:  # we have the length 0 gate string
-                    self.GateSequenceDict.update( { gateset.attrib['name']: [] } )
-                self.GateSequenceAttributes.update( { gateset.attrib['name']: gateset.attrib })
+                    self._gate_string_list.append(GateString(None, "{}"))
             self.validate()
     
     """Validate the gates used in the gate sets against the defined gates"""            
@@ -83,22 +104,30 @@ class GateSequenceContainer:
         if os.path.exists(path_or_literal):
             self.prep = load_gatestring_list(path_or_literal)
             return os.path.split(path_or_literal)[-1]
-        self.prep = GateString(None, path_or_literal)
+        self.prep = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
         return path_or_literal
 
     def setMeasurement(self, path_or_literal):
         if os.path.exists(path_or_literal):
             self.meas = load_gatestring_list(path_or_literal)
             return os.path.split(path_or_literal)[-1]
-        self.meas = GateString(None, path_or_literal)
+        self.meas = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
         return path_or_literal
 
-    def setGerm(self, path_or_literal):
+    def setGerms(self, path_or_literal):
         if os.path.exists(path_or_literal):
             self.germs = load_gatestring_list(path_or_literal)
             return os.path.split(path_or_literal)[-1]
-        self.germs = GateString(None, path_or_literal)
+        self.germs = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
         return path_or_literal
+
+    def setLengths(self, literal):
+        self.maxLengths = list(map(int, split(literal)))
+        self.update_pyGSTi()
+        return literal
 
 
 if __name__=="__main__":
