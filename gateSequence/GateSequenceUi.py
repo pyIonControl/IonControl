@@ -224,6 +224,7 @@ class GateSequenceUi(Form, Base):
         updateComboBoxItems(self.MeasurementBox, list(self.settings.measurementFiducialsCache.keys()))
         updateComboBoxItems(self.GermsBox, list(self.settings.germsCache.keys()))
         updateComboBoxItems(self.LengthsBox, list(self.settings.lengthsCache.keys()))
+        updateComboBoxItems(self.GateSetBox, list(self.settings.gateSetCache.keys()))
         self.loadGateSet(self.settings.gateSetCache.get(self.settings.gateSet))
         self.loadPreparation(self.settings.preparationFiducialsCache.get(self.settings.preparationFiducials))
         self.loadMeasurement(self.settings.measurementFiducialsCache.get(self.settings.measurementFiducials))

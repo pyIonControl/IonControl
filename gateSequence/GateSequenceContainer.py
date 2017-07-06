@@ -24,15 +24,30 @@ class GateSequenceContainer:
         self.gateDefinition = gateDefinition
         self.GateSequenceDict = GateSequenceOrderedDict()
         self.GateSequenceAttributes = OrderedDict()
-        self.usePyGSTi = False
+        self._usePyGSTi = False
         self.gateSet = None
         self.prep = None
         self.meas = None
+        self.filename = None
+
+    @property
+    def usePyGSTi(self):
+        return self._usePyGSTi
+
+    @usePyGSTi.setter
+    def usePyGSTi(self, use):
+        self._usePyGSTi = use
+        if not self._usePyGSTi and self.filename:
+            self.loadXml(self.filename)
+        else:
+            pass
+
         
     def __repr__(self):
         return self.GateSequenceDict.__repr__()
     
     def loadXml(self, filename):
+        self.filename = filename
         self.GateSequenceDict = GateSequenceOrderedDict()
         if filename is not None:
             tree = etree.parse(filename)
