@@ -403,9 +403,9 @@ class GateSequenceUi(Form, Base):
             address = [0] * self.settings.thisSequenceRepetition
         return address, data, self.settings
     
-    def gateSequenceAttributes(self):
+    def gateSequencePlaquettes(self):
         if self.settings.active == self.Mode.FullList:
-            return list(self.gateSequenceContainer.GateSequenceAttributes.values())
+            return self.gateSequenceContainer._gate_string_struct._plquettes
         return None
         
     def setVariables(self, variabledict):

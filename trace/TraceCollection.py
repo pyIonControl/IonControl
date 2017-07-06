@@ -347,19 +347,22 @@ class TraceCollection(keydefaultdict):
         return self.filename
 
     def saveText(self, filename):
-        if self.rawdata:
-            self.description["rawdata"] = self.rawdata.save()
-        if hasattr(self,'fitfunction'):
-            self.description["fitfunction"] = self.fitfunction
         if filename:
-            of = open(filename,'w')
-            columnspec = ColumnSpec(key for key in self.keys() if key is not None)
-            self.description["columnspec"] = columnspec #",".join(columnspec)
-            self.saveTraceHeaderXml(of)
-            for l in zip_longest(*list(self.values()), fillvalue=float('NaN')):
-                print("\t".join(map(repr,l)), file=of)
-            of.close()
+            with open(filename,'w') as of:
+                self.saveTraceHeaderXml(of)
+                of.write(self.dataText())
             self.saved = True
+
+    def dataText(self):
+        return "\n".join("\t".join(map(repr, l)) for l in zip_longest(*list(self.values()), fillvalue=float('NaN')))
+
+    def saveZip(self, filename):
+        """Save data in zip file
+        Data structure is
+        header: xml header
+        data: standard data file
+        struct: folder with all structured data"""
+
 
     def saveHdf5(self, filename):
         # if self.rawdata:
@@ -394,16 +397,20 @@ class TraceCollection(keydefaultdict):
         for var, value in self.description.items():
             print("# {0}\t{1}".format(var, value), file=outfile)
 
-    def saveTraceHeaderXml(self,outfile):
+    def headerXml(self):
+        if hasattr(self, 'fitfunction'):
+            self.description["fitfunction"] = self.fitfunction
+        columnspec = ColumnSpec(key for key in self.keys() if key is not None)
+        self.description["columnspec"] = columnspec  # ",".join(columnspec)
         root = ElementTree.Element('DataFileHeader')
         varsElement = ElementTree.SubElement(root, 'Variables', {})
         self.description.sort()
         for name, value in self.description.items():
             self.saveDescriptionElement(name, value, varsElement)
-        structuredElement = ElementTree.SubElement(root, "StructuredData", {})
-        for name, value in self.structuredData.items():
-            self.saveDescriptionElement(name, value, structuredElement)
-        outfile.write(prettify(root,'# '))
+        return root
+
+    def saveTraceHeaderXml(self,outfile):
+        outfile.write(prettify(self.headerXml(),'# '))
 
     def saveMetadata(self, f):
         variables = f.require_group('variables')

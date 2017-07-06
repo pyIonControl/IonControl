@@ -1,11 +1,12 @@
 import pygsti
 import pygsti.construction as pc
+from pygsti.objects import GateSet, GateString
 
 from math import sqrt
 import numpy as np
 
 #Initialize an empty GateSet object
-gateset1 = pygsti.objects.GateSet()
+gateset1 = GateSet()
 
 #Populate the GateSet object with states, effects, gates,
 # all in the *normalized* Pauli basis: { I/sqrt(2), X/sqrt(2), Y/sqrt(2), Z/sqrt(2) }
@@ -25,8 +26,8 @@ gateset1['Gy'] = [[1, 0, 0, 0],
 
 #Create SPAM labels "plus" and "minus" using the special "remainder" label,
 # and set the then-needed identity vector.
-gateset1.spamdefs['plus'] = ('rho0','E0')
-gateset1.spamdefs['minus'] = ('rho0','remainder')
+gateset1.spamdefs['1'] = ('rho0','E0')
+gateset1.spamdefs['0'] = ('rho0','remainder')
 gateset1['identity'] = [ sqrt(2), 0, 0, 0 ]  # [[1, 0], [0, 1]] in Pauli basis
 
 pygsti.io.write_gateset(gateset1, "tutorial_files/MyTargetGateset.txt")
@@ -48,7 +49,7 @@ pygsti.io.write_gatestring_list("tutorial_files/MyFiducials.txt", fiducials, "My
 pygsti.io.write_gatestring_list("tutorial_files/MyGerms.txt", germs, "My germ gate strings")
 
 listOfExperiments = pygsti.construction.make_lsgst_structs(gateset1.gates.keys(),
-                                                                   fiducials, fiducials, germs, maxLengths, nest=True)
+                                                                   fiducials, fiducials, germs, maxLengths, nest=True)[-1]
 # myset = dict((ex, idx) for idx, ex in enumerate(listOfExperiments))
 
 
@@ -56,5 +57,13 @@ listOfExperiments = pygsti.construction.make_lsgst_structs(gateset1.gates.keys()
 
 #Create an empty dataset file, which stores the list of experiments
 #plus extra columns where data can be inserted
-pygsti.io.write_empty_dataset("tutorial_files/MyDataTemplate.txt", listOfExperiments[-1].allstrs,
+pygsti.io.write_empty_dataset("tutorial_files/MyDataTemplate.txt", listOfExperiments.allstrs,
                               "## Columns = plus count, count total")
+
+result = gateset1.product(GateString(None, 'Gx'))
+probs = gateset1.probs(GateString(None, 'Gx^2'))
+print(probs)
+
+evaltree = gateset1.bulk_evaltree(listOfExperiments.allstrs)
+bulk_probs = gateset1.bulk_probs(evaltree)
+print(bulk_probs)
