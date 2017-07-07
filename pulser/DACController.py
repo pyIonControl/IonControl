@@ -58,7 +58,7 @@ class DACController(QtCore.QObject):
     def __init__(self):
         super().__init__()
         self.Mutex = QtCore.QMutex
-        self.dataQueue = multiprocessing.Queue()
+        self.dataQueue = multiprocessing.Queue(256)
         self.clientPipe, self.serverPipe = multiprocessing.Pipe()
         self.loggingQueue = multiprocessing.Queue()
         self.sharedMemoryArray = Array(c_longlong, self.sharedMemorySize, lock=True)
