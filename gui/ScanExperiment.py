@@ -589,8 +589,13 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 gsdata['value'].extend(values)
                 gsdata['repeats'].extend(repeats)
                 gsdata['timestamps'].extend(timestaps)
-                print(gsdata)
-                break  # we just use the first algorithm that implements qubitEvaluate
+            if hasattr(algo, 'detailEvaluate'):
+                values, timestamps = algo.detailEvaluate(data, evaluation, ppDict=replacementDict,
+                                                         globalDict=self.globalVariables)
+                gsdata = self.context.qubitData[gateSequence]
+                gsdata['_' + evaluation.name].extend(values)
+                gsdata['_' + evaluation.name + '_timestamps'].extend(timestamps)
+
         if len(evaluated) > 0:
             self.displayUi.add([e[0] for e in evaluated])
             self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
