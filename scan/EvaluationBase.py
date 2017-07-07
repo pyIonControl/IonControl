@@ -35,6 +35,18 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
         self.setDefault()
         self.settingsName = None
 
+    @property
+    def useQubitEvaluation(self):
+        return hasattr(self, 'qubitEvaluation')
+
+    @property
+    def useDetailEvaluation(self):
+        return hasattr(self, 'detailEvaluation')
+
+    @property
+    def qubitPlotWindow(self):
+        return 'Qubit' if self.useQubitEvaluation else None
+
     def setDefault(self):
         pass
 

@@ -644,7 +644,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 traceCollection.structuredData['plaquettes'] = self.context.plaquettes
                 traceCollection.structuredDataFormat['qubitData'] = 'yaml'
                 traceCollection.structuredDataFormat['plaquettes'] = 'yaml'
-                plottedStructure = PlottedStructure(traceCollection, 'qubitData')
+                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.context.plaquettes,
+                                                    'Qubit')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
