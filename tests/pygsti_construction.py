@@ -1,6 +1,8 @@
 import pygsti
 import pygsti.construction as pc
 from pygsti.objects import GateSet, GateString
+from pygsti_addons import yaml as _yaml
+import yaml
 
 from math import sqrt
 import numpy as np
@@ -59,6 +61,9 @@ listOfExperiments = pygsti.construction.make_lsgst_structs(gateset1.gates.keys()
 #plus extra columns where data can be inserted
 pygsti.io.write_empty_dataset("tutorial_files/MyDataTemplate.txt", listOfExperiments.allstrs,
                               "## Columns = plus count, count total")
+
+print(yaml.dump(GateString(None, 'Gx^2')))
+print(yaml.dump(listOfExperiments._plaquettes))
 
 result = gateset1.product(GateString(None, 'Gx'))
 probs = gateset1.probs(GateString(None, 'Gx^2'))
