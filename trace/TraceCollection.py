@@ -6,6 +6,9 @@
 import json
 from collections import defaultdict
 from datetime import datetime
+from zipfile import ZipFile, ZIP_DEFLATED, ZIP_BZIP2
+
+import yaml
 from dateutil import parser
 import io
 from itertools import zip_longest
@@ -13,6 +16,7 @@ import math
 import os.path
 import h5py
 import copy
+import pickle
 
 import numpy
 
@@ -32,8 +36,8 @@ try:
 except:
     FitFunctionsAvailable = False
 
-filetypes = {'.hdf': 'hdf5', '.hdf5': 'hdf5', '.txt': 'text'}
-extensions = {'text': '.txt', 'hdf5': '.hdf5'}
+filetypes = {'.hdf': 'hdf5', '.hdf5': 'hdf5', '.txt': 'text', '.zip': 'zip'}
+extensions = {'text': '.txt', 'hdf5': '.hdf5', 'zip': '.zip'}
 
 def file_type(filename, default):
     return filetypes.get(os.path.splitext(filename)[1], default)
@@ -342,8 +346,10 @@ class TraceCollection(keydefaultdict):
             self._fileType = fileType
         if self._fileType == "text":
             self.saveText(self.filename)
-        else:
+        elif self._fileType == 'hdf5':
             self.saveHdf5(self.filename)
+        elif self._fileType == 'zip' or self.structuredData:
+            self.saveZip(replaceExtension(self.filename, extensions['zip']))
         return self.filename
 
     def saveText(self, filename):
@@ -362,7 +368,51 @@ class TraceCollection(keydefaultdict):
         header: xml header
         data: standard data file
         struct: folder with all structured data"""
+        with ZipFile(filename, 'w', compression=ZIP_DEFLATED) as myzip:
+            myzip.writestr('header.xml', prettify(self.headerXml()))
+            myzip.writestr('data.txt', self.dataText())
+            myzip.writestr('header.pkl', pickle.dumps(self.header(), -1))
+            for name, value in self.structuredData.items():
+                extension = name.split('.')[-1]
+                name = 'structuredData/' + name
+                if extension == 'pkl':
+                    myzip.writestr(name + '.pkl', pickle.dumps(value))
+                elif extension == 'json':
+                    myzip.writestr(name + '.json', json.dumps(value))
+                elif extension == 'yml' or extension == 'yaml':
+                    myzip.writestr(name + '.yaml', yaml.dumps(value))
+                else:
+                    myzip.writestr(name + '.pkl', pickle.dumps(value))
 
+    def loadZip(self, filename):
+        with ZipFile(filename) as myzip:
+            with myzip.open('header.pkl') as f:
+                self.description = pickle.loads(f.read())
+            with myzip.open('data.txt') as stream:
+                data = []
+                for line in stream:
+                    line = line.strip()
+                    data.append(list(map(float, line.split())))
+            columnspec = self.description["columnspec"].split(',')
+            for colname, d in zip(columnspec, zip(*data)):
+                self[colname] = numpy.array(d)
+            if 'fitfunction' in self.description and FitFunctionsAvailable:
+                self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
+            if "tracePlottingList" not in self.description:
+                self.description["tracePlottingList"] = [
+                    TracePlotting(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
+                                  rawColumn=None, filtColumn=None, name="")]
+            for filename in myzip.namelist():
+                if filename.startswith('structuredData/'):
+                    fullname = filename[15:]
+                    name, extension = fullname.rsplit('.', 1)
+                    with myzip.open(fullname) as f:
+                        if extension == 'pkl':
+                            self.structuredData[name] = pickle.loads(f.read())
+                        elif extension == 'json':
+                            self.structuredData[name] = json.loads(f.read())
+                        elif extension == 'yml' or extension == 'yaml':
+                            self.structuredData[name] = yaml.loads(f.read())
 
     def saveHdf5(self, filename):
         # if self.rawdata:
@@ -396,6 +446,13 @@ class TraceCollection(keydefaultdict):
         self.description.sort()
         for var, value in self.description.items():
             print("# {0}\t{1}".format(var, value), file=outfile)
+
+    def header(self):
+        if hasattr(self, 'fitfunction'):
+            self.description["fitfunction"] = self.fitfunction
+        columnspec = ColumnSpec(key for key in self.keys() if key is not None)
+        self.description["columnspec"] = columnspec  # ",".join(columnspec)
+        return self.description
 
     def headerXml(self):
         if hasattr(self, 'fitfunction'):
@@ -451,6 +508,7 @@ class TraceCollection(keydefaultdict):
             self.loadTracePlain(filename)
 
     def loadTraceHdf5(self, filename):
+        self.filename = filename
         with h5py.File(self.filename) as f:
             for colname, dataset in f['columns'].items():
                 self[colname] = numpy.array(dataset)
