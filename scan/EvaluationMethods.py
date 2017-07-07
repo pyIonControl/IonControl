@@ -211,7 +211,7 @@ class ThresholdEvaluation(EvaluationBase):
             c = Counter(discriminated)
             return c.keys(), c.values(), repeat(data._creationTime, len(c))
         else:
-            return discriminated, repeat(1, len(discriminated), timestamps)
+            return discriminated, repeat(1, len(discriminated)), timestamps
 
     def parameters(self):
         parameterDict = super(ThresholdEvaluation, self).parameters()

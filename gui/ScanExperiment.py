@@ -579,10 +579,6 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
             evaluated.append(algo.evaluate(data, evaluation, ppDict=replacementDict,
                                            globalDict=self.globalVariables))  # returns mean, error, raw
-        if len(evaluated) > 0:
-            self.displayUi.add([e[0] for e in evaluated])
-            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
-            self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         # qubit evaluation
         gateSequence = self.context.generator.gateString(self.context.currentIndex)
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
@@ -593,7 +589,12 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 gsdata['value'].extend(values)
                 gsdata['repeats'].extend(repeats)
                 gsdata['timestamps'].extend(timestaps)
+                print(gsdata)
                 break  # we just use the first algorithm that implements qubitEvaluate
+        if len(evaluated) > 0:
+            self.displayUi.add([e[0] for e in evaluated])
+            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
+            self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         if data.other:
             logger.info("Other: {0}".format(data.other))
         self.context.currentIndex += 1
@@ -636,6 +637,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
                 traceCollection.structuredData['plaquettes'] = self.context.plaquettes
+                traceCollection.structuredDataFormat['qubitData'] = 'yaml'
+                traceCollection.structuredDataFormat['plaquettes'] = 'yaml'
                 plottedStructure = PlottedStructure(traceCollection, 'qubitData')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
