@@ -45,7 +45,8 @@ class LabBrick(object):
             self.maxFrequency = Q(10 * LabBrickDll.fnLMS_GetMaxFreq(self.deviceID), "Hz")
             self.minPower = LabBrickDll.fnLMS_GetMinPwr(self.deviceID) * 0.25  # this is in dBm
             self.maxPower = LabBrickDll.fnLMS_GetMaxPwr(self.deviceID) * 0.25  # this is in dBm
-            self._rfOn = bool(LabBrickDll.fnLMS_GetRF_On(self.deviceID))
+            #self._rfOn = bool(LabBrickDll.fnLMS_GetRF_On(self.deviceID))
+            self._extTTL = bool(LabBrickDll.fnLMS_SetUseExternalPulseMod(self.deviceID))
             self._useInternalReference = bool(LabBrickDll.fnLMS_GetUseInternalRef(self.deviceID))
             self._power = LabBrickDll.fnLMS_GetAbsPowerLevel(self.deviceID)
             self._frequency = Q(10 * LabBrickDll.fnLMS_GetFrequency(self.deviceID), " Hz")
@@ -55,6 +56,16 @@ class LabBrick(object):
     def close(self):
         LabBrickDll.fnLMS_CloseDevice(self.deviceID)
         self.deviceID = None
+
+    @property
+    def extTTL(self):
+        self._extTTL = bool(LabBrickDll.fnLMS_SetUseExternalPulseMod(self.deviceID))
+        return self._extTTL
+
+    @extTTL.setter
+    def extTTL(selfself, external):
+        LabBrickDll.fnLMS_SetUseExternalPulseMod(self.deviceID, external)
+        return self._extTTL
 
     @property
     def rfOn(self):

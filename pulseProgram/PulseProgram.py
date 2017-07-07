@@ -239,7 +239,7 @@ class PulseProgram:
         toBinary()      generates self.binarycode
     the procedure updateVariables( dictionary )  updates variable values in the bytecode
     """    
-    def __init__(self):
+    def __init__(self, ddsnum=8):
         self.variabledict = collections.OrderedDict()        # keeps information on all variables to easily change them later
         self.labeldict = dict()          # keep information on all labels
         self.source = collections.OrderedDict()             # dictionary of source code files (stored as strings)
@@ -253,8 +253,8 @@ class PulseProgram:
         class Board:
             channelLimit = 1    
             halfClockLimit = 500000000
-        self.adIndexList = [(x, 0) for x in range(8) ]
-        self.adBoards = [ Board() ]*8
+        self.adIndexList = [(x, 0) for x in range(ddsnum) ]
+        self.adBoards = [ Board() ]*ddsnum
         
         self.timestep = timestep
         self.sourcelines = []

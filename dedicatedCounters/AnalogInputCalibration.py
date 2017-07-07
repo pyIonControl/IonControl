@@ -193,4 +193,4 @@ class PowerDetectorCalibrationTwo(PowerDetectorCalibration):
 AnalogInputCalibrationMap = { 'Voltage': AnalogInputCalibration,
                               'Rf power detector': PowerDetectorCalibration,
                               'AD7608 Voltage': AnalogInputCalibrationAD7608,
-                              'Rf power detector AD7608': PowerDetectorCalibrationAD7608 }
+                              'Rf power detector AD7608': PowerDetectorCalibrationAD7608}

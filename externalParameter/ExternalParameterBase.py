@@ -3,6 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from collections import OrderedDict
+
 from PyQt5 import QtCore
 from pyqtgraph.parametertree import Parameter
 import logging
@@ -43,7 +45,7 @@ class ExternalParameterBase(object, metaclass=InstrumentMeta):
 
     def createOutputChannels(self):
         """create all output channels"""
-        self.outputChannels = dict( [(channel, SlowAdjustOutputChannel(self, self.name, channel, self.globalDict, self.settings.channelSettings.get(channel, dict()), unit)) 
+        self.outputChannels = OrderedDict( [(channel, SlowAdjustOutputChannel(self, self.name, channel, self.globalDict, self.settings.channelSettings.get(channel, dict()), unit))
                                     for channel, unit in self._outputChannels.items()] )
         
     def lastOutputValue(self, channel):
