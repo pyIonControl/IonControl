@@ -177,6 +177,12 @@ class keydefaultdict(OrderedDict):
             return ret
 
 
+class FormatDict(dict):
+    def __missing__(self, key):
+        ret = self[key] = 'pkl'
+        return ret
+
+
 class TraceCollection(keydefaultdict):
     """ Class to encapsulate a collection of traces with a common array of x values (or a single trace).
 
@@ -217,6 +223,7 @@ class TraceCollection(keydefaultdict):
         self.description["tracePlottingList"] = TracePlottingList()
         self.record_timestamps = record_timestamps
         self.structuredData = keydefaultdict(dict)  #  Can contained structured data that can be json dumped
+        self.structuredDataFormat = FormatDict()
 
     def __bool__(self):
         return True  # to remain backwards compatible with previous behavior
@@ -348,7 +355,7 @@ class TraceCollection(keydefaultdict):
             self.saveText(self.filename)
         elif self._fileType == 'hdf5':
             self.saveHdf5(self.filename)
-        elif self._fileType == 'zip' or self.structuredData:
+        if self._fileType == 'zip' or self.structuredData:
             self.saveZip(replaceExtension(self.filename, extensions['zip']))
         return self.filename
 
@@ -373,16 +380,15 @@ class TraceCollection(keydefaultdict):
             myzip.writestr('data.txt', self.dataText())
             myzip.writestr('header.pkl', pickle.dumps(self.header(), -1))
             for name, value in self.structuredData.items():
-                extension = name.split('.')[-1]
+                format = self.structuredDataFormat[name]
                 name = 'structuredData/' + name
-                if extension == 'pkl':
+                if format == 'pkl':
                     myzip.writestr(name + '.pkl', pickle.dumps(value))
-                elif extension == 'json':
+                elif format == 'json':
                     myzip.writestr(name + '.json', json.dumps(value))
-                elif extension == 'yml' or extension == 'yaml':
+                elif format == 'yaml':
                     myzip.writestr(name + '.yaml', yaml.dumps(value))
-                else:
-                    myzip.writestr(name + '.pkl', pickle.dumps(value))
+            myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat))
 
     def loadZip(self, filename):
         with ZipFile(filename) as myzip:
@@ -402,17 +408,23 @@ class TraceCollection(keydefaultdict):
                 self.description["tracePlottingList"] = [
                     TracePlotting(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
                                   rawColumn=None, filtColumn=None, name="")]
-            for filename in myzip.namelist():
-                if filename.startswith('structuredData/'):
-                    fullname = filename[15:]
-                    name, extension = fullname.rsplit('.', 1)
-                    with myzip.open(fullname) as f:
-                        if extension == 'pkl':
-                            self.structuredData[name] = pickle.loads(f.read())
-                        elif extension == 'json':
-                            self.structuredData[name] = json.loads(f.read())
-                        elif extension == 'yml' or extension == 'yaml':
-                            self.structuredData[name] = yaml.loads(f.read())
+            try:
+                with myzip.open('structuredDataFormat.json') as f:
+                    self.structuredDataFormat = FormatDict(json.loads(f.read()))
+                for filename in myzip.namelist():
+                    if filename.startswith('structuredData/'):
+                        leaf = filename[15:]
+                        name = leaf.split('.', 1)[0]
+                        format = self.structuredDataFormat[name]
+                        with myzip.open(filename) as f:
+                            if format == 'pkl':
+                                self.structuredData[name] = pickle.loads(f.read())
+                            elif format == 'json':
+                                self.structuredData[name] = json.loads(f.read())
+                            elif format == 'yaml':
+                                self.structuredData[name] = yaml.loads(f.read())
+            except:
+                pass
 
     def saveHdf5(self, filename):
         # if self.rawdata:

@@ -209,7 +209,7 @@ class ThresholdEvaluation(EvaluationBase):
         discriminated = self._evaluate(data, evaluation, countarray)
         if timestamps is None or len(timestamps) != len(countarray):
             c = Counter(discriminated)
-            return c.keys(), c.values(), repeat(data._creationtime, len(c))
+            return c.keys(), c.values(), repeat(data._creationTime, len(c))
         else:
             return discriminated, repeat(1, len(discriminated), timestamps)
 

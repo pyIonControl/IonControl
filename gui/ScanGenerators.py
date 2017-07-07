@@ -216,7 +216,6 @@ class GateSequenceScanGenerator:
         logger = logging.getLogger(__name__)
         self.maxUpdatesToWrite = maxUpdatesToWrite
         address, data, self.gateSequenceSettings = self.scan.gateSequenceUi.gateSequenceScanData()
-        self.gateSequenceAttributes = self.scan.gateSequenceUi.gateSequenceAttributes()
         parameter = self.gateSequenceSettings.startAddressParam
         logger.debug( "GateSequenceScan {0} {1}".format( address, parameter ) )
         self.scan.list = address
@@ -284,21 +283,11 @@ class GateSequenceScanGenerator:
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()
 
-    def expected(self, index):
-        if self.gateSequenceAttributes is not None:
-            try:
-                expected = self.gateSequenceAttributes[self.scan.index[index]]['expected']
-            except (IndexError, KeyError):
-                expected = None
-            return expected
-        return None
+    def gateString(self, index):
+        return self.scan.gateSequenceUi.gateString(index)
 
-    def gateSequence(self, index):
-        # TODO: implement
-        return None
+    def plaquettes(self):
+        return self.scan.gateSequenceUi.plaquettes()
 
-    def gateSequenceIndex(self, index):
-        # TODO: implement
-        return None
-        
+
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   

@@ -75,6 +75,10 @@ ExpectedLoopkup = { 'd': 0, 'u' : 1, '1':0.5, '-1':0.5, 'i':0.5, '-i':0.5 }
 FifoDepth = 1020
 
 
+def qubitDataStructure():
+    return defaultdict(list)
+
+
 class ScanExperimentContext(object):
     """This class encapsulates all variables, settings and data of the scan.
     It is used in order to implement the ability to stash and resumea ScanExperiment"""
@@ -95,7 +99,8 @@ class ScanExperimentContext(object):
         self.globalOverrides = list()
         self.revertGlobalsValues = list()
         self.analysisName = None
-        self.qubitData = dict()
+        self.qubitData = defaultdict(qubitDataStructure)
+        self.plaquettes = None
 
     def overrideGlobals(self, globalDict):
         self.revertGlobals(globalDict)  # make sure old values were reverted e.g. when calling start on a running scan
@@ -391,6 +396,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.dataStore:
                 self.pulseProgramIdentifier = self.dataStore.addData(self.pulseProgramUi.pppSource)
             (mycode, data) = self.context.generator.prepare(self.pulseProgramUi, self.context.scanMethod.maxUpdatesToWrite )
+            self.context.qubitData = defaultdict(qubitDataStructure)
+            self.context.plaquettes = copy(self.context.generator.plaquettes())
             if self.pulseProgramUi.writeRam and self.pulseProgramUi.ramData:
                 data = self.pulseProgramUi.ramData #Overwrites anything set above by the gate sequence ui
             if data:
@@ -516,8 +523,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         else:
             path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save file', directory.path())
             return path
-            
-    def onData(self, data, queuesize ):
+
+    def onData(self, data, queuesize):
         """ Called by worker with new data
         queuesize is the size of waiting messages, dont't do expensive unnecessary stuff if queue is deep
         """
@@ -540,12 +547,12 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     logger.warning( "PP Timing violation at address {0}".format(lineInPP))
             if data.final:
                 if data.exitcode == 0x100000000000:  # interrupt
-                    self.processData(data, queuesize)
+                    self.processData(data, 0)
                     self.onStashBottomHalf()
                 elif data.exitcode not in [0, 0xffff]:
                     self.onInterrupt(self.pulseProgramUi.exitcode(data.exitcode))
                 else:
-                    self.processData(data, queuesize)
+                    self.processData(data, 0)
             else:
                 self.processData(data, queuesize)
         else:
@@ -553,41 +560,42 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
 
     def processData(self, data, queuesize):
         logger = logging.getLogger(__name__)
-        logger.info( "onData {0} {1} {2}".format( self.context.currentIndex, dict((i, len(data.count[i])) for i in sorted(data.count.keys())), data.scanvalue ) )
+        logger.info("onData {0} {1} {2} {3}".format(self.context.currentIndex,
+                                                    dict((i, len(data.count[i])) for i in sorted(data.count.keys())),
+                                                    data.scanvalue, queuesize))
         x = self.context.generator.xValue(self.context.currentIndex, data)
         if self.context.rawDataFile is not None:
-            self.context.rawDataFile.write( data.dataString() )
-            self.context.rawDataFile.write( '\n' )
+            self.context.rawDataFile.write(data.dataString())
+            self.context.rawDataFile.write('\n')
             self.context.rawDataFile.flush()
-        self.context.scanMethod.onData( data, queuesize, x )
+        self.context.scanMethod.onData(data, queuesize, x)
 
     def dataMiddlePart(self, data, queuesize, x):
         if is_Q(x):
             x = x.m_as(self.context.scan.xUnit)
         logger = logging.getLogger(__name__)
         evaluated = list()
-        expected = self.context.generator.expected( self.context.currentIndex )
-        replacementDict = dict(iter(list(self.pulseProgramUi.currentContext.parameters.valueView.items()))) 
+        replacementDict = dict(iter(list(self.pulseProgramUi.currentContext.parameters.valueView.items())))
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
-            evaluated.append( algo.evaluate( data, evaluation, expected=expected, ppDict=replacementDict, globalDict=self.globalVariables) ) # returns mean, error, raw
-        if len(evaluated)>0:
-            self.displayUi.add(  [ e[0] for e in evaluated ] )
-            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize  )
-            self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList )
+            evaluated.append(algo.evaluate(data, evaluation, ppDict=replacementDict,
+                                           globalDict=self.globalVariables))  # returns mean, error, raw
+        if len(evaluated) > 0:
+            self.displayUi.add([e[0] for e in evaluated])
+            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
+            self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         # qubit evaluation
-        gateSequence = self.context.generator.gateSequence(self.context.currentIndex)
-        gateSequenceIndex = self.context.generator.gateSequenceIndex(self.context.currentIndex)
+        gateSequence = self.context.generator.gateString(self.context.currentIndex)
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
             if hasattr(algo, 'qubitEvaluate'):
-                values, repeats, timestaps = algo.qubitEvaluate(data, evaluation, ppDict=replacementDict, globalDict=self.globalVariables)
+                values, repeats, timestaps = algo.qubitEvaluate(data, evaluation, ppDict=replacementDict,
+                                                                globalDict=self.globalVariables)
                 gsdata = self.context.qubitData[gateSequence]
                 gsdata['value'].extend(values)
                 gsdata['repeats'].extend(repeats)
                 gsdata['timestamps'].extend(timestaps)
-                gsdata['sequence_index'] = gateSequenceIndex
                 break  # we just use the first algorithm that implements qubitEvaluate
         if data.other:
-            logger.info( "Other: {0}".format( data.other ) )
+            logger.info("Other: {0}".format(data.other))
         self.context.currentIndex += 1
         if self.context.evaluation.enableTimestamps and self.timestampsEnabled:
             self.showTimestamps(data)
@@ -627,7 +635,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     self.context.plottedTraceList.append( plottedTrace )
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
-                plottedStructure = PlottedStructure('qubitData')
+                traceCollection.structuredData['plaquettes'] = self.context.plaquettes
+                plottedStructure = PlottedStructure(traceCollection, 'qubitData')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
