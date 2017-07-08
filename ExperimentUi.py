@@ -60,6 +60,7 @@ import scan.FitHistogramsEvaluation
 import Experiment_rc
 from AWG.AWGUi import AWGUi
 from AWG import AWGDevices
+from pygsti_addons import yaml as _yaml
 
 setID = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
 if __name__=='__main__': #imports that aren't just definitions

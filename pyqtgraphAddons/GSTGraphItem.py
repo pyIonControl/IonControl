@@ -1,3 +1,4 @@
+import numpy
 from PyQt5 import QtGui, QtCore
 from pyqtgraph.graphicsItems.GraphicsObject import GraphicsObject
 from pyqtgraph import getConfigOption
@@ -70,21 +71,22 @@ class GSTGraphItem(GraphicsObject):
             colorscale = lambda x: (1, 0, 0)
         x_max = asarray(self.opts.get('x_max'))
         if x_max is None:
-            x_max = x.max(0)
+            x_max = numpy.array([z for z in x if z is not None]).max(0)
 
         def plot_index(idx):
-            f1, f2, l, g = idx
-            f1_max, f2_max, l_max, g_max = x_max
-            return l * (f1_max + 2) + f1, g * (f2_max + 2) + f2
+            x1, y1, x2, y2 = idx
+            x1_max, y1_max, x2_max, y2_max = x_max
+            return x1 * (x2_max + 2) + x2, y1 * (y2_max + 2) + y2
 
         p.setPen(fn.mkPen(pen))
         for index, value in zip(x, y):
-            c = QtGui.QColor(255,0,0)
-            p.setBrush(QtGui.QBrush(c))
-            rx, ry = plot_index(index)
-            rect = QtCore.QRectF(rx - 0.5, ry - 0.5, 1, 1)
-            p.drawRect(rect)
-            self._shape.addRect(rect)
+            if x is not None:
+                c = QtGui.QColor(255,0,0)
+                p.setBrush(QtGui.QBrush(c))
+                rx, ry = plot_index(index)
+                rect = QtCore.QRectF(rx - 0.5, ry - 0.5, 1, 1)
+                p.drawRect(rect)
+                self._shape.addRect(rect)
 
         p.end()
         self.prepareGeometryChange()

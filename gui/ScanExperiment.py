@@ -633,7 +633,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
                 traceCollection.structuredDataFormat['qubitData'] = 'yaml'
-                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, 'Qubit')
+                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.plotDict['Qubit']['view'], 'Qubit')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""

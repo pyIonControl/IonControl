@@ -26,10 +26,11 @@ class PlottedTrace(object):
     Styles = enum.enum('lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars')
     PointsStyles = [ 1, 4 ]
     Types = enum.enum('default', 'steps')
-    def __init__(self,Trace,graphicsView,penList=None,pen=0,style=None,plotType=None,
-                 xColumn='x',yColumn='y',topColumn='top',bottomColumn='bottom',heightColumn='height',
-                 rawColumn='raw', filtColumn=None, tracePlotting=None, name="", xAxisLabel = None,
-                 xAxisUnit = None, yAxisLabel = None, yAxisUnit = None, fill=True, windowName=None):
+
+    def __init__(self, Trace, graphicsView, penList=None, pen=0, style=None, plotType=None,
+                 xColumn='x', yColumn='y', topColumn='top', bottomColumn='bottom', heightColumn='height',
+                 rawColumn='raw', filtColumn=None, tracePlotting=None, name="", xAxisLabel=None,
+                 xAxisUnit=None, yAxisLabel=None, yAxisUnit=None, fill=True, windowName=None):
         self.category = None
         self.fill = fill
         if penList is None:
