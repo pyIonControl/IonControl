@@ -49,6 +49,12 @@ class GSTGraphItem(GraphicsObject):
         self.update()
         self.informViewBoundsChanged()
 
+    def setData(self, x, y):
+        self.opts['x'] = x
+        self.opts['y'] = y
+        self.update()
+        self.drawPicture()
+
     def drawPicture(self):
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
@@ -81,7 +87,7 @@ class GSTGraphItem(GraphicsObject):
         p.setPen(fn.mkPen(pen))
         for index, value in zip(x, y):
             if x is not None:
-                c = QtGui.QColor(255,0,0)
+                c = QtGui.QColor(*colorscale(value))
                 p.setBrush(QtGui.QBrush(c))
                 rx, ry = plot_index(index)
                 rect = QtCore.QRectF(rx - 0.5, ry - 0.5, 1, 1)

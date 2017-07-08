@@ -1,3 +1,5 @@
+from math import floor, ceil
+
 import numpy
 from pygsti import logl_terms, logl_max_terms
 
@@ -7,6 +9,21 @@ from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 class QubitPlotSettings:
     def __init__(self):
         self.gateSet = None
+
+
+def default_color_scale(num):
+    print(num)
+    scale = 5
+    colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
+    num /= scale
+    if num < 0:
+        return colors[0]
+    if num + 1 > len(colors):
+        return colors[-1]
+    left = floor(num)
+    right = ceil(num)
+    minor = num - left
+    return colors[left] * (1 - minor) + colors[right] * minor
 
 
 class PlottedStructure:
@@ -67,7 +84,7 @@ class PlottedStructure:
         if self._graphicsView is not None:
             self._assemble_data()
             self.removePlots()
-            self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y)
+            self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, colorscale=default_color_scale)
             self._graphicsView.setAspectLocked()
             self._graphicsView.addItem(self._gstGraphItem)
 
