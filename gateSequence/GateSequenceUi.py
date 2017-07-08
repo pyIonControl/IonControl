@@ -412,7 +412,13 @@ class GateSequenceUi(Form, Base):
         if self.gateSequenceContainer.sequenceList is None:
             return None
         return self.gateSequenceContainer.sequenceList[index]
-        
+
+    @property
+    def gateStringList(self):
+        if self.gateSequenceContainer.sequenceList is None:
+            return None
+        return self.gateSequenceContainer.sequenceList
+
     def setVariables(self, variabledict):
         self.variabledict = variabledict
         #oldParameterName = self.StartAddressBox.currentText()

@@ -7,24 +7,30 @@ def qubitDataStructure():
     return defaultdict(list)
 
 
-class ResultCounter(defaultdict(lambda: 0)):
+class ResultCounter(dict):
     def __init__(self, values, repeats):
+        super().__init__()
         for v, r in zip(values, repeats):
             self[v] += r
 
+    def __missing__(self, key):
+        ret = self[key] = 0
+        return ret
+
 
 class QubitDataSet:
-    _fields = ['gatestring_list', 'plaquettes', 'spam_labels', '_rawdata']
-    def __init__(self, gatestring_list=None, plaquettes=None, spam_labels=None):
+    _fields = ['gatestring_list', 'plaquettes', 'target_gateset', '_rawdata']
+    def __init__(self, gatestring_list=None, plaquettes=None, target_gateset=None):
         self.gatestring_list = gatestring_list
         self.plaquettes = plaquettes
-        self.spam_labels = spam_labels
+        self.target_gateset = target_gateset
         self._rawdata = defaultdict(qubitDataStructure)  # _rawdata[gatestring]['value' 'repeats' 'timestamps' ...] list
         self._init_internal()
 
     def _init_internal(self):
         if self.is_gst:
-            self._countVecMx = numpy.zeros((len(self.spamLabels), len(self.gatestring_list)), 'd')
+            self.spam_labels = self.target_gateset.get_spam_labels()
+            self._countVecMx = numpy.zeros((len(self.spam_labels), len(self.gatestring_list)), 'd')
             self._totalCntVec = numpy.zeros(len(self.gatestring_list), 'd')
             for gatestring, d in self._rawdata.items():
                 self._extend(gatestring, d['value'], d['repeats'])
@@ -51,13 +57,14 @@ class QubitDataSet:
             gatestring_idx = self.gatestring_list.index(gatestring)
             eval = ResultCounter(values, repeats)
             for label, count in eval.items():
-                self._countVecMx[gatestring_idx, self.spam_labels.index(label)] += count
+                self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
             self._totalCntVec[gatestring_idx] += sum(eval.values())
 
     def extendEnv(self, gatestring, name, values, timestamps):
-        point = self._rawdata[gatestring]
-        point['_' + name].extend(values)
-        point['_' + name + '_ts'].extend(timestamps)
+        if values and timestamps:
+            point = self._rawdata[gatestring]
+            point['_' + name].extend(values)
+            point['_' + name + '_ts'].extend(timestamps)
 
     @property
     def countVecMx(self):
@@ -73,7 +80,7 @@ class QubitDataSet:
 
     @property
     def is_gst(self):
-        return self.gatestring_list is not None and self.spam_labels is not None
+        return self.gatestring_list is not None and self.target_gateset is not None
 
 
 

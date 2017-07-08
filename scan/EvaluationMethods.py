@@ -93,27 +93,28 @@ class MeanEvaluation(EvaluationBase):
         timestamps = data.timeTick.get(self.settings['timestamp_id'], None)
         # we will return 3-tuple of lists: value, repeats, timestamp
         # if we do not find a timestamp we will accumulate the data, otherwise send back every event
-        if timestamps is None or len(timestamps) != len(countarray):
-            mean, (minus, plus), raw = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
-            if self.settings['transformation'] != "":
-                mydict = {'y': mean}
-                if ppDict:
-                    mydict.update(ppDict)
-                mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            return [mean], [data._creationTime]
-        else:
-            if self.settings['transformation'] != "":
-                mydict = dict()
-                if ppDict:
-                    mydict.update(ppDict)
-                values = list()
-                for value in countarray:
-                    mydict['y'] = value
-                    values.append(float(self.expression.evaluate(self.settings['transformation'], mydict)))
+        if countarray:
+            if timestamps is None or len(timestamps) != len(countarray):
+                mean, (minus, plus), raw = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+                if self.settings['transformation'] != "":
+                    mydict = {'y': mean}
+                    if ppDict:
+                        mydict.update(ppDict)
+                    mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
+                return [mean], [data._creationTime]
             else:
-                values = countarray
-            return values, timestamps
-
+                if self.settings['transformation'] != "":
+                    mydict = dict()
+                    if ppDict:
+                        mydict.update(ppDict)
+                    values = list()
+                    for value in countarray:
+                        mydict['y'] = value
+                        values.append(float(self.expression.evaluate(self.settings['transformation'], mydict)))
+                else:
+                    values = countarray
+                return values, timestamps
+        return [], []
 
 class NumberEvaluation(EvaluationBase):
     name = 'Number'

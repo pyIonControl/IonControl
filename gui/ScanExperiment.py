@@ -394,7 +394,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.dataStore:
                 self.pulseProgramIdentifier = self.dataStore.addData(self.pulseProgramUi.pppSource)
             (mycode, data) = self.context.generator.prepare(self.pulseProgramUi, self.context.scanMethod.maxUpdatesToWrite )
-            self.context.qubitData = QubitDataSet(self.context.generator.gateStringList, self.context.generator.plaquettes, self.context.generator.spam_labels)
+            self.context.qubitData = QubitDataSet(self.context.generator.gateStringList, self.context.generator.plaquettes, self.context.generator.gateSet)
             if self.pulseProgramUi.writeRam and self.pulseProgramUi.ramData:
                 data = self.pulseProgramUi.ramData #Overwrites anything set above by the gate sequence ui
             if data:
@@ -584,7 +584,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                                               *algo.qubitEvaluate(data, evaluation, ppDict=replacementDict,
                                                                   globalDict=self.globalVariables))
             if hasattr(algo, 'detailEvaluate'):
-                self.context.qubitData.extendEnv(gateSequence,
+                self.context.qubitData.extendEnv(gateSequence, evaluation.name,
                                                  *algo.detailEvaluate(data, evaluation, ppDict=replacementDict,
                                                                       globalDict=self.globalVariables))
         if len(evaluated) > 0:

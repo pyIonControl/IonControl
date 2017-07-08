@@ -86,17 +86,23 @@ class ParameterScanGenerator:
             if error is not None:
                 trace.bottom = numpy.append(trace.bottom, error[0])
                 trace.top = numpy.append(trace.top, error[1])
-                
-    def expected(self, index):
+
+    def gateString(self, index):
         return None
 
-    def gateSequence(self, index):
+    @property
+    def gateStringList(self):
         return None
 
-    def gateSequenceIndex(self, index):
-        return (index, )
+    @property
+    def plaquettes(self):
+        return None
 
-                
+    @property
+    def gateSet(self):
+        return None
+
+
 class StepInPlaceGenerator:
     def __init__(self, scan):
         self.scan = scan
@@ -147,14 +153,20 @@ class StepInPlaceGenerator:
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()                   
 
-    def expected(self, index):
+    def gateString(self, index):
         return None
 
-    def gateSequence(self, index):
+    @property
+    def gateStringList(self):
         return None
 
-    def gateSequenceIndex(self, index):
-        return (index, )
+    @property
+    def plaquettes(self):
+        return None
+
+    @property
+    def gateSet(self):
+        return None
 
 
 class FreerunningGenerator:
@@ -196,14 +208,20 @@ class FreerunningGenerator:
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()                   
 
-    def expected(self, index):
+    def gateString(self, index):
         return None
 
-    def gateSequence(self, index):
+    @property
+    def gateStringList(self):
         return None
 
-    def gateSequenceIndex(self, index):
-        return (index, )
+    @property
+    def plaquettes(self):
+        return None
+
+    @property
+    def gateSet(self):
+        return None
 
 class GateSequenceScanGenerator:
     def __init__(self, scan):
@@ -286,8 +304,18 @@ class GateSequenceScanGenerator:
     def gateString(self, index):
         return self.scan.gateSequenceUi.gateString(index)
 
+    @property
+    def gateStringList(self):
+        return self.scan.gateSequenceUi.gateStringList
+
+    @property
     def plaquettes(self):
         return self.scan.gateSequenceUi.plaquettes()
+
+    @property
+    def gateSet(self):
+        return self.scan.gateSequenceUi.gateSequenceContainer.gateSet
+
 
 
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   
