@@ -21,8 +21,11 @@ from pathlib import Path
 
 import itertools
 
+import yaml
+
 from modules.InkscapeConversion import addPdfMetaData
 from persist.StringTable import DataStore
+from pygsti_addons.QubitDataSet import QubitDataSet
 from trace import Traceui
 from trace import NamedTraceui
 
@@ -75,10 +78,6 @@ ExpectedLoopkup = { 'd': 0, 'u' : 1, '1':0.5, '-1':0.5, 'i':0.5, '-i':0.5 }
 FifoDepth = 1020
 
 
-def qubitDataStructure():
-    return defaultdict(list)
-
-
 class ScanExperimentContext(object):
     """This class encapsulates all variables, settings and data of the scan.
     It is used in order to implement the ability to stash and resumea ScanExperiment"""
@@ -99,8 +98,7 @@ class ScanExperimentContext(object):
         self.globalOverrides = list()
         self.revertGlobalsValues = list()
         self.analysisName = None
-        self.qubitData = defaultdict(qubitDataStructure)
-        self.plaquettes = None
+        self.qubitData = QubitDataSet()
 
     def overrideGlobals(self, globalDict):
         self.revertGlobals(globalDict)  # make sure old values were reverted e.g. when calling start on a running scan
@@ -396,8 +394,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.dataStore:
                 self.pulseProgramIdentifier = self.dataStore.addData(self.pulseProgramUi.pppSource)
             (mycode, data) = self.context.generator.prepare(self.pulseProgramUi, self.context.scanMethod.maxUpdatesToWrite )
-            self.context.qubitData = defaultdict(qubitDataStructure)
-            self.context.plaquettes = copy(self.context.generator.plaquettes())
+            self.context.qubitData = QubitDataSet(self.context.generator.gateStringList, self.context.generator.plaquettes, self.context.generator.spam_labels)
             if self.pulseProgramUi.writeRam and self.pulseProgramUi.ramData:
                 data = self.pulseProgramUi.ramData #Overwrites anything set above by the gate sequence ui
             if data:
@@ -583,19 +580,13 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         gateSequence = self.context.generator.gateString(self.context.currentIndex)
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
             if hasattr(algo, 'qubitEvaluate'):
-                values, repeats, timestaps = algo.qubitEvaluate(data, evaluation, ppDict=replacementDict,
-                                                                globalDict=self.globalVariables)
-                gsdata = self.context.qubitData[gateSequence]
-                gsdata['value'].extend(values)
-                gsdata['repeats'].extend(repeats)
-                gsdata['timestamps'].extend(timestaps)
+                self.context.qubitData.extend(gateSequence,
+                                              *algo.qubitEvaluate(data, evaluation, ppDict=replacementDict,
+                                                                  globalDict=self.globalVariables))
             if hasattr(algo, 'detailEvaluate'):
-                values, timestamps = algo.detailEvaluate(data, evaluation, ppDict=replacementDict,
-                                                         globalDict=self.globalVariables)
-                gsdata = self.context.qubitData[gateSequence]
-                gsdata['_' + evaluation.name].extend(values)
-                gsdata['_' + evaluation.name + '_timestamps'].extend(timestamps)
-
+                self.context.qubitData.extendEnv(gateSequence,
+                                                 *algo.detailEvaluate(data, evaluation, ppDict=replacementDict,
+                                                                      globalDict=self.globalVariables))
         if len(evaluated) > 0:
             self.displayUi.add([e[0] for e in evaluated])
             self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
@@ -641,11 +632,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     self.context.plottedTraceList.append( plottedTrace )
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
-                traceCollection.structuredData['plaquettes'] = self.context.plaquettes
                 traceCollection.structuredDataFormat['qubitData'] = 'yaml'
-                traceCollection.structuredDataFormat['plaquettes'] = 'yaml'
-                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.context.plaquettes,
-                                                    'Qubit')
+                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, 'Qubit')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
@@ -688,7 +676,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 logging.getLogger(__name__).info("Closed raw data file")
             if self.context.scan.saveQubitData and self.context.scan.qubitFilename:
                 with open(DataDirectory.DataDirectory().sequencefile(self.context.scan.qubitFilename)[0], 'w') as f:
-                    json.dump(self.context.qubitData, f)
+                    yaml.dump(self.context.qubitData, f)
             for trace in ([self.context.currentTimestampTrace]+[self.context.plottedTraceList[0].traceCollection] if self.context.plottedTraceList else[]):
                 if trace:
                     trace.description["traceFinalized"] = datetime.now(pytz.utc)

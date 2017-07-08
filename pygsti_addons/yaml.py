@@ -2,6 +2,8 @@ import yaml
 from pygsti.objects import GateString
 from pygsti.objects.gatestringstructure import GatestringPlaquette
 
+from pygsti_addons.QubitDataSet import QubitDataSet
+
 
 def _GateString_representer(dumper, gate_string):
     return dumper.represent_scalar('!GateString', str(gate_string))
@@ -29,3 +31,17 @@ def _GateStringPlaquette_constructor(loader, node):
 
 yaml.add_representer(GatestringPlaquette, _GateStringPlaquette_representer)
 yaml.add_constructor('!GateStringPlaquette', _GateStringPlaquette_constructor)
+
+
+def _QubitDataSet_representer(dumper, qubit_data_set):
+    return dumper.represent_mapping('!QubitDataSet', qubit_data_set.__getstate__())
+
+def _QubitDataSet_constructor(loader, node):
+    qubit_data_set = QubitDataSet()
+    state = loader.construct_mapping(node)
+    qubit_data_set.__setstate__(state)
+    return qubit_data_set
+
+yaml.add_representer(QubitDataSet, _QubitDataSet_representer)
+yaml.add_constructor('!QubitDataSet', _QubitDataSet_constructor)
+
