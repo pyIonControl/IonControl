@@ -18,10 +18,41 @@ OpStates = enum.enum('idle', 'running', 'paused', 'starting', 'stopping', 'inter
 NoneScanCode = [4095, 0]  # TODO: should use the pulserconfiguration dataMemorySize
 MaxWordsInFifo = 2040
 
-class ParameterScanGenerator:
-    expression = Expression()
+
+class ScanGeneratorBase:
     def __init__(self, scan):
         self.scan = scan
+
+    def xKey(self, index):
+        return index % self.scan.singleScanLength
+
+    @property
+    def gateStringList(self):
+        return None
+
+    @property
+    def plaquettes(self):
+        return None
+
+    @property
+    def gateSet(self):
+        return None
+
+    def dataOnFinal(self, experiment, currentState):
+        experiment.onStop()
+
+    def xValue(self, index, data):
+        return index % self.scan.singleScanLength
+
+    def xRange(self):
+        return []
+
+
+class ParameterScanGenerator(ScanGeneratorBase):
+    expression = Expression()
+
+    def __init__(self, scan):
+        super().__init__(scan)
         self.nextIndexToWrite = 0
         self.numUpdatedVariables = 1
 
@@ -70,9 +101,6 @@ class ParameterScanGenerator:
             return self.scan.code[start:self.nextIndexToWrite]
         return []
         
-    def dataOnFinal(self, experiment, currentState):
-        experiment.onStop()
-    
     def xRange(self):
         return self.scan.start.m_as(self.scan.xUnit), self.scan.stop.m_as(self.scan.xUnit)
                                      
@@ -87,25 +115,10 @@ class ParameterScanGenerator:
                 trace.bottom = numpy.append(trace.bottom, error[0])
                 trace.top = numpy.append(trace.top, error[1])
 
-    def gateString(self, index):
-        return None
 
-    @property
-    def gateStringList(self):
-        return None
-
-    @property
-    def plaquettes(self):
-        return None
-
-    @property
-    def gateSet(self):
-        return None
-
-
-class StepInPlaceGenerator:
+class StepInPlaceGenerator(ScanGeneratorBase):
     def __init__(self, scan):
-        self.scan = scan
+        super().__init__(scan)
         
     def prepare(self, pulseProgramUi, maxUpdatesToWrite=None ):
         if self.scan.gateSequenceUi.settings.enabled:
@@ -122,12 +135,6 @@ class StepInPlaceGenerator:
     def dataNextCode(self, experiment):
         return self.scan.code
         
-    def xValue(self, index, data):
-        return index
-
-    def xRange(self):
-        return []
-
     def appendData(self, traceList, x, evaluated, timeinterval):
         steps = self.scan.maxPoints
         if evaluated and traceList:
@@ -150,29 +157,11 @@ class StepInPlaceGenerator:
                         trace.bottom = numpy.append(trace.bottom[-steps+1:], error[0])
                         trace.top = numpy.append(trace.top[-steps+1:], error[1])
 
-    def dataOnFinal(self, experiment, currentState):
-        experiment.onStop()                   
 
-    def gateString(self, index):
-        return None
-
-    @property
-    def gateStringList(self):
-        return None
-
-    @property
-    def plaquettes(self):
-        return None
-
-    @property
-    def gateSet(self):
-        return None
-
-
-class FreerunningGenerator:
+class FreerunningGenerator(ScanGeneratorBase):
     expression = Expression()
     def __init__(self, scan):
-        self.scan = scan
+        super().__init__(scan)
         
     def prepare(self, pulseProgramUi, maxUpdatesToWrite=None ):
         if self.scan.gateSequenceUi.settings.enabled:
@@ -191,9 +180,6 @@ class FreerunningGenerator:
     def xValue(self, index, data):
         return self.expression.evaluate( self.scan.xExpression, { 'x': data.scanvalue if data.scanvalue else 0} )  if self.scan.xExpression else data.scanvalue
 
-    def xRange(self):
-        return []
-
     def appendData(self, traceList, x, evaluated, timeinterval):
         if evaluated and traceList:
             traceList[0].x = numpy.append(traceList[0].x, x)
@@ -205,27 +191,10 @@ class FreerunningGenerator:
                     trace.bottom = numpy.append(trace.bottom, error[0])
                     trace.top = numpy.append(trace.top, error[1])
 
-    def dataOnFinal(self, experiment, currentState):
-        experiment.onStop()                   
 
-    def gateString(self, index):
-        return None
-
-    @property
-    def gateStringList(self):
-        return None
-
-    @property
-    def plaquettes(self):
-        return None
-
-    @property
-    def gateSet(self):
-        return None
-
-class GateSequenceScanGenerator:
+class GateSequenceScanGenerator(ScanGeneratorBase):
     def __init__(self, scan):
-        self.scan = scan
+        super().__init__(scan)
         self.nextIndexToWrite = 0
         self.numUpdatedVariables = 1
         self.maxWordsToWrite = MaxWordsInFifo
@@ -236,7 +205,8 @@ class GateSequenceScanGenerator:
         address, data, self.gateSequenceSettings = self.scan.gateSequenceUi.gateSequenceScanData()
         parameter = self.gateSequenceSettings.startAddressParam
         logger.debug( "GateSequenceScan {0} {1}".format( address, parameter ) )
-        self.scan.list = address
+        self.scan.list = address * self.scan.repeats
+        self.scan.singleScanLength = len(address)
         self.scan.index = list(range(len(self.scan.list)))
         if self.scan.scantype == 1:
             self.scan.list.reverse()
@@ -275,7 +245,7 @@ class GateSequenceScanGenerator:
         return self.scan.code[currentWordCount:]
 
     def xValue(self, index, data):
-        return self.scan.index[index]
+        return self.scan.index[index % self.scan.singleScanLength]
 
     def dataNextCode(self, experiment):
         if self.nextIndexToWrite<len(self.scan.code):
@@ -298,11 +268,8 @@ class GateSequenceScanGenerator:
                 trace.bottom = numpy.append(trace.bottom, error[0])
                 trace.top = numpy.append(trace.top, error[1])
 
-    def dataOnFinal(self, experiment, currentState):
-        experiment.onStop()
-
-    def gateString(self, index):
-        return self.scan.gateSequenceUi.gateString(index)
+    def xKey(self, index):
+        return self.scan.gateSequenceUi.gateString(index % self.scan.singleScanLength)
 
     @property
     def gateStringList(self):

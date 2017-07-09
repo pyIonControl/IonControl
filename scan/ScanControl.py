@@ -7,6 +7,7 @@
 import copy
 import functools
 import logging
+from functools import partial
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
@@ -89,8 +90,9 @@ class Scan:
         self.__dict__.setdefault('saveRawData', False)
         self.__dict__.setdefault('rawFilename', "")
         self.__dict__.setdefault('saveQubitData', False)
-        self.__dict__.setdefault('qubitFilename', '')
+        self.__dict__.setdefault('qubitDataFormat', 'Pickle')
         self.__dict__.setdefault('maxPoints', 0)
+        self.__dict__.setdefault('repeats', 1)
         self.__dict__.setdefault('parallelInternalScanParameter', "None")
 
     def __eq__(self, other):
@@ -109,7 +111,7 @@ class Scan:
     stateFields = ['scanParameter', 'scanTarget', 'scantype', 'scanMode', 'filename', 'histogramFilename',
                    'autoSave', 'histogramSave', 'xUnit', 'xExpression', 'loadPP', 'loadPPName',
                    'gateSequenceSettings', 'scanSegmentList', 'saveRawData', 'rawFilename', 'saveQubitData',
-                   'qubitFilename', 'maxPoints', 'parallelInternalScanParameter']
+                   'qubitDataFormat', 'maxPoints', 'parallelInternalScanParameter', 'repeats']
 
     documentationList = ['scanParameter', 'scanTarget', 'scantype', 'scanMode',
                          'xUnit', 'xExpression', 'loadPP', 'loadPPName', 'parallelInternalScanParameter']
@@ -214,11 +216,12 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         self.scanModeComboBox.currentIndexChanged[int].connect( self.onModeChanged )
         self.filenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.filenameEdit, 'filename') )
         self.rawFilenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.rawFilenameEdit, 'rawFilename') )
-        self.qubitFilenameEdit.editingFinished.connect(functools.partial(self.onEditingFinished, self.qubitFilenameEdit, 'qubitFilename'))
+        self.qubitDataFormatBox.currentIndexChanged[str].connect(self.onQubitDataFormatChanged)
         self.histogramFilenameEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.histogramFilenameEdit, 'histogramFilename') )
         self.xUnitEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.xUnitEdit, 'xUnit') )
         self.xExprEdit.editingFinished.connect( functools.partial(self.onEditingFinished, self.xExprEdit, 'xExpression') )
-        self.maxPointsBox.valueChanged.connect( self.onMaxPointsChanged )
+        self.maxPointsBox.valueChanged.connect(partial(self.onSetIntField, 'maxPoints'))
+        self.repeatsBox.valueChanged.connect(partial(self.onSetIntField, 'repeats'))
         self.loadPPcheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'loadPP' ) )
         self.loadPPComboBox.currentIndexChanged[str].connect( self.onLoadPP )
         self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
@@ -246,6 +249,9 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         self.addAction(self.defaultHdf5TypeAction)
         self.onDefaultFilename()
         self.parallelInternalScanComboBox.setVisible(self.parameters.currentScanTarget != "Internal")
+
+    def onQubitDataFormatChanged(self, f):
+        self.settings.qubitDataFormat = f
 
     def evaluate(self, name):
         if self.settings.evaluate( self.globalDict ):
@@ -304,12 +310,14 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         filename = getattr(self.settings, 'filename', '')
         self.filenameEdit.setText(filename if filename else '')
         self.rawFilenameEdit.setText( getattr(self.settings, 'rawFilename', '') )
-        self.qubitFilenameEdit.setText(getattr(self.settings, 'qubitFilename', '') )
+        self.qubitDataFormatBox.setCurrentIndex(self.qubitDataFormatBox.findText(getattr(self.settings, 'qubitDataFormat', 'Pickle')))
         self.histogramFilenameEdit.setText( getattr(self.settings, 'histogramFilename', '') )
         self.scanTypeCombo.setEnabled(self.settings.scanMode in [0, 1])
-        self.xUnitEdit.setText( self.settings.xUnit )
-        self.xExprEdit.setText( self.settings.xExpression )
-        self.maxPointsBox.setValue( self.settings.maxPoints )
+        self.xUnitEdit.setText(self.settings.xUnit)
+        self.xExprEdit.setText(self.settings.xExpression)
+        self.maxPointsBox.setValue(self.settings.maxPoints)
+        self.repeatsBox.setValue(self.settings.repeats)
+        self.qubitDataFormatBox.setCurrentIndex(self.qubitDataFormatBox.findText(self.settings.qubitDataFormat))
 
         self.loadPPcheckBox.setChecked( self.settings.loadPP )
         if self.settings.loadPPName: 
@@ -399,8 +407,8 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         setattr( self.settings, attribute, index )        
         self.checkSettingsSavable()
 
-    def onMaxPointsChanged(self, value):
-        self.settings.maxPoints = int(value)
+    def onSetIntField(self, field, value):
+        setattr(self.settings, field, int(value))
         self.checkSettingsSavable()
 
     def onModeChanged(self, index):       
@@ -500,7 +508,8 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         if scan.scanMode==Scan.ScanMode.Freerunning:
             scan.list = None
         else:
-            scan.list = list( concatenate_iter( *[ linspace(segment.start, segment.stop, segment.steps) for segment in scan.scanSegmentList ] ) )
+            scan.list = list(concatenate_iter(*[linspace(segment.start, segment.stop, segment.steps) for segment in scan.scanSegmentList]))
+            scan.singleScanLength = len(scan.list)
             if scan.type==0:
                 scan.list = sorted( scan.list )
                 scan.start = scan.list[0]
@@ -518,7 +527,7 @@ class ScanControl(ScanControlForm, ScanControlBase ):
                 scan.list = sorted( scan.list )
                 center = len(scan.list)//2
                 scan.list = list( interleave_iter(scan.list[center:], reversed(scan.list[:center])) )
-            
+            scan.list *= scan.repeats
         scan.gateSequenceUi = self.gateSequenceUi
         scan.settingsName = self.settingsName
         return scan

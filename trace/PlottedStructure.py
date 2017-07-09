@@ -12,7 +12,6 @@ class QubitPlotSettings:
 
 
 def default_color_scale(num):
-    print(num)
     scale = 5
     colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
     num /= scale

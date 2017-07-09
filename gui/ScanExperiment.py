@@ -577,7 +577,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             evaluated.append(algo.evaluate(data, evaluation, ppDict=replacementDict,
                                            globalDict=self.globalVariables))  # returns mean, error, raw
         # qubit evaluation
-        gateSequence = self.context.generator.gateString(self.context.currentIndex)
+        gateSequence = self.context.generator.xKey(self.context.currentIndex)
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
             if hasattr(algo, 'qubitEvaluate'):
                 self.context.qubitData.extend(gateSequence,
@@ -632,7 +632,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     self.context.plottedTraceList.append( plottedTrace )
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
-                traceCollection.structuredDataFormat['qubitData'] = 'yaml'
+                traceCollection.structuredDataFormat['qubitData'] = self.context.scan.qubitDataFormat
                 plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.plotDict['Qubit']['view'], 'Qubit')
                 self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName

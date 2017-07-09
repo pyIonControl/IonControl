@@ -382,11 +382,11 @@ class TraceCollection(keydefaultdict):
             for name, value in self.structuredData.items():
                 format = self.structuredDataFormat[name]
                 name = 'structuredData/' + name
-                if format == 'pkl':
+                if format.lower() in ['pkl', 'pickle']:
                     myzip.writestr(name + '.pkl', pickle.dumps(value))
-                elif format == 'json':
+                elif format.lower() == 'json':
                     myzip.writestr(name + '.json', json.dumps(value))
-                elif format == 'yaml':
+                elif format.lower() == 'yaml':
                     myzip.writestr(name + '.yaml', yaml.dump(value))
             myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat))
 
@@ -417,11 +417,11 @@ class TraceCollection(keydefaultdict):
                         name = leaf.split('.', 1)[0]
                         format = self.structuredDataFormat[name]
                         with myzip.open(filename) as f:
-                            if format == 'pkl':
+                            if format.lower() in ['pkl', 'pickle']:
                                 self.structuredData[name] = pickle.loads(f.read())
-                            elif format == 'json':
+                            elif format.lower() == 'json':
                                 self.structuredData[name] = json.loads(f.read())
-                            elif format == 'yaml':
+                            elif format.lower() == 'yaml':
                                 self.structuredData[name] = yaml.loads(f.read())
             except:
                 pass
