@@ -29,7 +29,6 @@ class PlottedStructure:
     def __init__(self, traceCollection, qubitData, plot, windowName):
         self.qubitData = qubitData
         self.traceCollection = traceCollection
-        self.curvePen = 0
         self.name = 'Qubit'
         self.windowName = windowName
         self._graphicsView = plot['view']
@@ -47,6 +46,10 @@ class PlottedStructure:
         self._x, self._plot_s = list(zip(*sorted(self._lookup.items())))
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
         self.labels = [str(s) for s in self._plot_s]
+
+    @property
+    def curvePen(self):
+        return 1 if self._gstGraphItem else 0
 
     @property
     def x(self):
@@ -85,10 +88,11 @@ class PlottedStructure:
         if self._graphicsView is not None:
             self._assemble_data()
             self.removePlots()
-            self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, labels=self.labels, colorscale=default_color_scale)
-            self._graphicsView.setAspectLocked()
-            self._graphicsView.addItem(self._gstGraphItem)
-            self._graphicsWidget.label_index = self._gstGraphItem.spatialIndex
+            if penindex != 0:
+                self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, labels=self.labels, colorscale=default_color_scale)
+                self._graphicsView.setAspectLocked()
+                self._graphicsView.addItem(self._gstGraphItem)
+                self._graphicsWidget.label_index = self._gstGraphItem.spatialIndex
 
     def replot(self):
         if self._gstGraphItem is not None:
