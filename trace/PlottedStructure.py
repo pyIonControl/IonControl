@@ -26,13 +26,14 @@ def default_color_scale(num):
 
 
 class PlottedStructure:
-    def __init__(self, traceCollection, qubitData, graphicsView, windowName):
+    def __init__(self, traceCollection, qubitData, plot, windowName):
         self.qubitData = qubitData
         self.traceCollection = traceCollection
         self.curvePen = 0
         self.name = 'Qubit'
         self.windowName = windowName
-        self._graphicsView = graphicsView
+        self._graphicsView = plot['view']
+        self._graphicsWidget = plot['widget']
         self._gstGraphItem = None
         lengths = sorted(set([k[0] for k in self.qubitData.plaquettes.keys()]))
         germs = sorted(set([k[1] for k in self.qubitData.plaquettes.keys()]))
