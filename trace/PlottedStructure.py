@@ -46,6 +46,7 @@ class PlottedStructure:
                 self._lookup[(l_id, g_id, r, c)] = s
         self._x, self._plot_s = list(zip(*sorted(self._lookup.items())))
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
+        self.labels = [str(self._plot_s[i]) for i in self._plot_s_idx]
 
     @property
     def x(self):
@@ -84,9 +85,10 @@ class PlottedStructure:
         if self._graphicsView is not None:
             self._assemble_data()
             self.removePlots()
-            self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, colorscale=default_color_scale)
+            self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, labels=self.labels, colorscale=default_color_scale)
             self._graphicsView.setAspectLocked()
             self._graphicsView.addItem(self._gstGraphItem)
+            self._graphicsWidget.label_index = self._gstGraphItem.spatialIndex
 
     def replot(self):
         if self._gstGraphItem is not None:
