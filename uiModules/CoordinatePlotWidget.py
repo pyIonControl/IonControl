@@ -210,6 +210,7 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
         self.filterType = True
         self.mousePointList = list()
         self._graphicsView.showGrid(x = True, y = True, alpha = grid_opacity) #grid defaults to on
+        self.label_index = None
 
         # add option to set plot title to pyqtgraph's Plot Options context menu
         titleMenu = QtWidgets.QMenu(self._graphicsView.ctrlMenu)
@@ -422,13 +423,16 @@ class CoordinatePlotWidget(pg.GraphicsLayoutWidget):
                     logX = self._graphicsView.ctrl.logXCheck.isChecked()
                     y = self.mousePoint.y() if not logY else pow(10, self.mousePoint.y())
                     x = self.mousePoint.x() if not logX else pow(10, self.mousePoint.x())
-                    vR = self._graphicsView.vb.viewRange()
-                    deltaY = vR[1][1]-vR[1][0] if not logY else pow(10, vR[1][1])-pow(10, vR[1][0]) #Calculate x and y display ranges
-                    deltaX = vR[0][1]-vR[0][0] if not logX else pow(10, vR[0][1])-pow(10, vR[0][0])
-                    precx = int( math.ceil( math.log10(abs(x/deltaX)) ) + 3 ) if x!=0 and deltaX>0 else 1
-                    precy = int( math.ceil( math.log10(abs(y/deltaY)) ) + 3 ) if y!=0 and deltaY>0 else 1
-                    roundedx, roundedy = roundToNDigits( x, precx), roundToNDigits(y, precy )
-                    self.coordinateLabel.setText( self.template.format( repr(roundedx), repr(roundedy) ))
+                    if self.label_index is None:
+                        vR = self._graphicsView.vb.viewRange()
+                        deltaY = vR[1][1]-vR[1][0] if not logY else pow(10, vR[1][1])-pow(10, vR[1][0]) #Calculate x and y display ranges
+                        deltaX = vR[0][1]-vR[0][0] if not logX else pow(10, vR[0][1])-pow(10, vR[0][0])
+                        precx = int( math.ceil( math.log10(abs(x/deltaX)) ) + 3 ) if x!=0 and deltaX>0 else 1
+                        precy = int( math.ceil( math.log10(abs(y/deltaY)) ) + 3 ) if y!=0 and deltaY>0 else 1
+                        roundedx, roundedy = roundToNDigits( x, precx), roundToNDigits(y, precy )
+                        self.coordinateLabel.setText( self.template.format( repr(roundedx), repr(roundedy) ))
+                    else:
+                        self.coordinateLabel.setText(self.label_index.get((round(x), round(y)), ''))
                 except numpy.linalg.linalg.LinAlgError:
                     pass
                     

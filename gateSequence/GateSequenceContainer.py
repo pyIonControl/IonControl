@@ -42,7 +42,7 @@ class GateSequenceContainer:
     @property
     def sequenceList(self):
         if self._usePyGSTi:
-            return self._gate_string_struct.allstrs
+            return self._gate_string_struct.allstrs if self._gate_string_struct is not None else None
         else:
             return self._gate_string_list
 

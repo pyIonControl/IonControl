@@ -46,7 +46,7 @@ class PlottedStructure:
                 self._lookup[(l_id, g_id, r, c)] = s
         self._x, self._plot_s = list(zip(*sorted(self._lookup.items())))
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
-        self.labels = [str(self._plot_s[i]) for i in self._plot_s_idx]
+        self.labels = [str(s) for s in self._plot_s]
 
     @property
     def x(self):

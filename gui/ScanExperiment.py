@@ -633,8 +633,9 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.context.qubitData:
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
                 traceCollection.structuredDataFormat['qubitData'] = self.context.scan.qubitDataFormat
-                plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.plotDict['Qubit'], 'Qubit')
-                self.context.plottedTraceList.append(plottedStructure)
+                if self.context.qubitData.is_gst:
+                    plottedStructure = PlottedStructure(traceCollection, self.context.qubitData, self.plotDict['Qubit'], 'Qubit')
+                    self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
             self.context.plottedTraceList[0].traceCollection.description["PulseProgram"] = self.pulseProgramUi.description()
