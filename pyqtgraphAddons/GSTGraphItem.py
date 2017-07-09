@@ -37,10 +37,12 @@ class GSTGraphItem(GraphicsObject):
             max_x=None,
             pen=None,
             colorscale=None,
+            labels=None
         )
         self._shape = None
         self.picture = None
         self.setOpts(**opts)
+        self.spatialIndex = None
 
     def setOpts(self, **opts):
         self.opts.update(opts)
@@ -49,9 +51,11 @@ class GSTGraphItem(GraphicsObject):
         self.update()
         self.informViewBoundsChanged()
 
-    def setData(self, x, y):
+    def setData(self, x, y, labels=None):
         self.opts['x'] = x
         self.opts['y'] = y
+        if labels is not None:
+            self.opts['labels'] = labels
         self.update()
         self.drawPicture()
 
@@ -59,6 +63,7 @@ class GSTGraphItem(GraphicsObject):
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
+        self.spatialIndex = dict()
 
         pen = self.opts['pen']
 
@@ -72,6 +77,9 @@ class GSTGraphItem(GraphicsObject):
 
         x = asarray(self.opts.get('x'))
         y = asarray(self.opts.get('y'))
+        labels = self.opts.get('labels')
+        if labels is None:
+            labels = x
         colorscale = self.opts.get('colorscale')
         if colorscale is None:
             colorscale = lambda x: (1, 0, 0)
@@ -85,12 +93,13 @@ class GSTGraphItem(GraphicsObject):
             return x1 * (x2_max + 2) + x2, y1 * (y2_max + 2) + y2
 
         p.setPen(fn.mkPen(pen))
-        for index, value in zip(x, y):
+        for index, value, label in zip(x, y, labels):
             if x is not None:
                 c = QtGui.QColor(*colorscale(value))
                 p.setBrush(QtGui.QBrush(c))
                 rx, ry = plot_index(index)
                 rect = QtCore.QRectF(rx - 0.5, ry - 0.5, 1, 1)
+                self.spatialIndex[(rx, ry)] = label
                 p.drawRect(rect)
                 self._shape.addRect(rect)
 
