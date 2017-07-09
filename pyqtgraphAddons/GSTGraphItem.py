@@ -63,7 +63,10 @@ class GSTGraphItem(GraphicsObject):
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
-        self.spatialIndex = dict()
+        if self.spatialIndex is None:
+            self.spatialIndex = dict()
+        else:
+            self.spatialIndex.clear()
 
         pen = self.opts['pen']
 
@@ -99,7 +102,7 @@ class GSTGraphItem(GraphicsObject):
                 p.setBrush(QtGui.QBrush(c))
                 rx, ry = plot_index(index)
                 rect = QtCore.QRectF(rx - 0.5, ry - 0.5, 1, 1)
-                self.spatialIndex[(rx, ry)] = label
+                self.spatialIndex[(rx, ry)] = "{}  {:.3f}".format(label, value)
                 p.drawRect(rect)
                 self._shape.addRect(rect)
 
