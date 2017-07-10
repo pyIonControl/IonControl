@@ -138,7 +138,7 @@ class TracePlottingList(list):
             if plottingelement.find("FitFunction") is not None:
                 plotting.fitFunction = FitFunctions.fromXmlElement( plottingelement.find("FitFunction") )
             l.append(plotting)
-        for plottingelement in element.finadall("StructurePlotting"):
+        for plottingelement in element.findall("StructurePlotting"):
             plotting = StructurePlotting()
             plotting.__dict__.update(plottingelement.attrib)
             l.append(plotting)
