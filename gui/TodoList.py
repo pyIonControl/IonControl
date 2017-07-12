@@ -31,6 +31,7 @@ from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
 from modules.GuiAppearance import saveGuiState, restoreGuiState   #@UnresolvedImport
 from modules.firstNotNone import firstNotNone
 from collections import defaultdict, deque
+from modules.quantity import Q
 
 Form, Base = uic.loadUiType('ui/TodoList.ui')
 
@@ -255,6 +256,14 @@ class TodoList(Form, Base):
         self.enableStopFlagAction = QtGui.QAction( "toggle stop flag" , self)
         self.enableStopFlagAction.triggered.connect( self.onEnableStopFlag  )
         self.tableView.addAction( self.enableStopFlagAction )
+        # copy in a dictionary format, might be useful for todo list style scripts etc...
+        self.copyAsDictAction = QtGui.QAction( "copy as dictionary" , self)
+        self.copyAsDictAction.triggered.connect( self.copy_dict_format  )
+        self.tableView.addAction( self.copyAsDictAction )
+        # copy in a format that can be pasted directly into a script
+        self.copyAsScriptAction = QtGui.QAction( "copy in script format" , self)
+        self.copyAsScriptAction.triggered.connect( self.copy_script_format  )
+        self.tableView.addAction( self.copyAsScriptAction )
 
         #
         restoreGuiState( self, self.config.get('Todolist.guiState'))
@@ -292,6 +301,35 @@ class TodoList(Form, Base):
         clip = QtWidgets.QApplication.clipboard()
         rows = [ i.row() for i in self.tableView.selectedIndexes()]
         clip.setText(str(rows))
+
+    def copy_dict_format(self):
+        """Copy todo list entries in the form of a dictionary for usage in other parts of the code"""
+        clip = QtWidgets.QApplication.clipboard()
+        dictData = [{'scan': self.tableModel.nodeFromIndex(n).entry.measurement,
+                     'evaluation': self.tableModel.nodeFromIndex(n).entry.evaluation,
+                     'analysis': self.tableModel.nodeFromIndex(n).entry.analysis,
+                     'overrides': [(k, (Q(v).m, str(Q(v).u))) for k,v in self.tableModel.nodeFromIndex(n).entry.settings.items()] if self.tableModel.nodeFromIndex(n).entry.settings else []
+                     } for n in self.tableView.selectedIndexes()]
+        dictStr = '['+',\n '.join(map(str, dictData))+']' if len(dictData) > 1 else str(dictData[0])
+        clip.setText(dictStr)
+
+    def copy_script_format(self):
+        """Copy todo list entries in the form of a dictionary for usage in other parts of the code"""
+        clip = QtWidgets.QApplication.clipboard()
+        dictData = [{'scan': self.tableModel.nodeFromIndex(n).entry.measurement,
+                     'evaluation': self.tableModel.nodeFromIndex(n).entry.evaluation,
+                     'analysis': self.tableModel.nodeFromIndex(n).entry.analysis,
+                     'overrides': [(k, (Q(v).m, str(Q(v).u))) for k,v in self.tableModel.nodeFromIndex(n).entry.settings.items()] if self.tableModel.nodeFromIndex(n).entry.settings else []
+                     } for n in self.tableView.selectedIndexes()]
+        dictStr = ''
+        for todoElem in dictData:
+            dictStr += "setScan('{scan}')\nsetEvaluation('{evaluation}')\nsetAnalysis('{analysis}')\nstartScan({overrides})\n".format(
+                        scan=todoElem['scan'], evaluation=todoElem['evaluation'], analysis=todoElem['analysis'], overrides=todoElem['overrides'])
+        clip.setText(dictStr)
+
+
+
+
 
     def paste_from_clipboard(self):
         """ Append the string of rows from the clipboard to the end of the TODO list. """
