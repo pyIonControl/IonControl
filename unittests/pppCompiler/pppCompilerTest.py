@@ -27,9 +27,11 @@ def ppCompile(assemblerfile):
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
 folder = "test"
-testfiles = [ #"Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
-              #"PulseCommand",
-              "indented_blocks" ]
+testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
+              "PulseCommand",
+              "indented_blocks",
+              "Master_uWave_program_v2",
+              "Declarations"]
 
 def test_generator(name):
     def test(self):
@@ -47,6 +49,9 @@ for name in testfiles:
     test = test_generator(name)
     setattr(pppCompilerTest, test_name, test)
 
+
+if __name__ == "__main__":
+    main()
 
 
 
