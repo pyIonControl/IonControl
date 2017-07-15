@@ -11,22 +11,16 @@ class QubitPlotSettings:
         self.gateSet = None
 
 
-def default_color_scale(num):
-    scale = 5
-    colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
-    num /= scale
-    if num < 0:
-        return colors[0]
-    if num + 1 > len(colors):
-        return colors[-1]
-    left = floor(num)
-    right = ceil(num)
-    minor = num - left
-    return colors[left] * (1 - minor) + colors[right] * minor
+class PlottedStructureProperties:
+    def __init__(self, gateset=None, axesIndex=(0, 1, 2, 3), collapse_minor=False, confidence_level=95):
+        self.gateset = gateset
+        self.axesIndex = axesIndex
+        self.collapse_minor = collapse_minor
+        self.confidence_level = confidence_level
 
 
 class PlottedStructure:
-    def __init__(self, traceCollection, qubitData, plot, windowName):
+    def __init__(self, traceCollection, qubitData, plot, windowName, properties=None):
         self.qubitData = qubitData
         self.traceCollection = traceCollection
         self.name = 'Qubit'
@@ -46,6 +40,20 @@ class PlottedStructure:
         self._x, self._plot_s = list(zip(*sorted(self._lookup.items())))
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
         self.labels = [str(s) for s in self._plot_s]
+        self.properties = properties or PlottedStructureProperties()
+
+    def default_color_scale(self, num):
+        scale = 5
+        colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
+        num /= scale
+        if num < 0:
+            return colors[0]
+        if num + 1 > len(colors):
+            return colors[-1]
+        left = floor(num)
+        right = ceil(num)
+        minor = num - left
+        return colors[left] * (1 - minor) + colors[right] * minor
 
     @property
     def curvePen(self):
@@ -89,7 +97,7 @@ class PlottedStructure:
             self._assemble_data()
             self.removePlots()
             if penindex != 0:
-                self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, labels=self.labels, colorscale=default_color_scale)
+                self._gstGraphItem = GSTGraphItem(x=self._x, y=self._y, labels=self.labels, colorscale=self.default_color_scale)
                 self._graphicsView.setAspectLocked()
                 self._graphicsView.addItem(self._gstGraphItem)
                 self._graphicsWidget.label_index = self._gstGraphItem.spatialIndex
