@@ -3,8 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from pyparsing import ParserElement
-ParserElement.enablePackrat()
+#from cPyparsing import ParserElement
+#ParserElement.enablePackrat()
 from unittests import loggingConfig
 from pppCompiler import pppCompiler
 from unittest import TestCase, main
@@ -31,7 +31,8 @@ testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "R
               "PulseCommand",
               "indented_blocks",
               "Master_uWave_program_v2",
-              "Declarations"]
+              "Declarations"
+            ]
 
 def test_generator(name):
     def test(self):
