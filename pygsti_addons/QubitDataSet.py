@@ -46,6 +46,7 @@ class QubitDataSet:
         self._init_internal()
 
     def extend(self, gatestring, values, repeats, timestamps):
+        """Append the measurement result for gatestring to the datastructure"""
         point = self._rawdata[gatestring]
         point['value'].extend(values)
         point['repeats'].extend(repeats)
@@ -53,6 +54,7 @@ class QubitDataSet:
         self._extend(gatestring, values, repeats)
 
     def _extend(self, gatestring, values, repeats):
+        """Keeps the data in the input format for pygsti log_likelyhood up to date"""
         if self.is_gst:
             gatestring_idx = self.gatestring_list.index(gatestring)
             eval = ResultCounter(values, repeats)
