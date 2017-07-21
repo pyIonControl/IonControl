@@ -5,6 +5,7 @@
 # *****************************************************************
 
 from collections import namedtuple
+from queue import Full
 
 import logging
 import struct
@@ -37,7 +38,10 @@ class DACControllerServer(ServerProcess, OKBase):
                 d = CRCData(*struct.unpack('II', s))
                 #if d.shuttling != 0xffffffff:
                 print("CRC info:", d)
-                #self.dataQueue.put(d)
+                try:
+                    self.dataQueue.put(d, False)
+                except Full:
+                    pass  # ignoring full queue
 
     def writeVoltage(self, address, line):
         if self.xem:

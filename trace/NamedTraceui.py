@@ -22,6 +22,7 @@ from modules.Utility import unique
 from datetime import datetime
 import pytz
 from pathlib import Path
+import logging
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/NamedTraceui.ui')
 TraceuiForm, TraceuiBase = PyQt5.uic.loadUiType(uipath)
@@ -152,6 +153,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
     def setupUi(self, *args):
         TraceuiForm.setupUi(self, *args)
         super().setupUi(*args)
+        logger = logging.getLogger(__name__)
         self.model.flagsLookup[self.model.column.name] = QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
         self.model.categoryFlagsLookup[self.model.column.name] = QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsUserCheckable
         self.model.dataLookup.update({
@@ -201,12 +203,13 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.filtersAction)
 
         self.resetTraceOptions()
-        try:
-            for filename in sorted(self.settings.filelist, key=lambda x: Path(x).stem):
+        for filename in sorted(self.settings.filelist, key=lambda x: Path(x).stem):
+            try:
                 self.openFile(filename, defaultpen=0)
-            self.updateNames()
-        except NameError:
-            self.settings.filelist = []
+            except:
+                logger.error("Could not load named trace from file {}!".format(filename))
+                self.settings.filelist.remove(filename)
+        self.updateNames()
         self.traceView.collapseAll()
 
     def initComboBox(self):
