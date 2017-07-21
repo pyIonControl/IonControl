@@ -675,9 +675,6 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 self.context.rawDataFile.close()
                 self.context.rawDataFile = None
                 logging.getLogger(__name__).info("Closed raw data file")
-            if self.context.scan.saveQubitData and self.context.scan.qubitFilename:
-                with open(DataDirectory.DataDirectory().sequencefile(self.context.scan.qubitFilename)[0], 'w') as f:
-                    yaml.dump(self.context.qubitData, f)
             for trace in ([self.context.currentTimestampTrace]+[self.context.plottedTraceList[0].traceCollection] if self.context.plottedTraceList else[]):
                 if trace:
                     trace.description["traceFinalized"] = datetime.now(pytz.utc)

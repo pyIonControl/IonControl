@@ -516,6 +516,8 @@ class TraceCollection(keydefaultdict):
         self._fileType = file_type(filename, self._fileType)
         if self._fileType == "hdf5":
             self.loadTraceHdf5(filename)
+        elif self._fileType == "zip":
+            pass  # self.loadTraceZip(filename)
         else:
             self.loadTracePlain(filename)
 
