@@ -138,7 +138,7 @@ class TracePlottingList(list):
             if plottingelement.find("FitFunction") is not None:
                 plotting.fitFunction = FitFunctions.fromXmlElement( plottingelement.find("FitFunction") )
             l.append(plotting)
-        for plottingelement in element.finadall("StructurePlotting"):
+        for plottingelement in element.findall("StructurePlotting"):
             plotting = StructurePlotting()
             plotting.__dict__.update(plottingelement.attrib)
             l.append(plotting)
@@ -513,11 +513,20 @@ class TraceCollection(keydefaultdict):
             e.text = str(value)
 
     def loadTrace(self, filename):
+        logger = logging.getLogger(__name__)
         self._fileType = file_type(filename, self._fileType)
         if self._fileType == "hdf5":
-            self.loadTraceHdf5(filename)
+            try:
+                self.loadTraceHdf5(filename)
+            except:
+                logger.error( "Could not load file {}!".format(filename))
+        elif self._fileType == "zip":
+            pass  # self.loadTraceZip(filename)
         else:
-            self.loadTracePlain(filename)
+            try:
+                self.loadTracePlain(filename)
+            except:
+                logger.error( "Could not load file {}!".format(filename))
 
     def loadTraceHdf5(self, filename):
         self.filename = filename

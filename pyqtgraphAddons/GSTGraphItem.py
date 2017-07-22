@@ -42,7 +42,7 @@ class GSTGraphItem(GraphicsObject):
         self._shape = None
         self.picture = None
         self.setOpts(**opts)
-        self.spatialIndex = None
+        self.spatialIndex = dict()
 
     def setOpts(self, **opts):
         self.opts.update(opts)
@@ -63,10 +63,7 @@ class GSTGraphItem(GraphicsObject):
         self.picture = QtGui.QPicture()
         self._shape = QtGui.QPainterPath()
         p = QtGui.QPainter(self.picture)
-        if self.spatialIndex is None:
-            self.spatialIndex = dict()
-        else:
-            self.spatialIndex.clear()
+        self.spatialIndex.clear()
 
         pen = self.opts['pen']
 
