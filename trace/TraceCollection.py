@@ -61,59 +61,8 @@ class ColumnSpec(list):
     def fromXmlElement(element):
         return ColumnSpec( element.text.split(", ") )
     
-class TracePlotting(object):
-    Types = enum('default','steps')
-    def __init__(self, xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None, rawColumn=None,
-                 filtColumn=None, name="",type_ =None, xAxisUnit=None, xAxisLabel=None, windowName=None ):
-        self.xColumn = xColumn
-        self.yColumn = yColumn
-        self.topColumn = topColumn
-        self.bottomColumn = bottomColumn
-        self.heightColumn = heightColumn
-        self.rawColumn = rawColumn
-        self.filtColumn = filtColumn
-        self.fitFunction = None
-        self.name = name
-        self.xAxisUnit = xAxisUnit
-        self.xAxisLabel = xAxisLabel
-        self.type = TracePlotting.Types.default if type_ is None else type_
-        self.windowName = windowName
-        
-    def __setstate__(self, d):
-        self.__dict__ = d
-        self.__dict__.setdefault( 'xAxisUnit', None )
-        self.__dict__.setdefault( 'xAxisLabel', None )
-        self.__dict__.setdefault( 'windowName', None)
 
-    def toXML(self, element):
-        e = ElementTree.SubElement(element, 'TracePlotting',
-                               dict((name, str(getattr(self, name))) for name in self.attrFields))
-        if self.fitFunction:
-            self.fitFunction.toXmlElement(e)
-        return e
-
-    attrFields = ['xColumn','yColumn','topColumn', 'bottomColumn','heightColumn', 'filtColumn', 'name', 'type', 'xAxisUnit', 'xAxisLabel', 'windowName']
-
-
-class StructurePlotting:
-    def __init__(self, key, windowName, name):
-        self.key = key
-        self.name = name
-        self.windowName = windowName
-
-    def __setstate__(self, d):
-        self.__dict__ = d
-        self.__dict__.setdefault('key', None)
-
-    def toXML(self, element):
-        e = ElementTree.SubElement(element, 'StructurePlotting',
-                               dict((name, str(getattr(self, name))) for name in self.attrFields))
-        return e
-
-    attrFields = ['key', 'windowName', 'name']
-
-
-class TracePlottingList(list):        
+class TracePlottingList(list):
     def toXmlElement(self, root):
         myElement = ElementTree.SubElement(root, 'TracePlottingList', {})
         for traceplotting in self:
@@ -595,13 +544,13 @@ class TraceCollection(keydefaultdict):
             self[colname] = numpy.array(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-        self.description["tracePlottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name="")]
+        self.description["plottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name="")]
             
     def setPlotfunction(self, callback):
         self.plotfunction = callback
         
-    def addTracePlotting(self, traceplotting):
-        self.description["tracePlottingList"].append(traceplotting)
+    def addPlotting(self, plotting):
+        self.description["plottingList"].append(plotting)
         
     @property 
     def tracePlottingList(self):

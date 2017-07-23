@@ -3,6 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from xml.etree.ElementTree import ElementTree
 
 from trace import pens
 
@@ -12,8 +13,7 @@ from pyqtgraph.graphicsItems.ErrorBarItem import ErrorBarItem
 from pyqtgraph.graphicsItems.PlotCurveItem import PlotCurveItem
 
 from modules import enum
-from trace.TraceCollection import TracePlotting
-import time 
+import time
 from modules import WeakMethod
 from functools import partial
 from collections import deque
@@ -26,63 +26,49 @@ class PlottedTrace(object):
     Styles = enum.enum('lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars')
     PointsStyles = [ 1, 4 ]
     Types = enum.enum('default', 'steps')
-
-    def __init__(self, Trace, graphicsView, penList=None, pen=0, style=None, plotType=None,
+    serializeFields = ('_xColumn','_yColumn','_topColumn', '_bottomColumn','_heightColumn', '_filtColumn', 'name',
+                       'type', 'xAxisUnit', 'xAxisLabel', 'windowName', '_rawColumn', 'fill', 'style', 'type')
+    def __init__(self, Trace, graphics, penList=None, pen=0, style=None, plotType=None,
                  xColumn='x', yColumn='y', topColumn='top', bottomColumn='bottom', heightColumn='height',
-                 rawColumn='raw', filtColumn=None, tracePlotting=None, name="", xAxisLabel=None,
+                 rawColumn='raw', filtColumn=None, name="", xAxisLabel=None,
                  xAxisUnit=None, yAxisLabel=None, yAxisUnit=None, fill=True, windowName=None):
-        self.category = None
+        self._xColumn = xColumn
+        self._yColumn = yColumn
+        self._topColumn = topColumn
+        self._bottomColumn = bottomColumn
+        self._heightColumn = heightColumn
+        self._rawColumn = rawColumn
+        self._filtColumn = filtColumn
+        self.xAxisUnit = xAxisUnit
+        self.xAxisLabel = xAxisLabel
+        self.yAxisUnit = yAxisUnit
+        self.yAxisLabel = yAxisLabel
         self.fill = fill
+        self.style = self.Styles.lines if style is None else style
+        self.type = self.Types.default if plotType is None else plotType
+        self.setup(Trace, graphics, penList, pen, windowName, name)
+
+    def setup(self, traceCollection, graphics, penList=None, pen=-1, windowName=None, name=None, properties=None):
+        self.category = None
         if penList is None:
             penList = pens.penList
         self.penList = penList
-        self._graphicsView = graphicsView
+        self._graphicsView = graphics['view']
         if self._graphicsView is not None:
             if not hasattr(self._graphicsView, 'penUsageDict'):
                 self._graphicsView.penUsageDict = [0]*len(pens.penList)
             self.penUsageDict = self._graphicsView.penUsageDict        # TODO circular reference
-        self.trace = Trace
+        self.trace = traceCollection
         self.curve = None
         self.auxiliaryCurves = deque()
         self.fitcurve = None
         self.errorBarItem = None
         self.auxiliaryErrorBarItem = None
-        self.style = self.Styles.lines if style is None else style
-        self.type = self.Types.default if plotType is None else plotType
         self.curvePen = 0
         self.name = name
-        self.xAxisLabel = xAxisLabel
-        self.xAxisUnit = xAxisUnit
-        self.yAxisLabel = yAxisLabel
-        self.yAxisUnit = yAxisUnit
         self.lastPlotTime = time.time()
         self.needsReplot = False
         # we use pointers to the relevant columns in trace
-        if tracePlotting is not None:
-            self.tracePlotting = tracePlotting
-            self._xColumn = tracePlotting.xColumn
-            self._yColumn = tracePlotting.yColumn
-            self._topColumn = tracePlotting.topColumn
-            self._bottomColumn = tracePlotting.bottomColumn
-            self._heightColumn = tracePlotting.heightColumn
-            self._rawColumn = tracePlotting.rawColumn
-            self._filtColumn = tracePlotting.filtColumn
-            self.type = tracePlotting.type
-            self.xAxisLabel = tracePlotting.xAxisLabel
-            self.xAxisUnit = tracePlotting.xAxisUnit
-            self.windowName = tracePlotting.windowName
-        elif self.trace is not None:
-            self._xColumn = xColumn
-            self._yColumn = yColumn
-            self._topColumn = topColumn
-            self._bottomColumn = bottomColumn
-            self._heightColumn = heightColumn
-            self._rawColumn = rawColumn
-            self._filtColumn = filtColumn
-            self.tracePlotting = TracePlotting(xColumn=self._xColumn, yColumn=self._yColumn, topColumn=self._topColumn, bottomColumn=self._bottomColumn,   # TODO double check for reference
-                                               heightColumn=self._heightColumn, rawColumn=self._rawColumn, filtColumn=self._filtColumn, name=name, type_=self.type, xAxisUnit=self.xAxisUnit,
-                                               xAxisLabel=self.xAxisLabel, windowName=windowName )
-            self.trace.addTracePlotting( self.tracePlotting )   # TODO check for reference
         self.windowName = windowName
         self.stylesLookup = { self.Styles.lines: partial( WeakMethod.ref(self.plotLines), errorbars=False),
                          self.Styles.points: partial( WeakMethod.ref(self.plotPoints), errorbars=False),
@@ -90,6 +76,19 @@ class PlottedTrace(object):
                          self.Styles.lines_with_errorbars: partial( WeakMethod.ref(self.plotLines), errorbars=True),
                          self.Styles.points_with_errorbars: partial( WeakMethod.ref(self.plotPoints), errorbars=True),
                          self.Styles.linepoints_with_errorbars: partial( WeakMethod.ref(self.plotLinespoints), errorbars=True)}
+
+     def __getstate__(self):
+        return {key: getattr(self, key) for key in PlottedTrace.serializeFields}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'TracePlotting',
+                               dict((name, str(getattr(self, name))) for name in self.serializeFields))
+        if self.fitFunction:
+            self.fitFunction.toXmlElement(e)
+        return e
 
     def setGraphicsView(self, graphicsView, name):
         graphicsView = graphicsView['view']
