@@ -131,5 +131,6 @@ class PlottedStructure:
             self._graphicsView.removeItem(self._gstGraphItem)
             self._gstGraphItem = None
             self._graphicsWidget.label_index = None
+            self._graphicsView.setAspectLocked(False)
 
 
