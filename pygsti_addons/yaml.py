@@ -38,9 +38,8 @@ def _QubitDataSet_representer(dumper, qubit_data_set):
 
 def _QubitDataSet_constructor(loader, node):
     qubit_data_set = QubitDataSet()
-    yield qubit_data_set
     state = loader.construct_mapping(node)
-    # qubit_data_set.__setstate__(state)
+    yield qubit_data_set
     qubit_data_set.__setstate__(state)
 
 yaml.add_representer(QubitDataSet, _QubitDataSet_representer)
@@ -53,8 +52,8 @@ def make_custom_mapping(cls, node_name):
 
     def _cls_loader(loader, data):
         result = cls()
-        yield result
         mapping = loader.construct_mapping(data)
+        yield result
         result.update(mapping)
 
     yaml.add_representer(cls, _cls_representer)
