@@ -54,7 +54,8 @@ class TestYaml(unittest.TestCase):
             data = pickle.load(f)
         s = yaml.dump(data).encode()
         data_4 = yaml.load(s.decode())
-        pass
+        r = data == data_4
+        self.assertTrue(r)
 
 
 
