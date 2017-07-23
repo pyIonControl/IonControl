@@ -4,6 +4,7 @@ import numpy
 from pygsti import logl_terms, logl_max_terms
 
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
+from trace.TraceCollection import StructurePlotting
 
 
 class QubitPlotSettings:
@@ -20,14 +21,22 @@ class PlottedStructureProperties:
 
 
 class PlottedStructure:
-    def __init__(self, traceCollection, qubitData, plot, windowName, properties=None):
-        self.qubitData = qubitData
+    def __init__(self, traceCollection, qubitDataKey=None, plot=None, windowName=None, properties=None, tracePlotting=None, name=None):
+        self.qubitData = traceCollection.structuredData.get(qubitDataKey)
         self.traceCollection = traceCollection
-        self.name = 'Qubit'
+        self.name = name or 'Qubit'
         self.windowName = windowName
         self._graphicsView = plot['view']
         self._graphicsWidget = plot['widget']
         self._gstGraphItem = None
+        if tracePlotting is not None:
+            self.tracePlotting = tracePlotting
+            self.qubitData = self.traceCollection.structuredData.get(tracePlotting.key)
+            self.name = tracePlotting.name
+            self.windowName = tracePlotting.windowName
+        elif self.traceCollection is not None:
+            self.tracePlotting = StructurePlotting(key=qubitDataKey, name=self.name, windowName=self.windowName)
+            self.traceCollection.addTracePlotting(self.tracePlotting)  # TODO check for reference
         lengths = sorted(set([k[0] for k in self.qubitData.plaquettes.keys()]))
         germs = sorted(set([k[1] for k in self.qubitData.plaquettes.keys()]))
         self._lookup = dict()
@@ -41,6 +50,16 @@ class PlottedStructure:
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
         self.labels = [str(s) for s in self._plot_s]
         self.properties = properties or PlottedStructureProperties()
+
+    def setGraphicsView(self, graphicsView, name):
+        if graphicsView['view']!=self._graphicsView:
+            self.removePlots()
+            self._graphicsView = graphicsView['view']
+            self._graphicsWidget = graphicsView['widget']
+            self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('aa')#self._graphicsView.getLabel('bottom'))
+            self.windowName = name
+            self.tracePlotting.windowName = name
+            self.plot()
 
     def default_color_scale(self, num):
         scale = 5
@@ -111,5 +130,6 @@ class PlottedStructure:
         if self._gstGraphItem:
             self._graphicsView.removeItem(self._gstGraphItem)
             self._gstGraphItem = None
+            self._graphicsWidget.label_index = None
 
 

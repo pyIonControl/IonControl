@@ -2,7 +2,7 @@ import yaml
 from pygsti.objects import GateString
 from pygsti.objects.gatestringstructure import GatestringPlaquette
 
-from pygsti_addons.QubitDataSet import QubitDataSet
+from pygsti_addons.QubitDataSet import QubitDataSet, QubitResultContainer, QubitResult, ResultCounter
 
 
 def _GateString_representer(dumper, gate_string):
@@ -38,10 +38,29 @@ def _QubitDataSet_representer(dumper, qubit_data_set):
 
 def _QubitDataSet_constructor(loader, node):
     qubit_data_set = QubitDataSet()
+    yield qubit_data_set
     state = loader.construct_mapping(node)
+    # qubit_data_set.__setstate__(state)
     qubit_data_set.__setstate__(state)
-    return qubit_data_set
 
 yaml.add_representer(QubitDataSet, _QubitDataSet_representer)
 yaml.add_constructor('!QubitDataSet', _QubitDataSet_constructor)
+
+
+def make_custom_mapping(cls, node_name):
+    def _cls_representer(dumper, d):
+        return dumper.represent_mapping(node_name, d)
+
+    def _cls_loader(loader, data):
+        result = cls()
+        yield result
+        mapping = loader.construct_mapping(data)
+        result.update(mapping)
+
+    yaml.add_representer(cls, _cls_representer)
+    yaml.add_constructor(node_name, _cls_loader)
+
+make_custom_mapping(QubitResultContainer, '!QubitResultContainer')
+make_custom_mapping(QubitResult, '!QubitResult')
+make_custom_mapping(ResultCounter, '!ResultCounter')
 

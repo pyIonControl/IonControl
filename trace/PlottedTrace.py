@@ -92,6 +92,7 @@ class PlottedTrace(object):
                          self.Styles.linepoints_with_errorbars: partial( WeakMethod.ref(self.plotLinespoints), errorbars=True)}
 
     def setGraphicsView(self, graphicsView, name):
+        graphicsView = graphicsView['view']
         if graphicsView!=self._graphicsView:
             self.removePlots()
             self._graphicsView = graphicsView

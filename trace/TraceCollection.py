@@ -96,8 +96,10 @@ class TracePlotting(object):
 
 
 class StructurePlotting:
-    def __init__(self, key):
+    def __init__(self, key, windowName, name):
         self.key = key
+        self.name = name
+        self.windowName = windowName
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -108,7 +110,7 @@ class StructurePlotting:
                                dict((name, str(getattr(self, name))) for name in self.attrFields))
         return e
 
-    attrFields = ['key']
+    attrFields = ['key', 'windowName', 'name']
 
 
 class TracePlottingList(list):        

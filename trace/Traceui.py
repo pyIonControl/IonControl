@@ -10,7 +10,8 @@ import numpy
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from trace.BlockAutoRange import BlockAutoRangeList
-from trace.TraceCollection import TraceCollection
+from trace.PlottedStructure import PlottedStructure
+from trace.TraceCollection import TraceCollection, StructurePlotting, TracePlotting
 from trace import pens
 
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -536,7 +537,10 @@ class TraceuiMixin:
         for plotting in traceCollection.tracePlottingList:
             windowName = plotting.windowName if plotting.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
             name = plotting.name
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
+            if isinstance(plotting, TracePlotting):
+                plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
+            elif isinstance(plotting, StructurePlotting):
+                plottedTrace = PlottedStructure(traceCollection, plot=self.graphicsViewDict[windowName], tracePlotting=plotting, windowName=windowName, name=name)
             plottedTrace.category = category
             plottedTraceList.append(plottedTrace)
             self.addTrace(plottedTrace, defaultpen)

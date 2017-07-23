@@ -3,8 +3,16 @@ from collections import defaultdict
 import numpy
 
 
-def qubitDataStructure():
-    return defaultdict(list)
+class QubitResultContainer(dict):
+    def __missing__(self, key):
+        ret = self[key] = QubitResult()
+        return ret
+
+
+class QubitResult(dict):
+    def __missing__(self, key):
+        ret = self[key] = list()
+        return ret
 
 
 class ResultCounter(dict):
@@ -24,7 +32,8 @@ class QubitDataSet:
         self.gatestring_list = gatestring_list
         self.plaquettes = plaquettes
         self.target_gateset = target_gateset
-        self._rawdata = defaultdict(qubitDataStructure)  # _rawdata[gatestring]['value' 'repeats' 'timestamps' ...] list
+        self._rawdata = QubitResultContainer()  # _rawdata[gatestring]['value' 'repeats' 'timestamps' ...] list
+        self._initialized = False
         self._init_internal()
 
     def _init_internal(self):
@@ -37,16 +46,26 @@ class QubitDataSet:
         else:
             self._countVecMx = None
             self._totalCntVec = None
+            self.spam_labels = None
+        self._initialized = True
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in self._fields}
 
     def __setstate__(self, state):
         self.__dict__.update(state)
-        self._init_internal()
+        #  the following is necessary to play well with yaml
+        #  the yaml loader changes the internal objects after construction, thus pupulating the cached data
+        #  has to be done when needed
+        if self._rawdata:
+            self._init_internal()
+        else:
+            self._initialized = False
 
     def extend(self, gatestring, values, repeats, timestamps):
         """Append the measurement result for gatestring to the datastructure"""
+        if not self._initialized:
+            self._init_internal()
         point = self._rawdata[gatestring]
         point['value'].extend(values)
         point['repeats'].extend(repeats)
@@ -63,6 +82,8 @@ class QubitDataSet:
             self._totalCntVec[gatestring_idx] += sum(eval.values())
 
     def extendEnv(self, gatestring, name, values, timestamps):
+        if not self._initialized:
+            self._init_internal()
         if values and timestamps:
             point = self._rawdata[gatestring]
             point['_' + name].extend(values)
@@ -70,10 +91,14 @@ class QubitDataSet:
 
     @property
     def countVecMx(self):
+        if not self._initialized:
+            self._init_internal()
         return self._countVecMx
 
     @property
     def totalCntVec(self):
+        if not self._initialized:
+            self._init_internal()
         return self._totalCntVec
 
     @property
