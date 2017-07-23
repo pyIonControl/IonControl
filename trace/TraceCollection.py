@@ -385,10 +385,10 @@ class TraceCollection(keydefaultdict):
                 if format.lower() in ['pkl', 'pickle']:
                     myzip.writestr(name + '.pkl', pickle.dumps(value))
                 elif format.lower() == 'json':
-                    myzip.writestr(name + '.json', json.dumps(value))
+                    myzip.writestr(name + '.json', json.dumps(value).encode())
                 elif format.lower() == 'yaml':
-                    myzip.writestr(name + '.yaml', yaml.dump(value))
-            myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat))
+                    myzip.writestr(name + '.yaml', yaml.dump(value).encode())
+            myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat).encode())
 
     def loadZip(self, filename):
         with ZipFile(filename) as myzip:
@@ -399,7 +399,7 @@ class TraceCollection(keydefaultdict):
                 for line in stream:
                     line = line.strip()
                     data.append(list(map(float, line.split())))
-            columnspec = self.description["columnspec"].split(',')
+            columnspec = self.description["columnspec"]
             for colname, d in zip(columnspec, zip(*data)):
                 self[colname] = numpy.array(d)
             if 'fitfunction' in self.description and FitFunctionsAvailable:
@@ -410,7 +410,7 @@ class TraceCollection(keydefaultdict):
                                   rawColumn=None, filtColumn=None, name="")]
             try:
                 with myzip.open('structuredDataFormat.json') as f:
-                    self.structuredDataFormat = FormatDict(json.loads(f.read()))
+                    self.structuredDataFormat = FormatDict(json.loads(f.read().decode()))
                 for filename in myzip.namelist():
                     if filename.startswith('structuredData/'):
                         leaf = filename[15:]
@@ -420,10 +420,10 @@ class TraceCollection(keydefaultdict):
                             if format.lower() in ['pkl', 'pickle']:
                                 self.structuredData[name] = pickle.loads(f.read())
                             elif format.lower() == 'json':
-                                self.structuredData[name] = json.loads(f.read())
+                                self.structuredData[name] = json.loads(f.read().decode())
                             elif format.lower() == 'yaml':
-                                self.structuredData[name] = yaml.loads(f.read())
-            except:
+                                self.structuredData[name] = yaml.load(f.read().decode())
+            except Exception as e:
                 pass
 
     def saveHdf5(self, filename):
@@ -521,7 +521,7 @@ class TraceCollection(keydefaultdict):
             except:
                 logger.error( "Could not load file {}!".format(filename))
         elif self._fileType == "zip":
-            pass  # self.loadTraceZip(filename)
+            self.loadZip(filename)
         else:
             try:
                 self.loadTracePlain(filename)
