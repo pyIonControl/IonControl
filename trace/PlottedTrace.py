@@ -28,7 +28,10 @@ class PlottedTrace(object):
     Types = enum.enum('default', 'steps')
     serializeFields = ('_xColumn','_yColumn','_topColumn', '_bottomColumn','_heightColumn', '_filtColumn', 'name',
                        'type', 'xAxisUnit', 'xAxisLabel', 'windowName', '_rawColumn', 'fill', 'style', 'type')
-    def __init__(self, Trace, graphics, penList=None, pen=0, style=None, plotType=None,
+    fieldReplacements = {'xColumn': '_xColumn',  'yColumn': '_yColumn', 'topColumn': '_topColumn',
+                          'bottomColumn': '_bottomColumn', 'heightColumn': '_heightColumn',
+                          'filtColumn': '_filtColumn', 'rawColumn': '_rawColumn'}
+    def __init__(self, Trace=None, graphics=None, penList=None, pen=0, style=None, plotType=None,
                  xColumn='x', yColumn='y', topColumn='top', bottomColumn='bottom', heightColumn='height',
                  rawColumn='raw', filtColumn=None, name="", xAxisLabel=None,
                  xAxisUnit=None, yAxisLabel=None, yAxisUnit=None, fill=True, windowName=None):
@@ -70,18 +73,20 @@ class PlottedTrace(object):
         self.needsReplot = False
         # we use pointers to the relevant columns in trace
         self.windowName = windowName
-        self.stylesLookup = { self.Styles.lines: partial( WeakMethod.ref(self.plotLines), errorbars=False),
-                         self.Styles.points: partial( WeakMethod.ref(self.plotPoints), errorbars=False),
-                         self.Styles.linespoints: partial( WeakMethod.ref(self.plotLinespoints), errorbars=False), 
-                         self.Styles.lines_with_errorbars: partial( WeakMethod.ref(self.plotLines), errorbars=True),
-                         self.Styles.points_with_errorbars: partial( WeakMethod.ref(self.plotPoints), errorbars=True),
-                         self.Styles.linepoints_with_errorbars: partial( WeakMethod.ref(self.plotLinespoints), errorbars=True)}
+        self.stylesLookup = {self.Styles.lines: partial(WeakMethod.ref(self.plotLines), errorbars=False),
+                             self.Styles.points: partial(WeakMethod.ref(self.plotPoints), errorbars=False),
+                             self.Styles.linespoints: partial(WeakMethod.ref(self.plotLinespoints), errorbars=False),
+                             self.Styles.lines_with_errorbars: partial(WeakMethod.ref(self.plotLines), errorbars=True),
+                             self.Styles.points_with_errorbars: partial(WeakMethod.ref(self.plotPoints),
+                                                                        errorbars=True),
+                             self.Styles.linepoints_with_errorbars: partial(WeakMethod.ref(self.plotLinespoints),
+                                                                            errorbars=True)}
 
-     def __getstate__(self):
+    def __getstate__(self):
         return {key: getattr(self, key) for key in PlottedTrace.serializeFields}
 
     def __setstate__(self, state):
-        self.__dict__.update(state)
+        self.__dict__.update({PlottedTrace.fieldReplacements.get(key, key): value for key, value in state.items()})
 
     def toXML(self, element):
         e = ElementTree.SubElement(element, 'TracePlotting',

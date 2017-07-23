@@ -30,6 +30,9 @@ from modules.DataDirectory import DataDirectory
 import logging
 from collections import OrderedDict
 
+from trace.PlottedStructure import PlottedStructure
+from trace.PlottedTrace import PlottedTrace
+
 try:
     from fit import FitFunctions
     FitFunctionsAvailable = True
@@ -62,7 +65,7 @@ class ColumnSpec(list):
         return ColumnSpec( element.text.split(", ") )
     
 
-class TracePlottingList(list):
+class PlottingList(list):
     def toXmlElement(self, root):
         myElement = ElementTree.SubElement(root, 'TracePlottingList', {})
         for traceplotting in self:
@@ -73,7 +76,7 @@ class TracePlottingList(list):
         mygroup = group.require_group('TracePlottingList')
         for traceplotting in self:
             g = mygroup.require_group(traceplotting.name)
-            for name in TracePlotting.attrFields:
+            for name in PlottedTrace.serializeFields:
                 attr = getattr(traceplotting, name)
                 g.attrs[name] = attr if attr is not None else ''
             if traceplotting.fitFunction:
@@ -81,28 +84,28 @@ class TracePlottingList(list):
 
     @staticmethod
     def fromXmlElement(element):
-        l = TracePlottingList()
+        l = PlottingList()
         for plottingelement in element.findall("TracePlotting"):
-            plotting = TracePlotting()
-            plotting.__dict__.update( plottingelement.attrib )
-            plotting.type = int(plotting.type) if hasattr(plotting,'type') else 0
+            plotting = PlottedTrace()
+            plotting.__setstate__(plottingelement.attrib)
+            plotting.type = int(plotting.type) if hasattr(plotting, 'type') else 0
             if plottingelement.find("FitFunction") is not None:
-                plotting.fitFunction = FitFunctions.fromXmlElement( plottingelement.find("FitFunction") )
+                plotting.fitFunction = FitFunctions.fromXmlElement(plottingelement.find("FitFunction"))
             l.append(plotting)
         for plottingelement in element.findall("StructurePlotting"):
-            plotting = StructurePlotting()
-            plotting.__dict__.update(plottingelement.attrib)
+            plotting = PlottedStructure()
+            plotting.__setstate__(plottingelement.attrib)
             l.append(plotting)
         return l
 
     @staticmethod
     def fromHdf5(group):
-        l = TracePlottingList()
+        l = PlottingList()
         for name, g in group.items():
-            plotting = TracePlotting()
-            plotting.__dict__.update( g.attrs )
+            plotting = PlottedTrace()
+            plotting.__setstate__(g.attrs)
             if "FitFunction" in g:
-                plotting.fitFunction = FitFunctions.fromHdf5( g.get("FitFunction"))
+                plotting.fitFunction = FitFunctions.fromHdf5(g.get("FitFunction"))
             l.append(plotting)
         return l
     
@@ -171,7 +174,7 @@ class TraceCollection(keydefaultdict):
         self.filepath = None
         self.fileleaf = None
         self.rawdata = None
-        self.description["tracePlottingList"] = TracePlottingList()
+        self.description["plottingList"] = PlottingList()
         self.record_timestamps = record_timestamps
         self.structuredData = keydefaultdict(dict)  #  Can contained structured data that can be json dumped
         self.structuredDataFormat = FormatDict()
@@ -355,10 +358,10 @@ class TraceCollection(keydefaultdict):
                 self[colname] = numpy.array(d)
             if 'fitfunction' in self.description and FitFunctionsAvailable:
                 self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-            if "tracePlottingList" not in self.description:
-                self.description["tracePlottingList"] = [
+            if "plottingList" not in self.description:
+                self.description["plottingList"] = PlottingList(
                     TracePlotting(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
-                                  rawColumn=None, filtColumn=None, name="")]
+                                  rawColumn=None, filtColumn=None, name=""))
             try:
                 with myzip.open('structuredDataFormat.json') as f:
                     self.structuredDataFormat = FormatDict(json.loads(f.read().decode()))
@@ -485,7 +488,7 @@ class TraceCollection(keydefaultdict):
             for colname, dataset in f['columns'].items():
                 self[colname] = numpy.array(dataset)
             tpelement = f.get("/variables/TracePlottingList")
-            self.description["tracePlottingList"] = TracePlottingList.fromHdf5(tpelement) if tpelement is not None else None
+            self.description["plottingList"] = PlottingList.fromHdf5(tpelement) if tpelement is not None else None
             # for element in root.findall("/variables/Element"):
             #     self.varFromXmlElement(element, self.description)
 
@@ -498,7 +501,7 @@ class TraceCollection(keydefaultdict):
                 self.loadTraceXml(instream)
             else:
                 self.loadTraceText(instream)
-                self.description["tracePlottingList"].append(TracePlotting())
+                self.description["plottingList"].append(TracePlotting())
         self.filename = filename
 
     def loadTraceXml(self, stream):
@@ -518,7 +521,7 @@ class TraceCollection(keydefaultdict):
                 a = numpy.array(d)
             self[colname] = a
         tpelement = root.find("./Variables/TracePlottingList")
-        self.description["tracePlottingList"] = TracePlottingList.fromXmlElement(tpelement) if tpelement is not None else None
+        self.description["plottingList"] = PlottingList.fromXmlElement(tpelement) if tpelement is not None else None
         for element in root.findall("./Variables/Element"):
             self.varFromXmlElement(element, self.description)
         for element in root.findall("./StructuredData/Element"):
@@ -544,7 +547,7 @@ class TraceCollection(keydefaultdict):
             self[colname] = numpy.array(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-        self.description["plottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name="")]
+        self.description["plottingList"] = PlottingList(TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name=""))
             
     def setPlotfunction(self, callback):
         self.plotfunction = callback
@@ -553,8 +556,8 @@ class TraceCollection(keydefaultdict):
         self.description["plottingList"].append(plotting)
         
     @property 
-    def tracePlottingList(self):
-        return self.description["tracePlottingList"]
+    def plottingList(self):
+        return self.description["plottingList"]
 
 if __name__=="__main__":
     import sys

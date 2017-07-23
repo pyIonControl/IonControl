@@ -5,7 +5,6 @@ import numpy
 from pygsti import logl_terms, logl_max_terms
 
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
-from trace.TraceCollection import StructurePlotting
 
 
 class QubitPlotSettings:
