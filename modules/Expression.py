@@ -31,7 +31,7 @@ class Parser:
         self.dependencies = set()
         self.val = 0
         self.lexer = lex.lex(module=self)
-        self.parser = yacc.yacc(module=self, debug=False, tabmodule='parsetab_expression')
+        self.parser = yacc.yacc(module=self, debug=False,  picklefile='parsetab_expression.pkl')
 
         self.useFloat = False
         self.epsilon = 1e-12
