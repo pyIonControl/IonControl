@@ -26,8 +26,8 @@ class PlottedStructure:
         self.qubitDataKey = qubitDataKey
         self.name = name
         self.windowName = windowName
-        self.setup(traceCollection, plot)
         self.properties = properties
+        self.setup(traceCollection, plot)
 
     def setup(self, traceCollection, graphics, penList=None, pen=-1, windowName=None, name=None, properties=None):
         self.traceCollection = traceCollection

@@ -615,13 +615,13 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     if showerror:
                         topColumnName = '{0}_top'.format(evaluation.name)
                         bottomColumnName = '{0}_bottom'.format(evaluation.name)
-                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname]["view"] if self.context.evaluation.evalList[index].plotname != 'None' else None,
+                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname] if self.context.evaluation.evalList[index].plotname != 'None' else None,
                                                     pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName,
                                                     yColumn=yColumnName, topColumn=topColumnName, bottomColumn=bottomColumnName, 
                                                     rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name, xAxisUnit = self.context.scan.xUnit,
                                                     xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname)
                     else:                
-                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname]["view"] if self.context.evaluation.evalList[index].plotname != 'None' else None,
+                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname] if self.context.evaluation.evalList[index].plotname != 'None' else None,
                                                     pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName, yColumn=yColumnName, rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name,
                                                     xAxisUnit = self.context.scan.xUnit, xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname)
                     xRange = self.context.generator.xRange() if is_Q(self.context.scan.start) and Q(1, self.context.scan.xUnit).dimensionality == self.context.scan.start.dimensionality else None

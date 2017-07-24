@@ -332,7 +332,7 @@ class TraceCollection(keydefaultdict):
         with ZipFile(filename, 'w', compression=ZIP_DEFLATED) as myzip:
             myzip.writestr('header.xml', prettify(self.headerXml()))
             myzip.writestr('data.txt', self.dataText())
-            myzip.writestr('header.pkl', pickle.dumps(self.header(), -1))
+            myzip.writestr('header.pkl', pickle.dumps({'header': self.header(), 'plottingList': self.plottingList}, -1))
             for name, value in self.structuredData.items():
                 format = self.structuredDataFormat[name]
                 name = 'structuredData/' + name
@@ -347,7 +347,9 @@ class TraceCollection(keydefaultdict):
     def loadZip(self, filename):
         with ZipFile(filename) as myzip:
             with myzip.open('header.pkl') as f:
-                self.description = pickle.loads(f.read())
+                data = pickle.loads(f.read())
+                self.description = data.get('header')
+                self.plottingList = data.get('plottingList')
             with myzip.open('data.txt') as stream:
                 data = []
                 for line in stream:

@@ -536,7 +536,8 @@ class TraceuiMixin:
         for plotted in traceCollection.plottingList:
             windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
             name = plotted.name
-            plotted.setup(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
+            plotted.setup(traceCollection, self.graphicsViewDict[windowName], pens.penList, -1,
+                          windowName=windowName, name=name)
             plotted.category = category
             self.addTrace(plotted, defaultpen)
         if self.expandNew:

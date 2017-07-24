@@ -50,13 +50,14 @@ class PlottedTrace(object):
         self.style = self.Styles.lines if style is None else style
         self.type = self.Types.default if plotType is None else plotType
         self.setup(Trace, graphics, penList, pen, windowName, name)
+        self._fitFunction = None
 
     def setup(self, traceCollection, graphics, penList=None, pen=-1, windowName=None, name=None, properties=None):
         self.category = None
         if penList is None:
             penList = pens.penList
         self.penList = penList
-        self._graphicsView = graphics['view']
+        self._graphicsView = graphics and graphics.get('view')
         if self._graphicsView is not None:
             if not hasattr(self._graphicsView, 'penUsageDict'):
                 self._graphicsView.penUsageDict = [0]*len(pens.penList)
@@ -87,6 +88,7 @@ class PlottedTrace(object):
 
     def __setstate__(self, state):
         self.__dict__.update({PlottedTrace.fieldReplacements.get(key, key): value for key, value in state.items()})
+        self.__dict__.setdefault('_fitfunction', None)
 
     def toXML(self, element):
         e = ElementTree.SubElement(element, 'TracePlotting',
@@ -493,11 +495,11 @@ class PlottedTrace(object):
             
     @property
     def fitFunction(self):
-        return self.tracePlotting.fitFunction if self.tracePlotting else None
-    
+        return self._fitFunction
+
     @fitFunction.setter
     def fitFunction(self, fitfunction):
-        self.tracePlotting.fitFunction = fitfunction
+        self._fitFunction = fitfunction
 
 #     def __del__(self):
 #         super(PlottedTrace, self)__del__()
