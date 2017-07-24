@@ -56,8 +56,6 @@ class QubitDataSet:
 
     def extend(self, gatestring, values, repeats, timestamps):
         """Append the measurement result for gatestring to the datastructure"""
-        if not self._initialized:
-            self._init_internal()
         point = self._rawdata[gatestring]
         point['value'].extend(values)
         point['repeats'].extend(repeats)
