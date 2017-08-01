@@ -3,7 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+from modules.SequenceDict import SequenceDict
 from trace import pens
 
 from PyQt5 import QtCore
@@ -494,6 +494,12 @@ class PlottedTrace(object):
     @fitFunction.setter
     def fitFunction(self, fitfunction):
         self.tracePlotting.fitFunction = fitfunction
+
+    def parameters(self):
+        return SequenceDict()
+
+    def update(self, parameter):
+        pass
 
 #     def __del__(self):
 #         super(PlottedTrace, self)__del__()

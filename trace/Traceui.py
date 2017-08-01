@@ -153,6 +153,7 @@ class TraceuiMixin:
         filtersMenu.addAction(self.filterData)
         filtersMenu.addAction(self.filterROI)
         filtersMenu.addAction(self.removeFilterAction)
+        self.plotParamTable.setupUi()
 
     @doprofile
     def onDelete(self, _):
@@ -400,6 +401,15 @@ class TraceuiMixin:
             else:
                 self.finalizedDateLabel.setText('')
                 self.finalizedTimeLabel.setText('')
+            # take care of properties
+            plotted = dataNode.content
+            self.plotParamTable.setParameters(plotted.parameters())
+            try:
+                self.plotParamTable.valueChanged.disconnect()
+            except Exception:
+                pass
+            self.plotParamTable.valueChanged.connect(plotted.update)
+
         else:
                 self.createdDateLabel.setText('')
                 self.createdTimeLabel.setText('')

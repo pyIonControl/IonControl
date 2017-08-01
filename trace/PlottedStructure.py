@@ -3,9 +3,10 @@ from math import floor, ceil
 import numpy
 from pygsti import logl_terms, logl_max_terms
 
+from modules.SequenceDict import SequenceDict
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 from trace.TraceCollection import StructurePlotting
-
+from uiModules.ParameterTable import Parameter
 
 class QubitPlotSettings:
     def __init__(self):
@@ -18,6 +19,28 @@ class PlottedStructureProperties:
         self.axesIndex = axesIndex
         self.collapse_minor = collapse_minor
         self.confidence_level = confidence_level
+        self.gate_noise = 0
+        self.bright_error = 0
+        self.dark_error = 0
+        self.scale_threshold = 5
+
+    def parameters(self):
+        parameterDict = SequenceDict()
+        parameterDict['scale_threshold'] = Parameter(name='scale_threshold', dataType='magnitude',
+                                                      value=self.scale_threshold)
+        parameterDict['confidence_level'] = Parameter(name='confidence_level', dataType='magnitude',
+                                                      value=self.confidence_level)
+        parameterDict['gate_noise'] = Parameter(name='gate_noise', dataType='magnitude',
+                                                value=self.gate_noise)
+        parameterDict['bright_error'] = Parameter(name='bright_error', dataType='magnitude',
+                                                  value=self.bright_error)
+        parameterDict['dark_error'] = Parameter(name='dark_error', dataType='magnitude',
+                                                value=self.dark_error)
+        return parameterDict
+
+    def update(self, parameter):
+        """update the parameter changed in the parameterTable"""
+        setattr(self, parameter.name, parameter.value)
 
 
 class PlottedStructure:
@@ -62,9 +85,8 @@ class PlottedStructure:
             self.plot()
 
     def default_color_scale(self, num):
-        scale = 5
         colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
-        num /= scale
+        num /= self.properties.scale_threshold
         if num < 0:
             return colors[0]
         if num + 1 > len(colors):
@@ -133,4 +155,11 @@ class PlottedStructure:
             self._graphicsWidget.label_index = None
             self._graphicsView.setAspectLocked(False)
 
+    def parameters(self):
+        return self.properties.parameters()
+
+    def update(self, parameter):
+        self.properties.update(parameter)
+        self.gateSet = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
+        self.replot()
 
