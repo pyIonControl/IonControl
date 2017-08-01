@@ -1,4 +1,4 @@
-from math import floor, ceil
+from math import floor, ceil, sqrt
 
 import numpy
 from pygsti import logl_terms, logl_max_terms
@@ -160,6 +160,8 @@ class PlottedStructure:
 
     def update(self, parameter):
         self.properties.update(parameter)
-        self.gateSet = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
+        temp = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
+        temp['E0'] = [1/sqrt(2) * (1 - self.properties.dark_error), 0, 0, -1/sqrt(2) * (1 - self.properties.bright_error)]
+        self.gateSet = temp
         self.replot()
 
