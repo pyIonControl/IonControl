@@ -33,7 +33,7 @@ class PMTReaderServer( PulserHardwareServer ):
             0x6nxxxxxx count result from channel n (0-15)
             0x7nxxxxxx count result from channel n+16 (16-31)
         """
-        data, self.dedicatedData.overrun = self.ppReadData(4)
+        data, self.dedicatedData.overrun = self.ppReadWriteData(4)
         if data:
             for s in sliceview(data, 4):
                 (token,) = struct.unpack('I', s)
