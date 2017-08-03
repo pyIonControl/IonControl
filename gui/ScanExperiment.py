@@ -12,7 +12,9 @@ echo those on the pipe output followed by the measurement results.
 It is expected to send an endlabel (0xffffffff) when finished.
 
 """
+import cProfile
 import json
+import pstats
 from datetime import datetime, timedelta
 import functools
 import logging
@@ -425,6 +427,9 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.context.otherDataFile = None
             self.context.histogramBuffer = defaultdict( list )
             self.context.scanMethod.startScan()
+            #### profile
+            self.profile = cProfile.Profile()
+            self.profile.enable()
 
     def onContinue(self):
         if self.progressUi.is_interrupted:
@@ -691,6 +696,11 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.context.dataFinalized = reason
             allData = {self.p.name:(self.p.x, self.p.y) for self.p in self.context.plottedTraceList}
             self.allDataSignal.emit(allData)
+            #####
+            self.profile.disable()
+            sortby = 'tottime'
+            ps = pstats.Stats(self.profile).sort_stats(sortby)
+            ps.print_stats()
         
     def dataAnalysis(self):
         if self.context.analysisName != self.analysisControlWidget.currentAnalysisName:
