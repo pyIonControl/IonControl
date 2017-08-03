@@ -11,6 +11,8 @@ import logging
 import multiprocessing
 from multiprocessing.sharedctypes import Array
 from ctypes import c_longlong
+from time import time
+
 import numpy
 
 from PyQt5 import QtCore
@@ -53,7 +55,7 @@ class QueueReader(QtCore.QThread):
         while True:
             try:
                 data = self.dataQueue.get()
-                self.dataHandler[ data.__class__.__name__ ]( data, self.dataQueue.qsize() )
+                self.dataHandler[data.__class__.__name__](data, time())  # self.dataQueue.qsize()
             except (KeyboardInterrupt, SystemExit, FinishException):
                 break
             except Exception:

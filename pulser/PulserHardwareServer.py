@@ -604,11 +604,12 @@ class PulserHardwareServer(ServerProcess, OKBase):
     def _write_buffer(self, min_words=10):
         """Write data from the buffer to the fifo if there is space available"""
         if self._data_fifo_buffer:
-            write_count = self.xem.GetWireOutValue(0x26) >> 2  # number of 64 bit words that can be written to data fifo
+            write_count = 2040 - (self.xem.GetWireOutValue(0x26) >> 2)  # number of 64 bit words that can be written to data fifo
             if write_count > min_words:
                 do_write_count = min(len(self._data_fifo_buffer), 8*write_count)
                 self.xem.WriteToPipeIn(0x81, self._data_fifo_buffer[:do_write_count])
                 self._data_fifo_buffer = self._data_fifo_buffer[do_write_count:]
+                print("_write_buffer wrote {} bytes {} remaining".format(do_write_count, len(self._data_fifo_buffer)))
 
     def ppReadWriteData(self, minbytes=8, minwrite=10):
         if self.xem:

@@ -165,6 +165,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         else:
             self.dataStore = None
         self.pulseProgramIdentifier = None     # will save the hash of the Pulse Program
+        self.last_plot_time = time.time()
 
     def setupUi(self, MainWindow, config):
         logger = logging.getLogger(__name__)
@@ -521,11 +522,12 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             path, _ = QtWidgets.QFileDialog.getSaveFileName(self, 'Save file', directory.path())
             return path
 
-    def onData(self, data, queuesize):
+    def onData(self, data, insert_time):
         """ Called by worker with new data
         queuesize is the size of waiting messages, dont't do expensive unnecessary stuff if queue is deep
         """
         logger = logging.getLogger(__name__)
+        delay = time.time() - insert_time
         if self.progressUi.is_running or self.progressUi.is_stashing:
             if data.other and self.context.scan.gateSequenceSettings.debug:
                 if self.context.otherDataFile is None:
@@ -551,23 +553,23 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 else:
                     self.processData(data, 0)
             else:
-                self.processData(data, queuesize)
+                self.processData(data, delay)
         else:
             logger.info( "pp not running ignoring onData {0} {1} {2}".format( self.context.currentIndex, dict((i, len(data.count[i])) for i in sorted(data.count.keys())), data.scanvalue ) )
 
-    def processData(self, data, queuesize):
+    def processData(self, data, delay):
         logger = logging.getLogger(__name__)
         logger.info("onData {0} {1} {2} {3}".format(self.context.currentIndex,
                                                     dict((i, len(data.count[i])) for i in sorted(data.count.keys())),
-                                                    data.scanvalue, queuesize))
+                                                    data.scanvalue, delay))
         x = self.context.generator.xValue(self.context.currentIndex, data)
         if self.context.rawDataFile is not None:
             self.context.rawDataFile.write(data.dataString())
             self.context.rawDataFile.write('\n')
             self.context.rawDataFile.flush()
-        self.context.scanMethod.onData(data, queuesize, x)
+        self.context.scanMethod.onData(data, delay, x)
 
-    def dataMiddlePart(self, data, queuesize, x):
+    def dataMiddlePart(self, data, delay, x):
         if is_Q(x):
             x = x.m_as(self.context.scan.xUnit)
         logger = logging.getLogger(__name__)
@@ -589,7 +591,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                                                                       globalDict=self.globalVariables))
         if len(evaluated) > 0:
             self.displayUi.add([e[0] for e in evaluated])
-            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queuesize)
+            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, delay)
             self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         if data.other:
             logger.info("Other: {0}".format(data.other))
@@ -601,7 +603,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         results = [(x, res[0]) for res in evaluated]
         self.evaluatedDataSignal.emit(dict(list(zip(names, results))))
         
-    def updateMainGraph(self, x, evaluated, timeinterval, timeTickOffset, queuesize): # evaluated is list of mean, error, raw
+    def updateMainGraph(self, x, evaluated, timeinterval, timeTickOffset, delay): # evaluated is list of mean, error, raw
         if not self.context.plottedTraceList:
             traceCollection = TraceCollection(record_timestamps=True)
             traceCollection.recordTimeinterval(timeTickOffset)
@@ -659,9 +661,10 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.traceui.resizeColumnsToContents()
         else:
             self.context.generator.appendData(self.context.plottedTraceList, x, evaluated, timeinterval )
-            if queuesize<2:
+            if delay < 1 or time.time() - self.last_plot_time > 15:
                 for plottedTrace in self.context.plottedTraceList:
                     plottedTrace.replot()
+                self.last_plot_time = time.time()
 
     def finalizeData(self, reason='end of scan'):
         if not self.context.dataFinalized:  # is not yet finalized
