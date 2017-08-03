@@ -412,7 +412,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.pulserHardware.ppFlushData()
             self.pulserHardware.ppClearWriteFifo()
             self.pulserHardware.ppUpload(self.context.PulseProgramBinary)
-            self.pulserHardware.ppWriteData(mycode)
+            self.pulserHardware.ppWriteDataBuffered(mycode)
             self.displayUi.onClear()
             self.timestampsNewRun = True
             if self.context.plottedTraceList and self.traceui.unplotLastTrace:
@@ -435,7 +435,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         if self.progressUi.state in [self.OpStates.paused, self.OpStates.interrupted]:
             self.pulserHardware.ppFlushData()
             self.pulserHardware.ppClearWriteFifo()
-            self.pulserHardware.ppWriteData(self.context.generator.restartCode(self.context.currentIndex))
+            self.pulserHardware.ppWriteDataBuffered(self.context.generator.restartCode(self.context.currentIndex))
             logger.info( "Starting" )
             self.pulserHardware.ppStart()
             self.progressUi.resumeRunning(self.context.currentIndex)
@@ -481,7 +481,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         logger = logging.getLogger(__name__)
         self.pulserHardware.ppFlushData()
         self.pulserHardware.ppClearWriteFifo()
-        self.pulserHardware.ppWriteData(self.context.generator.restartCode(self.context.currentIndex))
+        self.pulserHardware.ppWriteDataBuffered(self.context.generator.restartCode(self.context.currentIndex))
         logger.info( "Resuming" )
         self.pulserHardware.ppStart()
         self.progressUi.setData(self.context.progressData)

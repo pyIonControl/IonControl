@@ -152,6 +152,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
         self.logicAnalyzerBuffer = bytearray()
         self.logicAnalyzerReadStatus = 0      #
         self._pulserConfiguration = None
+        self._data_fifo_buffer = bytearray()
         
     def syncTime(self):
         if self.xem:
@@ -230,7 +231,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
             self.logicAnalyzerBuffer = bytearray( sliceview_remainder(self.logicAnalyzerBuffer, 8) )           
 
                    
-        data, self.data.overrun, self.data.externalStatus = self.ppReadData(8)
+        data, self.data.overrun, self.data.externalStatus = self.ppReadWriteData(8)
         self.dedicatedData.externalStatus = self.data.externalStatus
         self.dedicatedData.maxBytesRead = max(self.dedicatedData.maxBytesRead, len(data) if data else 0)
         if data:
@@ -572,6 +573,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
         self.sleepQueue.put(False)
 
     def ppWriteData(self, data):
+        """Write data to the FPGA input fifo"""
         if self.xem:
             if isinstance(data, bytearray):
                 return self.xem.WriteToPipeIn(0x81, data)
@@ -584,10 +586,34 @@ class PulserHardwareServer(ServerProcess, OKBase):
         else:
             logging.getLogger(__name__).warning("Pulser Hardware not available")
             return None
-                
-    def ppReadData(self,minbytes=8):
+
+    def ppWriteDataBuffered(self, data):
+        if self.xem:
+            if isinstance(data, bytearray):
+                self._data_fifo_buffer.extend(data)
+            else:
+                code = bytearray()
+                for item in data:
+                    code.extend(struct.pack('Q' if item>0 else 'q', item))
+                self._data_fifo_buffer.extend(code)
+            self.readDataFifo()  # This makes sure data is written before we return
+        else:
+            logging.getLogger(__name__).warning("Pulser Hardware not available")
+            return None
+
+    def _write_buffer(self, min_words=10):
+        """Write data from the buffer to the fifo if there is space available"""
+        if self._data_fifo_buffer:
+            write_count = self.xem.GetWireOutValue(0x26) >> 2  # number of 64 bit words that can be written to data fifo
+            if write_count > min_words:
+                do_write_count = min(len(self._data_fifo_buffer), 8*write_count)
+                self.xem.WriteToPipeIn(0x81, self._data_fifo_buffer[:do_write_count])
+                self._data_fifo_buffer = self._data_fifo_buffer[do_write_count:]
+
+    def ppReadWriteData(self, minbytes=8, minwrite=10):
         if self.xem:
             self.xem.UpdateWireOuts()
+            self._write_buffer(minwrite)
             wirevalue = self.xem.GetWireOutValue(0x25)   # pipe_out_available
             byteswaiting = (wirevalue & 0x1ffe)*2
             externalStatus = self.xem.GetWireOutValue(0x30) | (self.xem.GetWireOutValue(0x31) << 16)
@@ -697,6 +723,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
 
     def ppClearWriteFifo(self):
         if self.xem:
+            self._data_fifo_buffer = bytearray()
             self.xem.ActivateTriggerIn(0x41, 3)
         else:
             logging.getLogger(__name__).warning("Pulser Hardware not available")
