@@ -46,6 +46,7 @@ class Data(object):
         self.timeTick = defaultdict(list)
         self.timeTickOffset = 0.0
         self.timingViolations = None
+        self.post_time = None
         
     @property
     def creationTime(self):
@@ -162,6 +163,11 @@ class PulserHardwareServer(ServerProcess, OKBase):
             logging.getLogger(__name__).error("No time synchronization because FPGA is not available")
         self.timeTickOffset = time_time()        
             
+    def queueData(self):
+        self.data.timeTickOffset = self.timeTickOffset
+        self.data.post_time = time_time()
+        self.dataQueue.put(self.data)
+        self.data = Data()
 
     analyzingState = enum.enum('normal', 'scanparameter', 'dependentscanparameter')
     def readDataFifo(self):
@@ -247,9 +253,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                     if self.data.scanvalue is None:
                         self.data.scanvalue = token
                     else:
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
-                        self.data = Data()
+                        self.queueData()
                         self.data.scanvalue = token
                     self.state = self.analyzingState.normal
                 elif token & 0xff00000000000000 == 0xee00000000000000: # dedicated results
@@ -269,17 +273,13 @@ class PulserHardwareServer(ServerProcess, OKBase):
                     if token == 0xffffffffffffffff:    # end of run
                         self.data.final = True
                         self.data.exitcode = 0x0000
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
+                        self.queueData()
                         logger.info( "End of Run marker received" )
-                        self.data = Data()
                     elif token & 0xffff000000000000 == 0xfffe000000000000:  # exitparameter
                         self.data.final = True
                         self.data.exitcode = token & 0x0000ffffffffffff
                         logger.info( "Exitcode {0:x} received".format(self.data.exitcode) )
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
-                        self.data = Data()
+                        self.queueData()
                     elif token == 0xfffd000000000000:
                         self.timestampOffset += (1<<40)
                     elif token & 0xffff000000000000 == 0xfffc000000000000:  # new scan parameter
@@ -337,9 +337,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         self.data.other.append(token)
             if self.data.overrun:
                 logger.info( "Overrun detected, triggered data queue" )
-                self.data.timeTickOffset = self.timeTickOffset
-                self.dataQueue.put( self.data )
-                self.data = Data()
+                self.queueData()
                 self.clearOverrun()
                 
             

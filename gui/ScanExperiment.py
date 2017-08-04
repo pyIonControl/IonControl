@@ -532,7 +532,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         queuesize is the size of waiting messages, dont't do expensive unnecessary stuff if queue is deep
         """
         logger = logging.getLogger(__name__)
-        delay = time.time() - insert_time
+        delay = time.time() - data.post_time
         if self.progressUi.is_running or self.progressUi.is_stashing:
             if data.other and self.context.scan.gateSequenceSettings.debug:
                 if self.context.otherDataFile is None:
