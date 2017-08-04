@@ -20,7 +20,6 @@ import pytz
 
 import PyQt5.uic
 from PyQt5 import QtCore, QtNetwork, QtWidgets
-from pyqtgraph.parametertree.Parameter import Parameter
 
 from dedicatedCounters.LoadingHistoryModel import LoadingHistoryModel
 from dedicatedCounters.WavemeterInterlockTableModel import WavemeterInterlockTableModel
