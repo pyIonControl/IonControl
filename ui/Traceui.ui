@@ -355,7 +355,7 @@
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="CategoryTreeView" name="traceView"/>
-     <widget class="ParameterTable" name="plotParamTable"/>
+     <widget class="ParameterTree" name="plotParamTable"/>
     </widget>
    </item>
    <item>
@@ -455,9 +455,9 @@
    <header>uiModules.CategoryTree</header>
   </customwidget>
   <customwidget>
-   <class>ParameterTable</class>
-   <extends>QTableView</extends>
-   <header>uiModules.ParameterTable</header>
+   <class>ParameterTree</class>
+   <extends>QTreeWidget</extends>
+   <header>pyqtgraph.parametertree</header>
   </customwidget>
  </customwidgets>
  <resources>
