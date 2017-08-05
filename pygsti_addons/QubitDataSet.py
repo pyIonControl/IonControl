@@ -68,9 +68,11 @@ class QubitDataSet:
         if self.is_gst:
             gatestring_idx = self.gatestring_dict[gatestring]
             if len(values) == 1:
-                self._countVecMx[self.spam_labels.index(str(values[0])), gatestring_idx] += repeats[0]
-                self._totalCntVec[gatestring_idx] += repeats[0]
+                v, r = next(iter(values)), next(iter(repeats))
+                self._countVecMx[self.spam_labels.index(str(v)), gatestring_idx] += r
+                self._totalCntVec[gatestring_idx] += r
             else:
+                print("len(values)", len(values))
                 eval = ResultCounter(values, repeats)
                 for label, count in eval.items():
                     self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
