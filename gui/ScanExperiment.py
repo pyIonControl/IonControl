@@ -641,7 +641,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 traceCollection.structuredData['qubitData'] = self.context.qubitData
                 traceCollection.structuredDataFormat['qubitData'] = self.context.scan.qubitDataFormat
                 if self.context.qubitData.is_gst:
-                    plottedStructure = PlottedStructure(traceCollection, 'qubitData', self.plotDict['Qubit'], 'Qubit')
+                    plottedStructure = PlottedStructure(traceCollection, 'qubitData', self.plotDict['Qubit'], 'Qubit',
+                                                        properties=self.context.scan.gateSequenceSettings.plotProperties.copy())
                     self.context.plottedTraceList.append(plottedStructure)
             self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
             self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
