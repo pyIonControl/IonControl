@@ -53,6 +53,7 @@ class QubitDataSet:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.gatestring_dict = {s: idx for idx, s in enumerate(self.gatestring_list)} if self.gatestring_list else None
         self._init_internal()
 
     def extend(self, gatestring, values, repeats, timestamps):

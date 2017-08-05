@@ -3,7 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from xml.etree.ElementTree import ElementTree
+import xml.etree.ElementTree as ElementTree
 from pyqtgraph.parametertree import Parameter
 
 from modules.SequenceDict import SequenceDict
@@ -29,7 +29,8 @@ class PlottedTrace(object):
     PointsStyles = [ 1, 4 ]
     Types = enum.enum('default', 'steps')
     serializeFields = ('_xColumn','_yColumn','_topColumn', '_bottomColumn','_heightColumn', '_filtColumn', 'name',
-                       'type', 'xAxisUnit', 'xAxisLabel', 'windowName', '_rawColumn', 'fill', 'style', 'type')
+                       'type', 'xAxisUnit', 'xAxisLabel', 'yAxisLabel', 'windowName', '_rawColumn', 'fill', 'style',
+                       'type', '_fitFunction')
     fieldReplacements = {'xColumn': '_xColumn',  'yColumn': '_yColumn', 'topColumn': '_topColumn',
                           'bottomColumn': '_bottomColumn', 'heightColumn': '_heightColumn',
                           'filtColumn': '_filtColumn', 'rawColumn': '_rawColumn'}
@@ -37,6 +38,7 @@ class PlottedTrace(object):
                  xColumn='x', yColumn='y', topColumn='top', bottomColumn='bottom', heightColumn='height',
                  rawColumn='raw', filtColumn=None, name="", xAxisLabel=None,
                  xAxisUnit=None, yAxisLabel=None, yAxisUnit=None, fill=True, windowName=None):
+        self.trace = None
         self._xColumn = xColumn
         self._yColumn = yColumn
         self._topColumn = topColumn
@@ -64,7 +66,6 @@ class PlottedTrace(object):
             if not hasattr(self._graphicsView, 'penUsageDict'):
                 self._graphicsView.penUsageDict = [0]*len(pens.penList)
             self.penUsageDict = self._graphicsView.penUsageDict        # TODO circular reference
-        self.trace = traceCollection
         self.curve = None
         self.auxiliaryCurves = deque()
         self.fitcurve = None
@@ -84,13 +85,18 @@ class PlottedTrace(object):
                                                                         errorbars=True),
                              self.Styles.linepoints_with_errorbars: partial(WeakMethod.ref(self.plotLinespoints),
                                                                             errorbars=True)}
+        if self.trace is None and traceCollection is not None:
+            traceCollection.addPlotting(self)
+        self.trace = traceCollection
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in PlottedTrace.serializeFields}
 
     def __setstate__(self, state):
         self.__dict__.update({PlottedTrace.fieldReplacements.get(key, key): value for key, value in state.items()})
-        self.__dict__.setdefault('_fitfunction', None)
+        self.__dict__.setdefault('_fitFunction', None)
+        self.__dict__.setdefault('trace', None)
+        self.__dict__.setdefault('yAxisLabel', None)
 
     def toXML(self, element):
         e = ElementTree.SubElement(element, 'TracePlotting',

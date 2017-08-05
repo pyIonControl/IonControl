@@ -17,6 +17,8 @@ class QubitPlotSettings:
 class PlottedStructureProperties:
     stateFields = ('gateset', 'axesIndex', 'collapse_minor', 'confidence_level', 'gate_noise', 'bright_error',
                    'dark_error', 'scale_threshold')
+    xmlPropertFields = ('collapse_minor', 'confidence_level', 'gate_noise', 'bright_error',
+                        'dark_error', 'scale_threshold')
     def __init__(self, gateset=None, axesIndex=(0, 1, 2, 3), collapse_minor=False, confidence_level=95):
         self.gateset = gateset
         self.axesIndex = axesIndex
@@ -64,9 +66,16 @@ class PlottedStructureProperties:
         p.__setstate__(self.__getstate__())
         return p
 
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'PlottedStructureProperties',
+                               dict((name, str(getattr(self, name))) for name in self.xmlPropertFields))
+        #sub = ElementTree.subElement(e, 'Properties')
+        return e
+
 
 class PlottedStructure:
     serializeFields = ('qubitDataKey', 'name', 'windowName', 'properties')
+    xmlPropertFields = ('qubitDataKey', 'name', 'windowName')
     def __init__(self, traceCollection, qubitDataKey, plot=None, windowName=None, properties=None, tracePlotting=None, name=None):
         self.qubitDataKey = qubitDataKey
         self.name = name
@@ -95,6 +104,7 @@ class PlottedStructure:
         self._plot_s_idx = [self.qubitData.gatestring_list.index(s) for s in self._plot_s]
         self.labels = [str(s) for s in self._plot_s]
         self.properties = properties or self.properties or PlottedStructureProperties()
+        self.traceCollection.addPlotting(self)
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in PlottedStructure.serializeFields}
@@ -104,7 +114,8 @@ class PlottedStructure:
 
     def toXML(self, element):
         e = ElementTree.SubElement(element, 'StructurePlotting',
-                               dict((name, str(getattr(self, name))) for name in self.serializeFields))
+                               dict((name, str(getattr(self, name))) for name in self.xmlPropertFields))
+        self.properties.toXML(e)
         return e
 
     def setGraphicsView(self, graphicsView, name):
