@@ -1,8 +1,10 @@
-from math import floor, ceil
 from xml.etree import ElementTree
+from math import floor, ceil, sqrt
 
 import numpy
+from PyQt5 import QtCore
 from pygsti import logl_terms, logl_max_terms
+from pyqtgraph.parametertree.Parameter import Parameter
 
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 
@@ -13,11 +15,54 @@ class QubitPlotSettings:
 
 
 class PlottedStructureProperties:
+    stateFields = ('gateset', 'axesIndex', 'collapse_minor', 'confidence_level', 'gate_noise', 'bright_error',
+                   'dark_error', 'scale_threshold')
     def __init__(self, gateset=None, axesIndex=(0, 1, 2, 3), collapse_minor=False, confidence_level=95):
         self.gateset = gateset
         self.axesIndex = axesIndex
         self.collapse_minor = collapse_minor
         self.confidence_level = confidence_level
+        self.gate_noise = 0.
+        self.bright_error = 0.
+        self.dark_error = 0.
+        self.scale_threshold = 5.
+
+    def __getstate__(self):
+        return {key: getattr(self, key) for key in self.stateFields}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def paramDef(self):
+        return [{'name': 'scale threshold', 'type': 'magnitude', 'value': self.scale_threshold, 'field': 'scale_threshold'},
+         {'name': 'confidence_level', 'type': 'magnitude', 'value': self.confidence_level, 'field': 'confidence_level'},
+         {'name': 'gate_noise', 'type': 'magnitude', 'value': self.gate_noise,'field': 'gate_noise'},
+         {'name': 'bright_error', 'type': 'magnitude', 'value': self.bright_error, 'field': 'bright_error'},
+         {'name': 'dark_error', 'type': 'magnitude', 'value': self.bright_error, 'field': 'dark_error'}]
+
+    def parameters(self):
+        self._parameter = Parameter.create(name='Settings', type='group', children=self.paramDef())
+        self._parameter.sigTreeStateChanged.connect(self.update, QtCore.Qt.UniqueConnection)
+        return self._parameter
+
+    def update(self, param, changes):
+        """
+        update the parameter, called by the signal of pyqtgraph parametertree
+        """
+        prop_changed = False
+        for param, change, data in changes:
+            if change == 'value':
+                value = float(data.m_as(''))
+                setattr(self, param.opts['field'], value)
+                prop_changed = True
+            elif change == 'activated':
+                getattr(self, param.opts['field'])()
+        return prop_changed
+
+    def copy(self):
+        p = PlottedStructureProperties()
+        p.__setstate__(self.__getstate__())
+        return p
 
 
 class PlottedStructure:
@@ -72,18 +117,17 @@ class PlottedStructure:
             self.tracePlotting.windowName = name
             self.plot()
 
+    colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
     def default_color_scale(self, num):
-        scale = 5
-        colors = [numpy.array((255, 255, 255)), numpy.array((0, 0, 0)), numpy.array((255, 0, 0))]
-        num /= scale
+        num /= self.properties.scale_threshold
         if num < 0:
-            return colors[0]
-        if num + 1 > len(colors):
-            return colors[-1]
+            return self.colors[0]
+        if num + 1 > len(self.colors):
+            return self.colors[-1]
         left = floor(num)
         right = ceil(num)
         minor = num - left
-        return colors[left] * (1 - minor) + colors[right] * minor
+        return self.colors[left] * (1 - minor) + self.colors[right] * minor
 
     @property
     def curvePen(self):
@@ -144,4 +188,16 @@ class PlottedStructure:
             self._graphicsWidget.label_index = None
             self._graphicsView.setAspectLocked(False)
 
+    def parameters(self):
+        self._parameter = Parameter.create(name='Settings', type='group', children=self.properties.paramDef())
+        self._parameter.sigTreeStateChanged.connect(self.update, QtCore.Qt.UniqueConnection)
+        return self._parameter
 
+    def updateGateSet(self):
+        self.gateSet = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
+        self.gateSet['E0'] = [sqrt(2) * (1-self.properties.bright_error), 0, 0, -sqrt(2) * (1 - self.properties.dark_error)]
+
+    def update(self, param, changes):
+        if self.properties.update(param, changes):
+           self.updateGateSet()
+           self.replot()

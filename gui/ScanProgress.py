@@ -28,6 +28,8 @@ class ScanProgress(Form, Base):
         self.previouslyElapsedTime = 0      # time spent on run before last start 
         self.expected = 0
         self.timer = None
+        self.lastPercentage = 0
+        self.lastTime = 0
 
     def getData(self):
         return (self.startTime, self.previouslyElapsedTime)
@@ -139,9 +141,12 @@ class ScanProgress(Form, Base):
         self.stopTimer()
        
     def onData(self, index):
-        self.progressBar.setValue(index)
-        self.expected =  self.elapsedTime() / (index/float(self.range)) if index>0 else 0
-        self.setTimeLabel()
+        percentage = round(100 * (index / self.range))
+        if percentage != self.lastPercentage:
+            self.lastPercentage = percentage
+            self.progressBar.setValue(index)
+            self.expected =  self.elapsedTime() / (index/float(self.range)) if index>0 else 0
+            self.setTimeLabel()
         
     def elapsedTime(self):
         return self.previouslyElapsedTime + ( (time.time() - self.startTime) if self.state==self.OpStates.running else 0 )

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>364</width>
-    <height>693</height>
+    <height>937</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -350,7 +350,13 @@
     </layout>
    </item>
    <item>
-    <widget class="CategoryTreeView" name="traceView"/>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <widget class="CategoryTreeView" name="traceView"/>
+     <widget class="ParameterTree" name="plotParamTable"/>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -447,6 +453,11 @@
    <class>CategoryTreeView</class>
    <extends>QTreeView</extends>
    <header>uiModules.CategoryTree</header>
+  </customwidget>
+  <customwidget>
+   <class>ParameterTree</class>
+   <extends>QTreeWidget</extends>
+   <header>pyqtgraph.parametertree</header>
   </customwidget>
  </customwidgets>
  <resources>

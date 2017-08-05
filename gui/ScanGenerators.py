@@ -68,19 +68,21 @@ class ParameterScanGenerator(ScanGeneratorBase):
         else:
             self.scan.code, self.numVariablesPerUpdate = pulseProgramUi.variableScanCode(parameterName, self.scan.list, extendedReturn=True)
         self.numUpdatedVariables = len(self.scan.code) // 2 // len(self.scan.list)
-        maxWordsToWrite = MaxWordsInFifo if maxUpdatesToWrite is None else 2 * self.numUpdatedVariables * maxUpdatesToWrite
-        if len(self.scan.code) > maxWordsToWrite:
-            self.nextIndexToWrite = maxWordsToWrite
-            return self.scan.code[:maxWordsToWrite], data
+        if maxUpdatesToWrite is not None:
+            maxWordsToWrite = 2 * self.numUpdatedVariables * maxUpdatesToWrite
+            if len(self.scan.code) > maxWordsToWrite:
+                self.nextIndexToWrite = maxWordsToWrite
+                return self.scan.code[:maxWordsToWrite], data
         self.nextIndexToWrite = len(self.scan.code)
         return self.scan.code, data
-        
+
     def restartCode(self, currentIndex):
-        maxWordsToWrite = MaxWordsInFifo if self.maxUpdatesToWrite is None else 2*self.numUpdatedVariables*self.maxUpdatesToWrite
-        currentWordCount = 2*self.numUpdatedVariables*currentIndex
-        if len(self.scan.code)-currentWordCount>maxWordsToWrite:
-            self.nextIndexToWrite = maxWordsToWrite+currentWordCount
-            return ( self.scan.code[currentWordCount:self.nextIndexToWrite])
+        currentWordCount = 2 * self.numUpdatedVariables * currentIndex
+        if self.maxUpdatesToWrite is not None:
+            maxWordsToWrite = 2 * self.numUpdatedVariables * self.maxUpdatesToWrite
+            if len(self.scan.code) - currentWordCount > maxWordsToWrite:
+                self.nextIndexToWrite = maxWordsToWrite + currentWordCount
+                return (self.scan.code[currentWordCount:self.nextIndexToWrite])
         self.nextIndexToWrite = len(self.scan.code)
         return self.scan.code[currentWordCount:]
         
@@ -120,7 +122,7 @@ class StepInPlaceGenerator(ScanGeneratorBase):
     def __init__(self, scan):
         super().__init__(scan)
         
-    def prepare(self, pulseProgramUi, maxUpdatesToWrite=None ):
+    def prepare(self, pulseProgramUi, maxUpdatesToWrite=None):
         if self.scan.gateSequenceUi.settings.enabled:
             _, data, self.gateSequenceSettings = self.scan.gateSequenceUi.gateSequenceScanData()    
         else:
@@ -163,7 +165,7 @@ class FreerunningGenerator(ScanGeneratorBase):
     def __init__(self, scan):
         super().__init__(scan)
         
-    def prepare(self, pulseProgramUi, maxUpdatesToWrite=None ):
+    def prepare(self, pulseProgramUi, maxUpdatesToWrite=None):
         if self.scan.gateSequenceUi.settings.enabled:
             _, data, self.gateSequenceSettings = self.scan.gateSequenceUi.gateSequenceScanData()    
         else:
@@ -197,7 +199,7 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
         super().__init__(scan)
         self.nextIndexToWrite = 0
         self.numUpdatedVariables = 1
-        self.maxWordsToWrite = MaxWordsInFifo
+        self.maxWordsToWrite = None
         
     def prepare(self, pulseProgramUi, maxUpdatesToWrite=None):
         logger = logging.getLogger(__name__)
@@ -230,17 +232,19 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
             with open( codeFilename, 'w') as f:
                 for index, a in enumerate(sorted(self.scan.code[1::2])):
                     f.write( "{0} {1}\n".format(index, a) )
-        if len(self.scan.code)>self.maxWordsToWrite:
-            self.nextIndexToWrite = self.maxWordsToWrite
-            return ( self.scan.code[:self.maxWordsToWrite], data)
+        if self.maxWordsToWrite is not None:
+            if len(self.scan.code) > self.maxWordsToWrite:
+                self.nextIndexToWrite = self.maxWordsToWrite
+                return (self.scan.code[:self.maxWordsToWrite], data)
         self.nextIndexToWrite = len(self.scan.code)
-        return ( self.scan.code, data)
+        return (self.scan.code, data)
 
     def restartCode(self, currentIndex):
-        currentWordCount = 2*self.numUpdatedVariables*currentIndex
-        if len(self.scan.code)-currentWordCount>self.maxWordsToWrite:
-            self.nextIndexToWrite = self.maxWordsToWrite+currentWordCount
-            return ( self.scan.code[currentWordCount:self.nextIndexToWrite])
+        currentWordCount = 2 * self.numUpdatedVariables * currentIndex
+        if self.maxWordsToWrite is not None:
+            if len(self.scan.code) - currentWordCount > self.maxWordsToWrite:
+                self.nextIndexToWrite = self.maxWordsToWrite + currentWordCount
+                return (self.scan.code[currentWordCount:self.nextIndexToWrite])
         self.nextIndexToWrite = len(self.scan.code)
         return self.scan.code[currentWordCount:]
 

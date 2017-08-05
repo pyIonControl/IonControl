@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>387</width>
-    <height>693</height>
+    <height>1165</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -351,29 +351,8 @@
    </item>
    <item>
     <widget class="QSplitter" name="splitter">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="baseSize">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
-     </property>
-     <property name="handleWidth">
-      <number>8</number>
-     </property>
-     <property name="childrenCollapsible">
-      <bool>false</bool>
      </property>
      <widget class="QFrame" name="createTraceOptions">
       <property name="enabled">
@@ -590,6 +569,7 @@
       </layout>
      </widget>
      <widget class="CategoryTreeView" name="traceView"/>
+     <widget class="ParameterTable" name="plotParamTable"/>
     </widget>
    </item>
    <item>
@@ -704,6 +684,11 @@
    <class>CategoryTreeView</class>
    <extends>QTreeView</extends>
    <header>uiModules.CategoryTree</header>
+  </customwidget>
+  <customwidget>
+   <class>ParameterTable</class>
+   <extends>QTableView</extends>
+   <header>uiModules.ParameterTable</header>
   </customwidget>
  </customwidgets>
  <resources>

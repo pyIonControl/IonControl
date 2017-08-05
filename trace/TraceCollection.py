@@ -343,6 +343,7 @@ class TraceCollection(keydefaultdict):
                 elif format.lower() == 'yaml':
                     myzip.writestr(name + '.yaml', yaml.dump(value).encode())
             myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat).encode())
+        self.saved = True
 
     def loadZip(self, filename):
         with ZipFile(filename) as myzip:
