@@ -460,23 +460,23 @@ class PlottedTrace(object):
                     QtCore.QTimer.singleShot(len(self.x)*2, self._replot) 
             else:
                 self._replot()
-            
+
     def _replot(self):
         if hasattr(self, 'curve') and self.curve is not None:
-            if self.style not in self.PointsStyles and self.type==self.Types.default:
+            if self.style not in self.PointsStyles and self.type == self.Types.default:
                 x, y = sort_lists_by((self.x, self.y), key_list=0) if len(self.x) > 0 else (self.x, self.y)
-                self.curve.setData( numpy.array(x), numpy.array(y) )
+                self.curve.setData(numpy.array(x), numpy.array(y))
             else:
-                self.curve.setData( (self.x), (self.y) )
+                self.curve.setData(self.x, self.y)
         if hasattr(self, 'errorBarItem') and self.errorBarItem is not None:
             if self.hasHeightColumn:
-                self.errorBarItem.setData(x=(self.x), y=(self.y), height=(self.height))
+                self.errorBarItem.setData(x=self.x, y=self.y, height=self.height)
             else:
-                self.errorBarItem.setOpts(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom))
+                self.errorBarItem.setOpts(x=self.x, y=self.y, top=self.top, bottom=self.bottom)
         if self.fitFunction is not None:
-            if self.type==self.Types.default:
+            if self.type == self.Types.default:
                 self.replotFitFunction()
-            elif self.type==self.Types.steps: 
+            elif self.type == self.Types.steps:
                 self.replotStepsFitFunction()
         elif self.fitcurve is not None:
             self._graphicsView.removeItem(self.fitcurve)
