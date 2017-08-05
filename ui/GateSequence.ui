@@ -130,6 +130,20 @@
     </widget>
    </item>
    <item>
+    <widget class="QComboBox" name="sourceSelect">
+     <item>
+      <property name="text">
+       <string>Gate Sequence List</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>GST</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
     <widget class="QTabWidget" name="sequenceOriginWidget">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -138,7 +152,7 @@
       </sizepolicy>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="GateSequenceList">
       <attribute name="title">
@@ -439,6 +453,16 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Plot properties</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="ParameterTree" name="treeWidget"/>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -457,6 +481,11 @@
   </layout>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>ParameterTree</class>
+   <extends>QTreeWidget</extends>
+   <header>pyqtgraph.parametertree</header>
+  </customwidget>
   <customwidget>
    <class>MagnitudeSpinBox</class>
    <extends>QDoubleSpinBox</extends>

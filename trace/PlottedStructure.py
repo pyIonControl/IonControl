@@ -15,6 +15,8 @@ class QubitPlotSettings:
 
 
 class PlottedStructureProperties:
+    stateFields = ('gateset', 'axesIndex', 'collapse_minor', 'confidence_level', 'gate_noise', 'bright_error',
+                   'dark_error', 'scale_threshold')
     def __init__(self, gateset=None, axesIndex=(0, 1, 2, 3), collapse_minor=False, confidence_level=95):
         self.gateset = gateset
         self.axesIndex = axesIndex
@@ -25,12 +27,42 @@ class PlottedStructureProperties:
         self.dark_error = 0.
         self.scale_threshold = 5.
 
+    def __getstate__(self):
+        return {key: getattr(self, key) for key in self.stateFields}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
     def paramDef(self):
         return [{'name': 'scale threshold', 'type': 'magnitude', 'value': self.scale_threshold, 'field': 'scale_threshold'},
          {'name': 'confidence_level', 'type': 'magnitude', 'value': self.confidence_level, 'field': 'confidence_level'},
          {'name': 'gate_noise', 'type': 'magnitude', 'value': self.gate_noise,'field': 'gate_noise'},
          {'name': 'bright_error', 'type': 'magnitude', 'value': self.bright_error, 'field': 'bright_error'},
          {'name': 'dark_error', 'type': 'magnitude', 'value': self.bright_error, 'field': 'dark_error'}]
+
+    def parameters(self):
+        self._parameter = Parameter.create(name='Settings', type='group', children=self.paramDef())
+        self._parameter.sigTreeStateChanged.connect(self.update, QtCore.Qt.UniqueConnection)
+        return self._parameter
+
+    def update(self, param, changes):
+        """
+        update the parameter, called by the signal of pyqtgraph parametertree
+        """
+        prop_changed = False
+        for param, change, data in changes:
+            if change == 'value':
+                value = float(data.m_as(''))
+                setattr(self, param.opts['field'], value)
+                prop_changed = True
+            elif change == 'activated':
+                getattr(self, param.opts['field'])()
+        return prop_changed
+
+    def copy(self):
+        p = PlottedStructureProperties()
+        p.__setstate__(self.__getstate__())
+        return p
 
 
 class PlottedStructure:
@@ -155,15 +187,6 @@ class PlottedStructure:
         self.gateSet['E0'] = [sqrt(2) * (1-self.properties.bright_error), 0, 0, -sqrt(2) * (1 - self.properties.dark_error)]
 
     def update(self, param, changes):
-        """
-        update the parameter, called by the signal of pyqtgraph parametertree
-        """
-        for param, change, data in changes:
-            if change == 'value':
-                value = float(data.m_as(''))
-                setattr(self.properties, param.opts['field'], value)
-                self.updateGateSet()
-                self.replot()
-            elif change == 'activated':
-                getattr(self, param.opts['field'])()
-
+        if self.properties.update(param, changes):
+           self.updateGateSet()
+           self.replot()

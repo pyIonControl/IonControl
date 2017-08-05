@@ -3,6 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from pyqtgraph.parametertree import Parameter
+
 from modules.SequenceDict import SequenceDict
 from trace import pens
 
@@ -496,13 +498,8 @@ class PlottedTrace(object):
         self.tracePlotting.fitFunction = fitfunction
 
     def parameters(self):
-        return SequenceDict()
+        return Parameter.create(name='Settings', type='group', children=[])
 
-    def update(self, parameter):
-        pass
-
-#     def __del__(self):
-#         super(PlottedTrace, self)__del__()
 
 if __name__=="__main__":
     from trace.TraceCollection import TraceCollection
