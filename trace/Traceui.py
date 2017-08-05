@@ -155,7 +155,6 @@ class TraceuiMixin:
         filtersMenu.addAction(self.removeFilterAction)
         #self.plotParamTable.setupUi()
 
-    @doprofile
     def onDelete(self, _):
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             self.traceView.onDelete()

@@ -443,8 +443,6 @@ class pppCompiler:
         codetext = "\n".join(header + allcode)
         return codetext
 
-    from modules.doProfile import doprofile
-    @doprofile
     def compileString(self, programText):
         self.programText = programText
         self.currentFile = "Memory"
