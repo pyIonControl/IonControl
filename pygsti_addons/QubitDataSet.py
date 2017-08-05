@@ -30,6 +30,7 @@ class QubitDataSet:
     _fields = ['gatestring_list', 'plaquettes', 'target_gateset', '_rawdata']
     def __init__(self, gatestring_list=None, plaquettes=None, target_gateset=None):
         self.gatestring_list = gatestring_list
+        self.gatestring_dict = {s: idx for idx, s in enumerate(gatestring_list)} if gatestring_list else None
         self.plaquettes = plaquettes
         self.target_gateset = target_gateset
         self._rawdata = QubitResultContainer()  # _rawdata[gatestring]['value' 'repeats' 'timestamps' ...] list
@@ -65,11 +66,15 @@ class QubitDataSet:
     def _extend(self, gatestring, values, repeats):
         """Keeps the data in the input format for pygsti log_likelyhood up to date"""
         if self.is_gst:
-            gatestring_idx = self.gatestring_list.index(gatestring)
-            eval = ResultCounter(values, repeats)
-            for label, count in eval.items():
-                self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
-            self._totalCntVec[gatestring_idx] += sum(eval.values())
+            gatestring_idx = self.gatestring_dict[gatestring]
+            if len(values) == 1:
+                self._countVecMx[self.spam_labels.index(str(values[0])), gatestring_idx] += repeats[0]
+                self._totalCntVec[gatestring_idx] += repeats[0]
+            else:
+                eval = ResultCounter(values, repeats)
+                for label, count in eval.items():
+                    self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
+                self._totalCntVec[gatestring_idx] += sum(eval.values())
 
     def extendEnv(self, gatestring, name, values, timestamps):
         if values and timestamps:

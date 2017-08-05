@@ -63,12 +63,12 @@ class QueueReader(QtCore.QThread):
                 #  that the next data element can be submitted
                 with self.condition_var:
                     self.pulserHardware.next_data_trigger.emit()
-                    self.condition_var.wait()
+                    self.condition_var.wait(1)
             except (KeyboardInterrupt, SystemExit, FinishException):
                 break
             except Exception:
                 logger.exception("Exception in QueueReader")
-        logger.info( "QueueReader thread finished." )
+        logger.info( "PulserHardware QueueReader thread finished." )
 
 
 class PulserHardware(QtCore.QObject):
@@ -90,7 +90,6 @@ class PulserHardware(QtCore.QObject):
         self._shutter = 0
         self._trigger = 0
         self.xem = None
-        self.Mutex = QtCore.QMutex
         self._adcCounterMask = 0
         self._integrationTime = Q(100, 'ms')
         
@@ -103,7 +102,7 @@ class PulserHardware(QtCore.QObject):
         self.serverProcess.start()
 
         self.condition_var = Condition()
-        self.next_data_trigger.connect(lambda: QTimer.singleShot(0, self.next_data_notify))
+        self.next_data_trigger.connect(self.next_data_notify)
         self.queueReader = QueueReader(self, self.dataQueue, self.condition_var)
         self.queueReader.start()
         
