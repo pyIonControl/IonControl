@@ -379,7 +379,8 @@ class TraceCollection(keydefaultdict):
                             elif format.lower() == 'yaml':
                                 self.structuredData[name] = yaml.load(f.read().decode())
             except Exception as e:
-                pass
+                logging.getLogger(__name__)
+                logging.error("Failed to load zip file: {}".format(e))
 
     def saveHdf5(self, filename):
         # if self.rawdata:
