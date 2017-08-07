@@ -11,7 +11,7 @@ import numpy
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from trace.BlockAutoRange import BlockAutoRangeList
 from trace.PlottedStructure import PlottedStructure
-from trace.TraceCollection import TraceCollection, StructurePlotting, TracePlotting
+from trace.TraceCollection import TraceCollection
 from trace import pens
 
 from PyQt5 import QtGui, QtCore, QtWidgets
@@ -153,8 +153,8 @@ class TraceuiMixin:
         filtersMenu.addAction(self.filterData)
         filtersMenu.addAction(self.filterROI)
         filtersMenu.addAction(self.removeFilterAction)
+        #self.plotParamTable.setupUi()
 
-    @doprofile
     def onDelete(self, _):
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             self.traceView.onDelete()
@@ -400,6 +400,9 @@ class TraceuiMixin:
             else:
                 self.finalizedDateLabel.setText('')
                 self.finalizedTimeLabel.setText('')
+            # take care of properties
+            plotted = dataNode.content
+            self.plotParamTable.setParameters(plotted.parameters())
         else:
                 self.createdDateLabel.setText('')
                 self.createdTimeLabel.setText('')
@@ -532,22 +535,17 @@ class TraceuiMixin:
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
                 return #If the filename and creation dates are the same, you're trying to open an existing trace.
-        plottedTraceList = list()
-        category = None if len(traceCollection.tracePlottingList)==1 else self.getUniqueCategory(filename)
-        for plotting in traceCollection.tracePlottingList:
-            windowName = plotting.windowName if plotting.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
-            name = plotting.name
-            if isinstance(plotting, TracePlotting):
-                plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
-            elif isinstance(plotting, StructurePlotting):
-                plottedTrace = PlottedStructure(traceCollection, plot=self.graphicsViewDict[windowName], tracePlotting=plotting, windowName=windowName, name=name)
-            plottedTrace.category = category
-            plottedTraceList.append(plottedTrace)
-            self.addTrace(plottedTrace, defaultpen)
+        category = None if len(traceCollection.plottingList)==1 else self.getUniqueCategory(filename)
+        for plotted in traceCollection.plottingList:
+            windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
+            name = plotted.name
+            plotted.setup(traceCollection, self.graphicsViewDict[windowName], pens.penList, -1,
+                          windowName=windowName, name=name)
+            plotted.category = category
+            self.addTrace(plotted, defaultpen)
         if self.expandNew:
-            self.expand(plottedTraceList[0])
+            self.expand(traceCollection.plottingList[0])
         self.resizeColumnsToContents()
-        return plottedTraceList
 
     def openContainingDirectory(self):
         """Opens the parent directory of a file, selecting the file if possible."""

@@ -16,7 +16,7 @@ from dedicatedCounters import DedicatedCountersSettings
 from dedicatedCounters import DedicatedDisplay
 from dedicatedCounters import InputCalibrationUi
 from modules import enum
-from trace.TraceCollection import TraceCollection, TracePlotting
+from trace.TraceCollection import TraceCollection
 from modules.DataDirectory import DataDirectory
 from modules.SequenceDict import SequenceDict
 from trace.pens import penList
@@ -253,7 +253,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     else:
                         trace.description["ADC"] = str(plotName)
                     filename, _ = DataDirectory().sequencefile("DedicatedCounter_{0}.txt".format(n))
-                    trace.addTracePlotting( TracePlotting(name="Counter {0}".format(n)) )
+                    trace.addplotting( TracePlotting(name="Counter {0}".format(n)) )
                     trace.save()
         logger.info("saving dedicated counters")
     

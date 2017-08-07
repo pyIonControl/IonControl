@@ -13,6 +13,7 @@ from functools import partial
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
+from trace.PlottedStructure import PlottedStructureProperties
 from .GateDefinition import GateDefinition
 from .GateSequenceCompiler import GateSequenceCompiler
 from .GateSequenceContainer import GateSequenceContainer
@@ -41,7 +42,8 @@ class Settings:
                    'thisSequenceRepetition', 'debug', 'gateSequenceCache', 'gateDefinitionCache',
                    'generatorType', 'gateSet', 'preparationFiducials', 'measurementFiducials',
                    'germs', 'lengths', 'keepFraction', 'keepSeed', 'preparationFiducialsCache',
-                   'measurementFiducialsCache', 'germsCache', 'lengthsCache', 'gateSetCache']
+                   'measurementFiducialsCache', 'germsCache', 'lengthsCache', 'gateSetCache',
+                   'plotProperties']
     XMLTagName = "GateSequence"
     class GeneratorType(Enum):
         GateSequenceList = 0
@@ -72,6 +74,7 @@ class Settings:
         self.measurementFiducialsCache = HashableDict()
         self.germsCache = HashableDict()
         self.lengthsCache = HashableDict()
+        self.plotProperties = PlottedStructureProperties()
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -96,6 +99,7 @@ class Settings:
         self.__dict__.setdefault('germsCache', HashableDict())
         self.__dict__.setdefault('lengthsCache', HashableDict())
         self.__dict__.setdefault('gateSetCache', HashableDict())
+        self.__dict__.setdefault('plotProperties', PlottedStructureProperties())
         if isinstance(self.generatorType, str):
             self.generatorType = self.GeneratorType.GateSequenceList
 
@@ -182,7 +186,7 @@ class GateSequenceUi(Form, Base):
         self.repetitionSpinBox.valueChanged.connect(self.onRepetitionChanged)
         self.GateSequenceBox.currentIndexChanged[str].connect(self.onGateSequenceChanged)
         self.GateDefinitionBox.currentIndexChanged[str].connect(self.onGateDefinitionChanged)
-        self.sequenceOriginWidget.currentChanged.connect(self.onChangeSource)
+        self.sourceSelect.currentIndexChanged[int].connect(self.onChangeSource)
         self.debugCheckBox.stateChanged.connect(self.onDebugChanged)
         self.keepFractionBox.valueChanged.connect(partial(setattr, self, 'keepFraction'))
         self.keepSeedBox.valueChanged.connect(partial(setattr, self, 'keepSeed'))
@@ -197,6 +201,7 @@ class GateSequenceUi(Form, Base):
             exampleGateSequencesDir = os.path.realpath(os.path.join(os.path.dirname(__file__), '..','config/GateSequences'))
             shutil.copytree(exampleGateSequencesDir,
                             self.defaultGateSequencesDir)  # Copy over all example gate sequence files
+        self.treeWidget.setParameters(self.settings.plotProperties.parameters())
 
     def onChangeSource(self, index):
         try:
@@ -215,7 +220,7 @@ class GateSequenceUi(Form, Base):
         logger.debug( str( settings) )
         logger.debug( "GateSequenceUi SetSettings {0}".format( settings.__dict__ ) )
         self.settings = settings
-        self.sequenceOriginWidget.setCurrentIndex(self.settings.generatorType.value)
+        self.sourceSelect.setCurrentIndex(self.settings.generatorType.value)
         self.GateSequenceEnableCheckBox.setChecked( self.settings.enabled )
         self.GateSequenceFrame.setEnabled( self.settings.enabled )
         self.GateEdit.setText( ", ".join(self.settings.gate ))
@@ -248,6 +253,7 @@ class GateSequenceUi(Form, Base):
                 self.FullListRadioButton.setChecked(True)
             elif self.settings.active == self.Mode.Gate:
                 self.GateRadioButton.setChecked(True)
+        self.treeWidget.setParameters(self.settings.plotProperties.parameters())
 
     def updateDatastructures(self):
         if self.settings.enabled:
@@ -291,6 +297,7 @@ class GateSequenceUi(Form, Base):
         self.settings.enabled = state == QtCore.Qt.Checked
         self.GateSequenceFrame.setEnabled(self.settings.enabled)
         self.sequenceOriginWidget.setEnabled(self.settings.enabled)
+        self.sourceSelect.setEnabled(self.settings.enabled)
         self.updateDatastructures()
         self.valueChanged.emit()          
         
