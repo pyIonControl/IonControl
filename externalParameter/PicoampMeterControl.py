@@ -3,12 +3,12 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+import pytz
 from PyQt5 import QtCore
 import PyQt5.uic
 from functools import partial
 
-from modules.quantity import Q
+from modules.quantity import Q, is_Q
 from scan.ScanList import scanList
 from trace.TraceCollection import TraceCollection
 import numpy
@@ -34,15 +34,15 @@ class MeterState:
         self.voltageEnabled = False
         self.voltageEnabled_2 = False
         self.voltageEnabled_3 = False
-        self.voltageRange = 0
-        self.voltageRange_2 = 0
-        self.voltageRange_3 = 0
+        self.voltageRange = Q(0, "V")
+        self.voltageRange_2 = Q(0, "V")
+        self.voltageRange_3 = Q(0, "V")
         self.currentLimit = 0
         self.currentLimit_2 = 0
         self.currentLimit_3 = 0
-        self.voltage = 0
-        self.voltage_2 = 0
-        self.voltage_3 = 0
+        self.voltage = Q(0, "V")
+        self.voltage_2 = Q(0, "V")
+        self.voltage_3 = Q(0, "V")
         self.autoRange = False
         self.autoRange_2 = False
         self.autoRange_3 = False
@@ -205,8 +205,8 @@ class PicoampMeterControl(Base, Form):
         self.voltagePlottedTrace = PlottedTrace(self.trace, self.plotDict['Voltage']['view'], yColumn='voltage', penList=pens.penList )
 #         self.voltagePlottedTrace_2 = PlottedTrace(self.trace, self.plotDict['Voltage']['view'], yColumn='voltage_2', penList=pens.penList )
 #         self.voltagePlottedTrace_3 = PlottedTrace(self.trace, self.plotDict['Voltage']['view'], yColumn='voltage_3', penList=pens.penList )
-        self.plottedTrace.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
-        self.voltagePlottedTrace.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
+        self.plottedTrace.trace.filenamePattern =  self.meterState.filename
+        self.voltagePlottedTrace.trace.filenamePattern =  self.meterState.filename
 #         self.plottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
 #         self.voltagePlottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
 #         self.plottedTrace_3.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
@@ -268,7 +268,7 @@ class PicoampMeterControl(Base, Form):
             self.plottedTrace =  PlottedTrace(self.trace, self.plotDict['Scan']['view'], pens.penList )
 #             self.plottedTrace_2 =  PlottedTrace(self.trace, self.plotDict['Scan']['view'], yColumn='current_2', penList=pens.penList )
 #             self.plottedTrace_3 =  PlottedTrace(self.trace, self.plotDict['Scan']['view'], yColumn='current_3', penList=pens.penList )
-            self.plottedTrace.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
+            self.plottedTrace.trace.filenamePattern =  self.meterState.filename
 #             self.plottedTrace_2.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
 #             self.plottedTrace_3.trace.filenameCallback =  partial( self.plottedTrace.traceFilename, self.meterState.filename )           
             self.traceAdded = False
@@ -310,8 +310,8 @@ class PicoampMeterControl(Base, Form):
         QtCore.QTimer.singleShot(0, self.initPoint )
     
     def finalizeScan(self):
-        self.trace.description["traceFinalized"] = datetime.now()
-        self.trace.resave(saveIfUnsaved=False)
+        self.trace.description["traceFinalized"] = datetime.now(pytz.utc)
+        self.trace.save()
         self.scanRunning = False
         
     def onMeasure(self):
@@ -342,16 +342,21 @@ class PicoampMeterControl(Base, Form):
         setattr( self.meterState, attr, str(value) )
         
     def onVoltage(self, value):
-        raw = value.m_as("V")
-        self.meter.setVoltage(raw)
+        # if not is_Q(value):
+        #     value = Q(value)
+        self.meter.setVoltage(value)
         self.meterState.voltage = value
         
     def onVoltage_2(self, value):
+        if not is_Q(value):
+            value = Q(value)
         raw = value.m_as("V")
         self.meter_2.setVoltage(raw)
         self.meterState.voltage_2 = value
         
     def onVoltage_3(self, value):
+        if not is_Q(value):
+            value = Q(value)
         raw = value.m_as("V")
         self.meter_3.setVoltage(raw)
         self.meterState.voltage_3 = value
