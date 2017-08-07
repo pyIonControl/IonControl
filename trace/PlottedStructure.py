@@ -94,7 +94,6 @@ class PlottedStructure:
         lengths = sorted(set([k[0] for k in self.qubitData.plaquettes.keys()]))
         germs = sorted(set([k[1] for k in self.qubitData.plaquettes.keys()]))
         self._lookup = dict()
-        self.gateSet = self.qubitData.target_gateset
         for (l, g), p in self.qubitData.plaquettes.items():
             l_id = lengths.index(l)
             g_id = germs.index(g)
@@ -105,6 +104,7 @@ class PlottedStructure:
         self.labels = [str(s) for s in self._plot_s]
         self.properties = properties or self.properties or PlottedStructureProperties()
         self.traceCollection.addPlotting(self)
+        self.updateGateSet()
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in PlottedStructure.serializeFields}
