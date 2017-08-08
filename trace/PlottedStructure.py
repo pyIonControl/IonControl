@@ -205,10 +205,11 @@ class PlottedStructure:
         return self._parameter
 
     def updateGateSet(self):
-        self.gateSet = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
-        self.gateSet['E0'] = [sqrt(2) * (1-self.properties.bright_error), 0, 0, -sqrt(2) * (1 - self.properties.dark_error)]
+        temp_gs = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
+        temp_gs['E0'] = [sqrt(2) * (1-self.properties.bright_error), 0, 0, -sqrt(2) * (1 - self.properties.dark_error)]
+        self.gateSet = temp_gs
 
     def update(self, param, changes):
         if self.properties.update(param, changes):
-           self.updateGateSet()
-           self.replot()
+            self.updateGateSet()
+            self.replot()

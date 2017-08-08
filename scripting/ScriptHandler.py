@@ -343,7 +343,7 @@ class ScriptHandler(QtCore.QObject):
         else:
             traceCollection = TraceCollection()
             yColumnName = 'y0'
-            plottedTrace = PlottedTrace(traceCollection, self.scanExperiment.plotDict[plotName]["view"], pens.penList, xColumn = 'x',
+            plottedTrace = PlottedTrace(traceCollection, self.scanExperiment.plotDict[plotName], pens.penList, xColumn = 'x',
                                         yColumn=yColumnName, name=traceName, xAxisUnit = xUnit, xAxisLabel = xLabel, windowName=plotName)
             self.scanExperiment.plotDict[plotName]["view"].enableAutoRange(axis=ViewBox.XAxis)
             plottedTrace.traceCollection.name = self.script.shortname
