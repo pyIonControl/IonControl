@@ -702,7 +702,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         bins = int(self.context.evaluation.roiWidth / self.context.evaluation.binwidth)
         multiplier = self.pulserHardware.timestep.m_as('ms')
         myrange = (self.context.evaluation.roiStart.m_as('ms')/multiplier, (self.context.evaluation.roiStart+self.context.evaluation.roiWidth).m_as('ms')/multiplier)
-        y, x = numpy.histogram(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel]),
+        y, x = numpy.histogram(list(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel])),
                                range=myrange,
                                bins=bins)
         x = x[0:-1] * multiplier
