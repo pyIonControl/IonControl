@@ -7,6 +7,8 @@
 import PyQt5.uic
 import logging
 
+import numpy
+
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from modules.SequenceDict import SequenceDict
 from scan.AnalysisTableModel import AnalysisTableModel             #@UnresolvedImport
@@ -377,7 +379,7 @@ class AnalysisControl(ControlForm, ControlBase ):
                 if plot.hasHeightColumn:
                     sigma = plot.height
                 elif plot.hasTopColumn and plot.hasBottomColumn:
-                    sigma = abs(plot.top + plot.bottom)
+                    sigma = abs(numpy.array(plot.top) + numpy.array(plot.bottom))
                 self.fitfunction.leastsq(plot.x, plot.y, sigma=sigma, filt=plot.filt)
                 plot.fitFunction = copy.deepcopy(self.fitfunction)
                 plot.plot(-2)
@@ -397,7 +399,7 @@ class AnalysisControl(ControlForm, ControlBase ):
                 if plot.hasHeightColumn:
                     sigma = plot.height
                 elif plot.hasTopColumn and plot.hasBottomColumn:
-                    sigma = abs(plot.top + plot.bottom)
+                    sigma = abs(numpy.array(plot.top) + numpy.array(plot.bottom))
                 fitfunction.leastsq(plot.x, plot.y, sigma=sigma, filt=plot.filt)
                 plot.fitFunction = fitfunction
                 plot.plot(-2)
