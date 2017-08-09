@@ -216,8 +216,9 @@ class PulserHardwareServer(ServerProcess, OKBase):
                     elif header==5: # aux data
                         self.logicAnalyzerReadStatus = 5
                     elif header==6:
-                        self.logicAnalyzerReadStatus = 6                                       
-                    logger.debug("Time {0:x} header {1} pattern {2:x} {3:x} {4:x}".format(self.logicAnalyzerTime, header, pattern, code, self.logicAnalyzerData.countOffset))
+                        self.logicAnalyzerReadStatus = 6
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("Time {0:x} header {1} pattern {2:x} {3:x} {4:x}".format(self.logicAnalyzerTime, header, pattern, code, self.logicAnalyzerData.countOffset))
                 elif self.logicAnalyzerReadStatus==3:
                     (pattern, ) = struct.unpack('Q', s) 
                     self.logicAnalyzerData.data.append( (self.logicAnalyzerTime, pattern) )
@@ -246,10 +247,12 @@ class PulserHardwareServer(ServerProcess, OKBase):
                 #print(hex(token))
                 if self.state == self.analyzingState.dependentscanparameter:
                     self.data.dependentValues.append(token)
-                    logger.debug( "Dependent value {0} received".format(token) )
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug( "Dependent value {0} received".format(token) )
                     self.state = self.analyzingState.normal
                 elif self.state == self.analyzingState.scanparameter:
-                    logger.debug( "Scan value {0} received".format(token) )
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug( "Scan value {0} received".format(token) )
                     if self.data.scanvalue is None:
                         self.data.scanvalue = token
                     else:
@@ -599,7 +602,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
             logging.getLogger(__name__).warning("Pulser Hardware not available")
             return None
 
-    def _write_buffer(self, min_words=10):
+    def _write_buffer(self, min_words=512):
         """Write data from the buffer to the fifo if there is space available"""
         if self._data_fifo_buffer:
             write_count = 2040 - (self.xem.GetWireOutValue(0x26) >> 2)  # number of 64 bit words that can be written to data fifo
@@ -607,9 +610,11 @@ class PulserHardwareServer(ServerProcess, OKBase):
                 do_write_count = min(len(self._data_fifo_buffer), 8*write_count)
                 self.xem.WriteToPipeIn(0x81, self._data_fifo_buffer[:do_write_count])
                 self._data_fifo_buffer = self._data_fifo_buffer[do_write_count:]
-                print("_write_buffer wrote {} bytes {} remaining".format(do_write_count, len(self._data_fifo_buffer)))
+                logger = logging.getLogger(__name__)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("_write_buffer wrote {} bytes {} remaining".format(do_write_count, len(self._data_fifo_buffer)))
 
-    def ppReadWriteData(self, minbytes=8, minwrite=10):
+    def ppReadWriteData(self, minbytes=8, minwrite=512):
         if self.xem:
             self.xem.UpdateWireOuts()
             self._write_buffer(minwrite)

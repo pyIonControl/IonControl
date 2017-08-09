@@ -186,8 +186,8 @@ class TraceCollection(keydefaultdict):
     @staticmethod
     def defaultColumn(d, key):
         if key == 'indexColumn' and 'x' in d:
-            return numpy.arange(0, len(d['x']), 1)
-        return numpy.array([])
+            return list(range(len(d['x'])))
+        return list()
 
     def varFromXmlElement(self, element, description):
         name = element.attrib['name']
@@ -212,11 +212,11 @@ class TraceCollection(keydefaultdict):
     
     def timeintervalAppend(self, timeinterval, maxPoints=0):
         if 0 < maxPoints < len(self["timeTickFirst"]):
-            self['timeTickFirst'] = numpy.append(self['timeTickFirst'][-maxPoints+1:0], timeinterval[0])
-            self['timeTickLast'] = numpy.append(self['timeTickLast'][-maxPoints+1:0], timeinterval[1])
+            self['timeTickFirst'] = self['timeTickFirst'][-maxPoints+1:0].append(timeinterval[0])
+            self['timeTickLast'] = self['timeTickLast'][-maxPoints+1:0].append(timeinterval[1])
         else:
-            self['timeTickFirst'] = numpy.append(self['timeTickFirst'], timeinterval[0])
-            self['timeTickLast'] = numpy.append(self['timeTickLast'], timeinterval[1])
+            self['timeTickFirst'].append(timeinterval[0])
+            self['timeTickLast'].append(timeinterval[1])
         self.description["lastDataAquired"] = datetime.now(pytz.utc)
     
     @property
@@ -358,7 +358,7 @@ class TraceCollection(keydefaultdict):
                     data.append(list(map(float, line.split())))
             columnspec = self.description["columnspec"]
             for colname, d in zip(columnspec, zip(*data)):
-                self[colname] = numpy.array(d)
+                self[colname] = list(d)
             if 'fitfunction' in self.description and FitFunctionsAvailable:
                 self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
             if "tracePlottingList" not in self.description:
@@ -489,7 +489,7 @@ class TraceCollection(keydefaultdict):
         self.filename = filename
         with h5py.File(self.filename) as f:
             for colname, dataset in f['columns'].items():
-                self[colname] = numpy.array(dataset)
+                self[colname] = list(dataset)
             tpelement = f.get("/variables/TracePlottingList")
             self.description["tracePlottingList"] = PlottingList.fromHdf5(tpelement) if tpelement is not None else None
             # for element in root.findall("/variables/Element"):
@@ -519,9 +519,9 @@ class TraceCollection(keydefaultdict):
         columnspec = ColumnSpec.fromXmlElement(root.find("./Variables/ColumnSpec"))
         for colname, d in zip(columnspec, zip(*data)):
             if math.isnan(d[-1]):
-                a = numpy.array(d[0:-1])
+                a = list(d[0:-1])
             else:
-                a = numpy.array(d)
+                a = list(d)
             self[colname] = a
         tpelement = root.find("./Variables/TracePlottingList")
         self.description["tracePlottingList"] = PlottingList.fromXmlElement(tpelement, self) if tpelement is not None else None
@@ -547,7 +547,7 @@ class TraceCollection(keydefaultdict):
                 data.append( list(map(float,line.split())) )
         columnspec =  self.description["columnspec"].split(',')
         for colname, d in zip( columnspec, zip(*data) ):
-            self[colname] = numpy.array(d)
+            self[colname] = list(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
         self.description["tracePlottingList"] = PlottingList(TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name=""))

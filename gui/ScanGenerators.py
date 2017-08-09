@@ -108,14 +108,14 @@ class ParameterScanGenerator(ScanGeneratorBase):
                                      
     def appendData(self, traceList, x, evaluated, timeinterval):
         if evaluated and traceList:
-            traceList[0].x = numpy.append(traceList[0].x, x)
+            traceList[0].x.append(x)
             traceList[0].timeintervalAppend(timeinterval)
         for trace, (y, error, raw) in zip(traceList, evaluated):                                  
-            trace.y = numpy.append(trace.y, y)
-            trace.raw = numpy.append(trace.raw, raw)
+            trace.y.append(y)
+            trace.raw.append(raw)
             if error is not None:
-                trace.bottom = numpy.append(trace.bottom, error[0])
-                trace.top = numpy.append(trace.top, error[1])
+                trace.bottom.append(error[0])
+                trace.top.append(error[1])
 
 
 class StepInPlaceGenerator(ScanGeneratorBase):
@@ -141,23 +141,23 @@ class StepInPlaceGenerator(ScanGeneratorBase):
         steps = self.scan.maxPoints
         if evaluated and traceList:
             if len(traceList[0].x)<steps or steps==0:
-                traceList[0].x = numpy.append(traceList[0].x, x)
+                traceList[0].x.append(x)
                 traceList[0].timeintervalAppend(timeinterval)
                 for trace, (y, error, raw) in zip(traceList, evaluated):                                  
-                    trace.y = numpy.append(trace.y, y)
-                    trace.raw = numpy.append(trace.raw, raw)
+                    trace.y.append(y)
+                    trace.raw.append(raw)
                     if error is not None:
-                        trace.bottom = numpy.append(trace.bottom, error[0])
-                        trace.top = numpy.append(trace.top, error[1])
+                        trace.bottom.append(error[0])
+                        trace.top.append(error[1])
             else:
-                traceList[0].x = numpy.append(traceList[0].x[-steps+1:], x)
+                traceList[0].x = traceList[0].x[-steps+1:].append(x)
                 traceList[0].timeintervalAppend(timeinterval, steps)
                 for trace, (y, error, raw) in zip(traceList, evaluated):                                  
-                    trace.y = numpy.append(trace.y[-steps+1:], y)
-                    trace.raw = numpy.append(trace.raw[-steps+1:], raw)
+                    trace.y = trace.y[-steps+1:].append(y)
+                    trace.raw = trace.raw[-steps+1:].append(raw)
                     if error is not None:
-                        trace.bottom = numpy.append(trace.bottom[-steps+1:], error[0])
-                        trace.top = numpy.append(trace.top[-steps+1:], error[1])
+                        trace.bottom = trace.bottom[-steps+1:].append(error[0])
+                        trace.top = trace.top[-steps+1:].append(error[1])
 
 
 class FreerunningGenerator(ScanGeneratorBase):
@@ -184,14 +184,14 @@ class FreerunningGenerator(ScanGeneratorBase):
 
     def appendData(self, traceList, x, evaluated, timeinterval):
         if evaluated and traceList:
-            traceList[0].x = numpy.append(traceList[0].x, x)
+            traceList[0].x.append(x)
             traceList[0].timeintervalAppend(timeinterval)
             for trace, (y, error, raw) in zip(traceList, evaluated):                                  
-                trace.y = numpy.append(trace.y, y)
-                trace.raw = numpy.append(trace.raw, raw)
+                trace.y.append(y)
+                trace.raw.append(raw)
                 if error is not None:
-                    trace.bottom = numpy.append(trace.bottom, error[0])
-                    trace.top = numpy.append(trace.top, error[1])
+                    trace.bottom.append(error[0])
+                    trace.top.append(error[1])
 
 
 class GateSequenceScanGenerator(ScanGeneratorBase):
@@ -263,14 +263,14 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
 
     def appendData(self, traceList, x, evaluated, timeinterval):
         if evaluated and traceList:
-            traceList[0].x = numpy.append(traceList[0].x, x)
+            traceList[0].x.append(x)
             traceList[0].timeintervalAppend(timeinterval)
         for trace, (y, error, raw) in zip(traceList, evaluated):                                  
-            trace.y = numpy.append(trace.y, y)
-            trace.raw = numpy.append(trace.raw, raw)
+            trace.y.append(y)
+            trace.raw.append(raw)
             if error is not None:
-                trace.bottom = numpy.append(trace.bottom, error[0])
-                trace.top = numpy.append(trace.top, error[1])
+                trace.bottom.append(error[0])
+                trace.top.append(error[1])
 
     def xKey(self, index):
         return self.scan.gateSequenceUi.gateString(index % self.scan.singleScanLength)
