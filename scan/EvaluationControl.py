@@ -128,7 +128,7 @@ class Evaluation:
         return hash(tuple(getattr(self, field) for field in self.stateFields))
         
     stateFields = [ 'histogramBins', 'integrateHistogram', 'enableTimestamps', 'binwidth', 'roiStart', 'roiWidth', 'integrateTimestamps', 'timestampsChannel', 
-                    'saveRawData', 'evalList', 'counterChannel']
+                    'saveRawData', 'evalList', 'counterChannel', 'timestampsId']
 
 
 class EvaluationControlParameters(AttributeComparisonEquality):
