@@ -702,7 +702,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         bins = int(self.context.evaluation.roiWidth / self.context.evaluation.binwidth)
         multiplier = self.pulserHardware.timestep.m_as('ms')
         myrange = (self.context.evaluation.roiStart.m_as('ms')/multiplier, (self.context.evaluation.roiStart+self.context.evaluation.roiWidth).m_as('ms')/multiplier)
-        y, x = numpy.histogram(list(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel])),
+        y, x = numpy.histogram(list(itertools.chain(*data.timestamp[self.context.evaluation.timestampsKey])),
                                range=myrange,
                                bins=bins)
         x = x[0:-1] * multiplier
@@ -713,12 +713,12 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.context.currentTimestampTrace.y += y
             self.plottedTimestampTrace.replot()
             if self.context.currentTimestampTrace.rawdata:
-                self.context.currentTimestampTrace.rawdata.addInt(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel]))
+                self.context.currentTimestampTrace.rawdata.addInt(itertools.chain(*data.timestamp[self.context.evaluation.timestampsKey]))
         else:    
             self.context.currentTimestampTrace = TraceCollection()
             if self.context.evaluation.saveRawData:
                 self.context.currentTimestampTrace.rawdata = RawData()
-                self.context.currentTimestampTrace.rawdata.addInt(itertools.chain(data.timestamp[self.context.evaluation.timestampsChannel]))
+                self.context.currentTimestampTrace.rawdata.addInt(itertools.chain(data.timestamp[self.context.evaluation.timestampsKey]))
             self.context.currentTimestampTrace.x = x
             self.context.currentTimestampTrace.y = y
             self.context.currentTimestampTrace.name = self.context.scan.settingsName

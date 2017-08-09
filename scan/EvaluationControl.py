@@ -98,8 +98,13 @@ class Evaluation:
         self.roiWidth = Q(1, 'ms')
         self.integrateTimestamps = 0
         self.timestampsChannel = 0
+        self.timestampsId = 0
         self.saveRawData = False
-        
+
+    @property
+    def timestampsKey(self):
+        return ((self.timestampsId & 0xff) << 8) | (self.timestampsChannel & 0xff)
+
     def __setstate__(self, state):
         """this function ensures that the given fields are present in the class object
         after unpickling. Only new class attributes need to be added here.
@@ -107,6 +112,7 @@ class Evaluation:
         self.__dict__ = state
         self.__dict__.setdefault('evalList', list())
         self.__dict__.setdefault('histogramBins', 50)
+        self.__dict__.setdefault('timestampsId', 0)
 
     def __eq__(self, other):
         try:
@@ -212,6 +218,7 @@ class EvaluationControl(ControlForm, ControlBase ):
             self.saveRawDataCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'saveRawData' ) )
             self.integrateCombo.currentIndexChanged[int].connect( self.onIntegrationChanged )
             self.channelSpinBox.valueChanged.connect( functools.partial(self.onBareValueChanged, 'timestampsChannel') )
+            self.idSpinBox.valueChanged.connect(functools.partial(self.onBareValueChanged, 'timestampsId'))
         else:
             self.settings.enableTimestamps = False
             timestampsWidget = self.toolBox.widget(1)
@@ -251,6 +258,7 @@ class EvaluationControl(ControlForm, ControlBase ):
             self.roiWidthSpinBox.setValue(self.settings.roiWidth)
             self.integrateCombo.setCurrentIndex( self.settings.integrateTimestamps )
             self.channelSpinBox.setValue( self.settings.timestampsChannel )
+            self.idSpinBox.setValue(self.settings.timestampsId)
         self.checkSettingsSavable()
         self.evalAlgorithmList = []
         for evaluation in self.settings.evalList:
