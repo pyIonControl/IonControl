@@ -206,8 +206,8 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         for filename in sorted(self.settings.filelist, key=lambda x: Path(x).stem):
             try:
                 self.openFile(filename, defaultpen=0)
-            except:
-                logger.error("Could not load named trace from file {}!".format(filename))
+            except Exception as e:
+                logger.error("Could not load named trace from file {} error {}".format(filename, e))
                 self.settings.filelist.remove(filename)
         self.updateNames()
         self.traceView.collapseAll()
@@ -480,7 +480,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         for index in range(len(self.childTableModel.childList)):
             yColumnName = self.getUniqueChildName(index)
             rawColumnName = '{0}_raw'.format(yColumnName)
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
+            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()],
                                         pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
@@ -522,7 +522,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                 traceCollection = trc.NamedTraceDict[parentName].children[0].content.traceCollection
                 yColumnName = childName
                 rawColumnName = '{0}_raw'.format(yColumnName)
-                plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
+                plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()],
                                             pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
                                             bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                             heightColumn=yColumnName+"_height",
@@ -538,7 +538,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             parentName = self.getUniqueName(parentName)
             yColumnName = childName
             rawColumnName = '{0}_raw'.format(yColumnName)
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()]["view"],
+            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[self.comboBox.currentText()],
                                         pens.penList, xColumn=yColumnName+"_x", yColumn=yColumnName, rawColumn=rawColumnName, name=yColumnName,
                                         bottomColumn=yColumnName+"_bottom", topColumn=yColumnName+"_top",
                                         heightColumn=yColumnName+"_height",
@@ -576,19 +576,17 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
                 return #If the filename and creation dates are the same, you're trying to open an existing trace.
-        plottedTraceList = list()
         category = self.getUniqueCategory(filename) #this row differs from the Traceui version of this function
-        for plotting in traceCollection.tracePlottingList:
-            windowName = plotting.windowName if plotting.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
-            name = plotting.name
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
-            plottedTrace.category = category
-            plottedTraceList.append(plottedTrace)
-            self.addTrace(plottedTrace, defaultpen)
+        for plotted in traceCollection.plottingList:
+            windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
+            name = plotted.name
+            plotted.setup(traceCollection, self.graphicsViewDict[windowName], pens.penList, -1,
+                          windowName=windowName, name=name)
+            plotted.category = category
+            self.addTrace(plotted, defaultpen)
         if self.expandNew:
-            self.expand(plottedTraceList[0])
+            self.expand(traceCollection.plottingList[0])
         self.resizeColumnsToContents()
-        return plottedTraceList
 
     def rightClickMenu(self, pos):
         """a CustomContextMenu for right click"""

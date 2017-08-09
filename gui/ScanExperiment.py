@@ -703,7 +703,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         bins = int(self.context.evaluation.roiWidth / self.context.evaluation.binwidth)
         multiplier = self.pulserHardware.timestep.m_as('ms')
         myrange = (self.context.evaluation.roiStart.m_as('ms')/multiplier, (self.context.evaluation.roiStart+self.context.evaluation.roiWidth).m_as('ms')/multiplier)
-        y, x = numpy.histogram(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel]),
+        y, x = numpy.histogram(list(itertools.chain(*data.timestamp[self.context.evaluation.timestampsChannel])),
                                range=myrange,
                                bins=bins)
         x = x[0:-1] * multiplier
@@ -725,7 +725,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.context.currentTimestampTrace.name = self.context.scan.settingsName
             self.context.currentTimestampTrace.description["comment"] = ""
             self.context.currentTimestampTrace.filenameCallback = functools.partial( self.traceFilename, "Timestamp_"+self.context.scan.filename )
-            self.plottedTimestampTrace = PlottedTrace(self.context.currentTimestampTrace, self.plotDict["Timestamps"]["view"], pens.penList, windowName="Timestamps")
+            self.plottedTimestampTrace = PlottedTrace(self.context.currentTimestampTrace, self.plotDict["Timestamps"], pens.penList, windowName="Timestamps")
             self.timestampTraceui.addTrace(self.plottedTimestampTrace, pen=-1)              
             # pulseProgramHeader = stringutilit.commentarize( self.pulseProgramUi.documentationString() )
             # scanHeader = stringutilit.commentarize( repr(self.context.scan) )
@@ -757,7 +757,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 self.context.histogramCurveList[index].replot()
             else:
                 yColumnName = 'y{0}'.format(index) 
-                plottedHistogramTrace = PlottedTrace(self.context.histogramTrace, self.plotDict["Histogram"]["view"], pens.penList, plotType=PlottedTrace.Types.steps, #@UndefinedVariable
+                plottedHistogramTrace = PlottedTrace(self.context.histogramTrace, self.plotDict["Histogram"], pens.penList, plotType=PlottedTrace.Types.steps, #@UndefinedVariable
                                                      yColumn=yColumnName, name="Histogram "+(histogram[2] if histogram[2] else ""), windowName="Histogram" )
                 self.context.histogramTrace.filenamePattern = "Hist_"+self.context.scan.filename
                 plottedHistogramTrace.x = histogram[1]

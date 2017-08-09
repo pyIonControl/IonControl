@@ -128,11 +128,11 @@ class StepInPlaceGenerator(ScanGeneratorBase):
         else:
             data = []
         self.scan.code = NoneScanCode # writing the last memory location
-        return self.scan.code*5, data # write 5 points to the fifo queue at start,
+        return self.scan.code*50, data # write 5 points to the fifo queue at start,
                         # this prevents the Step in Place from stopping in case the computer lags behind evaluating by up to 5 points
 
     def restartCode(self, currentIndex):
-        return self.scan.code * 5
+        return self.scan.code * 50
         
     def dataNextCode(self, experiment):
         return self.scan.code

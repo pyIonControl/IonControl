@@ -194,7 +194,7 @@ class InstrumentLoggingHandler(QtCore.QObject):
         plot = self.plotDict.get( handler.plotName, None ) 
         if plot is None:
             plot = list(self.plotDict.values())[0]
-        handler.addPoint( self.traceui, plot["view"], convdata, source )
+        handler.addPoint( self.traceui, plot, convdata, source )
         self.newData.emit( source, InputData(calibrated=convdata[1], decimated=data[1]) )
                 
     def persistenceCallback(self, source, data):
