@@ -112,7 +112,6 @@ class PlottedTrace(object):
             self._graphicsView = graphicsView
             self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('aa')#self._graphicsView.getLabel('bottom'))
             self.windowName = name
-            self.tracePlotting.windowName = name
             self.plot()
 
     @property
@@ -212,7 +211,6 @@ class PlottedTrace(object):
     def filt(self, column):
         if self._filtColumn is None:
            self._filtColumn = self._yColumn+'_filt'
-           self.tracePlotting.filtColumn = self._filtColumn
         self.trace[self._filtColumn] = column
 
     @property
