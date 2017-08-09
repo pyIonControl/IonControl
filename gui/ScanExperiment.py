@@ -558,9 +558,10 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
 
     def processData(self, data, queue_size):
         logger = logging.getLogger(__name__)
-        logger.info("onData {0} {1} {2} {3}".format(self.context.currentIndex,
-                                                    dict((i, len(data.count[i])) for i in sorted(data.count.keys())),
-                                                    data.scanvalue, queue_size))
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("onData {0} {1} {2} {3}".format(self.context.currentIndex,
+                                                        dict((i, len(data.count[i])) for i in sorted(data.count.keys())),
+                                                        data.scanvalue, queue_size))
         x = self.context.generator.xValue(self.context.currentIndex, data)
         if self.context.rawDataFile is not None:
             self.context.rawDataFile.write(data.dataString())

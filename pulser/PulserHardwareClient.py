@@ -12,10 +12,12 @@ from ctypes import c_longlong
 from multiprocessing.sharedctypes import Array
 from queue import Queue
 from threading import Condition
+from time import time
 
 import numpy
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication
 
 from modules.quantity import Q
 from pulser.LoggingReader import LoggingReader
@@ -55,8 +57,11 @@ class QueueReader(QtCore.QThread):
         logger.info( "QueueReader thread started." )
         while True:
             try:
-                data = self.dataQueue.get()
-                self.dataHandler[data.__class__.__name__](data, self.dataQueue.qsize())
+                for _ in range(10):
+                    data = self.dataQueue.get()
+                    # print("data from queue", time(), data.__class__.__name__)
+                    self.dataHandler[data.__class__.__name__](data, self.dataQueue.qsize())
+                # print("data dispatched", time())
                 #  use condition_var to wait until gui thread has processed data and all other events
                 #  this generates a handshake with the event loop, we send out a signal to the event loop
                 #  the signal gets added to the end of the queue, once it is processed, it signals back to this thread
@@ -64,6 +69,7 @@ class QueueReader(QtCore.QThread):
                 with self.condition_var:
                     self.pulserHardware.next_data_trigger.emit()
                     self.condition_var.wait(1)
+                    # print("condition stop wait", time())
             except (KeyboardInterrupt, SystemExit, FinishException):
                 break
             except Exception:
@@ -119,6 +125,7 @@ class PulserHardware(QtCore.QObject):
         self.clientPipe.send(('finish', (), {}))
         self.serverProcess.join()
         self.queueReader.wait()
+        QApplication.processEvents()
         self.loggingReader.wait()
         logging.getLogger(__name__).debug("PulseHardwareClient Shutdown completed")
         
