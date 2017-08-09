@@ -90,6 +90,8 @@ class PlottingList(list):
             plotting.type = int(plotting.type) if hasattr(plotting, 'type') else 0
             if plottingelement.find("FitFunction") is not None:
                 plotting.fitFunction = FitFunctions.fromXmlElement(plottingelement.find("FitFunction"))
+            else:
+                plotting.fitFunction = None
             l.append(plotting)
         # for plottingelement in element.findall("StructurePlotting"):
         #     plotting = PlottedStructure()
