@@ -42,7 +42,7 @@ class QueueReader(QtCore.QThread):
         self.dataQueue = dataQueue
         self.condition_var = condition_var
         self.dataHandler = { 'Data': lambda data, size : self.pulserHardware.dataAvailable.emit(data, size),
-                             'DedicatedData': lambda data, size: self.pulserHardware.dedicatedDataAvailable.emit(data),
+                             'DedicatedData': lambda data, size: self.pulserHardware.dedicatedDataAvailable.emit(data, size),
                              'FinishException': lambda data, size: self.raise_(FinishException()),
                              'LogicAnalyzerData': self.onLogicAnalyzerData}
    
@@ -82,7 +82,7 @@ class PulserHardware(QtCore.QObject):
     sleepQueue = Queue()   # used to be able to interrupt the sleeping procedure
 
     dataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject', object )
-    dedicatedDataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject' )
+    dedicatedDataAvailable = QtCore.pyqtSignal(object, object)
     logicAnalyzerDataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject' )
     shutterChanged = QtCore.pyqtSignal( 'PyQt_PyObject' )
     ppActiveChanged = QtCore.pyqtSignal(object)

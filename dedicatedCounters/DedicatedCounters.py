@@ -6,28 +6,30 @@
 """
 DedicatedCounters reads and displays the counts from the simple counters and ADCs.
 """
-from PyQt5 import QtCore, QtWidgets, QtGui
+import logging
+import os
+from time import time
+
 import PyQt5
 import numpy
-import logging
+from PyQt5 import QtCore, QtWidgets, QtGui
+from pyqtgraph.dockarea import Dock, DockArea
 
 from dedicatedCounters import AutoLoad
 from dedicatedCounters import DedicatedCountersSettings
 from dedicatedCounters import DedicatedDisplay
 from dedicatedCounters import InputCalibrationUi
-from modules import enum
-from trace.TraceCollection import TraceCollection
-from modules.DataDirectory import DataDirectory
-from modules.SequenceDict import SequenceDict
-from trace.pens import penList
 from dedicatedCounters.StatusDisplay import StatusDisplay
-from pyqtgraph.dockarea import Dock, DockArea
-from uiModules.DateTimePlotWidget import DateTimePlotWidget
+from modules import enum
+from modules.DataDirectory import DataDirectory
 from modules.RollingUpdate import rollingUpdate
+from modules.SequenceDict import SequenceDict
+from modules.quantity import is_Q
+from trace.TraceCollection import TraceCollection
+from trace.pens import penList
 from uiModules.BlockAutoRange import BlockAutoRange
-from modules.quantity import is_Q, Q
+from uiModules.DateTimePlotWidget import DateTimePlotWidget
 
-import os
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/DedicatedCounters.ui')
 DedicatedCountersForm, DedicatedCountersBase = PyQt5.uic.loadUiType(uipath)
 
@@ -61,7 +63,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.externalInstrumentObservable = externalInstrumentObservable
         self.dbConnection = dbConnection
         self.plotDict = dict()
-
+        self.lastPlotTime = 0
         self.area = None
 #        [
 #            AnalogInputCalibration.PowerDetectorCalibration(),
@@ -265,7 +267,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             for n in list(subdict.keys()):
                 subdict[n].setData(self.xData[n], self.yData[n])
 
-    def onData(self, data):
+    def onData(self, data, queueSize):
         self.tick += 1
         self.displayUi.values = data.data[0:4]
         self.displayUi2.values = data.data[4:8]
@@ -297,17 +299,23 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     y = value
                 self.yData[myindex] = rollingUpdate(self.yData[myindex], y, self.settings.pointsToKeep)
                 self.xData[myindex] = rollingUpdate(self.xData[myindex], data.timestamp, self.settings.pointsToKeep)
-        for name, plotwin in self.curvesDict.items():
-            if plotwin:
-                with BlockAutoRange(next(iter(plotwin.values()))):
-                    for index, plotdata in plotwin.items():
-                        plotdata.setData(self.xData[index], self.yData[index])
+        lag = time() - self.lastPlotTime
+        if queueSize < 2 or (queueSize < 20 and lag > 1) or lag > 2:
+            self.replot()
         self.statusDisplay.setData(data)
         self.dataAvailable.emit(data)
         # logging.getLogger(__name__).info("Max bytes read {0}".format(data.maxBytesRead))
         self.statusDisplay.setData(data)
         self.dataAvailable.emit(data)
- 
+
+    def replot(self):
+        for name, plotwin in self.curvesDict.items():
+            if plotwin:
+                with BlockAutoRange(next(iter(plotwin.values()))):
+                    for index, plotdata in plotwin.items():
+                        plotdata.setData(self.xData[index], self.yData[index])
+        self.lastPlotTime = time()
+
     def convertAnalog(self, data):
         converted = list()
         for channel, cal in enumerate(self.analogCalbrations):
