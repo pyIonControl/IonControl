@@ -416,7 +416,10 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         else:
             self.showMaximized()
             
-        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting )
+        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser,
+                                                         self.globalVariablesUi, self.shutterUi,
+                                                         self.ExternalParametersUi.callWhenDoneAdjusting,
+                                                         remoteRender=self.project.isEnabled('software', 'Remote render'))
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
         
         self.logicAnalyzerWindow = LogicAnalyzer(self.config, self.pulser, self.channelNameData )

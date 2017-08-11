@@ -26,9 +26,10 @@ from modules.RollingUpdate import rollingUpdate
 from modules.SequenceDict import SequenceDict
 from modules.quantity import is_Q
 from trace.TraceCollection import TraceCollection
-from trace.pens import penList
+from trace.pens import penList, penArgList
 from uiModules.BlockAutoRange import BlockAutoRange
 from uiModules.DateTimePlotWidget import DateTimePlotWidget
+from uiModules.RemoteCustomPlot import RemoteCustomView
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/DedicatedCounters.ui')
 DedicatedCountersForm, DedicatedCountersBase = PyQt5.uic.loadUiType(uipath)
@@ -42,7 +43,9 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
     dataAvailable = QtCore.pyqtSignal( object )
     OpStates = enum.enum('idle', 'running', 'paused')
 
-    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable, parent=None):
+    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable,
+                 parent=None, remoteRender=False):
+        self.remoteRender = remoteRender
         DedicatedCountersForm.__init__(self)
         DedicatedCountersBase.__init__(self, parent)
         self.curvesDict = {}
@@ -184,9 +187,9 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     adcIndexList = [self.adcDict[n] for n in dataSourceNames if n in self.adcDict]
                     mycurves = self.curvesDict[windowName]
                     for cIdx in counterIndexList:
-                        mycurves.setdefault(cIdx, self.plotDict[windowName]['view'].plot(pen=penList[cIdx + 1][0]))
+                        mycurves.setdefault(cIdx, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
                     for aIdx in adcIndexList:
-                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penList[cIdx + 1][0]))
+                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
                     for eIdx in set(mycurves) - set(counterIndexList) - set(i + 16 for i in adcIndexList):
                         curve = mycurves.pop(eIdx)
                         self.plotDict[windowName]['view'].removeItem(curve)
@@ -334,11 +337,20 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             plotNames.append('Autoload')
         for name in plotNames:
             dock = Dock(name)
-            widget = DateTimePlotWidget(self, name=name)
-            view = widget._graphicsView
-            self.area.addDock(dock, "bottom")
-            dock.addWidget(widget)
-            self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
+            if self.remoteRender:
+                widget = RemoteCustomView()
+                widget.pg.setConfigOptions(antialias=True)  ## prettier plots at no cost to the main process!
+                rplt = widget.cp.CustomPlotItem(dateAxis=True, name=name)
+                rplt._setProxyOptions(deferGetattr=True)  ## speeds up access to rplt.plot
+                widget.setCentralItem(rplt)
+                dock.addWidget(widget)
+                self.plotDict[name] = {"dock":dock, "widget":widget, "view":rplt}
+            else:
+                widget = DateTimePlotWidget(self, name=name)
+                view = widget._graphicsView
+                self.area.addDock(dock, "bottom")
+                dock.addWidget(widget)
+                self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
 
     def onAddPlot(self):
         name, ok = QtGui.QInputDialog.getText(self, 'Plot Name', 'Please enter a plot name: ')

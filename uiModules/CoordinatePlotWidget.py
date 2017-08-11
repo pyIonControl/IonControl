@@ -124,6 +124,9 @@ class CustomPlotItem(PlotItem):
         Create a new CustomPlotItem. In addition to the ordinary PlotItem, adds buttons and uses the custom ViewBox.
         """
         cvb = CustomViewBox()
+        if kargs.get('dateAxis', False):
+            self.dateAxisItem = DateAxisItem('bottom')
+            kargs['axisItems'] = {'bottom': self.dateAxisItem}
         super(CustomPlotItem, self).__init__(parent, viewBox = cvb, **kargs)
         self.unityRangeBtn = ButtonItem(imageFile=range_icon_file, width=14, parentItem=self)
         self.unityRangeBtn.setToolTip("Set y range to (0,1)")
@@ -134,7 +137,7 @@ class CustomPlotItem(PlotItem):
         self.autoBtn.setToolTip("Autorange x and y axes")
         self.showGrid(x = True, y = True, alpha = grid_opacity) #grid defaults to on
         self.allButtonsHidden = False
-        
+
     def hideAllButtons(self, hide):
         self.allButtonsHidden = hide
         if self.allButtonsHidden:
