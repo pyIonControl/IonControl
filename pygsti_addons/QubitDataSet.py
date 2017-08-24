@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import numpy
+import pygsti
 
 
 class QubitResultContainer(dict):
@@ -16,10 +17,15 @@ class QubitResult(dict):
 
 
 class ResultCounter(dict):
-    def __init__(self, values, repeats):
+    def __init__(self, values, repeats, force_string=False):
         super().__init__()
-        for v, r in zip(values, repeats):
-            self[v] += r
+        if force_string:
+            for v, r in zip(values, repeats):
+                self[str(v)] += r
+        else:
+            for v, r in zip(values, repeats):
+                self[v] += r
+
 
     def __missing__(self, key):
         ret = self[key] = 0
@@ -73,7 +79,7 @@ class QubitDataSet:
                 self._countVecMx[self.spam_labels.index(str(v)), gatestring_idx] += r
                 self._totalCntVec[gatestring_idx] += r
             else:
-                print("len(values)", len(values))
+                # print("len(values)", len(values))
                 eval = ResultCounter(values, repeats)
                 for label, count in eval.items():
                     self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
@@ -105,4 +111,12 @@ class QubitDataSet:
         return (isinstance(other, QubitDataSet) and
                 all(getattr(self, f) == getattr(other, f) for f in ('gatestring_list', '_rawdata')))
 
+    @property
+    def gst_dataset(self):
+        ds = pygsti.objects.DataSet(spamLabels=['0', '1'])
+        for gs, data in self.data.items():
+            rc = ResultCounter(data['value'], data['repeats'], force_string=True)
+            ds.add_count_dict(gs, rc)
+        ds.done_adding_data()
+        return ds
 
