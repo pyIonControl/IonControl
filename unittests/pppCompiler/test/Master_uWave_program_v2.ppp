@@ -1,0 +1,178 @@
+# useful constants for keeping track of things like DDSs and counter channels etc..
+const DDSLock_370 = 9
+const TickleDDS = 7
+const MicrowaveDDS = 5
+const PMTChannel = 1
+
+# various shutter sequences
+shutter InitializationShutter
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter DetectOn
+masked_shutter TickleOn
+masked_shutter MicrowaveOn
+
+# parameters that can be controlled from the parameter window, show up in order listed below
+parameter <AD9912_FRQ> CoolingFreq = 230 MHz
+parameter <AD9912_FRQ> DetectFreq = 250 MHz
+parameter <AD9912_FRQ> TickleFreq = 0 MHz
+parameter <AD9912_FRQ> AppliedTickleFreq = 0 MHz
+parameter <AD9912_FRQ> AppliedMicrowaveFreq = 0 MHz
+parameter <AD9912_FRQ> MicrowaveFreqOffset = 0 MHz
+
+parameter<AD9912_PHASE> SpinEchoPhase = 180
+parameter<AD9912_PHASE> MicrowaveAnalyzePhase = 0
+parameter<AD9912_PHASE> MicrowaveInitPhase = 0
+
+parameter CoolingTime = 2 ms
+parameter PumpTime = 100 us
+
+parameter PumpTime2 = 100 us
+parameter DetectTime = 1 ms
+parameter piTime = 20 us
+parameter MicrowaveInitTime = 40 us
+parameter MicrowaveAnalyzeTime = 10 us
+parameter QubitWaitTime = 0 ms
+parameter SpinEchoTime = 0 ms
+parameter PumpHoldTime = 2 us
+parameter updateTime = 100 ms
+parameter experiments = 100
+
+parameter BoolFreqScan = 0
+parameter BoolTickle = 0
+parameter BooluWaveScan = 0
+parameter BoolSpinEcho = 0
+
+# counter channels associated with when data should accumulated
+counter CoolingCounters
+counter DetectCounters
+
+# trigger list, for now just for applying updates to DDSs
+trigger ddsApplyAll
+trigger ddsLockPt
+trigger ddsuwave
+
+# excitcodes for different types of exit sequences, ie end of scan, ion lost etc..
+exitcode endLabel = 0xfffe000000000000
+exitcode IonLostExitcode = 0xfffe000000000001
+
+# variables to be modified within pulse program
+var currentexperiment = 0
+var piTimeIntegrator = 0
+var CoolPhotons = 0
+
+def something():
+    if CoolingTime == 1:
+        CoolingTime = 0
+
+def cool():
+    if BoolFreqScan ==1:
+        set_dds( channel=DDSLock_370, freq=CoolingFreq )
+        set_trigger( ddsLockPt )
+    pulse(shutter=CoolingOn, counter=CoolingCounters, duration=CoolingTime)
+    #set_shutter( CoolingOn )
+    #set_counter( CoolingCounters )
+    #update( CoolingTime )
+    #clear_counter()
+    #update()
+    #set_inv_shutter( CoolingOn )
+    CoolPhotons = load_count( PMTChannel )
+
+def pump():
+    pulse(shutter=PumpingOn, duration=PumpTime)
+    update( PumpHoldTime )
+
+def microwaveon():
+    set_dds( channel=MicrowaveDDS, phase=MicrowaveInitPhase )
+    if BooluWaveScan == 1:
+        set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq )
+    pulse(shutter=MicrowaveOn, trigger=ddsuwave,duration=MicrowaveInitTime)
+
+
+def spinecho():
+    set_dds( channel=MicrowaveDDS, phase=SpinEchoPhase )
+    pulse(shutter=MicrowaveOn, trigger=ddsuwave, duration=SpinEchoTime)
+
+def qubitAnalyze():
+    set_dds( channel=MicrowaveDDS, phase=MicrowaveAnalyzePhase )
+    pulse(shutter=MicrowaveOn, trigger=ddsuwave, duration=MicrowaveAnalyzeTime)
+
+#def pitimedriftcal():
+    # pulsetime = piTime
+    #pulsetime *=pulsenum  #pulsenum should be an odd num 4n+1, to maintain the rotation dir on the bloch sphere. To amplify error, larger n.
+    #qubitInit(pulseTime)
+    #loadcounts from counter into a var
+    #if statement: counts>thresh
+        #pitimeint -= 1
+    #else, pitimeint +=1
+    #pitime = pitimeint >>3 #shift back the bit register
+    
+
+def detect():
+    if BoolFreqScan==1:
+        set_dds( channel=DDSLock_370, freq=DetectFreq )
+        set_trigger( ddsLockPt )
+    update ( updateTime )
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+#    set_dds( channel=DDSDetect, freq=DetectFreq )
+#    set_shutter( DetectOn )
+#    set_counter( DetectCounters )
+#    set_trigger( ddsApplyTrigger )
+#    update( DetectTime )
+#    set_inv_shutter( DetectOn )
+#    clear_counter()
+#    update()
+
+
+set_shutter(InitializationShutter)
+update()
+
+if BoolTickle == 1:
+    set_shutter(TickleOn)
+    update()
+
+#if Booldriftcal==1:
+#    piTimeIntegrator = piTime << 3
+
+
+while not pipe_empty():
+    apply_next_scan_point()
+    
+    # Initialize modulation frequency for Tickle Scan
+    if BoolTickle ==1:
+        set_dds( channel=TickleDDS, freq=AppliedTickleFreq )  
+    # Initialize lockpoint for cooling
+    set_dds( channel=DDSLock_370, freq=CoolingFreq )
+    set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq, phase=MicrowaveInitPhase )
+    set_trigger( ddsApplyAll )
+    update()
+
+    currentexperiment = 0
+    while currentexperiment < experiments:
+        cool()
+        if PumpTime>0:
+            pump()
+        if MicrowaveInitTime>0:
+            microwaveon()
+        if QubitWaitTime>0:
+            update( QubitWaitTime )
+        if BoolSpinEcho>0:
+            spinecho()
+            if QubitWaitTime>0:
+                update( QubitWaitTime )
+        if MicrowaveAnalyzeTime>0:
+            qubitAnalyze()
+        if DetectTime>0:
+            detect()
+        #if BoolPiTimeCal==1:
+            #qubitcalexpt
+        currentexperiment += 1
+
+exit( endLabel )

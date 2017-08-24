@@ -25,9 +25,10 @@ def ppCompile(assemblerfile):
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
 folder = "test"
-testfiles = [ #"Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
-              #"PulseCommand",
-              #"indented_blocks",
+testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
+              "PulseCommand",
+              "indented_blocks",
+              "Master_uWave_program_v2",
               "Declarations"]
 
 def test_lex_generator(name):
@@ -68,4 +69,7 @@ for name in testfiles:
     test_name = "test_parse_{0}".format(name)
     test = test_parse_generator(name)
     setattr(pppCompilerTest, test_name, test)
+
+if __name__ == "__main__":
+    main()
 
