@@ -9,7 +9,10 @@ from trace.TraceCollection import TraceCollection
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('--filename', type=str, default="Phoenix", help='filename of voltage array')
 args = parser.parse_args()
-filename = args.filename[0]
+#filename = args.filename[0]
+
+# PUT THE FILE NAME HERE, EITHER COPY IT INTO THE SAME DIRECTORY AS THIS CODE, OR SPECIFY THE CORRECT PATH TO YOUR FILE
+filename = "GSTScan_057.zip"
 
 Trace = TraceCollection()
 Trace.loadZip(filename)
@@ -39,5 +42,7 @@ maxLengths = [1,2,4,8,16,32,64,128,256,512,1024]
 
 #gs_target.set_all_parameterizations("TP")
 results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+
+#CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
 pygsti.report.create_general_report(results, filename=r'output.html',
                                     title="GSTScan_057", verbosity=2)
