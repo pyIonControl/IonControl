@@ -402,7 +402,10 @@ class TraceuiMixin:
                 self.finalizedTimeLabel.setText('')
             # take care of properties
             plotted = dataNode.content
-            self.plotParamTable.setParameters(plotted.parameters())
+            try:
+                self.plotParamTable.setParameters(plotted.parameters())
+            except:
+                pass
         else:
                 self.createdDateLabel.setText('')
                 self.createdTimeLabel.setText('')
