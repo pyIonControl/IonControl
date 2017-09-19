@@ -287,6 +287,22 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
     def gateSet(self):
         return self.scan.gateSequenceUi.gateSequenceContainer.gateSet
 
+    @property
+    def prepFiducials(self):
+        return self.scan.gateSequenceUi.gateSequenceContainer.prep
+
+    @property
+    def measFiducials(self):
+        return self.scan.gateSequenceUi.gateSequenceContainer.meas
+
+    @property
+    def germs(self):
+        return self.scan.gateSequenceUi.gateSequenceContainer.germs
+
+    @property
+    def maxLengths(self):
+        return self.scan.gateSequenceUi.gateSequenceContainer.maxLengths
+
 
 
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   
