@@ -303,7 +303,13 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         value = token & 0x000000ffffffffff
                         if self.data.timestamp is None:
                             self.data.timestamp = defaultdict(list)
-                        self.data.timestamp[channel][-1].append(self.timestampOffset + value - self.data.timestampZero[channel][-1])
+                        try:
+                            self.data.timestamp[channel][-1].append(self.timestampOffset + value - self.data.timestampZero[channel][-1])
+                        except IndexError:
+                            logger.error("channel: {}".format(channel))
+                            logger.error("timestampZero: {}".format(self.data.timestampZero))
+                            logger.error("timestamp: {}".format(self.data.timestamp))
+                            raise
                     elif key==3:  # timestamp gate start
                         channel = (token >>40) & 0xffff 
                         value = token & 0x000000ffffffffff
