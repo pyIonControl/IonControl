@@ -27,28 +27,8 @@ class ScanGeneratorBase:
         return index % self.scan.singleScanLength
 
     @property
-    def gateStringList(self):
-        return None
-
-    @property
-    def plaquettes(self):
-        return None
-
-    @property
-    def gateSet(self):
-        return None
-
-    @property
-    def prepFiducials(self):
-        return None
-
-    @property
-    def measFiducials(self):
-        return None
-
-    @property
-    def maxLengths(self):
-        return None
+    def gateSequenceInfo(self):
+        return {}
 
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()
@@ -288,33 +268,8 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
         return self.scan.gateSequenceUi.gateString(index % self.scan.singleScanLength)
 
     @property
-    def gateStringList(self):
-        return self.scan.gateSequenceUi.gateStringList
-
-    @property
-    def plaquettes(self):
-        return self.scan.gateSequenceUi.plaquettes()
-
-    @property
-    def gateSet(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.gateSet
-
-    @property
-    def prepFiducials(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.prep
-
-    @property
-    def measFiducials(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.meas
-
-    @property
-    def germs(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.germs
-
-    @property
-    def maxLengths(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.maxLengths
-
+    def gateSequenceInfo(self):
+        return self.scan.gateSequenceUi.gateSequenceInfo
 
 
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   
