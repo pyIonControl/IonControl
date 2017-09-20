@@ -38,6 +38,18 @@ class ScanGeneratorBase:
     def gateSet(self):
         return None
 
+    @property
+    def prepFiducials(self):
+        return None
+
+    @property
+    def measFiducials(self):
+        return None
+
+    @property
+    def maxLengths(self):
+        return None
+
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()
 

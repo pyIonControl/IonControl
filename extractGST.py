@@ -22,7 +22,7 @@ for filename in args.filename:
     gs_target = std1Q_XYI.gs_target
     gs_target.spamdefs = my_gs_target.spamdefs
 
-    output_name = os.path.join(folder, file_base + ".txt")
+    output_name = os.path.join(folder, file_base + ".gstdata")
     pygsti.io.write_dataset(output_name, ds, spamLabelOrder=['0', '1'])
 
     #Create germ gate string lists
