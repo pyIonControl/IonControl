@@ -136,7 +136,7 @@ class PulseProgramUi(PulseProgramWidget, PulseProgramBase):
         PulseProgramBase.__init__(self)
         self.dependencyGraph = DiGraph()
         self.pulser = pulser
-        self.numDDSChannels = len(self.pulser.pulserConfiguration().ddsChannels)
+        self.numDDSChannels = len(self.pulser.pulserConfiguration().ddsChannels) if self.pulser.pulserConfiguration() else 8
         self.pulseProgram = PulseProgram.PulseProgram(ddsnum=self.numDDSChannels)
         self.sourceCodeEdits = dict()
         self.pppCodeEdits = dict()
