@@ -6,6 +6,7 @@
 import copy
 import logging
 
+import numpy
 from PyQt5 import QtGui, QtCore, QtWidgets
 import PyQt5.uic
 
@@ -229,7 +230,7 @@ class FitUi(fitForm, QtWidgets.QWidget):
         if plottedTrace.hasHeightColumn:
             sigma = plottedTrace.height
         elif plottedTrace.hasTopColumn and plottedTrace.hasBottomColumn:
-            sigma = abs(plottedTrace.top + plottedTrace.bottom)
+            sigma = numpy.abs(numpy.array(plottedTrace.top) + numpy.array(plottedTrace.bottom))
         self.fitfunction.leastsq(plottedTrace.x, plottedTrace.y, sigma=sigma, filt=plottedTrace.filt)
         plottedTrace.fitFunction = copy.deepcopy(self.fitfunction)
         plottedTrace.plot(-2)

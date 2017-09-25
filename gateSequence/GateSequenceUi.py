@@ -438,6 +438,12 @@ class GateSequenceUi(Form, Base):
         else:
             self.settings.startAddressParam = self.StartAddressBox.currentText()
 
+    @property
+    def gateSequenceInfo(self):
+        return {'gatestring_list': self.gateStringList, 'plaquettes': self.plaquettes(),
+                'target_gateset' : self.gateSequenceContainer.gateSet,
+                'prepFiducials': self.gateSequenceContainer.prep, 'measFiducials': self.gateSequenceContainer.meas,
+                'germs': self.gateSequenceContainer.germs, 'maxLengths':self.gateSequenceContainer.maxLengths}
 
 if __name__ == "__main__":
     from pulseProgram.PulseProgram import PulseProgram

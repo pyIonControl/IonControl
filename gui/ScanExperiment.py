@@ -395,7 +395,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if self.dataStore:
                 self.pulseProgramIdentifier = self.dataStore.addData(self.pulseProgramUi.pppSource)
             (mycode, data) = self.context.generator.prepare(self.pulseProgramUi, self.context.scanMethod.maxUpdatesToWrite )
-            self.context.qubitData = QubitDataSet(self.context.generator.gateStringList, self.context.generator.plaquettes, self.context.generator.gateSet)
+            self.context.qubitData = QubitDataSet(**self.context.generator.gateSequenceInfo)
             if self.pulseProgramUi.writeRam and self.pulseProgramUi.ramData:
                 data = self.pulseProgramUi.ramData #Overwrites anything set above by the gate sequence ui
             if data:

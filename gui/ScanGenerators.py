@@ -27,16 +27,8 @@ class ScanGeneratorBase:
         return index % self.scan.singleScanLength
 
     @property
-    def gateStringList(self):
-        return None
-
-    @property
-    def plaquettes(self):
-        return None
-
-    @property
-    def gateSet(self):
-        return None
+    def gateSequenceInfo(self):
+        return {}
 
     def dataOnFinal(self, experiment, currentState):
         experiment.onStop()
@@ -276,17 +268,8 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
         return self.scan.gateSequenceUi.gateString(index % self.scan.singleScanLength)
 
     @property
-    def gateStringList(self):
-        return self.scan.gateSequenceUi.gateStringList
-
-    @property
-    def plaquettes(self):
-        return self.scan.gateSequenceUi.plaquettes()
-
-    @property
-    def gateSet(self):
-        return self.scan.gateSequenceUi.gateSequenceContainer.gateSet
-
+    def gateSequenceInfo(self):
+        return self.scan.gateSequenceUi.gateSequenceInfo
 
 
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   

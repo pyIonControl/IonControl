@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import numpy
+import pygsti
 
 
 class QubitResultContainer(dict):
@@ -16,10 +17,15 @@ class QubitResult(dict):
 
 
 class ResultCounter(dict):
-    def __init__(self, values, repeats):
-        super().__init__()
-        for v, r in zip(values, repeats):
-            self[v] += r
+    def __init__(self, values, repeats, keys=[], force_string=False):
+        super().__init__({k: 0 for k in keys})
+        if force_string:
+            for v, r in zip(values, repeats):
+                self[str(v)] += r
+        else:
+            for v, r in zip(values, repeats):
+                self[v] += r
+
 
     def __missing__(self, key):
         ret = self[key] = 0
@@ -28,12 +34,17 @@ class ResultCounter(dict):
 
 class QubitDataSet:
     _fields = ['gatestring_list', 'plaquettes', 'target_gateset', '_rawdata']
-    def __init__(self, gatestring_list=None, plaquettes=None, target_gateset=None):
+    def __init__(self, gatestring_list=None, plaquettes=None, target_gateset=None,
+                 prepFiducials=None, measFiducials=None, germs=None, maxLengths=None):
         self.gatestring_list = gatestring_list
         self.gatestring_dict = {s: idx for idx, s in enumerate(gatestring_list)} if gatestring_list else None
         self.plaquettes = plaquettes
         self.target_gateset = target_gateset
         self._rawdata = QubitResultContainer()  # _rawdata[gatestring]['value' 'repeats' 'timestamps' ...] list
+        self.prepFiducials = prepFiducials
+        self.measFiducials = measFiducials
+        self.maxLengths = maxLengths
+        self.germs = germs
         self._init_internal()
 
     def _init_internal(self):
@@ -53,6 +64,10 @@ class QubitDataSet:
 
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.__dict__.setdefault('prepFiducials', None)
+        self.__dict__.setdefault('measFiducials', None)
+        self.__dict__.setdefault('germs', None)
+        self.__dict__.setdefault('maxLengths', None)
         self.gatestring_dict = {s: idx for idx, s in enumerate(self.gatestring_list)} if self.gatestring_list else None
         self._init_internal()
 
@@ -73,7 +88,7 @@ class QubitDataSet:
                 self._countVecMx[self.spam_labels.index(str(v)), gatestring_idx] += r
                 self._totalCntVec[gatestring_idx] += r
             else:
-                print("len(values)", len(values))
+                # print("len(values)", len(values))
                 eval = ResultCounter(values, repeats)
                 for label, count in eval.items():
                     self._countVecMx[self.spam_labels.index(str(label)), gatestring_idx] += count
@@ -105,4 +120,13 @@ class QubitDataSet:
         return (isinstance(other, QubitDataSet) and
                 all(getattr(self, f) == getattr(other, f) for f in ('gatestring_list', '_rawdata')))
 
+    @property
+    def gst_dataset(self):
+        ds = pygsti.objects.DataSet(spamLabels=['0', '1'])
+        for gs, data in self.data.items():
+            rc = ResultCounter(data['value'], data['repeats'], keys=self.target_gateset.spamdefs.keys(),
+                               force_string=True)
+            ds.add_count_dict(gs, rc)
+        ds.done_adding_data()
+        return ds
 
