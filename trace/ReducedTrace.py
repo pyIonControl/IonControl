@@ -2,7 +2,6 @@ import numpy
 from collections import defaultdict
 
 from modules.RunningStat import RunningStat
-from trace.sortlists import sort_lists_by
 
 
 class ReducedTrace:
@@ -17,6 +16,7 @@ class ReducedTrace:
         self.bottomColumn = bottomColumn
         self.topColumn = topColumn
         self.heightColumn = heightColumn
+        self.initCache()
         self.clearCache()
 
     def update(self, averageSameX=False, combinePoints=0, averageType=None):
@@ -24,40 +24,14 @@ class ReducedTrace:
             self._averageSameX = averageSameX
             self._combinePoints = combinePoints
             self._averageType = averageType
-            self.clearCache()
             return True
         return False
 
     def clearCache(self):
         self._cachedLength = 0
-        self._x_cache = defaultdict(RunningStat)
 
-    # @property
-    # def averageSameX(self):
-    #     return self._averageSameX
-    #
-    # @averageSameX.setter
-    # def averageSameX(self, averageSameX):
-    #     self._averageSameX = averageSameX
-    #     self._cachedLength = 0
-    #
-    # @property
-    # def combinePoints(self):
-    #     return self._combinePoints
-    #
-    # @combinePoints.setter
-    # def combinePoints(self, points):
-    #     self._combinePoints = points
-    #     self._cachedLength = 0
-    #
-    # @property
-    # def averageType(self):
-    #     return self._averageType
-    #
-    # @averageType.setter
-    # def averageType(self, averageType):
-    #     self._averageType = averageType
-    #     self._cachedLength = 0
+    def initCache(self):
+        self._x_cache = defaultdict(RunningStat)
 
     @property
     def x(self):
