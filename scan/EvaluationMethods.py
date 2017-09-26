@@ -37,6 +37,7 @@ class MeanEvaluation(EvaluationBase):
                                    'min max': self.evaluateMinMax}
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('errorBarType', 'shotnoise')
         self.settings.setdefault('transformation', "")
         self.settings.setdefault('timestamp_id', 0)

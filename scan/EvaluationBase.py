@@ -10,6 +10,8 @@ from PyQt5 import QtCore
 import logging
 import copy
 import numpy
+from uiModules.ParameterTable import Parameter
+
 
 EvaluationAlgorithms = {}
 
@@ -48,12 +50,19 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
         return 'Qubit' if self.useQubitEvaluation else None
 
     def setDefault(self):
-        pass
+        self.settings.setdefault('averageSameX', False)
+        self.settings.setdefault('combinePoints', 0)
 
     def parameters(self):
         """return the parameter definitions used by the parameterTable"""
-        return SequenceDict()
-               
+        parameterDict = SequenceDict()
+        parameterDict['combineSameX'] = Parameter(name='combineSameX', dataType='bool',
+                                                    value=self.settings['averageSameX'],
+                                                    tooltip="average all values for same x value")
+        parameterDict['combinePoints'] = Parameter(name='combinePoints', dataType='magnitude',
+                                                  value=self.settings['combinePoints'])
+        return parameterDict
+
     def update(self, parameter):
         """update the parameter changed in the parameterTable"""
         if parameter.dataType != 'action':
