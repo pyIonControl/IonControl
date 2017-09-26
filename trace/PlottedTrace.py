@@ -412,7 +412,7 @@ class PlottedTrace(object):
 
     def plotPoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
-            if self.averageSameX or self.combinePoints:
+            if self.properties.averageSameX or self.properties.combinePoints:
                 x, y = self._reducedTrace.plotData
                 self.curve = self._graphicsView.plot(x, y, pen=None, symbol=self.penList[penindex][1],
                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
@@ -446,7 +446,7 @@ class PlottedTrace(object):
 
     def plotLinespoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
-            if self.averageSameX or self.combinePoints:
+            if self.properties.averageSameX or self.properties.combinePoints:
                 x, y = self._reducedTrace.plotData
                 self.curve = self._graphicsView.plot(x, y, pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
