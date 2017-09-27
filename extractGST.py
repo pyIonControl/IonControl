@@ -37,5 +37,5 @@ for filename in args.filename:
     results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
 
     #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
-    pygsti.report.create_general_report(results, filename=r'output.html',
+    pygsti.report.create_general_report(results, filename=r'{}'.format(os.path.join(folder, file_base + "report.html")),
                                         title="GSTScan_057", verbosity=2)
