@@ -237,7 +237,7 @@ class ThresholdEvaluation(EvaluationBase):
 
     def qubitEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
-        timestamps = data.timeTick.get(self.settings['timestamp_id'], None)
+        timestamps = data.timeTick.get(int(self.settings['timestamp_id']), None)
         # we will return 3-tuple of lists: value, repeats, timestamp
         # if we do not find a timestamp we will accumulate the data, otherwise send back every event
         discriminated = self._evaluate(data, evaluation, countarray)
