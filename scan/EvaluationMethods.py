@@ -37,6 +37,7 @@ class MeanEvaluation(EvaluationBase):
                                    'min max': self.evaluateMinMax}
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('errorBarType', 'shotnoise')
         self.settings.setdefault('transformation', "")
         self.settings.setdefault('timestamp_id', 0)
@@ -139,6 +140,7 @@ class FeedbackEvaluation(EvaluationBase):
         self.lastUpdate = None
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('SetPoint', Q(0))
         self.settings.setdefault('P', Q(0))
         self.settings.setdefault('I', Q(0))
@@ -200,6 +202,7 @@ class ThresholdEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         self.settings.setdefault('timestamp_id', 0)
@@ -262,6 +265,7 @@ class RangeEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('min',0)
         self.settings.setdefault('max',1)
         self.settings.setdefault('invert',False)
@@ -306,6 +310,7 @@ class DoubleRangeEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('min_1',0)
         self.settings.setdefault('max_1',1)
         self.settings.setdefault('min_2',0)
@@ -362,6 +367,7 @@ class FidelityEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         
@@ -409,6 +415,7 @@ class ParityEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
 
@@ -454,6 +461,7 @@ class TwoIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('dd',1)
@@ -517,6 +525,7 @@ class CounterSumMeanEvaluation(EvaluationBase):
                                    'min max': self.evaluateMinMax}
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('errorBarType', 'shotnoise')
         self.settings.setdefault('transformation', "")
         self.settings.setdefault('counters', [])
@@ -592,6 +601,7 @@ class CounterSumThresholdEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         self.settings.setdefault('counters', [])
@@ -648,6 +658,7 @@ class ThreeIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('Ion_3','')
@@ -731,6 +742,7 @@ class FourIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('Ion_3','')
