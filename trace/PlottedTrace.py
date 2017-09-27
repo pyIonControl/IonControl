@@ -539,9 +539,9 @@ class PlottedTrace(object):
                 self.penUsageDict[penindex] += 1
             self.curvePen = penindex
         
-    def replot(self):
+    def replot(self, forceNow=False):
         if self._graphicsView is not None:
-            if len(self.x)>500 and time.time()-self.lastPlotTime<len(self.x)/500.:
+            if not forceNow and len(self.x)>500 and time.time()-self.lastPlotTime<len(self.x)/500.:
                 if not self.needsReplot:
                     self.needsReplot = True
                     QtCore.QTimer.singleShot(len(self.x)*2, self._replot) 
@@ -596,7 +596,7 @@ class PlottedTrace(object):
         if self.properties.update(param, changes):
             changed = self._reducedTrace.update(self.properties.averageSameX, self.properties.combinePoints, self.properties.averageType)
             if changed:
-                self.replot()
+                self.replot(True)
 
 if __name__=="__main__":
     from trace.TraceCollection import TraceCollection
