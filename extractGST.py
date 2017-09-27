@@ -1,14 +1,27 @@
 import argparse
 
 import os
+import pickle
+
 import pygsti
+import yaml
 from pygsti import report
 from pygsti.construction import std1Q_XYI
 
 from trace.TraceCollection import TraceCollection
+try:
+    from yaml import CLoader as Loader, CDumper as Dumper
+except ImportError:
+    from yaml import Loader, Dumper
+
 
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('filename', type=str, default=None, nargs='+', help='filename of trace zip')
+parser.add_argument('--gst-eval', action='store_true')
+parser.add_argument('--save-pickle', action='store_true')
+parser.add_argument('--save-txt', action='store_true')
+parser.add_argument('--save-yaml', action='store_true')
+parser.add_argument('--pickle-protocol', type=int, default=2, help='For python 2.7 use 2; for python 3.5+ use 4')
 args = parser.parse_args()
 
 for filename in args.filename:
@@ -33,9 +46,34 @@ for filename in args.filename:
     #Create maximum lengths list
     maxLengths = qubitData.maxLengths or [1,2,4,8,16,32,64,128,256,512,1024]
 
-    #gs_target.set_all_parameterizations("TP")
-    results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+    if args.save_pickle or args.save_txt or args.save_yaml:
+        generic_data = dict()
+        generic_data['target_gateset'] = qubitData.target_gateset
+        generic_data['gst_dataset'] = qubitData.gst_dataset
+        generic_data['gatestring_list'] = qubitData.gatestring_list
+        generic_data['max_lengths'] = qubitData.maxLengths
+        generic_data['meas_fiducials'] = qubitData.measFiducials
+        generic_data['prep_fiducials'] = qubitData.prepFiducials
+        generic_data['germs'] = qubitData.germs
+        generic_data['raw_data'] = {s:dict(r) for s, r in qubitData.data.items()}
+        if args.save_pickle:
+            output_name = os.path.join(folder, file_base + ".gstraw.pkl")
+            with open(output_name, 'wb') as f:
+                pickle.dump(generic_data, f, args.pickle_protocol)
+        if args.save_txt:
+            output_name = os.path.join(folder, file_base + ".gstraw.txt")
+            with open(output_name, 'w') as f:
+                print(generic_data, file=f)
+        if args.save_yaml:
+            output_name = os.path.join(folder, file_base + ".gstraw.yaml")
+            with open(output_name, 'w') as f:
+                yaml.dump(generic_data, f, Dumper=Dumper)
 
-    #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
-    pygsti.report.create_general_report(results, filename=r'output.html',
-                                        title="GSTScan_057", verbosity=2)
+    if args.gst_eval:
+        #gs_target.set_all_parameterizations("TP")
+        results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+
+        #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
+        pygsti.report.create_general_report(results, filename=r'output.html',
+                                            title="GSTScan_057", verbosity=2)
+
