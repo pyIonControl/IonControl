@@ -621,11 +621,13 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                                                     pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName,
                                                     yColumn=yColumnName, topColumn=topColumnName, bottomColumn=bottomColumnName, 
                                                     rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name, xAxisUnit = self.context.scan.xUnit,
-                                                    xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname)
+                                                    xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname,
+                                                    combinePoints=evaluation.settings['combinePoints'], averageSameX=evaluation.settings['averageSameX'], averageType=evaluation.settings['averageType'])
                     else:                
                         plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname] if self.context.evaluation.evalList[index].plotname != 'None' else None,
                                                     pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName, yColumn=yColumnName, rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name,
-                                                    xAxisUnit = self.context.scan.xUnit, xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname)
+                                                    xAxisUnit = self.context.scan.xUnit, xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname,
+                                                    combinePoints=evaluation.settings['combinePoints'], averageSameX=evaluation.settings['averageSameX'], averageType=evaluation.settings['averageType'])
                     xRange = self.context.generator.xRange() if is_Q(self.context.scan.start) and Q(1, self.context.scan.xUnit).dimensionality == self.context.scan.start.dimensionality else None
                     if xRange:
                         self.plotDict["Scan Data"]["view"].setXRange( *xRange )

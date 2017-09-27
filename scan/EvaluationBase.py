@@ -52,15 +52,18 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
     def setDefault(self):
         self.settings.setdefault('averageSameX', False)
         self.settings.setdefault('combinePoints', 0)
+        self.settings.setdefault('averageType', 0)
 
     def parameters(self):
         """return the parameter definitions used by the parameterTable"""
         parameterDict = SequenceDict()
-        parameterDict['combineSameX'] = Parameter(name='combineSameX', dataType='bool',
+        parameterDict['averageSameX'] = Parameter(name='averageSameX', dataType='bool',
                                                     value=self.settings['averageSameX'],
                                                     tooltip="average all values for same x value")
         parameterDict['combinePoints'] = Parameter(name='combinePoints', dataType='magnitude',
                                                   value=self.settings['combinePoints'])
+        parameterDict['averageType'] = Parameter(name='averageType', dataType='magnitude',
+                                                  value=self.settings['averageType'])
         return parameterDict
 
     def update(self, parameter):
