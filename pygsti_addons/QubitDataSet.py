@@ -33,7 +33,8 @@ class ResultCounter(dict):
 
 
 class QubitDataSet:
-    _fields = ['gatestring_list', 'plaquettes', 'target_gateset', '_rawdata']
+    _fields = ['gatestring_list', 'plaquettes', 'target_gateset', '_rawdata', 'prepFiducials', 'measFiducials',
+               'germs', 'maxLengths']
     def __init__(self, gatestring_list=None, plaquettes=None, target_gateset=None,
                  prepFiducials=None, measFiducials=None, germs=None, maxLengths=None):
         self.gatestring_list = gatestring_list
