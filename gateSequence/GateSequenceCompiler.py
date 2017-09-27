@@ -35,13 +35,13 @@ class GateSequenceCompiler(object):
         return addresses, data
 
     """Compile one gateset into its binary representation"""
-    def gateSequenceCompile(self, gateset):
+    def gateSequenceCompile(self, gate_string):
         data = list()
         length = 0
-        for gate in gateset:
+        for gate in gate_string:
             thisCompiledGate = self.compiledGates[gate]
             data.extend( thisCompiledGate )
-            length += len(thisCompiledGate)//self.pulseListLength
+            length += len(thisCompiledGate) // self.pulseListLength
         return [length] + data
 
     """Compile each gate definition into its binary representation"""

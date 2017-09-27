@@ -115,7 +115,7 @@ class QubitDataSet:
 
     @property
     def is_gst(self):
-        return self.gatestring_list is not None and self.target_gateset is not None
+        return self.gatestring_list is not None and self.target_gateset is not None and self.plaquettes is not None
 
     def __eq__(self, other):
         return (isinstance(other, QubitDataSet) and

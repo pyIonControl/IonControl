@@ -12,6 +12,7 @@ from functools import partial
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
+from pygsti.objects import GateString
 
 from trace.PlottedStructure import PlottedStructureProperties
 from .GateDefinition import GateDefinition
@@ -51,7 +52,7 @@ class Settings:
 
     def __init__(self):
         self.enabled = False
-        self.gate = []
+        self.gate = GateString(None, "{}")
         self.gateDefinition = None
         self.gateSequence = None
         self.active = 0
@@ -102,6 +103,8 @@ class Settings:
         self.__dict__.setdefault('plotProperties', PlottedStructureProperties())
         if isinstance(self.generatorType, str):
             self.generatorType = self.GeneratorType.GateSequenceList
+        if not isinstance(self.gate, GateString):
+            self.gate = GateString(None, "{}")
 
     def __eq__(self, other):
         return isinstance(other, self.__class__) and tuple(getattr(self, field) for field in self.stateFields)==tuple(getattr(other, field) for field in self.stateFields)
@@ -131,7 +134,7 @@ class Settings:
         xmlEncodeDictionary(self.gateDefinitionCache, ElementTree.SubElement(myElement, "GateDefinitionCache" ), "Item")
         xmlEncodeDictionary(self.gateSequenceCache, ElementTree.SubElement(myElement, "GateSequenceCache" ), "Item")
         gateElement = ElementTree.SubElement(myElement, "Gate" )
-        gateElement.text = ",".join( self.gate )
+        gateElement.text = str(self.gate)
         return myElement
     
     @staticmethod
@@ -142,7 +145,7 @@ class Settings:
         s.gateDefinitionCache = xmlParseDictionary(myElement.find("GateDefinitionCache"), "Item")
         s.gateSequenceCache = xmlParseDictionary(myElement.find("GateSequenceCache"), "Item")
         gateText = myElement.find("Gate").text
-        s.gate = gateText.split(",") if gateText else list()
+        s.gate = GateString(None, gateText)
         return s    
     
     def documentationString(self):
@@ -160,6 +163,7 @@ class GateSequenceUi(Form, Base):
     def __init__(self,parent=None):
         Form.__init__(self)
         Base.__init__(self, parent)
+        self._usePyGSTi = False
 
     def postInit(self, name, config, pulseProgram):
         self.config = config
@@ -208,7 +212,7 @@ class GateSequenceUi(Form, Base):
             self.settings.generatorType = Settings.GeneratorType(index)
         except ValueError:
             self.settings.generatorType = Settings.GeneratorType.GateSequenceList
-        self.gateSequenceContainer.usePyGSTi = self.settings.generatorType == Settings.GeneratorType.GST
+        self.gateSequenceContainer.usePyGSTi = self._usePyGSTi = self.settings.generatorType == Settings.GeneratorType.GST
 
     def getSettings(self):
         logger = logging.getLogger(__name__)
@@ -223,7 +227,7 @@ class GateSequenceUi(Form, Base):
         self.sourceSelect.setCurrentIndex(self.settings.generatorType.value)
         self.GateSequenceEnableCheckBox.setChecked( self.settings.enabled )
         self.GateSequenceFrame.setEnabled( self.settings.enabled )
-        self.GateEdit.setText( ", ".join(self.settings.gate ))
+        self.GateEdit.setText(str(self.settings.gate))
         self.repetitionSpinBox.setValue( self.settings.thisSequenceRepetition )
         if self.settings.startAddressParam:
             self.StartAddressBox.setCurrentIndex(self.StartAddressBox.findText(self.settings.startAddressParam) )
@@ -390,8 +394,8 @@ class GateSequenceUi(Form, Base):
         self.GateSequenceBox.setCurrentIndex(-1)
     
     def onGateEditChanged(self):
-        self.settings.gate = list(split(self.GateEdit.text()))
-        self.GateEdit.setText(", ".join(self.settings.gate))
+        self.settings.gate = GateString(None, self.GateEdit.text())
+        self.GateEdit.setText(str(self.settings.gate))
         self.valueChanged.emit()          
     
     def onRadioButtonToggled(self):
@@ -402,29 +406,45 @@ class GateSequenceUi(Form, Base):
         self.valueChanged.emit()
 
     def gateSequenceScanData(self):
-        if self.settings.active == self.Mode.FullList:
+        if self._usePyGSTi:
             address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer)
         else:
-            self.gateSequenceCompiler.gateCompile(self.gateSequenceContainer.gateDefinition)
-            data = self.gateSequenceCompiler.gateSequenceCompile(self.settings.gate)
-            address = [0] * self.settings.thisSequenceRepetition
+            if self.settings.active == self.Mode.FullList:
+                address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer)
+            else:
+                self.gateSequenceCompiler.gateCompile(self.gateSequenceContainer.gateDefinition)
+                data = self.gateSequenceCompiler.gateSequenceCompile(self.settings.gate)
+                address = [0] * self.settings.thisSequenceRepetition
         return address, data, self.settings
     
     def plaquettes(self):
-        if self.settings.active == self.Mode.FullList:
+        if self._usePyGSTi:
+            return self.gateSequenceContainer._gate_string_struct._plaquettes
+        elif self.settings.active == self.Mode.FullList:
             return self.gateSequenceContainer._gate_string_struct._plaquettes
         return None
 
     def gateString(self, index):
-        if self.gateSequenceContainer.sequenceList is None:
-            return None
-        return self.gateSequenceContainer.sequenceList[index]
+        if self._usePyGSTi:
+            if self.gateSequenceContainer.sequenceList is None:
+                return None
+            return self.gateSequenceContainer.sequenceList[index]
+        if self.settings.active == self.Mode.FullList:
+            return self.gateSequenceContainer.sequenceList[index]
+        else:
+            return self.settings.gate
 
     @property
     def gateStringList(self):
-        if self.gateSequenceContainer.sequenceList is None:
-            return None
-        return self.gateSequenceContainer.sequenceList
+        if self._usePyGSTi:
+            if self.gateSequenceContainer.sequenceList is None:
+                return None
+            return self.gateSequenceContainer.sequenceList
+        else:
+            if self.settings.active == self.Mode.FullList:
+                return self.gateSequenceContainer.sequenceList
+            else:
+                return [self.settings.gate] * self.settings.thisSequenceRepetition
 
     def setVariables(self, variabledict):
         self.variabledict = variabledict
@@ -440,10 +460,24 @@ class GateSequenceUi(Form, Base):
 
     @property
     def gateSequenceInfo(self):
-        return {'gatestring_list': self.gateStringList, 'plaquettes': self.plaquettes(),
-                'target_gateset' : self.gateSequenceContainer.gateSet,
-                'prepFiducials': self.gateSequenceContainer.prep, 'measFiducials': self.gateSequenceContainer.meas,
-                'germs': self.gateSequenceContainer.germs, 'maxLengths':self.gateSequenceContainer.maxLengths}
+        if self._usePyGSTi:
+            return {'gatestring_list': self.gateStringList, 'plaquettes': self.plaquettes(),
+                    'target_gateset' : self.gateSequenceContainer.gateSet,
+                    'prepFiducials': self.gateSequenceContainer.prep, 'measFiducials': self.gateSequenceContainer.meas,
+                    'germs': self.gateSequenceContainer.germs, 'maxLengths':self.gateSequenceContainer.maxLengths}
+        else:
+            if self.settings.active == self.Mode.FullList:
+                return {'gatestring_list': self.gateStringList, 'plaquettes': self.plaquettes(),
+                        'target_gateset': self.gateSequenceContainer.gateSet,
+                        'prepFiducials': self.gateSequenceContainer.prep,
+                        'measFiducials': self.gateSequenceContainer.meas,
+                        'germs': self.gateSequenceContainer.germs, 'maxLengths': self.gateSequenceContainer.maxLengths}
+            else:
+                return {'gatestring_list': self.gateStringList, 'plaquettes': self.plaquettes(),
+                        'target_gateset': self.gateSequenceContainer.gateSet,
+                        'prepFiducials': self.gateSequenceContainer.prep,
+                        'measFiducials': self.gateSequenceContainer.meas,
+                        'germs': self.gateSequenceContainer.germs, 'maxLengths': self.gateSequenceContainer.maxLengths}
 
 if __name__ == "__main__":
     from pulseProgram.PulseProgram import PulseProgram
