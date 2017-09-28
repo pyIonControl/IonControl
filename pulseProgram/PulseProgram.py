@@ -122,6 +122,8 @@ OPS = {'NOP'    : 0x00,
        'JMPNINTERRUPT': 0x5d,
        'RAND': 0x60,
        'RANDSEED': 0x61,
+       'SETSYNCTIME' : 0x62,
+       'WAITFORSYNC' : 0x63,
        'END'    : 0xFF }
 
 

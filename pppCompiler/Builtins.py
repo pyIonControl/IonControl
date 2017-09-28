@@ -300,6 +300,23 @@ def wait_dds( symboltable, arg=list(), kwarg=dict()):
     """
     return ["  WAITDDSWRITEDONE"]
 
+def set_sync_time(symboltable, arg=list(), kwarg=dict()):
+    """
+    set_sync_time( parameter )
+    Set the time for a periodic sync signal.
+    """
+    if len(arg)!=2:
+        raise CompileException( "expected exactly one argument in set_sync_time" )
+    symbol = symboltable.getVar( arg[1] )
+    return [ "  SETSYNCTIME {0}".format(symbol.name)]
+
+def wait_sync(symboltable, arg=list(), kwarg=dict()):
+    """
+    wait_sync( parameter )
+    wait for internal sync trigger
+    """
+    return ["  WAITFORSYNC"]
+
 def wait_trigger( symboltable, arg=list(), kwarg=dict()):
     """
     wait_trigger( parameter )
