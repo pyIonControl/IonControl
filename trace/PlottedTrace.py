@@ -550,7 +550,7 @@ class PlottedTrace(object):
 
     def _replot(self):
         if hasattr(self, 'curve') and self.curve is not None:
-            if self.style not in self.PointsStyles and self.type == self.Types.default:
+            if self.type == self.Types.default:
                 x, y = self._reducedTrace.plotData
                 self.curve.setData(numpy.array(x), numpy.array(y))
             else:

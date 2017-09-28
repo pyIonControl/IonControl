@@ -30,26 +30,28 @@ for filename in args.filename:
     Trace = TraceCollection()
     Trace.loadZip(filename)
     qubitData = Trace.structuredData['qubitData']
-    ds = qubitData.gst_dataset
-    my_gs_target = qubitData.target_gateset
-    gs_target = std1Q_XYI.gs_target
-    gs_target.spamdefs = my_gs_target.spamdefs
 
-    output_name = os.path.join(folder, file_base + ".gstdata")
-    pygsti.io.write_dataset(output_name, ds, spamLabelOrder=['0', '1'])
+    if qubitData.is_gst:
+        my_gs_target = qubitData.target_gateset
+        gs_target = std1Q_XYI.gs_target
+        gs_target.spamdefs = my_gs_target.spamdefs
+        ds = qubitData.gst_dataset
+        output_name = os.path.join(folder, file_base + ".gstdata")
+        pygsti.io.write_dataset(output_name, ds, spamLabelOrder=['0', '1'])
 
-    #Create germ gate string lists
-    germs = qubitData.germs or std1Q_XYI.germs
-    prep_fiducials = qubitData.prepFiducials or std1Q_XYI.prepStrs
-    meas_fiducials = qubitData.measFiducials or std1Q_XYI.effectStrs
+        #Create germ gate string lists
+        germs = qubitData.germs or std1Q_XYI.germs
+        prep_fiducials = qubitData.prepFiducials or std1Q_XYI.prepStrs
+        meas_fiducials = qubitData.measFiducials or std1Q_XYI.effectStrs
 
-    #Create maximum lengths list
-    maxLengths = qubitData.maxLengths or [1,2,4,8,16,32,64,128,256,512,1024]
+        #Create maximum lengths list
+        maxLengths = qubitData.maxLengths or [1,2,4,8,16,32,64,128,256,512,1024]
 
     if args.save_pickle or args.save_txt or args.save_yaml:
         generic_data = dict()
         generic_data['target_gateset'] = qubitData.target_gateset
-        generic_data['gst_dataset'] = qubitData.gst_dataset
+        if qubitData.is_gst:
+            generic_data['gst_dataset'] = qubitData.gst_dataset
         generic_data['gatestring_list'] = qubitData.gatestring_list
         generic_data['max_lengths'] = qubitData.maxLengths
         generic_data['meas_fiducials'] = qubitData.measFiducials
