@@ -8,8 +8,8 @@ import copy
 import re
 from collections import deque, defaultdict
 from .Symbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
-from itertools import starmap
 from functools import partial
+from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
 
 #List of all supported AST visitor nodes
 fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'AsyncFunctionDef', 'AsyncWith', 'Attribute', 'AugAssign',
@@ -51,25 +51,18 @@ def list_rtrim( l, trimvalue=None ):
 class CompileException(Exception):
     pass
 
-class pppCompiler(ast.NodeTransformer):
+class astCompiler(ast.NodeTransformer):
     def __init__(self):
         self.builtinBool = None
         self.codestr = []
-        self.maincode = ""
-        self.upd_funcs = set()
-        self.varnames = set()
-        self.funcnames = set()
+        self.maincode = []
         self.funcDeps = defaultdict(set)
-        #self.fnLUT = dict()
         self.localNameSpace = deque()
         self.chameleonLabelsDeque = deque()
-        self.ntvar = set()
-        self.currfn = None
-        self.lvpreamble = ""    #initial inline declarations
         self.lvctr = 1          #inline declaration counter
-        self.ifctr = 1000          #number of if statements
-        self.elsectr = 1000        #number of else statements
-        self.whilectr = 1000      #number of while statements
+        self.ifctr = 1000       #number of if statements
+        self.elsectr = 1000     #number of else statements
+        self.whilectr = 1000    #number of while statements
         self.fnctr = 1000
         self.symbols = SymbolTable()
         self.localVarDict = dict()
@@ -85,17 +78,14 @@ class pppCompiler(ast.NodeTransformer):
         if isinstance(obj, ast.Num):
             return obj.n, True
         elif isinstance(obj, ast.Name):
-            if obj.id in self.symbols.keys():
-                return self.symbols[obj.id].name, False
             if self.localNameSpace:
-                for ns in self.localNameSpace:
+                for ns in reversed(self.localNameSpace):
                     localname = ns+"_"+obj.id
                     if localname in self.symbols.keys():
                         return self.symbols[localname].name, False
-                #if obj.id in self.symbols.keys():
-                    #return self.symbols[obj.id].name, False
-                if self.localNameSpace[-1]+'_'+obj.id in self.symbols.keys():
-                    return self.localNameSpace[-1]+'_'+obj.id, False
+                if obj.id in self.symbols.keys():
+                    return self.symbols[obj.id].name, False
+                return self.localNameSpace[-1]+'_'+obj.id, False
         elif isinstance(obj, ast.Call):
             return obj.func.id, False
         return obj.id, False
@@ -107,7 +97,6 @@ class pppCompiler(ast.NodeTransformer):
             if right in self.localVarDict.keys(): #checks if inlinevar of the same value has already been created
                 return self.localVarDict[right], localvar
             else:
-                self.lvpreamble += "var inlinevar_{0} {1}\n".format(self.lvctr, right)
                 self.symbols.setInlineParameter(name="inlinevar_{0}".format(self.lvctr), value=right)
                 self.localVarDict[right] = "inlinevar_{0}".format(self.lvctr)
                 right = "inlinevar_{0}".format(self.lvctr)
@@ -122,6 +111,7 @@ class pppCompiler(ast.NodeTransformer):
             if target in self.symbols.keys():
                 if hasattr(node.value,'func') or hasattr(node.value, 'op'):
                     fret = True
+                    self.safe_generic_visit(node.value)
                 else:
                     right,_ = self.localVarHandler(node.value)
                     self.codestr += ["LDWR {0}\nSTWR {1}".format(right,target)]
@@ -129,18 +119,17 @@ class pppCompiler(ast.NodeTransformer):
             else:
                 if hasattr(node.value,'func') or hasattr(node.value, 'op'):
                     fret = True
-                    self.lvpreamble += "var {0} 0\n".format(target)
                     self.symbols[target] = VarSymbol(name=target, value=0)
+                    self.safe_generic_visit(node.value)
                 else:
                     right,localvar = self.localVarHandler(node.value)
                     self.codestr += ["LDWR {0}\nSTWR {1}".format(right,target)]
-                    self.symbols[target] = VarSymbol(name=target, value=right)
-                    self.lvpreamble += "var {0} {1}\n".format(target, right)
+                    self.symbols[target] = VarSymbol(name=target)
         self.safe_generic_visit(node)
         if fret:
             self.codestr += ["STWR {0}".format(target)]
         if not self.localNameSpace:
-            self.maincode += '\n'.join(self.codestr)+'\n'
+            self.maincode += self.codestr
             self.codestr = []
 
     def visit_AugAssign(self, node):
@@ -173,7 +162,7 @@ class pppCompiler(ast.NodeTransformer):
                 self.codestr += ["ORW {0}\nSTWR {1}".format(nodevid, nodetid)]
         self.safe_generic_visit(node)
         if not self.localNameSpace:
-            self.maincode += '\n'.join(self.codestr)+'\n'
+            self.maincode += self.codestr
             self.codestr = []
 
     def visit_BinOp(self, node):
@@ -232,7 +221,7 @@ class pppCompiler(ast.NodeTransformer):
             self.safe_generic_visit(node)
             self.codestr += ["end_if_label_{0}: NOP".format(currentIfCtr)]
         if not self.localNameSpace:
-            self.maincode += '\n'.join(self.codestr)+'\n'
+            self.maincode += self.codestr
             self.codestr = []
 
     def visit_While(self, node):
@@ -260,22 +249,17 @@ class pppCompiler(ast.NodeTransformer):
                 self.codestr += [" end_while_label_{0}".format(currentWhileCtr)]
             else:
                 self.codestr += ["LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr)]
-        #if right is None:
-            #self.codestr += ["LDWR {0}\nJMP{1}Z".format(left,op), " end_while_label_{0}".format(currentWhileCtr)]
-        #else:
-            #self.codestr += ["LDWR {0}\n{1} {2}\nJMPNCMP end_while_label_{3}".format(left,op,right,currentWhileCtr)]
         self.whilectr += 1
         self.safe_generic_visit(node)
         self.codestr += ["JMP while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr)]
         if not self.localNameSpace:
-            self.maincode += '\n'.join(self.codestr)+'\n'
+            self.maincode += self.codestr
             self.codestr = []
 
     def visit_FunctionDef(self, node):
         if node.name in self.symbols.keys():
             raise CompileException("Function {} has already been declared!".format(node.name))
         for arg in node.args.args:
-            self.lvpreamble += "var {0}_{1} 0\n".format(node.name, arg.arg)
             target = node.name+"_"+arg.arg
             self.symbols[target] = VarSymbol(name=target, value=0)
         self.localNameSpace.append(node.name) # push function context for maintaining local variable definitions
@@ -303,35 +287,37 @@ class pppCompiler(ast.NodeTransformer):
         if hasattr(node.func, 'id'):
             if self.localNameSpace:
                 self.funcDeps[self.localNameSpace[-1]].add(node.func.id)
-            #self.localNameSpace.append(node.func.id)
             if len(set(self.localNameSpace)) != len(self.localNameSpace):
                 raise CompileException('Recursion not supported!')
-            if node.func.id in self.symbols.keys():
+            if node.func.id in self.symbols.keys(): # if the function has already been defined, incorporate its code directly
                 procedure = self.symbols.getProcedure(node.func.id)
                 if node.keywords:
-                    kwdict = {kw.arg: self.valLUT(kw.value)[0] for kw in node.keywords}
+                    kwdict = {kw.arg: self.localVarHandler(kw.value)[0] for kw in node.keywords}
                 else:
                     kwdict = dict()
                 arglist = [node.func.id]
                 if node.args:
-                    arglist += [self.valLUT(arg)[0] for arg in node.args]
-                else:
-                    arglist += []
+                    arglist += [self.localVarHandler(arg)[0] for arg in node.args]
                 if node.func.id in ['pipe_empty','read_ram_valid']:
                     retdict = procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
-                    if isinstance(retdict, dict):
-                        #retdict = retdict[self.builtinBool]
-                        self.codestr[-1] = retdict[self.builtinBool]+self.codestr[-1]#procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)[self.builtinBool]
-                    #self.codestr[-2] += self.codestr[-1]
-                    #del self.codestr[-1]
+                    if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
+                        self.codestr[-1] = retdict[self.builtinBool]+self.codestr[-1]
                 else:
                     self.codestr += procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
                 if True in self.codestr:
-                    raise Exception('Bool in codestr')
+                    raise CompileException('Bool in codestr')
+            else: # put in a placeholder that can be used to generate the assembly after the function is defined
+                if node.keywords:
+                    kwdict = {kw.arg: self.localVarHandler(kw.value)[0] for kw in node.keywords}
+                else:
+                    kwdict = dict()
+                arglist = [node.func.id]
+                if node.args:
+                    arglist += [self.localVarHandler(arg)[0] for arg in node.args]
+                self.codestr += [[self.symbols.getProcedure, node.func.id, arglist, kwdict]]
         self.safe_generic_visit(node)
-        #self.localNameSpace.pop()
         if not self.localNameSpace:
-            self.maincode += '\n'.join(self.codestr)+'\n'
+            self.maincode += self.codestr
             self.codestr = []
 
     def visit_Return(self, node):
@@ -346,7 +332,6 @@ class pppCompiler(ast.NodeTransformer):
         tree = ast.parse(preprocessed_code)
         self.visit(tree)
         self.optimize()
-        #self.optimize()
         self.preamble = '\n'.join(self.createHeader())+'\n'
         return self.preamble+self.maincode
 
@@ -374,20 +359,48 @@ class pppCompiler(ast.NodeTransformer):
 
     def optimize(self):
         """Optimizes final pp code by condensing unnecessary calls"""
-        self.recursionMapper()
-        self.matches = set()
-        self.maincode = re.sub("STWR\s(\S+)\nLDWR\s(\S+)\n", self.reduceRedundantStLd, self.maincode)
-        self.optimizeChameleonLabels()
-        self.optimizeIfLabels()
-        self.optimizeElseLabels()
-        self.optimizeWhileLabels()
-        self.optimizeFunctionLabels()
-        self.optimizeLabelNOPs()
+        self.recursionMapper()              # Look for any mutually recursive calls
+        self.assembleMainCode()             # Finalize assembly by filling in placeholder declarations
+        self.optimizeRedundantSTWR_LDWRs()  # Get rid of STWR x\nLDWR x (the load is unnecessary)
+        self.optimizeDoubleSTWRs()          # Get rid of STWR x\nSTWR x that shows up from function returns
+        self.optimizeFunctionReturns()      # Reduce JMP end_function_label\n end_function_label: ... from return at end of function
+        self.optimizeChameleonLabels()      # Collapse consecutive labels into a single label
+        self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
+        self.optimizeLabelNOPs()            # Remove unnecessary NOPs after labels -> put label in front of next line
+
+    def assembleMainCode(self):
+        """Goes through main code and looks for functions that include calls to other functions
+           that hadn't been defined yet and fills in the missing assembly code"""
+        containsList = True
+        justInCaseCounter = 0
+        while containsList:
+            justInCaseCounter += 1
+            containsList = False
+            for ln, line in enumerate(self.maincode):
+                if not isinstance(line, str):
+                    containsList=True
+                    try:
+                        procedure = line[0](line[1])
+                        self.maincode[ln] = procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])
+                        if len(self.maincode)-1 > ln:
+                            self.maincode = self.maincode[:ln]+procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])+self.maincode[ln+1:]
+                        else:
+                            self.maincode = self.maincode[:ln]+procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])
+                        break
+                    except:
+                        raise CompileException("Function {} is not declared!".format(line[1]))
+            if justInCaseCounter > 1e6:
+                raise CompileException("Compiler seems to have encountered an endless loop! Perhaps there's some recursion it didn't catch!")
+        self.maincode = '\n'.join(self.maincode)+'\n'
+        self.maincode += "END\n"
 
     def recursionMapper(self):
+        """Wrapper for traceCalls to look for mutual recursion"""
         self.traceCalls(set(self.funcDeps.keys()))
 
     def traceCalls(self, c, calls=None):
+        """Looks for all function dependencies for each function and seeks out cyclic 
+           graphs in a way that doesn't lead to recursion depth failures."""
         if not calls:
             for call in c:
                 self.traceCalls(call,set([call]))
@@ -400,73 +413,16 @@ class pppCompiler(ast.NodeTransformer):
                     if call:
                         self.traceCalls(call, calls|set([c]))
 
-
-    def traceCalls2(self, calls=set(), parentCalls=set()):
-        if calls:
-            if parentCalls:
-                if parentCalls & calls:
-                    raise CompileException("Recursion is not supported!\n  --> Mutual calls between {}".format(", ".join(parentCalls|calls)))
-            return set(starmap(self.traceCalls2, [(self.funcDeps[c],calls|parentCalls) for c in calls]))
-        return None
-
-    def optimizeIfLabels(self):
-        """Reduces number of excess end_if_labels for nested if (or multiple elif) statements"""
-        m = re.search(r"(end_if_label_\d+):\sNOP\s*\n(end_if_label_\d+):\sNOP\n", self.maincode)
-        while m:
-            # look for consecutive end_if_labels and condense
-            self.maincode = re.sub("(end_if_label_\d+):\sNOP\s*\n(end_if_label_\d+):\sNOP\n", self.reduceNestedIfs, self.maincode)
-            # rename reduced end_if_labels for all JMP commands
-            for v in self.matches:
-                self.maincode = self.maincode.replace(v[0],v[1])
-            self.matches = set()
-            m = re.search(r"(end_if_label_\d+):\sNOP\s*\n(end_if_label_\d+):\sNOP\n", self.maincode)
-        # if end_if_labels present, rename them starting from 0
-        m = re.search(r"end_if_label_\d+", self.maincode)
-        if m:
-            for n,s in enumerate(set(re.findall(r"\S*\s*(end_if_label_\d+)", self.maincode))):
-                self.maincode = self.maincode.replace(s,'end_if_label_{}'.format(n))
-        return
-
-    def optimizeElseLabels(self):
-        """Reduces number of excess end_if_labels for nested if (or multiple elif) statements"""
-        #m = re.search(r"(else_label_\d+):\sNOP\s*\n(else_label_\d+):\sNOP\n", self.maincode)
-        #while m:
-            ## look for consecutive end_if_labels and condense
-            #self.maincode = re.sub("(else_label_\d+):\sNOP\s*\n(else_label_\d+):\sNOP\n", self.reduceNestedIfs, self.maincode)
-            ## rename reduced end_if_labels for all JMP commands
-            #for v in self.matches:
-                #self.maincode = self.maincode.replace(v[0],v[1])
-            #self.matches = set()
-            #m = re.search(r"(else_label_\d+):\sNOP\s*\n(else_label_\d+):\sNOP\n", self.maincode)
-        # if end_if_labels present, rename them starting from 0
-        m = re.search(r"else_label_\d+", self.maincode)
-        if m:
-            for n,s in enumerate(set(re.findall(r"\S*\s*(else_label_\d+)", self.maincode))):
-                self.maincode = self.maincode.replace(s,'else_label_{}'.format(n))
-        return
-
-    def optimizeWhileLabels(self):
-        """Sequentially order while labels"""
-        for n,s in enumerate(set(re.findall(r"\S*\s*\S*(while_label_\d+)", self.maincode))):
-            self.maincode = self.maincode.replace(s,'while_label_{}'.format(n))
-        return
-
-    def optimizeFunctionLabels(self):
-        """Remove JMP statements for return statements that occur at the end of a function"""
-        m = re.search(r"JMP\s(end_function_label_\d+)\s*\S*\n(end_function_label_\d+):\sNOP\n", self.maincode)
-        while m:
-            # look for consecutive end_if_labels and condense
-            self.maincode = re.sub(r"JMP\s(end_function_label_\d+)\s*\S*\n(end_function_label_\d+):\sNOP\n", self.reduceNestedIfs, self.maincode)
-            # rename reduced end_if_labels for all JMP commands
-            for v in self.matches:
-                self.maincode = self.maincode.replace(v[0],v[1])
-            self.matches = set()
-            m = re.search(r"JMP\s(end_function_label_\d+)\s*\S*\n(end_function_label_\d+):\sNOP\n", self.maincode)
-        # if end_function_labels present, rename them starting from 0
-        m = re.search(r"end_function_label_\d+", self.maincode)
-        if m:
-            for n,s in enumerate(set(re.findall(r"\S*\s*\S*(end_function_label_\d+)", self.maincode))):
-                self.maincode = self.maincode.replace(s,'end_function_label_{}'.format(n))
+    def optimizeLabelNumbers(self):
+        """Renumber all labels in the order that they appear for better readability of generated pp files"""
+        for labelType in ['else', 'while', 'end_function', 'end_if']:
+            replacements = set()
+            n = 0
+            for s in re.findall(r"\S*\s*\S*({}_label_\d+)".format(labelType), self.maincode):
+                if s not in replacements:
+                    replacements.add(s)
+                    self.maincode = self.maincode.replace(s,'{0}_label_{1}'.format(labelType,n))
+                    n += 1
         return
 
     def optimizeChameleonLabels(self):
@@ -480,12 +436,12 @@ class pppCompiler(ast.NodeTransformer):
             self.maincode = re.sub(replList[1], partial(self.reduceChameleonLabels,replList[0],), self.maincode, flags=re.MULTILINE)
         return
 
-    def optimizeLabelNOPs(self):
-        while re.search(r"(\S*label\S*:\s)(NOP\n)", self.maincode):
-            self.maincode = re.sub(r"(\S*label\S*:\s)(NOP\n)", self.reduceRedundantNOPs, self.maincode)
+    def optimizeFunctionReturns(self):
+        """Remove JMP statements for return statements that occur at the end of a function"""
+        self.maincode = re.sub(r"JMP\s(end_function_label_\d+)\s*\S*\n(end_function_label_\d+):\sNOP\n", self.reduceReturnJMPs, self.maincode)
         return
 
-    def reduceRedundantStLd(self, m):
+    def optimizeRedundantSTWR_LDWRs(self):
         """Prevents consecutive STWR and LDWR commands that reference the same variable:
 
             ...                 ...
@@ -494,6 +450,52 @@ class pppCompiler(ast.NodeTransformer):
             ...
 
             """
+        self.maincode = re.sub("STWR\s(\S+)\nLDWR\s(\S+)\n", self.reduceRedundantStLd, self.maincode)
+        return
+
+    def optimizeDoubleSTWRs(self):
+        """Gets rid of any redundant STWR calls:
+        
+               STWR a      ===>    STWR a
+               STWR a
+           
+           This problem can come about when saving something in a variable and subsequently
+           returning that variable from a function;
+           
+               def f(x):
+                   a = x**2
+                   return a
+               
+           """
+        self.maincode = re.sub(r"STWR (\S+)\nSTWR (\S+)\n", self.reduceDoubleSTWRs, self.maincode)
+        return
+
+    def optimizeLabelNOPs(self):
+        """Takes an end label with a NOP and puts it in front of the next line:
+                
+                end_label_1: NOP  ===> end_label_1: STWR a
+                STWR a
+            
+            """
+        while re.search(r"(\S*label\S*:\s)(NOP\n)", self.maincode):
+            self.maincode = re.sub(r"(\S*label\S*:\s)(NOP\n)", self.reduceRedundantNOPs, self.maincode)
+        return
+
+    ###########################################
+    #### Helper functions for re.sub calls ####
+    ###########################################
+
+    def reduceReturnJMPs(self, m):
+        if m.group(1) == m.group(2):
+            return m.group(2)+": NOP\n"
+        return "JMP\s{0}\s*\S*\n{1}:\sNOP\n".format(m.group(1), m.group(2))
+
+    def reduceDoubleSTWRs(self, m):
+        if m.group(1) == m.group(2):
+            return "STWR {0}\n".format(m.group(1))
+        return "STWR {0}\nSTWR {1}\n".format(m.group(1),m.group(2))
+
+    def reduceRedundantStLd(self, m):
         p1,p2 = m.group(1),m.group(2)
         if p1 == p2:
             return "STWR {}\n".format(m.group(1))
@@ -502,22 +504,6 @@ class pppCompiler(ast.NodeTransformer):
     def reduceRedundantNOPs(self, m):
         return m.group(1)
 
-    def reduceNestedIfs(self, m):
-        """Used in re.sub to replace consecutive end_if_labels with the second label:
-
-            ...                           ...
-            end_if_label_3: NOP    ===>   end_if_label_2: NOP
-            end_if_label_2: NOP           ...
-            ...
-
-        """
-        self.matches.add((m.group(1),m.group(2)))
-        return m.group(2)+": NOP\n"
-
-    def reduceUnnessecaryFnJMPs(self, m):
-        self.matches.add((m.group(1),m.group(2)))
-        return m.group(2)+": NOP\n"
-
     def reduceChameleonEndLabels(self, m):
         self.chameleonLabelsDeque.append([m.group(1),m.group(2)])
         return m.group(1)+": NOP"
@@ -525,11 +511,14 @@ class pppCompiler(ast.NodeTransformer):
     def reduceChameleonLabels(self, repl, m):
         return repl
 
+    ########################################################################
+    #### Grab all parameters/vars/triggers/... instantiated in the code ####
+    ########################################################################
+
     def collectConstants(self, code):
         """Parse const declarations and add them to symbols dictionary"""
         self.symbols[code.group(1)] = ConstSymbol(code.group(1), code.group(2))
         return ""
-
 
     def collectVars(self, code):
         """Parse var declarations with a value and add them to symbols dictionary"""
@@ -590,15 +579,14 @@ class pppCompiler(ast.NodeTransformer):
         return ""
 
     def collectExitcodes(self, code):
+        """Parse exitcode declarations with encoding and add them to symbols dictionary"""
         self.symbols[code.group(1)] = VarSymbol(type_="exitcode", name=code.group(1), value=code.group(2) if code.re.groups == 2 else 0)
         return ""
 
     def collectAddresses(self, code):
+        """Parse address declarations with encoding and add them to symbols dictionary"""
         self.symbols[code.group(1)] = VarSymbol(type_="address", name=code.group(1), value=code.group(2) if code.re.groups == 2 else 0)
         return ""
-
-        #type_ = Keyword("parameter") | Keyword("shutter") | Keyword("masked_shutter") | Keyword("trigger") | Keyword("var") | Keyword("counter") | Keyword("exitcode") | Keyword("address")
-        #var MicrowaveFreq 40, parameter, MHz, AD9912_FRQ
 
     def createHeader(self):
         """Creates pp header with all declarations from symbols dictionary"""
@@ -623,6 +611,10 @@ class pppCompiler(ast.NodeTransformer):
         header.append( "" )
         return header
 
+###########################################################################################################
+#### The next set of functions handle the class creation by adding methods to handle unsupported calls ####
+###########################################################################################################
+
 def illegalLambda(error_message):
     """Generic function for unsupported visitor methods"""
     def gencall(self, node):
@@ -635,229 +627,13 @@ def instantiateIllegalCalls():
     for name in fullASTPrimitives-allowedASTPrimitives:
         visit_name = "visit_{0}".format(name)
         visit_fn = illegalLambda(name)
-        setattr(pppCompiler, visit_name, visit_fn)
+        setattr(astCompiler, visit_name, visit_fn)
 
-
-class ppVirtualMachine:
-    """A virtual machine that mimics the soft-core processor on the FPGA for bug testing"""
-    def __init__(self, code):
-        self.mainCode = code
-        self.code = code.split('\n')
-        self.labelDict = dict()
-        self.labelLUT = self.findLabelLocations(self.code)
-        self.varDict = dict()
-        self.R = 0
-        self.CMP = 0
-
-    def printState(self):
-        print(self.varDict)
-        return self.varDict
-
-    def findLabelLocations(self, code):
-        """Find all label locations in terms of line number in the pp code"""
-        for n, line in enumerate(self.code):
-            m = re.match("^(end_if_label_\d+):", line, flags=re.MULTILINE)
-            if m:
-                if m.group(1) in self.labelDict.keys():
-                    raise Exception("Label {} already in dict!".format(m.group(1)))
-                self.labelDict[m.group(1)] = n
-            m = re.match("^(while_label_\d+):", line, flags=re.MULTILINE)
-            if m:
-                if m.group(1) in self.labelDict.keys():
-                    raise Exception("Label {} already in dict!".format(m.group(1)))
-                self.labelDict[m.group(1)] = n
-            m = re.match("^(end_while_label_\d+):", line, flags=re.MULTILINE)
-            if m:
-                if m.group(1) in self.labelDict.keys():
-                    raise Exception("Label {} already in dict!".format(m.group(1)))
-                self.labelDict[m.group(1)] = n
-            m = re.match("^(else_label_\d+):", line, flags=re.MULTILINE)
-            if m:
-                if m.group(1) in self.labelDict.keys():
-                    raise Exception("Label {} already in dict!".format(m.group(1)))
-                self.labelDict[m.group(1)] = n
-            m = re.match("^(end_function_label_\d+):", line, flags=re.MULTILINE)
-            if m:
-                if m.group(1) in self.labelDict.keys():
-                    raise Exception("Label {} already in dict!".format(m.group(1)))
-                self.labelDict[m.group(1)] = n
-
-        self.mainCode = re.sub(r"^(end_if_label_\d+:\s)(.*)", self.replaceLabel, self.mainCode, flags=re.MULTILINE)
-        self.mainCode = re.sub(r"^(while_label_\d+:\s)(.*)", self.replaceLabel, self.mainCode, flags=re.MULTILINE)
-        self.mainCode = re.sub(r"^(end_while_label_\d+:\s)(.*)", self.replaceLabel, self.mainCode, flags=re.MULTILINE)
-        self.mainCode = re.sub(r"^(else_label_\d+:\s)(.*)", self.replaceLabel, self.mainCode, flags=re.MULTILINE)
-        self.mainCode = re.sub(r"^(end_function_label_\d+:\s)(.*)", self.replaceLabel, self.mainCode, flags=re.MULTILINE)
-        self.code = self.mainCode.split('\n')
-        #print(self.labelDict)
-
-    def replaceLabel(self, m):
-        return m.group(2)
-
-    def runCode(self, printAll=False):
-        """Execute pp code"""
-        i = 0
-        pipe = 10
-        while i<len(self.code):
-            line = self.code[i]
-            i += 1
-            m = re.match(r"(var)\s(\S+)\s+(\S+),",line)
-            if m:
-                if "." in m.group(3):
-                    self.varDict[m.group(2)] = float(m.group(3))
-                #elif "x" in m.group(3):
-                    #self.varDict[m.group(2)] = hex(m.group(3))
-                else:
-                    self.varDict[m.group(2)] = int(m.group(3),0)
-                continue
-            else:
-                m = re.match(r"(var)\s(\S+)\s+(\S+)",line)
-                if m:
-                    self.varDict[m.group(2)] = m.group(3)
-                    continue
-                else:
-                    m = re.match(r"(var)\s(\S+)",line)
-                    if m:
-                        self.varDict[m.group(2)] = None
-                        continue
-            m = re.match(r"(const)\s(\S+)\s+(\S+),",line)
-            if m:
-                if "." in m.group(3):
-                    self.varDict[m.group(2)] = float(m.group(3))
-                else:
-                    self.varDict[m.group(2)] = int(m.group(3))
-                continue
-            else:
-                m = re.match(r"(const)\s(\S+)\s+(\S+)",line)
-                if m:
-                    self.varDict[m.group(2)] = m.group(3)
-                    continue
-                else:
-                    m = re.match(r"(const)\s(\S+)",line)
-                    if m:
-                        self.varDict[m.group(2)] = None
-                        continue
-            m = re.match(r"\s*(LDWR)\s(\S+)", line)
-            if m:
-                self.R = copy.copy(int(self.varDict[m.group(2)]))
-                if printAll:
-                    print(line, " --> self.R = {0}".format(self.R))
-                continue
-            m = re.match(r"\s*(STWR)\s(\S+)", line)
-            if m:
-                self.varDict[m.group(2)] = copy.copy(self.R)
-                if printAll:
-                    print(line, " --> {0} = {1}".format(m.group(2),self.R))
-                continue
-            m = re.match(r"\s*(CMPLESS)\s(\S+)", line)
-            if m:
-                self.CMP = int(self.varDict[m.group(2)]) > self.R
-                if printAll:
-                    print(line, " --> CMP = {0} < {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP))
-                continue
-            m = re.match(r"\s*(CMPGREATER)\s(\S+)", line)
-            if m:
-                self.CMP = int(self.varDict[m.group(2)]) < self.R
-                if printAll:
-                    print(line, " --> CMP = {0} > {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP))
-                continue
-            m = re.match(r"\s*(CMPEQUAL)\s(\S+)", line)
-            if m:
-                self.CMP = int(self.varDict[m.group(2)]) == self.R
-                if printAll:
-                    print(line, " --> CMP = {0} == {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP))
-                continue
-            m = re.match(r"\s*(MULW)\s(\S+)", line)
-            if m:
-                self.R *= int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R *= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(ADDW)\s(\S+)", line)
-            if m:
-                self.R += int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R += {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(SUBW)\s(\S+)", line)
-            if m:
-                self.R -= int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R -= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(ORW)\s(\S+)", line)
-            if m:
-                self.R = self.R | int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R |= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(ANDW)\s(\S+)", line)
-            if m:
-                self.R = self.R & int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R &= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(SHL)\s(\S+)", line)
-            if m:
-                self.R <<= int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R <<= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(SHR)\s(\S+)", line)
-            if m:
-                self.R >>= int(self.varDict[m.group(2)])
-                if printAll:
-                    print(line, " --> R >>= {0} -> {1}".format(self.varDict[m.group(2)],self.R))
-                continue
-            m = re.match(r"\s*(INC)\s(\S+)", line)
-            if m:
-                self.varDict[m.group(2)] = int(self.varDict[m.group(2)]) + 1
-                self.R = self.varDict[m.group(2)]
-                if printAll:
-                    print(line, " --> {0} += 1 -> {1}".format(m.group(2),self.varDict[m.group(2)]))
-                continue
-            m = re.match(r"\s*(DEC)\s(\S+)", line)
-            if m:
-                self.varDict[m.group(2)] = int(self.varDict[m.group(2)]) - 1
-                self.R = self.varDict[m.group(2)]
-                if printAll:
-                    print(line, " --> {0} -= 1 -> {1}".format(m.group(2),self.varDict[m.group(2)]))
-                continue
-                #self.varDict[m.group(2)] -= 1
-            m = re.match(r"\s*(JMPNCMP)\s(\S+)", line)
-            if m:
-                if not self.CMP:
-                    i = self.labelDict[m.group(2)]
-                    if printAll:
-                        print(line," --> JUMPING TO LINE {0}".format(i))
-                continue
-            m = re.match(r"\s*(JMPZ)\s(\S+)", line)
-            if m:
-                if not self.R:
-                    i = self.labelDict[m.group(2)]
-                    if printAll:
-                        print(line," --> JUMPING TO LINE {0}".format(i))
-                continue
-            m = re.match(r"\s*(JMPPIPEEMPTY)\s(\S+)", line)
-            if m:
-                if pipe<=0:
-                    i = self.labelDict[m.group(2)]
-                    if printAll:
-                        print(line," --> JUMPING TO LINE {0}".format(i))
-                pipe -= 1
-                continue
-            m = re.match(r"\s*(JMPNZ)\s(\S+)", line)
-            if m:
-                if self.R:
-                    i = self.labelDict[m.group(2)]
-                    if printAll:
-                        print(line," --> JUMPING TO LINE {0}".format(i))
-                continue
-            m = re.match(r"\s*(JMP)\s(\S+)", line)
-            if m:
-                i = self.labelDict[m.group(2)]
-                if printAll:
-                    print(line," --> JUMPING TO LINE {0}".format(i))
-                continue
+def pppCompiler(*args):
+    """used to instantiate a compiler object but adds a number of member functions to catch unsupported calls"""
+    instantiateIllegalCalls()
+    obj = astCompiler(*args)
+    return obj
 
 def pppcompile( sourcefile, targetfile, referencefile ):
     import os.path
@@ -892,58 +668,7 @@ def pppCompileString(sourcecode):
     compiler = pppCompiler()
     return compiler.compileString(sourcecode)
 
-
-def evalRawCode(code):
-    preprocessed_code = re.sub(r"const\s+(\S+)\s*=\s*(\S+)\s*\n", correctDeclarations, code)
-    preprocessed_code = re.sub(r"parameter\<\S+\>\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\s+(\S+)\s+=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"var\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"shutter\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"trigger\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"counter\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"const\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\<\S+\>\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"var\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"masked_shutter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"shutter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"trigger\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"counter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"(\s*)(\S+)\s=\s(.*)", printAllSettings, preprocessed_code)
-
-    print(preprocessed_code)
-    d = dict()
-    ex = exec(compile(preprocessed_code, '<string>', 'exec', optimize=2),d,d)
-    return d
-    #exec(compile(str(self.fullname)).read(), str(self.fullname), 'exec'), d, d) #run the script
-
-def correctDeclarations(code):
-    """Parse var declarations with no value and add them to symbols dictionary"""
-    return "{0} = {1}\n".format(code.group(1), code.group(2))
-
-def correctEmptyDeclarations(code):
-    """Parse var declarations with no value and add them to symbols dictionary"""
-    return "\n"
-
-def printAllSettings(code):
-    if code.group(2)[0] != '#':
-        return "{0}{1} = {2}{0}print('{1} = ', {1})".format(code.group(1),code.group(2),code.group(3))
-    return "{0}{1} = {2}".format(code.group(1),code.group(2),code.group(3))
-
-def compareDicts(d1,d2):
-    dout = dict()
-    for k,v in d1.items():
-        if "inlinevar" not in k:
-            if k in d2.keys():
-                if d2[k] != v:
-                    dout[k] = {'d1': v, 'd2': d2[k]}
-    return dout
-
-
-
 if __name__=='__main__':
-    #tree = ast.parse(mycode)
-
     mycode = """#code
 parameter<AD9912_PHS> xx = 5.352  
 const chan = 2
@@ -951,11 +676,11 @@ var retval = 0
 var retval8 = 12
 var retval3 = 0
 var arg1 = 0
-masked_shutter shutter2
-shutter mainshutter
+#masked_shutter shutter2
+#shutter mainshutter
 
 
-var d
+#var d = 5
 
 def myFunc(c,j):
     d = 5
@@ -965,17 +690,21 @@ def myFunc(c,j):
     while k<15:
         if 12 < b:
             b *= k
-        elif b:
-            b -= 12
+            b = b
         elif b == 36:
             b = 37
+        elif b:
+            b += 12
+            b = b
         else:
             b += k
-            b <<= 2
+            b = b
+            b *= 2
+            b = b
         k += 1
-        d = b << 1
-        if d > 30:
-            return d
+        #d = b# << 1
+        if b > 930:
+            return b
     #set_dds(channel=chan, phase=xx)
     #rand_seed(d)
     #update()
@@ -1009,12 +738,12 @@ def sec3(x):
     
 arg1 = 5
 arg2 = 6
-#retval = myFunc(arg1,6)
+retval = myFunc(arg1,6)
 g=3*arg2
-#g *= arg2
+g *= arg2
 arg1 = 4
 arg2 = 4
-#myFunc(arg1,arg2)
+myFunc(arg1,arg2)
 retval = 10
 arg2 = 6
 retval8 = secf(arg2)
@@ -1023,7 +752,7 @@ arg2 = 4
 retval3 = secf(arg2)
 g*=2
 arg2 = 4
-retval2 = secf(arg2)
+retval2 = roundabout(arg2)
 g1 = retval8
 g2 = retval2
 arg3 = 2
@@ -1031,39 +760,26 @@ arg3 = 2
 
     ppAn = pppCompiler()
     instantiateIllegalCalls()
-    ppAn.compileString(mycode)
-    #ppAn.visit(tree)
-    print(ppAn.preamble + ppAn.maincode)
-    compcode = ppAn.preamble + ppAn.maincode
+    compcode = ppAn.compileString(mycode)
+    print('-------------')
+    print('Compiled Code')
+    print('-------------')
+    print(compcode)
     ppvm = ppVirtualMachine(compcode)
-    ppvm.runCode()
+    print('\n------------------------')
+    print('Virtual Machine Sequence')
+    print('------------------------')
+    ppvm.runCode(True)
+    print('\nFinal State:')
     ppvm.printState()
+    print('')
     dcomp = ppvm.varDict
     draw = evalRawCode(mycode)
-    print(draw)
-    print("Dicts equal? ", compareDicts(dcomp,draw))
-
     #print(draw)
-    #for k,v in dcomp.items():
-    #    if k in draw.keys():
-    #        print("{0}: comp: {1}, raw: {2}".format(k,v,draw[k]))
-    #def repl(m):
-        #inner_word = list(m.group(2))
-        #print("const("+m.group(1)+","+ m.group(2)+")\n")
-        #return "const("+m.group(1)+","+ m.group(2)+")\n"
-        #return ""
-    #text = "const pi = 3.14\nconst e = 2.71"
-    #print(re.sub(r"\s*const\s*(\S+)\s*=\s*(\S+)", repl, text))
-    #print(text)
-#
-    #import uncompyle6 as uc
-    #
-    #compcode =compile('map(lambda x: x ** 2, [i*2/2 for i in range(10)])', '<string>', 'eval', optimize=2)
-    #with open('tmpout.py', 'w+') as file:
-        #uc.deparse_code(3.5, compcode, file)
-    #import py_compile
-    #print(py_compile.compile("plyCompiler.py", optimize=2))
-    #with open('tmpout.py', 'w+') as file:
-        ##uc.deparse_code(3.5,py_compile.compile("pppCompiler.py"),file)
-        #uc.decompile_file('__pycache__\plyCompiler.cpython-35.opt-2.pyc', file)
+    dictComp = compareDicts(dcomp,draw)
+    if dictComp:
+        print("\nFinal states are not equal!\n", dictComp)
+    else:
+        print("\nFinal states are equal, life is good :)")
+
 

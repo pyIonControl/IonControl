@@ -40,51 +40,55 @@ class FunctionSymbol(Symbol):
 
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
         self.codestr = list()
-        for i,arg in enumerate(args):
-            if i:
-                if self.nameSpace:
-                    argf = self.nameSpace+'_{}'.format(arg)
-                    if argf not in self.symbols.keys():
-                        argf = arg
-                else:
+        for i,arg in enumerate(args[1:]):
+            if self.nameSpace:
+                argf = self.nameSpace+'_{}'.format(arg)
+                if argf not in self.symbols.keys():
                     argf = arg
-                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, self.argn[i])]
+            else:
+                argf = arg
+            self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, self.argn[i])]
+            #self.codestr += ["LDWR {0}\nSTWR {1}".format(self.argn[i], argf)]
         return True
 
     def incrementIfTags(self):
         mset = set()
         for i,st in enumerate(self.block):
-            m = re.search(r"(end_if_label_)(\d+)", st)
-            if m:
-                mset.add(int(m.group(2)))
-                self.block[i]=re.sub(r"(end_if_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.ifctr), st)
+            if isinstance(st, str):
+                m = re.search(r"(end_if_label_)(\d+)", st)
+                if m:
+                    mset.add(int(m.group(2)))
+                    self.block[i]=re.sub(r"(end_if_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.ifctr), st)
         return len(mset)+1
 
     def incrementElseTags(self):
         mset = set()
         for i,st in enumerate(self.block):
-            m = re.search(r"(else_label_)(\d+)", st)
-            if m:
-                mset.add(int(m.group(2)))
-                self.block[i]=re.sub(r"(else_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.elsectr), st)
+            if isinstance(st, str):
+                m = re.search(r"(else_label_)(\d+)", st)
+                if m:
+                    mset.add(int(m.group(2)))
+                    self.block[i]=re.sub(r"(else_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.elsectr), st)
         return len(mset)+1
 
     def incrementWhileTags(self):
         mset = set()
         for i,st in enumerate(self.block):
-            m = re.search(r"(while_label_)(\d+)", st)
-            if m:
-                mset.add(int(m.group(2)))
-                self.block[i]=re.sub(r"(while_label_)(\d+)", lambda s: self.repWhileLabels(s,self.maincode.whilectr), st)
-        return len(mset)
+            if isinstance(st, str):
+                m = re.search(r"(while_label_)(\d+)", st)
+                if m:
+                    mset.add(int(m.group(2)))
+                    self.block[i]=re.sub(r"(while_label_)(\d+)", lambda s: self.repWhileLabels(s,self.maincode.whilectr), st)
+        return len(mset)+1
 
     def incrementFunctionTags(self):
         mset = set()
         for i,st in enumerate(self.block):
-            m = re.search(r"(end_function_label_)(\d+)", st)
-            if m:
-                mset.add(int(m.group(2)))
-                self.block[i]=re.sub(r"(end_function_label_)(\d+)", lambda s: self.repFunctionLabels(s,self.maincode.fnctr), st)
+            if isinstance(st, str):
+                m = re.search(r"(end_function_label_)(\d+)", st)
+                if m:
+                    mset.add(int(m.group(2)))
+                    self.block[i]=re.sub(r"(end_function_label_)(\d+)", lambda s: self.repFunctionLabels(s,self.maincode.fnctr), st)
         return len(mset)+1 #+1 prevents weird race condition that screws up labeling (once out of every ~10 runs with the same code)
 
     def incrementTags(self):

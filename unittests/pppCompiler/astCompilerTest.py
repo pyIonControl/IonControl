@@ -53,4 +53,106 @@ for name in testfiles:
 if __name__ == "__main__":
     main()
 
+    mycode = """#code
+    
+parameter<AD9912_PHS> xx = 5.352  
+const chan = 2
+var retval = 0
+var retval8 = 12
+var retval3 = 0
+var arg1 = 0
+masked_shutter shutter2
+shutter mainshutter
+
+
+var d = 5
+
+def myFunc(c,j):
+    d = 5
+    k = 3
+    b = c*2
+    #b=c
+    while k<15:
+        if 12 < b:
+            b *= k
+        elif b:
+            b -= 12
+        elif b == 36:
+            b = 37
+        else:
+            b += k
+            b <<= 2
+        k += 1
+        d = b << 1
+        if d > 30:
+            return d
+    #set_dds(channel=chan, phase=xx)
+    #rand_seed(d)
+    #update()
+    #b = secf(d)
+    b = roundabout(d)
+    return b
+    
+def secf(r):
+    #def innersec(ik):
+        #llk = ik+6
+        #return llk
+    #u = innersec(r)
+    u = r*2
+    u *= r
+    x = 0
+    x = myFunc(u,r)
+    return x
+    
+def roundabout(x):
+    ff = sec2(x)
+    return ff
+    
+def sec2(x):
+    fk = sec3(x)
+    return fk
+
+def sec3(x):
+    #kn = innersec(x) 
+    kn = x+2
+    return kn
+    
+arg1 = 5
+arg2 = 6
+#retval = myFunc(arg1,6)
+g=3*arg2
+#g *= arg2
+arg1 = 4
+arg2 = 4
+#myFunc(arg1,arg2)
+retval = 10
+arg2 = 6
+retval8 = secf(arg2)
+g*=2
+arg2 = 4
+retval3 = secf(arg2)
+g*=2
+arg2 = 4
+retval2 = secf(arg2)
+g1 = retval8
+g2 = retval2
+arg3 = 2
+"""
+
+
+
+    #ppAn = pppCompiler.pppCompiler()
+    #ppAn.compileString(mycode)
+    ##ppAn.visit(tree)
+    #print(ppAn.preamble + ppAn.maincode)
+
+    #compcode = ppAn.preamble + ppAn.maincode
+    #ppvm = pppCompiler.ppVirtualMachine(compcode)
+    #ppvm.runCode()
+    #ppvm.printState()
+    #dcomp = ppvm.varDict
+    #draw = pppCompiler.evalRawCode(mycode)
+    #print(draw)
+    #print("Dicts equal? ", pppCompiler.compareDicts(dcomp,draw))
+
 
