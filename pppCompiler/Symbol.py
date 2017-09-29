@@ -6,7 +6,9 @@
 from collections import OrderedDict
 import inspect
 from . import Builtins
+#import Builtins
 from .CompileException import SymbolException
+import re
 
 class Symbol(object):
     def __init__(self, name):
@@ -39,13 +41,14 @@ class FunctionSymbol(Symbol):
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
         self.codestr = list()
         for i,arg in enumerate(args):
-            if self.nameSpace:
-                argf = self.nameSpace+'_{}'.format(arg)
-                if argf not in self.symbols.keys():
+            if i:
+                if self.nameSpace:
+                    argf = self.nameSpace+'_{}'.format(arg)
+                    if argf not in self.symbols.keys():
+                        argf = arg
+                else:
                     argf = arg
-            else:
-                argf = arg
-            self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, self.argn[i])]
+                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, self.argn[i])]
         return True
 
     def incrementIfTags(self):
@@ -55,7 +58,7 @@ class FunctionSymbol(Symbol):
             if m:
                 mset.add(int(m.group(2)))
                 self.block[i]=re.sub(r"(end_if_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.ifctr), st)
-        return len(mset)
+        return len(mset)+1
 
     def incrementElseTags(self):
         mset = set()
@@ -64,7 +67,7 @@ class FunctionSymbol(Symbol):
             if m:
                 mset.add(int(m.group(2)))
                 self.block[i]=re.sub(r"(else_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.elsectr), st)
-        return len(mset)
+        return len(mset)+1
 
     def incrementWhileTags(self):
         mset = set()

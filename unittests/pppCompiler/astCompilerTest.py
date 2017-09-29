@@ -8,7 +8,7 @@
 from unittests import loggingConfig
 from pppCompiler import astCompiler as pppCompiler
 from unittest import TestCase, main
-import os.path
+import os
 
 def ppCompile(assemblerfile):
     from pulseProgram.PulseProgram import PulseProgram
@@ -26,7 +26,7 @@ def ppCompile(assemblerfile):
 
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
-folder = "test"
+folder = os.path.join(os.getcwd(), 'test')
 testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
               "PulseCommand",
               "indented_blocks",
