@@ -24,6 +24,7 @@ def ppCompile(assemblerfile):
 
     pp.toBinary()
 
+verbose = False # if verbose is True, the virtual machine prints line by line results
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
 folder = os.path.join(os.getcwd(), 'test')
@@ -36,13 +37,12 @@ testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "R
 def test_generator(name):
     def test(self):
         self.assertTrue(pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
-                                               os.path.join(folder, name + ".ppc.reference")))
+                                               os.path.join(folder, name + ".ppc.reference"), verbose=verbose))
     return test
 
 
 class pppCompilerTest(TestCase):
     pass
-
 
 for name in testfiles:
     test_name = "test_{0}".format(name)

@@ -635,7 +635,7 @@ def pppCompiler(*args):
     obj = astCompiler(*args)
     return obj
 
-def pppcompile( sourcefile, targetfile, referencefile ):
+def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
     import os.path
     try:
         with open(sourcefile, "r") as f:
@@ -652,10 +652,10 @@ def pppcompile( sourcefile, targetfile, referencefile ):
         with open(referencefile, "r") as f:
             referencecode = f.read()
         ppvm = ppVirtualMachine(assemblercode)
-        ppvm.runCode()
+        ppvm.runCode(verbose)
         dast = ppvm.varDict
         ppvm2 = ppVirtualMachine(referencecode)
-        ppvm2.runCode()
+        ppvm2.runCode(verbose)
         dcomp = ppvm2.varDict
         dictComparison = compareDicts(dast,dcomp)
         if dictComparison:
