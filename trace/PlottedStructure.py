@@ -111,7 +111,7 @@ class PlottedStructure:
 
     def _createIndex(self):
         d = {v:i for i,v in enumerate(self.qubitData.gatestring_list)}
-        self._plot_s_idx = [d[s] for s in self._plot_s]
+        self._plot_s_idx = [d.get(s) for s in self._plot_s]
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in PlottedStructure.serializeFields}

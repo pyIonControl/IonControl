@@ -224,6 +224,13 @@ class GateSequenceUi(Form, Base):
         logger.debug( str( settings) )
         logger.debug( "GateSequenceUi SetSettings {0}".format( settings.__dict__ ) )
         self.settings = settings
+        self.loadGateSet(self.settings.gateSetCache.get(self.settings.gateSet))
+        self.loadPreparation(self.settings.preparationFiducialsCache.get(self.settings.preparationFiducials))
+        self.loadMeasurement(self.settings.measurementFiducialsCache.get(self.settings.measurementFiducials))
+        self.loadGerms(self.settings.germsCache.get(self.settings.germs))
+        self.loadLengths(self.settings.lengthsCache.get(self.settings.lengths))
+        self.keepFractionBox.setValue(self.settings.keepFraction)
+        self.keepSeedBox.setValue(self.settings.keepSeed)
         self.sourceSelect.setCurrentIndex(self.settings.generatorType.value)
         self.GateSequenceEnableCheckBox.setChecked( self.settings.enabled )
         self.GateSequenceFrame.setEnabled( self.settings.enabled )
@@ -245,13 +252,6 @@ class GateSequenceUi(Form, Base):
         updateComboBoxItems(self.GermsBox, list(self.settings.germsCache.keys()))
         updateComboBoxItems(self.LengthsBox, list(self.settings.lengthsCache.keys()))
         updateComboBoxItems(self.GateSetBox, list(self.settings.gateSetCache.keys()))
-        self.loadGateSet(self.settings.gateSetCache.get(self.settings.gateSet))
-        self.loadPreparation(self.settings.preparationFiducialsCache.get(self.settings.preparationFiducials))
-        self.loadMeasurement(self.settings.measurementFiducialsCache.get(self.settings.measurementFiducials))
-        self.loadGerms(self.settings.germsCache.get(self.settings.germs))
-        self.loadLengths(self.settings.lengthsCache.get(self.settings.lengths))
-        self.keepFractionBox.setValue(self.settings.keepFraction)
-        self.keepSeedBox.setValue(self.settings.keepSeed)
         with BlockSignals(self.FullListRadioButton) as w:
             if self.settings.active == self.Mode.FullList:
                 self.FullListRadioButton.setChecked(True)
@@ -341,7 +341,8 @@ class GateSequenceUi(Form, Base):
     def loadGateSequenceList(self, path):
         logger = logging.getLogger(__name__)
         self.gateSequenceContainer.loadXml(path)
-        logger.debug( "loaded {0} gateSequences from {1}.".format(len(self.gateSequenceContainer.GateSequenceDict), path) )
+        if self.gateSequenceContainer._gate_string_list:
+            logger.debug("loaded {0} gateSequences from {1}.".format(len(self.gateSequenceContainer._gate_string_list), path))
         _, filename = os.path.split(path)
         self.settings.gateSequence = filename
         self.GateSequenceBox.setCurrentIndex(self.GateSequenceBox.findText(filename))

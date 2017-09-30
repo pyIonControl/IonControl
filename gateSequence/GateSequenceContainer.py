@@ -70,32 +70,26 @@ class GateSequenceContainer:
     
     def loadXml(self, filename):
         self.filename = filename
-        self._gate_string_list = list()
-        if filename is not None:
+        if not self._usePyGSTi and filename:
+            self._gate_string_list = list()
             tree = etree.parse(filename)
             root = tree.getroot()
             # load pulse definition
             for gateset in root:
                 if gateset.text:
-                    t = "".join(map(operator.methodcaller('strip'), gateset.text.split(',')))
-                    self._gate_string_list.append(GateString(None, t))
+                    self._gate_string_list.append(GateString(None, gateset.text.strip().translate({ord(','): None})))
                 else:  # we have the length 0 gate string
                     self._gate_string_list.append(GateString(None, "{}"))
             self.validate()
     
     """Validate the gates used in the gate sets against the defined gates"""            
     def validate(self):
-        for name, gatesequence in self.GateSequenceDict.items():
-            self.validateGateSequence( name, gatesequence )
-
-    def validateGateSequence(self, name, gatesequence):
-        for gate in gatesequence:
-            self.validateGate(name, gate)
-        return gatesequence
-
-    def validateGate(self, name, gate):
-        if gate not in self.gateDefinition.Gates:
-            raise GateSequenceException( "Gate '{0}' used in GateSequence '{1}' is not defined".format(gate, name) )
+        for gatesequence in self._gate_string_list:
+            basic_gates = set(self.gateSet.gates.keys())
+            for gate in gatesequence:
+                if gate not in basic_gates:
+                    raise GateSequenceException(
+                        "Gate '{0}' used in GateSequence is not defined".format(gate))
 
     def loadGateSet(self, path):
         self.gateSet = load_gateset(path)
