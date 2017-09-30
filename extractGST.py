@@ -15,6 +15,34 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
+def purge_no_timestamp_fron_qubit_data(raw_data):
+    for record in raw_data.values():
+        repeats = record['repeats']
+        timestamps = record['timestamps']
+        value = record['value']
+        new_repeats = list()
+        new_timestamps = list()
+        new_value = list()
+        drift_repeats = list()
+        drift_timestamps = list()
+        drift_value = list()
+        for r, t, v in zip(repeats, timestamps, value):
+            if isinstance(t, int):
+                new_repeats.append(r)
+                new_timestamps.append(t)
+                new_value.append(v)
+            else:
+                drift_repeats.append(r)
+                drift_timestamps.append(t)
+                drift_value.append(v)
+        record['repeats'] = new_repeats
+        record['timestamps'] = new_timestamps
+        record['value'] = new_value
+        record['_drift_repeats'] = drift_repeats
+        record['_drift_timestamps'] = drift_timestamps
+        record['_drift_value'] = drift_value
+
+
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('filename', type=str, default=None, nargs='+', help='filename of trace zip')
 parser.add_argument('--gst-eval', action='store_true')
@@ -22,6 +50,8 @@ parser.add_argument('--save-pickle', action='store_true')
 parser.add_argument('--save-txt', action='store_true')
 parser.add_argument('--save-yaml', action='store_true')
 parser.add_argument('--pickle-protocol', type=int, default=2, help='For python 2.7 use 2; for python 3.5+ use 4')
+parser.add_argument('--purge-no-timestamp-from-qubit-data', action='store_true',
+                    help='purge results from qubit data for which there is no hardware timestamp')
 args = parser.parse_args()
 
 for filename in args.filename:
@@ -58,6 +88,8 @@ for filename in args.filename:
         generic_data['prep_fiducials'] = qubitData.prepFiducials
         generic_data['germs'] = qubitData.germs
         generic_data['raw_data'] = {s:dict(r) for s, r in qubitData.data.items()}
+        if args.purge_no_timestamp_from_qubit_data:
+            purge_no_timestamp_fron_qubit_data(generic_data['raw_data'])
         if args.save_pickle:
             output_name = os.path.join(folder, file_base + ".gstraw.pkl")
             with open(output_name, 'wb') as f:
