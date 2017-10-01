@@ -206,6 +206,7 @@ class ThresholdEvaluation(EvaluationBase):
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         self.settings.setdefault('timestamp_id', 0)
+        self.settings.setdefault('color_box_plot', False)
 
     def _evaluate(self, data, evaluation, countarray):
         if evaluation.name in data.evaluated:
@@ -255,6 +256,7 @@ class ThresholdEvaluation(EvaluationBase):
                                         tooltip='Threshold evaluation (the threshold value itself is excluded)')
         parameterDict['invert'] = Parameter(name='invert', dataType='bool', value=self.settings['invert'])
         parameterDict['timestamp_id'] = Parameter(name='timestamp_id', dataType='magnitude', value=self.settings['timestamp_id'])
+        parameterDict['color_box_plot'] = Parameter(name='color_box_plot', dataType='bool', value=self.settings['color_box_plot'])
         return parameterDict
 
 class RangeEvaluation(EvaluationBase):

@@ -72,13 +72,18 @@ class QubitDataSet:
         self.gatestring_dict = {s: idx for idx, s in enumerate(self.gatestring_list)} if self.gatestring_list else None
         self._init_internal()
 
-    def extend(self, gatestring, values, repeats, timestamps):
+    def extend(self, gatestring, evaluation, add_to_color_box_plot, values, repeats, timestamps):
         """Append the measurement result for gatestring to the datastructure"""
         point = self._rawdata[gatestring]
-        point['value'].extend(values)
-        point['repeats'].extend(repeats)
-        point['timestamps'].extend(timestamps)
-        self._extend(gatestring, values, repeats)
+        if add_to_color_box_plot:
+            point['value'].extend(values)
+            point['repeats'].extend(repeats)
+            point['timestamps'].extend(timestamps)
+            self._extend(gatestring, values, repeats)
+        else:
+            point['_' + evaluation + "_value"].extend(values)
+            point['_' + evaluation + '_repeats'].extend(repeats)
+            point['_' + evaluation + '_timestamps'].extend(timestamps)
 
     def _extend(self, gatestring, values, repeats):
         """Keeps the data in the input format for pygsti log_likelyhood up to date"""

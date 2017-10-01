@@ -583,6 +583,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         for evaluation, algo in zip(self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList):
             if hasattr(algo, 'qubitEvaluate'):
                 self.context.qubitData.extend(gateSequence,
+                                              evaluation.name, evaluation.settings['color_box_plot'],
                                               *algo.qubitEvaluate(data, evaluation, ppDict=replacementDict,
                                                                   globalDict=self.globalVariables))
             if hasattr(algo, 'detailEvaluate'):
