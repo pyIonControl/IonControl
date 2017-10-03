@@ -23,11 +23,11 @@ fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'Async
     'UnaryOp', 'While', 'With', 'Yield', 'YieldFrom'}
 
 #List of visitor nodes supported in ppp
-allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Call', 'Compare',
-                        'Eq', 'Expr', 'Expression', 'For', 'FunctionDef', 'Global', 'Gt', 'GtE', 'If', 'IfExp', 'Load',
-                        #'Index', 'Interactive', 'Invert', 'Is', 'IsNot', 'LShift', 'Lambda', 'List', 'ListComp',
-                        'LShift', 'Lt', 'LtE', 'Mod', 'Module', 'Mult', 'Name', 'NameConstant', 'Nonlocal', 'Not', 'NotEq',
-                        'NotIn', 'Num', 'Or', 'Pass', 'RShift', 'Return',
+allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Break','Call', 'Compare',
+                        'Eq', 'Expr', 'Expression', 'FunctionDef', 'Gt', 'GtE', 'If', 'IfExp', 'Load', #'Lambda',
+                        #'Index', 'Interactive', 'Invert', 'Is', 'IsNot', 'Lambda', 'List', 'ListComp',
+                        'LShift', 'Lt', 'LtE', 'Mod', 'Module', 'Mult', 'Name', 'NameConstant', 'Not', 'NotEq',
+                        'Num', 'Or', 'Pass', 'RShift', 'Return',
                         'Store', 'Str', 'Sub', 'Suite', 'UAdd', 'USub', 'UnaryOp', 'While' }
 
 ComparisonLUT = {ast.Gt:    "CMPGREATER",
@@ -36,11 +36,6 @@ ComparisonLUT = {ast.Gt:    "CMPGREATER",
                  ast.LtE:   "CMPLE",
                  ast.Eq:    "CMPEQUAL",
                  ast.NotEq: "CMPNOTEQUAL"}
-
-BaseFunctions = {'set_dds': '',
-                 'set_trigger': '',
-                 'set_shutter': '',
-                 'update': ''}
 
 def list_rtrim( l, trimvalue=None ):
     """in place list right trim"""
@@ -68,6 +63,7 @@ class astCompiler(ast.NodeTransformer):
         self.localVarDict = dict()
         self.preamble = ""
         self.labelCounter = Counter()
+        self.loopLabelStack = deque()
 
     def safe_generic_visit(self, node):
         """Modified generic_visit call, currently just returning generic_visit directly"""
@@ -111,29 +107,15 @@ class astCompiler(ast.NodeTransformer):
 
     def visit_Assign(self, node):
         """Node visitor for variable assignment"""
-        fret = False
         if len(node.targets) == 1 and hasattr(node.targets[0],'id'):
             target,_ = self.valLUT(node.targets[0])
-            if target in self.symbols.keys():
-                if hasattr(node.value,'func') or hasattr(node.value, 'op'):
-                    fret = True
-                    self.safe_generic_visit(node.value)
-                else:
-                    right,_ = self.localVarHandler(node.value)
-                    self.codestr += ["LDWR {0}\nSTWR {1}".format(right,target)]
-                    self.symbols[target] = VarSymbol(name=target, value=0)
-            else:
-                if hasattr(node.value,'func') or hasattr(node.value, 'op'):
-                    fret = True
-                    self.symbols[target] = VarSymbol(name=target, value=0)
-                    self.safe_generic_visit(node.value)
-                else:
-                    right,localvar = self.localVarHandler(node.value)
-                    self.codestr += ["LDWR {0}\nSTWR {1}".format(right,target)]
-                    self.symbols[target] = VarSymbol(name=target)
+            if target not in self.symbols.keys():
+                self.symbols[target] = VarSymbol(name=target, value=0)
+            if any(map(lambda t: isinstance(node.value, t), [ast.Name, ast.Num, ast.NameConstant])):
+                right,_ = self.localVarHandler(node.value)
+                self.codestr += ["LDWR {0}".format(right)]
         self.safe_generic_visit(node)
-        if fret:
-            self.codestr += ["STWR {0}".format(target)]
+        self.codestr += ["STWR {0}".format(target)]
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
@@ -145,27 +127,27 @@ class astCompiler(ast.NodeTransformer):
             if nodetid not in self.symbols.keys():
                 nodetid = node.target.id
             if isinstance(node.op, ast.Add):
-                self.codestr += ["INC {0}".format(nodetid)]
+                self.codestr += "INC {0}\nSTWR {0}".format(nodetid).split('\n')
             elif isinstance(node.op, ast.Sub):
-                self.codestr += ["DEC {0}".format(nodetid)]
+                self.codestr += "DEC {0}\nSTWR {0}".format(nodetid).split('\n')
         else:
             nodetid,_ = self.localVarHandler(node.target)
             nodevid,_ = self.localVarHandler(node.value)
             self.codestr += ["LDWR {}".format(nodetid)]
             if isinstance(node.op, ast.Add):
-                self.codestr += ["ADDW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "ADDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.Sub):
-                self.codestr += ["SUBW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "SUBW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.Mult):
-                self.codestr += ["MULTW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.RShift):
-                self.codestr += ["SHR {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.LShift):
-                self.codestr += ["SHL {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "SHL {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.BitAnd):
-                self.codestr += ["ANDW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "ANDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
             elif isinstance(node.op, ast.BitOr):
-                self.codestr += ["ORW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += "ORW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
         self.safe_generic_visit(node)
         if not self.localNameSpace:
             self.maincode += self.codestr
@@ -215,11 +197,17 @@ class astCompiler(ast.NodeTransformer):
                 self.codestr += "LDWR {0}\nJMP{1}Z else_label_{2}".format(left,op,currentElseCtr).split('\n')
             else:
                 self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP else_label_{3}".format(left,op,right,currentElseCtr).split('\n')
-            for subnode in node.body:
-                self.visit(subnode)
+            if hasattr(node.body, '__iter__'):
+                for subnode in node.body:
+                    self.visit(subnode)
+            else:
+                self.visit(node.body)
             self.codestr += appendElse
-            for subnode in node.orelse:
-                self.visit(subnode)
+            if hasattr(node.body, '__iter__'):
+                for subnode in node.orelse:
+                    self.visit(subnode)
+            else:
+                self.visit(node.orelse)
         else:
             if right is None:
                 self.codestr += "LDWR {0}\nJMP{1}Z end_if_label_{2}".format(left,op,currentIfCtr).split('\n')
@@ -230,6 +218,12 @@ class astCompiler(ast.NodeTransformer):
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
+
+    def visit_IfExp(self, node):
+        self.visit_If(node)
+
+    def visit_Pass(self, node):
+        pass
 
     def visit_While(self, node):
         """Node visitor for while statements"""
@@ -257,11 +251,18 @@ class astCompiler(ast.NodeTransformer):
             else:
                 self.codestr += "LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr).split('\n')
         self.whilectr += 1
+        self.loopLabelStack.append(["JMP end_while_label_{0}".format(currentWhileCtr)])
         self.safe_generic_visit(node)
         self.codestr += "JMP begin_while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr).split('\n')
+        self.loopLabelStack.pop()
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
+
+    def visit_Break(self, node):
+        if self.loopLabelStack:
+            self.codestr += self.loopLabelStack[-1]
+        self.safe_generic_visit(node)
 
     def visit_FunctionDef(self, node):
         if node.name in self.symbols.keys():
@@ -425,16 +426,13 @@ class astCompiler(ast.NodeTransformer):
 
     def optimizeLabelNumbers(self):
         """Renumber all labels in the order that they appear for better readability of generated pp files"""
-        #for labelType in ['else', 'end_while', 'begin_while', 'end_function', 'end_if']:
         replacements = set()
-        #n = 0
         rep = re.findall(r"(\S+_label_)(\d+):", self.maincode)
         for s in rep:
             joined_s = ''.join(s)
             if joined_s not in replacements:
                 replacements.add(joined_s)
                 self.maincode = self.maincode.replace(joined_s,'{0}{1}'.format(s[0],self.labelCounter[s[0]]))
-                #n += 1
             self.labelCounter[s[0]] += 1
         return
 
@@ -729,17 +727,16 @@ var arg1 = 0
 def myFunc(c,j):
     d = 5
     k = 3
-    b = c*2
+    b = c*2 if c < 4 else c*3
     #b=c
     while k<15:
-        if 12 < b:
+        if 12 > b:
             b *= k
             b = b
         elif b == 36:
             b = 37
-        elif b:
-            b += 12
-            b = b
+        elif b > 500:
+            break
         else:
             b += k
             b = b
@@ -748,12 +745,13 @@ def myFunc(c,j):
         k += 1
         #d = b# << 1
         if b > 930:
-            return b
+            pass
+            #return b
     #set_dds(channel=chan, phase=xx)
     #rand_seed(d)
     #update()
     #b = secf(d)
-    b = roundabout(d)
+    #b = roundabout(d)
     return b
     
 def secf(r):
@@ -782,6 +780,8 @@ def sec3(x):
     
 arg1 = 5
 arg2 = 6
+#for someval in range(10):
+    #arg5 = someval
 retval = myFunc(arg1,6)
 g=3*arg2
 g *= arg2
