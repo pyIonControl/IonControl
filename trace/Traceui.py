@@ -138,6 +138,9 @@ class TraceuiMixin:
         self.openDirectory = QtWidgets.QAction("Open containing directory", self)
         self.openDirectory.triggered.connect(self.openContainingDirectory)
 
+        self.copyFilenameAction = QtWidgets.QAction("Copy filename", self)
+        self.copyFilenameAction.triggered.connect(self.onCopyFilename)
+
         self.filterData = QtWidgets.QAction("Filter editor", self)
         self.filterData.triggered.connect(self.onEditFilterData)
 
@@ -344,6 +347,17 @@ class TraceuiMixin:
             for dataNode in dataNodes:
                 trace = dataNode.content
                 trace.plot(-2, self.settings.plotstyle)
+
+    def onCopyFilename(self):
+        selectedTopNodes = self.traceView.selectedTopNodes()
+        filenames = list()
+        for node in selectedTopNodes:
+            dataNode = self.model.getFirstDataNode(node)
+            if dataNode:
+                traceCollection = dataNode.content.traceCollection
+                filenames.append(traceCollection.filename)
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(" ".join(filenames))
 
     def onSave(self, fileType=None, saveCopy=False, returnTraceNodeNames=False):
         """Save button is clicked. Save selected traces. If a trace has never been saved before, update model."""
