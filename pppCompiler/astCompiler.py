@@ -6,7 +6,7 @@
 import ast
 import copy
 import re
-from collections import deque, defaultdict
+from collections import deque, defaultdict, Counter
 from .Symbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
 from functools import partial
 from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
@@ -24,7 +24,7 @@ fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'Async
 
 #List of visitor nodes supported in ppp
 allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Call', 'Compare',
-                        'Eq', 'Expr', 'Expression', 'For', 'FunctionDef', 'GeneratorExp', 'Global', 'Gt', 'GtE', 'If', 'IfExp', 'Load',
+                        'Eq', 'Expr', 'Expression', 'For', 'FunctionDef', 'Global', 'Gt', 'GtE', 'If', 'IfExp', 'Load',
                         #'Index', 'Interactive', 'Invert', 'Is', 'IsNot', 'LShift', 'Lambda', 'List', 'ListComp',
                         'LShift', 'Lt', 'LtE', 'Mod', 'Module', 'Mult', 'Name', 'NameConstant', 'Nonlocal', 'Not', 'NotEq',
                         'NotIn', 'Num', 'Or', 'Pass', 'RShift', 'Return',
@@ -60,13 +60,14 @@ class astCompiler(ast.NodeTransformer):
         self.localNameSpace = deque()
         self.chameleonLabelsDeque = deque()
         self.lvctr = 1          #inline declaration counter
-        self.ifctr = 1000       #number of if statements
-        self.elsectr = 1000     #number of else statements
-        self.whilectr = 1000    #number of while statements
-        self.fnctr = 1000
+        self.ifctr = 10       #number of if statements
+        self.elsectr = 10     #number of else statements
+        self.whilectr = 10    #number of while statements
+        self.fnctr = 10
         self.symbols = SymbolTable()
         self.localVarDict = dict()
         self.preamble = ""
+        self.labelCounter = Counter()
 
     def safe_generic_visit(self, node):
         """Modified generic_visit call, currently just returning generic_visit directly"""
@@ -88,6 +89,11 @@ class astCompiler(ast.NodeTransformer):
                 return self.localNameSpace[-1]+'_'+obj.id, False
         elif isinstance(obj, ast.Call):
             return obj.func.id, False
+        elif isinstance(obj, ast.NameConstant):
+            if obj.value:
+                return 1, True
+            else:
+                return 0, True
         return obj.id, False
 
     def localVarHandler(self, nv):
@@ -151,7 +157,7 @@ class astCompiler(ast.NodeTransformer):
             elif isinstance(node.op, ast.Sub):
                 self.codestr += ["SUBW {0}\nSTWR {1}".format(nodevid, nodetid)]
             elif isinstance(node.op, ast.Mult):
-                self.codestr += ["MULW {0}\nSTWR {1}".format(nodevid, nodetid)]
+                self.codestr += ["MULTW {0}\nSTWR {1}".format(nodevid, nodetid)]
             elif isinstance(node.op, ast.RShift):
                 self.codestr += ["SHR {0}\nSTWR {1}".format(nodevid, nodetid)]
             elif isinstance(node.op, ast.LShift):
@@ -175,7 +181,7 @@ class astCompiler(ast.NodeTransformer):
         elif isinstance(node.op, ast.Sub):
             self.codestr += ["SUBW {0}".format(nodevid)]
         elif isinstance(node.op, ast.Mult):
-            self.codestr += ["MULW {0}".format(nodevid)]
+            self.codestr += ["MULTW {0}".format(nodevid)]
         elif isinstance(node.op, ast.RShift):
             self.codestr += ["SHR {0}".format(nodevid)]
         elif isinstance(node.op, ast.LShift):
@@ -189,6 +195,8 @@ class astCompiler(ast.NodeTransformer):
     def visit_If(self, node):
         """Node visitor for if statements, handles else and elif statements via subnodes"""
         currentIfCtr = copy.copy(self.ifctr)
+        appendStr = ["end_if_label_{0}: NOP".format(currentIfCtr)]
+        self.ifctr += 1
         if hasattr(node.test, 'left'):
             left,_ = self.localVarHandler(node.test.left)
             right,_ = self.localVarHandler(node.test.comparators[0])
@@ -200,26 +208,25 @@ class astCompiler(ast.NodeTransformer):
             left,_ = self.localVarHandler(node.test)
             right, op = None, ''
         if node.orelse:
+            currentElseCtr = copy.copy(self.elsectr)
+            appendElse = "JMP end_if_label_{0}\nelse_label_{1}: NOP".format(currentIfCtr,currentElseCtr).split('\n')
+            self.elsectr += 1
             if right is None:
-                self.codestr += ["LDWR {0}\nJMP{1}Z else_label_{2}".format(left,op,self.elsectr)]
+                self.codestr += "LDWR {0}\nJMP{1}Z else_label_{2}".format(left,op,currentElseCtr).split('\n')
             else:
-                self.codestr += ["LDWR {0}\n{1} {2}\nJMPNCMP else_label_{3}".format(left,op,right,self.elsectr)]
-            self.ifctr += 1
+                self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP else_label_{3}".format(left,op,right,currentElseCtr).split('\n')
             for subnode in node.body:
                 self.visit(subnode)
-            self.codestr += ["JMP end_if_label_{0}\nelse_label_{1}: NOP".format(currentIfCtr,self.elsectr)]
-            self.elsectr += 1
+            self.codestr += appendElse
             for subnode in node.orelse:
                 self.visit(subnode)
-            self.codestr += ["end_if_label_{0}: NOP".format(currentIfCtr)]
         else:
             if right is None:
-                self.codestr += ["LDWR {0}\nJMP{1}Z end_if_label_{2}".format(left,op,currentIfCtr)]
+                self.codestr += "LDWR {0}\nJMP{1}Z end_if_label_{2}".format(left,op,currentIfCtr).split('\n')
             else:
-                self.codestr += ["LDWR {0}\n{1} {2}\nJMPNCMP end_if_label_{3}".format(left,op,right,currentIfCtr)]
-            self.ifctr += 1
+                self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP end_if_label_{3}".format(left,op,right,currentIfCtr).split('\n')
             self.safe_generic_visit(node)
-            self.codestr += ["end_if_label_{0}: NOP".format(currentIfCtr)]
+        self.codestr += appendStr
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
@@ -227,31 +234,31 @@ class astCompiler(ast.NodeTransformer):
     def visit_While(self, node):
         """Node visitor for while statements"""
         currentWhileCtr = copy.copy(self.whilectr)
-        self.codestr += ["while_label_{}: NOP".format(currentWhileCtr)]
+        self.codestr += ["begin_while_label_{}: NOP".format(currentWhileCtr)]
         if hasattr(node.test, 'left'):
             left,_ = self.localVarHandler(node.test.left)
             right,_ = self.localVarHandler(node.test.comparators[0])
             op = ComparisonLUT[node.test.ops[0].__class__]
-            self.codestr += ["LDWR {0}\n{1} {2}\nJMPNCMP end_while_label_{3}".format(left,op,right,currentWhileCtr)]
+            self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP end_while_label_{3}".format(left,op,right,currentWhileCtr).split('\n')
         elif isinstance(node.test, ast.UnaryOp) and isinstance(node.test.op, ast.Not):
             left,_ = self.localVarHandler(node.test.operand)
             right, op = None, 'N'
             if hasattr(node.test.operand, 'func'):
                 self.builtinBool = True
-                self.codestr += [" end_while_label_{0}".format(currentWhileCtr)]
+                self.codestr += " end_while_label_{0}".format(currentWhileCtr).split('\n')
             else:
-                self.codestr += ["LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr)]
+                self.codestr += "LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr).split('\n')
         else:
             left,_ = self.localVarHandler(node.test)
             right, op = None, ''
             if hasattr(node.test.operand, 'func'):
                 self.builtinBool = False
-                self.codestr += [" end_while_label_{0}".format(currentWhileCtr)]
+                self.codestr += " end_while_label_{0}".format(currentWhileCtr).split('\n')
             else:
-                self.codestr += ["LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr)]
+                self.codestr += "LDWR {0}\nJMP{1}Z end_while_label_{0}".format(left,op,currentWhileCtr).split('\n')
         self.whilectr += 1
         self.safe_generic_visit(node)
-        self.codestr += ["JMP while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr)]
+        self.codestr += "JMP begin_while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr).split('\n')
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
@@ -337,16 +344,19 @@ class astCompiler(ast.NodeTransformer):
 
     def preprocessCode(self, code):
         """Code preprocessor to collect all variable declarations"""
-        preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, code)
+        preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1)+'\n', code)
+        preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
         preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
         preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
-        preprocessed_code = re.sub(r"var\s*(\S+)\s*=\s*(\S+)", self.collectVars, preprocessed_code)
+        preprocessed_code = re.sub(r"^ *var\s*(\S+)\s*=\s*(\S+) *$", self.collectVars, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"var\s*(\S+)\s*=\s*([0-9x.]+) *([a-zA-Z]+)", self.collectVars, preprocessed_code)
         preprocessed_code = re.sub(r"var\s*(\S+)", self.collectVars, preprocessed_code)
-        preprocessed_code = re.sub(r"parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9.]+) *([a-zA-Z]+)", self.collectTypedParameters, preprocessed_code)
-        preprocessed_code = re.sub(r"parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9.]+)", self.collectTypedParameters, preprocessed_code)
-        preprocessed_code = re.sub(r"parameter\s*(\S+)\s*=\s*([0-9.]+) *([a-zA-Z]+)", self.collectParameters, preprocessed_code)
-        preprocessed_code = re.sub(r"parameter\s*(\S+)\s*=\s*([0-9.]+)", self.collectParameters, preprocessed_code)
-        preprocessed_code = re.sub(r"parameter\s*(\S+)", self.collectParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^parameter\s*(\S+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
         preprocessed_code = re.sub(r"masked_shutter\s*(\S+)\s*=\s*(\S+)", self.collectMaskedShutters, preprocessed_code)
         preprocessed_code = re.sub(r"^shutter\s*(\S+)\s*=\s*(\S+)", self.collectShutters, preprocessed_code, flags=re.MULTILINE)
         preprocessed_code = re.sub(r"^trigger\s*(\S+)\s*=\s*(\S+)", self.collectTriggers, preprocessed_code, flags=re.MULTILINE)
@@ -415,14 +425,17 @@ class astCompiler(ast.NodeTransformer):
 
     def optimizeLabelNumbers(self):
         """Renumber all labels in the order that they appear for better readability of generated pp files"""
-        for labelType in ['else', 'while', 'end_function', 'end_if']:
-            replacements = set()
-            n = 0
-            for s in re.findall(r"\S*\s*\S*({}_label_\d+)".format(labelType), self.maincode):
-                if s not in replacements:
-                    replacements.add(s)
-                    self.maincode = self.maincode.replace(s,'{0}_label_{1}'.format(labelType,n))
-                    n += 1
+        #for labelType in ['else', 'end_while', 'begin_while', 'end_function', 'end_if']:
+        replacements = set()
+        #n = 0
+        rep = re.findall(r"(\S+_label_)(\d+):", self.maincode)
+        for s in rep:
+            joined_s = ''.join(s)
+            if joined_s not in replacements:
+                replacements.add(joined_s)
+                self.maincode = self.maincode.replace(joined_s,'{0}{1}'.format(s[0],self.labelCounter[s[0]]))
+                #n += 1
+            self.labelCounter[s[0]] += 1
         return
 
     def optimizeChameleonLabels(self):
@@ -432,8 +445,8 @@ class astCompiler(ast.NodeTransformer):
             self.maincode = re.sub(r"^(\S+_label_\d+):\sNOP\n(\S+_label_\d+):\sNOP", self.reduceChameleonEndLabels, self.maincode, flags=re.MULTILINE)
             m = re.search(r"^(\S+_label_\d+):\sNOP\n(\S+_label_\d+):\sNOP", self.maincode, flags=re.MULTILINE)
         while self.chameleonLabelsDeque:
-            replList = self.chameleonLabelsDeque.pop()
-            self.maincode = re.sub(replList[1], partial(self.reduceChameleonLabels,replList[0],), self.maincode, flags=re.MULTILINE)
+            replList = self.chameleonLabelsDeque.popleft()
+            self.maincode = re.sub(replList[1], partial(self.reduceChameleonLabels,replList[0]), self.maincode, flags=re.MULTILINE)
         return
 
     def optimizeFunctionReturns(self):
@@ -522,7 +535,12 @@ class astCompiler(ast.NodeTransformer):
 
     def collectVars(self, code):
         """Parse var declarations with a value and add them to symbols dictionary"""
-        self.symbols[code.group(1)] = VarSymbol(name=code.group(1), value=code.group(2) if code.re.groups == 2 else 0)
+        if code.re.groups == 3:
+            self.symbols[code.group(1)] = VarSymbol(name=code.group(1), value=code.group(2), unit=code.group(3))
+        elif code.re.groups == 2:
+            self.symbols[code.group(1)] = VarSymbol(name=code.group(1), value=code.group(2))
+        else:
+            self.symbols[code.group(1)] = VarSymbol(name=code.group(1), value=0)
         return ""
 
     def collectEmptyVars(self, code):
@@ -551,11 +569,16 @@ class astCompiler(ast.NodeTransformer):
                                                     name=code.group(2),
                                                     value=code.group(3),
                                                     unit=code.group(4))
-        else:
+        elif code.re.groups == 3:
             self.symbols[code.group(2)] = VarSymbol(type_="parameter",
                                                     encoding=code.group(1),
                                                     name=code.group(2),
                                                     value=code.group(3))
+        elif code.re.groups == 2:
+            self.symbols[code.group(2)] = VarSymbol(type_="parameter",
+                                                    encoding=code.group(1),
+                                                    name=code.group(2),
+                                                    value=0)
         return ""
 
     def collectShutters(self, code):
@@ -641,6 +664,8 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
         with open(sourcefile, "r") as f:
             sourcecode = f.read()
         compiler = pppCompiler()
+        #assembly = compiler.compileString(sourcecode)
+        #assemblercode = virtualMachineOptimization(assembly)
         assemblercode = compiler.compileString(sourcecode )
         with open(targetfile, "w") as f:
             f.write(assemblercode)
@@ -666,7 +691,26 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
 
 def pppCompileString(sourcecode):
     compiler = pppCompiler()
-    return compiler.compileString(sourcecode)
+    assembly = compiler.compileString(sourcecode)
+    optassy = virtualMachineOptimization(assembly)
+    return optassy
+
+def virtualMachineOptimization(assemblercode):
+    ppvm = ppVirtualMachine(assemblercode)
+    unnecessaryLines = ppvm.runCode(False)
+    assemblercodeSplit = assemblercode.split('\n')
+    print("orig length: ", len(assemblercodeSplit))
+    for l, line in reversed(sorted(unnecessaryLines, key=lambda x: x[0])):
+        print("line : ", l, "   code:  ", assemblercodeSplit[l-1])
+        m = re.match(r"(.*: ).*", line)
+        if m:
+            assemblercodeSplit[l] = m.group(1)+assemblercodeSplit[l]
+        del assemblercodeSplit[l-1]
+    print("fin length: ", len(assemblercodeSplit))
+    return '\n'.join(assemblercodeSplit)
+
+
+
 
 if __name__=='__main__':
     mycode = """#code

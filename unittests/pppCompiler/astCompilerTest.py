@@ -36,6 +36,7 @@ testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "R
 
 def test_generator(name):
     def test(self):
+        print("File: ", name)
         self.assertTrue(pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
                                                os.path.join(folder, name + ".ppc.reference"), verbose=verbose))
     return test

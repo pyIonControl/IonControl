@@ -37,6 +37,8 @@ class FunctionSymbol(Symbol):
         self.kwargn = kwargn
         self.symbols = symbols
         self.maincode = maincode
+        self.labelsCustomized = False
+        self.name = name
 
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
         self.codestr = list()
@@ -55,41 +57,53 @@ class FunctionSymbol(Symbol):
         mset = set()
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(end_if_label_)(\d+)", st)
+                m = re.search(r"(end_if_\S+_label_)(\d+)", st)
                 if m:
                     mset.add(int(m.group(2)))
-                    self.block[i]=re.sub(r"(end_if_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.ifctr), st)
-        return len(mset)+1
+                    self.block[i]=re.sub(r"(end_if_\S+_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.ifctr), st)
+        #return len(mset)+1
+        if mset:
+            return max(mset)+1
+        return 0
 
     def incrementElseTags(self):
         mset = set()
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(else_label_)(\d+)", st)
+                m = re.search(r"(else_\S+_label_)(\d+)", st)
                 if m:
                     mset.add(int(m.group(2)))
-                    self.block[i]=re.sub(r"(else_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.elsectr), st)
-        return len(mset)+1
+                    self.block[i]=re.sub(r"(else_\S+_label_)(\d+)", lambda s: self.repIfLabels(s,self.maincode.elsectr), st)
+        #return len(mset)+1
+        if mset:
+            return max(mset)+1
+        return 0
 
     def incrementWhileTags(self):
         mset = set()
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(while_label_)(\d+)", st)
+                m = re.search(r"(while_\S+_label_)(\d+)", st)
                 if m:
                     mset.add(int(m.group(2)))
-                    self.block[i]=re.sub(r"(while_label_)(\d+)", lambda s: self.repWhileLabels(s,self.maincode.whilectr), st)
-        return len(mset)+1
+                    self.block[i]=re.sub(r"(while_\S+_label_)(\d+)", lambda s: self.repWhileLabels(s,self.maincode.whilectr), st)
+        #return len(mset)+1
+        if mset:
+            return max(mset)+1
+        return 0
 
     def incrementFunctionTags(self):
         mset = set()
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(end_function_label_)(\d+)", st)
+                m = re.search(r"(end_function_\S+_label_)(\d+)", st)
                 if m:
                     mset.add(int(m.group(2)))
-                    self.block[i]=re.sub(r"(end_function_label_)(\d+)", lambda s: self.repFunctionLabels(s,self.maincode.fnctr), st)
-        return len(mset)+1 #+1 prevents weird race condition that screws up labeling (once out of every ~10 runs with the same code)
+                    self.block[i]=re.sub(r"(end_function_\S+_label_)(\d+)", lambda s: self.repFunctionLabels(s,self.maincode.fnctr), st)
+        #return len(mset)+1 #+1 prevents weird race condition that screws up labeling (once out of every ~10 runs with the same code)
+        if mset:
+            return max(mset)+1
+        return 0
 
     def incrementTags(self):
         self.maincode.ifctr += self.incrementIfTags()
@@ -109,16 +123,20 @@ class FunctionSymbol(Symbol):
         incval = int(m.group(2))+inc
         return '{0}{1}'.format(m.group(1),incval)
 
-
-
+    def customizeLabels(self):
+        for i,st in enumerate(self.block):
+            if isinstance(st, str):
+                m = re.search(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", st)
+                if m:
+                    self.block[i]=re.sub(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
+        self.labelsCustomized = True
 
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
-        #if len(arg)>1:
-            #raise SymbolException( "defined functions cannot have arguments" )
         self.instantiateInputParameters(arg,kwarg)
+        if not self.labelsCustomized:
+            self.customizeLabels()
         self.incrementTags()
         localBlock = self.codestr+self.block
-        #return self.block
         return localBlock
 
 class Builtin(FunctionSymbol):
