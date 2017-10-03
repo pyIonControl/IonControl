@@ -47,7 +47,7 @@ class CompileException(Exception):
     pass
 
 class astCompiler(ast.NodeTransformer):
-    def __init__(self):
+    def __init__(self, optimizePassByReference=True):
         self.builtinBool = None
         self.codestr = []
         self.maincode = []
@@ -64,6 +64,7 @@ class astCompiler(ast.NodeTransformer):
         self.preamble = ""
         self.labelCounter = Counter()
         self.loopLabelStack = deque()
+        FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
 
     def safe_generic_visit(self, node):
         """Modified generic_visit call, currently just returning generic_visit directly"""
@@ -346,6 +347,7 @@ class astCompiler(ast.NodeTransformer):
     def preprocessCode(self, code):
         """Code preprocessor to collect all variable declarations"""
         preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1)+'\n', code)
+        preprocessed_code = re.sub(r"COMPILER_FLAG *(\S+) *= *(\S+)", self.checkCompilerFlags, preprocessed_code)
         preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
         preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
         preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
@@ -525,6 +527,14 @@ class astCompiler(ast.NodeTransformer):
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####
     ########################################################################
+
+    def checkCompilerFlags(self, code):
+        if code.group(1) == 'SAFE_PASS_BY_REFERENCE':
+            if code.group(2) == 'True':
+                FunctionSymbol.passByReferenceCheckCompleted = False
+            else:
+                FunctionSymbol.passByReferenceCheckCompleted = True
+        return ""
 
     def collectConstants(self, code):
         """Parse const declarations and add them to symbols dictionary"""

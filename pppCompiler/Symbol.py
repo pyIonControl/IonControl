@@ -28,7 +28,8 @@ class VarSymbol(Symbol):
         self.unit = unit
 
 class FunctionSymbol(Symbol):
-    def __init__(self, name, block=None, argn=list(), kwargn=dict(), nameSpace=None, symbols=None, maincode=None):
+    passByReferenceCheckCompleted = False
+    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None):
         super(FunctionSymbol, self).__init__(name)
         self.block = block
         self.codestr = list()
@@ -39,17 +40,29 @@ class FunctionSymbol(Symbol):
         self.maincode = maincode
         self.labelsCustomized = False
         self.name = name
+        self.variablesPassedByReference = set()
 
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
         self.codestr = list()
+        fullargn = self.argn+[k for k in self.kwargn.keys()]
         for i,arg in enumerate(args[1:]):
-            if self.nameSpace:
-                argf = self.nameSpace+'_{}'.format(arg)
-                if argf not in self.symbols.keys():
+            if fullargn[i] not in self.variablesPassedByReference:
+                if self.nameSpace:
+                    argf = self.nameSpace+'_{}'.format(arg)
+                    if argf not in self.symbols.keys():
+                        argf = arg
+                else:
                     argf = arg
-            else:
-                argf = arg
-            self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, self.argn[i])]
+                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])]
+        for k,v in kwargs:
+            if k not in self.variablesPassedByReference:
+                if self.nameSpace:
+                    argf = self.nameSpace+'_{}'.format(arg)
+                    if argf not in self.symbols.keys():
+                        argf = v
+                else:
+                    argf = v
+                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, k)]
         return True
 
     def incrementLabels(self, repstr, ctr):
@@ -73,19 +86,60 @@ class FunctionSymbol(Symbol):
         return '{0}{1}'.format(m.group(1),incval)
 
     def customizeLabels(self):
+        self.labelsCustomized = True
         for i,st in enumerate(self.block):
             if isinstance(st, str):
                 m = re.search(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", st)
                 if m:
                     self.block[i]=re.sub(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
-        self.labelsCustomized = True
+            else:
+                self.labelsCustomized = False
+
+    def checkForVariablesPassedByReference(self):
+        overwrittenVars = set()
+        self.passByReferenceCheckCompleted = True
+        fullargs = self.argn+[k for k in self.kwargn.keys()]
+        for i,st in enumerate(self.block):
+            if isinstance(st, str):
+                for fargn in fullargs:
+                    m = re.search(r"STWR (\S+)".format(fargn), st)
+                    if m:
+                        if m.group(1) in self.argn:
+                            overwrittenVars.add(m.group(1))
+            else:
+                self.passByReferenceCheckCompleted = False
+                return
+        self.variablesPassedByReference = set(fullargs)-overwrittenVars
+
+    def substituteReferenceVars(self, args, kwargs):
+        if not self.variablesPassedByReference:
+            return self.block
+        subBlock = []
+        fullargs = args[1:]+[val for val in kwargs.values()]
+        fullargn = self.argn+[k for k in self.kwargn.keys()]
+        for i,st in enumerate(self.block):
+            if isinstance(st, str):
+                newstr = st
+                for override in self.variablesPassedByReference:
+                    if override in kwargs.keys():
+                        newstr = re.sub(override, kwargs[override], st)
+                    else:
+                        newstr = re.sub(override, fullargs[fullargn.index(override)], st)
+                subBlock.append(newstr)
+            else:
+                self.passByReferenceCheckCompleted = False
+                return self.block
+        return subBlock
 
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
-        self.instantiateInputParameters(arg,kwarg)
         if not self.labelsCustomized:
             self.customizeLabels()
+        if not self.passByReferenceCheckCompleted:
+            self.checkForVariablesPassedByReference()
+        self.instantiateInputParameters(arg,kwarg)
         self.incrementTags()
-        localBlock = self.codestr+self.block
+        overrideBlock = self.substituteReferenceVars(arg, kwarg)
+        localBlock = self.codestr+overrideBlock
         return localBlock
 
 class Builtin(FunctionSymbol):
