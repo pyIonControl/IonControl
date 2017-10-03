@@ -623,6 +623,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
         self.traceView.addAction(self.filtersAction)
+        self.traceView.addAction(self.copyFilenameAction)
 
     def rightClickMenu(self, pos):
         """a CustomContextMenu for right click"""
@@ -640,6 +641,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
             menu.addAction(self.plotWithGnuplot)
             menu.addAction(self.openDirectory)
             menu.addAction(self.filtersAction)
+            menu.addAction(self.copyFilenameAction)
         menu.exec_(self.traceView.mapToGlobal(pos))
 
 
