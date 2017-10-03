@@ -15,7 +15,7 @@ except ImportError:
     from yaml import Loader, Dumper
 
 
-def purge_no_timestamp_fron_qubit_data(raw_data):
+def separate_no_timestamp_from_qubit_data(raw_data):
     for record in raw_data.values():
         repeats = record['repeats']
         timestamps = record['timestamps']
@@ -43,6 +43,13 @@ def purge_no_timestamp_fron_qubit_data(raw_data):
         record['_drift_value'] = drift_value
 
 
+def copy_to_GST_data(raw_data, name):
+    for record in raw_data.values():
+        record['repeats'] = record['_' + name + "_repeats"]
+        record['timestamps'] = record['_' + name + "_timestamps"]
+        record['value'] = record['_' + name + "_value"]
+
+
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('filename', type=str, default=None, nargs='+', help='filename of trace zip')
 parser.add_argument('--gst-eval', action='store_true')
@@ -50,8 +57,10 @@ parser.add_argument('--save-pickle', action='store_true')
 parser.add_argument('--save-txt', action='store_true')
 parser.add_argument('--save-yaml', action='store_true')
 parser.add_argument('--pickle-protocol', type=int, default=2, help='For python 2.7 use 2; for python 3.5+ use 4')
-parser.add_argument('--purge-no-timestamp-from-qubit-data', action='store_true',
+parser.add_argument('--separate-no-timestamp-from-qubit-data', action='store_true',
                     help='purge results from qubit data for which there is no hardware timestamp')
+parser.add_argument('--copy-to-GST-data', type=str, default=None,
+                    help='copy data from evaluation to GST data')
 args = parser.parse_args()
 
 for filename in args.filename:
@@ -87,9 +96,10 @@ for filename in args.filename:
         generic_data['meas_fiducials'] = qubitData.measFiducials
         generic_data['prep_fiducials'] = qubitData.prepFiducials
         generic_data['germs'] = qubitData.germs
+        if args.separate_no_timestamp_from_qubit_data:
+            separate_no_timestamp_from_qubit_data(qubitData.data)
+            ds = qubitData.gst_dataset
         generic_data['raw_data'] = {s:dict(r) for s, r in qubitData.data.items()}
-        if args.purge_no_timestamp_from_qubit_data:
-            purge_no_timestamp_fron_qubit_data(generic_data['raw_data'])
         if args.save_pickle:
             output_name = os.path.join(folder, file_base + ".gstraw.pkl")
             with open(output_name, 'wb') as f:
@@ -103,11 +113,18 @@ for filename in args.filename:
             with open(output_name, 'w') as f:
                 yaml.dump(generic_data, f, Dumper=Dumper)
 
-    if args.gst_eval:
-        #gs_target.set_all_parameterizations("TP")
-        results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+    if args.copy_to_GST_data:
+        copy_to_GST_data(qubitData.data, args.copy_to_GST_data)
+        ds = qubitData.gst_dataset
 
-        #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
-        pygsti.report.create_general_report(results, filename=os.path.join(folder, file_base + "report.html"),
-                                            title=file_base, verbosity=2)
+    if args.gst_eval:
+        if qubitData.is_gst:
+            #gs_target.set_all_parameterizations("TP")
+            results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+
+            #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
+            pygsti.report.create_general_report(results, filename=os.path.join(folder, file_base + "report.html"),
+                                                title=file_base, verbosity=2)
+        else:
+            print("This claims to be not GST data, not running the evaluation")
 
