@@ -23,7 +23,7 @@ from pulseProgram.VariableTableModel import VariableTableModel
 from pulser.Encodings import EncodingDict
 from uiModules.RotatedHeaderView import RotatedHeaderView
 from modules.enum import enum
-from pppCompiler.pppCompiler import pppCompiler
+from pppCompiler.astCompiler import pppCompiler
 from pppCompiler.CompileException import CompileException
 from pppCompiler.Symbol import SymbolTable
 from modules.PyqtUtility import BlockSignals, updateComboBoxItems
@@ -558,7 +558,8 @@ class PulseProgramUi(PulseProgramWidget, PulseProgramBase):
         try:
             compiler = pppCompiler()
             ppCode = compiler.compileString( self.pppSource )
-            self.pppReverseLineLookup = compiler.reverseLineLookup
+            self.pppReverseLineLookup = dict()#compiler.reverseLineLookup
+            #self.pppReverseLineLookup = compiler.reverseLineLookup
             self.pppCompileException = None
             with open(savefilename, "w") as f:
                 f.write(ppCode)
