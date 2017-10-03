@@ -103,7 +103,7 @@ class ppVirtualMachine:
                     if "." in m.group(3):
                         self.varDict[m.group(2)] = float(m.group(3))
                     else:
-                        self.varDict[m.group(2)] = int(m.group(3))
+                        self.varDict[m.group(2)] = int(m.group(3), 0)
                     continue
                 else:
                     m = re.match(r"(var)\s(\S+)",line)
@@ -115,7 +115,7 @@ class ppVirtualMachine:
                 if "." in m.group(3):
                     self.varDict[m.group(2)] = float(m.group(3))
                 else:
-                    self.varDict[m.group(2)] = int(m.group(3))
+                    self.varDict[m.group(2)] = int(m.group(3), 0)
                 continue
             else:
                 m = re.match(r"(const)\s(\S+)\s+(\S+)",line)
@@ -123,7 +123,7 @@ class ppVirtualMachine:
                     if "." in m.group(3):
                         self.varDict[m.group(2)] = float(m.group(3))
                     else:
-                        self.varDict[m.group(2)] = int(m.group(3))
+                        self.varDict[m.group(2)] = int(m.group(3), 0)
                     continue
                 else:
                     m = re.match(r"(const)\s(\S+)",line)
