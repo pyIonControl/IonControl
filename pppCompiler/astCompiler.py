@@ -7,7 +7,7 @@ import ast
 import copy
 import re
 from collections import deque, defaultdict, Counter, OrderedDict
-from .Symbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
+from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
 from functools import partial
 from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
 from .pppCompiler import pppCompiler as oldpppCompiler

@@ -1,3 +1,4 @@
+
 # *****************************************************************
 # IonControl:  Copyright 2016 Sandia Corporation
 # This Software is released under the GPL license detailed
@@ -6,9 +7,7 @@
 from collections import OrderedDict
 import inspect
 from . import Builtins
-#import Builtins
 from .CompileException import SymbolException
-import re
 
 class Symbol(object):
     def __init__(self, name):
@@ -28,147 +27,33 @@ class VarSymbol(Symbol):
         self.unit = unit
 
 class FunctionSymbol(Symbol):
-    passByReferenceCheckCompleted = False
-    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False):
+    def __init__(self, name, block=None):
         super(FunctionSymbol, self).__init__(name)
         self.block = block
-        self.codestr = list()
-        self.nameSpace = nameSpace
-        self.argn = argn
-        self.kwargn = kwargn
-        self.symbols = symbols
-        self.maincode = maincode
-        self.labelsCustomized = False
-        self.name = name
-        self.variablesPassedByReference = set()
-        self.returnval = returnval
-
-    def instantiateInputParameters(self, args=list(), kwargs=dict()):
-        self.codestr = list()
-        fullargn = self.argn+[k for k in self.kwargn.keys()]
-        if len(args)>1:
-            for i,arg in enumerate(args[1:]):
-                if fullargn[i] not in self.variablesPassedByReference:
-                    if self.nameSpace:
-                        argf = self.nameSpace+'_{}'.format(arg)
-                        if argf not in self.symbols.keys():
-                            argf = arg
-                    else:
-                        argf = arg
-                    self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])]
-        for k,v in kwargs.items():
-            if k not in self.variablesPassedByReference:
-                if self.nameSpace:
-                    argf = self.nameSpace+'_{}'.format(v)
-                    if argf not in self.symbols.keys():
-                        argf = v
-                else:
-                    argf = v
-                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, k)]
-        return True
-
-    def incrementLabels(self, repstr, ctr):
-        mset = set()
-        for i,st in enumerate(self.block):
-            if isinstance(st, str):
-                m = re.search(repstr, st)
-                if m:
-                    mset.add(int(m.group(2)))
-                    self.block[i]=re.sub(repstr, lambda s: self.repLabels(s,ctr), st)
-        return len(mset)+1 #+1 prevents weird race condition that screws up labeling (once out of every ~10 runs with the same code)
-
-    def incrementTags(self):
-        self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
-        #self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
-        self.maincode.elsectr += self.incrementLabels(r"(else_\S+_label_)(\d+)", self.maincode.elsectr)
-        self.maincode.whilectr += self.incrementLabels(r"(while_\S+_label_)(\d+)", self.maincode.whilectr)
-        self.maincode.fnctr += self.incrementLabels(r"(end_function_\S+_label_)(\d+)", self.maincode.fnctr)
-
-    def repLabels(self, m, inc):
-        incval = int(m.group(2))+inc
-        return '{0}{1}'.format(m.group(1),incval)
-
-    def customizeLabels(self):
-        self.labelsCustomized = True
-        for i,st in enumerate(self.block):
-            if isinstance(st, str):
-                m = re.search(r"(while_|if_|end_function_|else_)+(label_)(\d+)", st)
-                if m:
-                    self.block[i]=re.sub(r"(while_|if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
-            else:
-                self.labelsCustomized = False
-
-    def checkForVariablesPassedByReference(self):
-        overwrittenVars = set()
-        self.passByReferenceCheckCompleted = True
-        fullargs = self.argn+[k for k in self.kwargn.keys()]
-        for i,st in enumerate(self.block):
-            if isinstance(st, str):
-                for fargn in fullargs:
-                    m = re.search(r"STWR (\S+)".format(fargn), st)
-                    if m:
-                        if m.group(1) in self.argn:
-                            overwrittenVars.add(m.group(1))
-            else:
-                self.passByReferenceCheckCompleted = False
-                return
-        self.variablesPassedByReference = set(fullargs)-overwrittenVars
-
-    def substituteReferenceVars(self, args, kwargs):
-        if not self.variablesPassedByReference:
-            return self.block
-        subBlock = []
-        if len(args)>1:
-            fullargs = args[1:]+[val for val in kwargs.values()]
-        else:
-            fullargs = [val for val in kwargs.values()]
-        fullargn = self.argn+[k for k in self.kwargn.keys()]
-        for i,st in enumerate(self.block):
-            if isinstance(st, str):
-                newstr = st
-                for override in self.variablesPassedByReference:
-                    if override in self.kwargn.keys() and override.split(self.nameSpace+'_')[1] not in kwargs.keys() and \
-                            override not in fullargn[0:len(fullargs)]:
-                        newstr = re.sub(override, self.kwargn[override], st) #pass in defaults for unmodified kw defaults
-                    elif override.split(self.nameSpace+'_')[1] in kwargs.keys():#[self.nameSpace+'_'+k for k in kwargs.keys() if self.nameSpace]:
-                        newstr = re.sub(override, kwargs[override.split(self.nameSpace+'_')[1]], st)
-                    else:
-                        newstr = re.sub(override, fullargs[fullargn.index(override)], st)
-                subBlock.append(newstr)
-            else:
-                self.passByReferenceCheckCompleted = False
-                return self.block
-        return subBlock
 
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
-        if not self.labelsCustomized:
-            self.customizeLabels()
-        if not self.passByReferenceCheckCompleted:
-            self.checkForVariablesPassedByReference()
-        self.instantiateInputParameters(arg,kwarg)
-        self.incrementTags()
-        overrideBlock = self.substituteReferenceVars(arg, kwarg)
-        localBlock = self.codestr+overrideBlock
-        return localBlock
+        if len(arg)>1:
+            raise SymbolException( "defined functions cannot have arguments" )
+        return self.block
 
 class Builtin(FunctionSymbol):
     def __init__(self, name, codegen):
         super(Builtin, self).__init__(name)
         self.codegen = codegen
         self.doc = inspect.getdoc(codegen)
-        
-    
+
+
 class SymbolTable(OrderedDict):
-    
+
     def __init__(self):
         super(SymbolTable, self).__init__()
         self.addBuiltins()
-        self.inlineParameterValues = dict() 
+        self.inlineParameterValues = dict()
         self.setInlineParameter( 'NULL', 0 )
         self.setInlineParameter( 'FFFFFFFF', 0xffffffffffffffff )
         self.setInlineParameter( 'INTERRUPT_EXITCODE', 0xfffe100000000000 )
         self.labelNumber = 0
-        
+
     def addBuiltins(self):
         self['set_shutter'] = Builtin('set_shutter', Builtins.set_shutter)
         self['set_inv_shutter'] = Builtin('set_inv_shutter', Builtins.set_inv_shutter)
@@ -194,22 +79,22 @@ class SymbolTable(OrderedDict):
         self['pulse'] = Builtin( 'pulse', Builtins.pulse )
         self['rand'] = Builtin('rand', Builtins.rand)
         self['rand_seed'] = Builtin('rand_seed', Builtins.rand_seed)
-        
+
     def setInlineParameter(self, name, value):
         self.inlineParameterValues[value] = name
         self[name] = VarSymbol(name=name, value=value)
-        
+
     def getInlineParameter(self, prefix, value):
         if value not in self.inlineParameterValues:
             name = "{0}_{1}".format(prefix, len(self.inlineParameterValues))
             self.inlineParameterValues[value] = name
             self[name] = VarSymbol(name=name, value=value)
         return self.inlineParameterValues[value]
-    
+
     def getLabelNumber(self):
         self.labelNumber += 1
         return self.labelNumber
-        
+
     def getConst(self, name):
         """get a const symbol"""
         if name not in self or not isinstance( self[name], ConstSymbol):
@@ -224,7 +109,7 @@ class SymbolTable(OrderedDict):
         if type_ is not None and var.type_!=type_:
             raise SymbolException("Variable '{0}' is of type {1}, required type: {2}".format(name, var.type_, type_))
         return self[name]
-        
+
     def getProcedure(self, name):
         if name not in self or not isinstance( self[name], FunctionSymbol):
             raise SymbolException("Function '{0}' is not defined".format(name))
@@ -233,12 +118,12 @@ class SymbolTable(OrderedDict):
     def checkAvailable(self, name):
         if name in self:
             raise SymbolException("symbol {0} already exists.".format(name))
-        
+
     def getAllConst(self):
         return [value for value in list(self.values()) if isinstance(value, ConstSymbol)]
 
     def getAllVar(self):
         return [value for value in list(self.values()) if isinstance(value, VarSymbol)]
-        
-        
-    
+
+
+
