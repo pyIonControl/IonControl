@@ -429,8 +429,8 @@ class astCompiler(ast.NodeTransformer):
         self.codestr += ["begin_while_label_{}: NOP".format(currentWhileCtr)]
         self.compTestClear()
         self.visit_IfTests(node)
-        self.testStatementHandler('begin_while_body_label_{0}'.format(currentWhileCtr), 'end_while_label_{0}'.format(currentWhileCtr))
-        self.codestr += ["begin_while_body_label_{0}: NOP".format(currentWhileCtr)]
+        self.testStatementHandler('begin_body_while_label_{0}'.format(currentWhileCtr), 'end_while_label_{0}'.format(currentWhileCtr))
+        self.codestr += ["begin_body_while_label_{0}: NOP".format(currentWhileCtr)]
         self.whilectr += 1
         self.loopLabelStack.append(["JMP end_while_label_{0}".format(currentWhileCtr)])
         self.safe_generic_visit(node)
