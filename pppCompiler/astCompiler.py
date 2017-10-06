@@ -10,6 +10,7 @@ from collections import deque, defaultdict, Counter, OrderedDict
 from .Symbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
 from functools import partial
 from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
+from .pppCompiler import pppCompiler as oldpppCompiler
 
 #List of all supported AST visitor nodes
 fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'AsyncFunctionDef', 'AsyncWith', 'Attribute', 'AugAssign',
@@ -73,6 +74,9 @@ class astCompiler(ast.NodeTransformer):
         self.rightlist = []
         self.oplist = []
         self.boolList = []
+        self.returnSet = set() #list of functions with return values
+        self.requiredReturnCalls = set()
+        self.passToOldPPPCompiler = False
         FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
 
     def safe_generic_visit(self, node):
@@ -189,18 +193,23 @@ class astCompiler(ast.NodeTransformer):
            such as 10 < y < 20"""
         leftiter = node.left
         for rightiter, opiter in zip(node.comparators, node.ops):
-            left,_ = self.localVarHandler(leftiter)
+            if isinstance(leftiter, ast.Call):
+                currentcodestr = copy.copy(self.codestr)
+                self.codestr = []
+                self.visit_Call(leftiter)
+                left = [leftiter.func.id, copy.copy(self.codestr)]
+                self.codestr = copy.copy(currentcodestr)
+            else:
+                left,_ = self.localVarHandler(leftiter)
             right,_ = self.localVarHandler(rightiter)
             op = ComparisonLUT[opiter.__class__]
             leftiter = rightiter
-            self.leftlist.append(left)
-            self.rightlist.append(right)
-            self.oplist.append(op)
-            self.boolList.append(False)
+            self.compTestPush(False, left, right, op)
 
     def checkIfBuiltinWithReturn(self,node, boolVal):
         """Special function that handles the dictionary output from pipe_empty and read_ram_valid builtins"""
         op = None
+        returncodestr = None
         if hasattr(node, 'func'):
             if node.func.id in ['pipe_empty','read_ram_valid']:
                 procedure = self.symbols.getProcedure(node.func.id)
@@ -208,16 +217,54 @@ class astCompiler(ast.NodeTransformer):
                 if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
                     op = retdict[boolVal]
             else:
-                raise CompileException("boolean testing of return statements not supported")
-        return op
+                currentcodestr = copy.copy(self.codestr)
+                self.codestr = []
+                self.visit_Call(node)
+                returncodestr = [node.func.id, copy.copy(self.codestr)]
+                self.codestr = copy.copy(currentcodestr)
+        return op, returncodestr
 
     def visit_BoolOp(self, node):
         """visitor for boolean operators such as and/or"""
+        multipleComparesExist = False
+        valDeque = deque()
         for n in node.values:
+            if isinstance(n, ast.BoolOp):
+                raise CompileException("Multiple differing boolean comparisons not yet supported!")
+            elif isinstance(n, ast.Compare):
+                if len(n.comparators)>1 and isinstance(node.op, ast.Or):
+                    if multipleComparesExist:
+                        raise CompileException("Can't support multiple comparators with or statements")
+                    #node.values = reversed(node.values)
+                    valDeque.appendleft(n)
+                    multipleComparesExist = True
+            elif isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not) and hasattr(n.operand, 'func') and \
+                n.operand.func.id in ['pipe_empty','read_ram_valid']:
+                if multipleComparesExist:
+                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
+                multipleComparesExist = True
+                valDeque.appendleft(n)
+            elif isinstance(n, ast.Call) and n.func.id in ['pipe_empty','read_ram_valid']:
+                if multipleComparesExist:
+                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
+                multipleComparesExist = True
+                valDeque.appendleft(n)
+            else:
+                valDeque.append(n)
+        if multipleComparesExist:
+            valDeque.rotate(-1)
+
+
+
+        for n in valDeque:
             if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
-                op = self.checkIfBuiltinWithReturn(n.operand, True)
+                op, retstr = self.checkIfBuiltinWithReturn(n.operand, True)
                 if op:
                     left, right = None, None
+                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                elif retstr:
+                    left = retstr
+                    right, op = None, 'N'
                 else:
                     left,_ = self.localVarHandler(n.operand)
                     right, op = None, 'N'
@@ -227,20 +274,19 @@ class astCompiler(ast.NodeTransformer):
                 right, op = None, ''
                 self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
             elif isinstance(n, ast.Call):
-                op = self.checkIfBuiltinWithReturn(n, False)
+                op, retstr = self.checkIfBuiltinWithReturn(n, False)
                 if op:
                     left, right = None, None
-                    self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
-                else:
-                    pass
-                    #self.generic_visit(node)
-                    #self.compTestPush(True if isinstance(node.op, ast.Or) else False, n, None, '')
+                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                elif retstr:
+                    left = retstr
+                    right, op = None, ''
+                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
             else:
                 currentCompTestPushLen = len(self.boolList)
                 self.visit(n)
                 if len(self.boolList) > currentCompTestPushLen:
                     self.boolList[-1] = True if isinstance(node.op, ast.Or) else False
-
 
     def compTestPush(self, boolVal, leftVal, rightVal, opVal):
         """helper function to deal with multiple boolean statements in if and while tests"""
@@ -259,26 +305,29 @@ class astCompiler(ast.NodeTransformer):
     def visit_IfTests(self, node):
         """intermediate visitor for handling boolean tests in if and while statements"""
         if isinstance(node.test, ast.UnaryOp) and isinstance(node.test.op, ast.Not):
-            left,_ = self.localVarHandler(node.test.operand)
-            if hasattr(node.test.operand, 'func'):
-                if node.test.operand.func.id in ['pipe_empty','read_ram_valid']:
-                    procedure = self.symbols.getProcedure(node.test.operand.func.id)
-                    retdict = procedure.codegen(self.symbols, arg=[node.test.operand.func.id], kwarg=dict())
-                    if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
-                        op = retdict[True]
-                        self.compTestPush(False, None, None, op)
+            op, retstr = self.checkIfBuiltinWithReturn(node.test.operand, True)
+            if op:
+                left, right = None, None
+                self.compTestPush(False, left, right, op)
+            elif retstr:
+                left = retstr
+                right, op = None, 'N'
+                self.compTestPush(False, left, right, op)
             else:
                 left,_ = self.localVarHandler(node.test.operand)
                 self.compTestPush(False, left, None, 'N')
         elif isinstance(node.test, ast.Name) or isinstance(node.test, ast.NameConstant):
             left,_ = self.localVarHandler(node.test)
             self.compTestPush(False, left, None, '')
-        elif hasattr(node.test, 'func') and node.test.func.id in ['pipe_empty','read_ram_valid']:
-                procedure = self.symbols.getProcedure(node.test.func.id)
-                retdict = procedure.codegen(self.symbols, arg=[node.test.func.id], kwarg=dict())
-                if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
-                    op = retdict[False]
-                    self.compTestPush(False, None, None, op)
+        elif isinstance(node.test, ast.Call):
+            op, retstr = self.checkIfBuiltinWithReturn(node.test, False)
+            if op:
+                left, right = None, None
+                self.compTestPush(False, left, right, op)
+            elif retstr:
+                left = retstr
+                right, op = None, ''
+                self.compTestPush(False, left, right, op)
         else:
             self.visit(node.test)
 
@@ -287,27 +336,45 @@ class astCompiler(ast.NodeTransformer):
            as well as and/or statements with multiple boolean tests"""
         for ind,orStatement,right,left,op in zip(list(reversed(range(len(self.leftlist)))), self.boolList, self.rightlist, self.leftlist, self.oplist):
             if orStatement:
+                if left is None:
+                    self.codestr += "{0} {1}".format(reverseJMPLUT[op],label1).split('\n')
+                    continue
+                elif isinstance(left, list):
+                    self.requiredReturnCalls.add(left[0])
+                    self.codestr += left[1]
+                else:
+                    self.codestr += ["LDWR {0}".format(left)]
                 if ind:
-                    if left is None:
-                        self.codestr += "{0} {1}".format(reverseJMPLUT[op],label1).split('\n')
-                    elif right is None:
-                        self.codestr += "LDWR {0}\nJMP{1}Z {2}".format(left,'' if op else 'N',label1).split('\n')
+                    if right is None:
+                        self.codestr += "JMP{0}Z {1}".format('' if op else 'N',label1).split('\n')
                     else:
-                        self.codestr += "LDWR {0}\n{1} {2}\nJMPCMP {3}".format(left,op,right,label1).split('\n')
+                        self.codestr += "{0} {1}\nJMPCMP {2}".format(op,right,label1).split('\n')
                 else:
                     if left is None:
                         self.codestr += "{0} {1}".format(op,label2).split('\n')
-                    elif right is None:
-                        self.codestr += "LDWR {0}\nJMP{1}Z {2}".format(left,op,label2).split('\n')
+                        continue
+                    elif isinstance(left, list):
+                        self.requiredReturnCalls.add(left[0])
+                        self.codestr += left[1]
                     else:
-                        self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP {3}".format(left,op,right,label2).split('\n')
+                        self.codestr += ["LDWR {0}".format(left)]
+                    if right is None:
+                        self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                    else:
+                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
             else:
                 if left is None:
                     self.codestr += "{0} {1}".format(op,label2).split('\n')
-                elif right is None:
-                    self.codestr += "LDWR {0}\nJMP{1}Z {2}".format(left,op,label2).split('\n')
+                    continue
+                elif isinstance(left, list):
+                    self.requiredReturnCalls.add(left[0])
+                    self.codestr += left[1]
                 else:
-                    self.codestr += "LDWR {0}\n{1} {2}\nJMPNCMP {3}".format(left,op,right,label2).split('\n')
+                    self.codestr += ["LDWR {0}".format(left)]
+                if right is None:
+                    self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                else:
+                    self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
         self.compTestClear()
 
     def visit_If(self, node):
@@ -409,16 +476,9 @@ class astCompiler(ast.NodeTransformer):
         self.fnctr += 1
         self.symbols[node.name] = FunctionSymbol(node.name, copy.copy(self.codestr),
                                                  nameSpace=node.name, argn=arglist,
-                                                 kwargn=kwarglist, symbols=self.symbols, maincode=self)
+                                                 kwargn=kwarglist, symbols=self.symbols,
+                                                 maincode=self, returnval=node.name in self.returnSet)
         self.codestr = []
-
-    def getChameleonSymbol(self, obj):
-        if self.localNameSpace:
-            target = "_".join(self.localNameSpace+deque(obj.id))
-            if target in self.symbols.keys():
-                return self.symbols[target]
-        if obj.id in self.symbols.keys():
-            return self.symbols[obj.id]
 
     def visit_Call(self, node):
         """visitor for function calls"""
@@ -438,6 +498,7 @@ class astCompiler(ast.NodeTransformer):
                     arglist += [self.localVarHandler(arg)[0] for arg in node.args]
                 if node.func.id in ['pipe_empty','read_ram_valid']:
                     retdict = procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
+                    #raise CompileException("{0}() needs to be called in an if/while statement!".format(node.func.id))
                     #if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
                         #self.codestr[-1] = retdict[self.builtinBool]+self.codestr[-1]
                 else:
@@ -454,19 +515,36 @@ class astCompiler(ast.NodeTransformer):
                     arglist += [self.localVarHandler(arg)[0] for arg in node.args]
                 self.codestr += [[self.symbols.getProcedure, node.func.id, arglist, kwdict]]
         self.safe_generic_visit(node)
+        returncodestr = copy.copy(self.codestr)
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
+        return returncodestr
 
     def visit_Return(self, node):
         """Node visitor for return statements"""
-        res, _ = self.localVarHandler(node.value)
-        self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
-        self.safe_generic_visit(node)
+        if isinstance(node.value, ast.Call):
+            self.visit(node.value)
+            self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
+        else:
+            res, _ = self.localVarHandler(node.value)
+            self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
+            self.safe_generic_visit(node)
+        if self.localNameSpace:
+            self.returnSet.add(self.localNameSpace[-1])
+        else:
+            raise CompileException("Function return called outside of function definition!")
+        #self.safe_generic_visit(node)
 
     def compileString(self, code):
         """Compile the ppp code"""
-        preprocessed_code = self.preprocessCode(code)
+        splitcode = code.split('\n')
+        for l,line in enumerate(splitcode):
+            splitcode[l] = self.preprocessCode(splitcode[l])
+        preprocessed_code = '\n'.join(splitcode)
+        if self.passToOldPPPCompiler:
+            oldcompiler = oldpppCompiler()
+            return oldcompiler.compileString(code)
         tree = ast.parse(preprocessed_code)
         self.visit(tree)
         self.optimize()
@@ -475,8 +553,8 @@ class astCompiler(ast.NodeTransformer):
 
     def preprocessCode(self, code):
         """Code preprocessor to collect all variable declarations"""
-        preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1)+'\n', code)
-        preprocessed_code = re.sub(r"COMPILER_FLAG *(\S+) *= *(\S+)", self.checkCompilerFlags, preprocessed_code)
+        preprocessed_code = re.sub(r"#COMPILER_FLAG *(\S+) *= *(\S+)", self.checkCompilerFlags, code)
+        preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1)+'\n', preprocessed_code)
         preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
         preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
         preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
@@ -505,8 +583,8 @@ class astCompiler(ast.NodeTransformer):
         self.assembleMainCode()             # Finalize assembly by filling in placeholder declarations
         self.optimizeRedundantSTWR_LDWRs()  # Get rid of STWR x\nLDWR x (the load is unnecessary)
         self.optimizeDoubleSTWRs()          # Get rid of STWR x\nSTWR x that shows up from function returns
+        self.optimizeDoubleLDWRs()          # Get rid of LDWR x\nLDWR x that shows up from function returns
         self.optimizeRedundantSTWR_LDWRs_STWRs()
-        #self.optimizeFunctionReturns()      # Reduce JMP end_function_label\n end_function_label: ... from return at end of function
         self.optimizeChameleonLabels()      # Collapse consecutive labels into a single label
         self.optimizeOneLineJMPs()
         self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
@@ -515,6 +593,8 @@ class astCompiler(ast.NodeTransformer):
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
            that hadn't been defined yet and fills in the missing assembly code"""
+        if self.requiredReturnCalls-self.returnSet:
+            raise CompileException("Expected returned values form the following functions: {}",self.requiredReturnCalls-self.returnSet)
         containsList = True
         justInCaseCounter = 0
         while containsList:
@@ -585,11 +665,6 @@ class astCompiler(ast.NodeTransformer):
         self.maincode = re.sub(r"JMP\s(?P<labelName>\S+_label_\d+)\s*((?P=labelName):.*)", self.reduceOneLineJMPs, self.maincode)
         return
 
-    def optimizeFunctionReturns(self):
-        """Remove JMP statements for return statements that occur at the end of a function"""
-        self.maincode = re.sub(r"JMP\s(end_function_label_\d+)\s*\S*\n(end_function_label_\d+):\sNOP\n", self.reduceReturnJMPs, self.maincode)
-        return
-
     def optimizeRedundantSTWR_LDWRs(self):
         """Prevents consecutive STWR and LDWR commands that reference the same variable:
 
@@ -628,7 +703,17 @@ class astCompiler(ast.NodeTransformer):
                    return a
                
            """
-        self.maincode = re.sub(r"STWR (\S+)\nSTWR (\S+)\n", self.reduceDoubleSTWRs, self.maincode)
+        self.maincode = re.sub(r"STWR (?P<varname>\S+)\nSTWR (?P=varname)\n", self.reduceDoubleSTWRs, self.maincode)
+        return
+
+    def optimizeDoubleLDWRs(self):
+        """Gets rid of any redundant LDWR calls:
+        
+               LDWR a      ===>    LDWR a
+               LDWR a
+           
+           """
+        self.maincode = re.sub(r"LDWR (?P<varname>\S+)\nLDWR (?P=varname)\n", self.reduceDoubleLDWRs, self.maincode)
         return
 
     def optimizeLabelNOPs(self):
@@ -647,19 +732,21 @@ class astCompiler(ast.NodeTransformer):
     ###########################################
 
     def reduceOneLineJMPs(self, m):
-        #if m.group(1) == m.group(2):
-            #return m.group(2)+": NOP\n"
         return m.group(2)
 
-    def reduceReturnJMPs(self, m):
-        if m.group(1) == m.group(2):
-            return m.group(2)+": NOP\n"
-        return "JMP\s{0}\s*\S*\n{1}:\sNOP\n".format(m.group(1), m.group(2))
+    #def reduceReturnJMPs(self, m):
+        #if m.group(1) == m.group(2):
+            #return m.group(2)+": NOP\n"
+        #return "JMP\s{0}\s*\S*\n{1}:\sNOP\n".format(m.group(1), m.group(2))
 
     def reduceDoubleSTWRs(self, m):
-        if m.group(1) == m.group(2):
-            return "STWR {0}\n".format(m.group(1))
-        return "STWR {0}\nSTWR {1}\n".format(m.group(1),m.group(2))
+        return "STWR {0}\n".format(m.group('varname'))
+        #if m.group(1) == m.group(2):
+            #return "STWR {0}\n".format(m.group(1))
+        #return "STWR {0}\nSTWR {1}\n".format(m.group(1),m.group(2))
+
+    def reduceDoubleLDWRs(self, m):
+        return "LDWR {0}\n".format(m.group('varname'))
 
     def reduceRedundantStLd(self, m):
         p1,p2 = m.group(1),m.group(2)
@@ -690,6 +777,10 @@ class astCompiler(ast.NodeTransformer):
                 FunctionSymbol.passByReferenceCheckCompleted = False
             else:
                 FunctionSymbol.passByReferenceCheckCompleted = True
+        if code.group(1) == 'USE_STANDARD_PPP_COMPILER':
+            if code.group(2) == 'True':
+                self.passToOldPPPCompiler = True
+                print("REVERT TO OLD COMPILER")
         return ""
 
     def collectConstants(self, code):
@@ -831,6 +922,7 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
         #assembly = compiler.compileString(sourcecode)
         #assemblercode = virtualMachineOptimization(assembly)
         assemblercode = compiler.compileString(sourcecode )
+
         with open(targetfile, "w") as f:
             f.write(assemblercode)
     except CompileException as e:
