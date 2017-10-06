@@ -45,19 +45,20 @@ class FunctionSymbol(Symbol):
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
         self.codestr = list()
         fullargn = self.argn+[k for k in self.kwargn.keys()]
-        for i,arg in enumerate(args[1:]):
-            if fullargn[i] not in self.variablesPassedByReference:
-                if self.nameSpace:
-                    argf = self.nameSpace+'_{}'.format(arg)
-                    if argf not in self.symbols.keys():
+        if len(args)>1:
+            for i,arg in enumerate(args[1:]):
+                if fullargn[i] not in self.variablesPassedByReference:
+                    if self.nameSpace:
+                        argf = self.nameSpace+'_{}'.format(arg)
+                        if argf not in self.symbols.keys():
+                            argf = arg
+                    else:
                         argf = arg
-                else:
-                    argf = arg
-                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])]
-        for k,v in kwargs:
+                    self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])]
+        for k,v in kwargs.items():
             if k not in self.variablesPassedByReference:
                 if self.nameSpace:
-                    argf = self.nameSpace+'_{}'.format(arg)
+                    argf = self.nameSpace+'_{}'.format(v)
                     if argf not in self.symbols.keys():
                         argf = v
                 else:
@@ -76,7 +77,8 @@ class FunctionSymbol(Symbol):
         return len(mset)+1 #+1 prevents weird race condition that screws up labeling (once out of every ~10 runs with the same code)
 
     def incrementTags(self):
-        self.maincode.ifctr += self.incrementLabels(r"(end_if_\S+_label_)(\d+)", self.maincode.ifctr)
+        self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
+        #self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
         self.maincode.elsectr += self.incrementLabels(r"(else_\S+_label_)(\d+)", self.maincode.elsectr)
         self.maincode.whilectr += self.incrementLabels(r"(while_\S+_label_)(\d+)", self.maincode.whilectr)
         self.maincode.fnctr += self.incrementLabels(r"(end_function_\S+_label_)(\d+)", self.maincode.fnctr)
@@ -89,9 +91,9 @@ class FunctionSymbol(Symbol):
         self.labelsCustomized = True
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", st)
+                m = re.search(r"(while_|if_|end_function_|else_)+(label_)(\d+)", st)
                 if m:
-                    self.block[i]=re.sub(r"(while_|end_if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
+                    self.block[i]=re.sub(r"(while_|if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
             else:
                 self.labelsCustomized = False
 
@@ -115,14 +117,20 @@ class FunctionSymbol(Symbol):
         if not self.variablesPassedByReference:
             return self.block
         subBlock = []
-        fullargs = args[1:]+[val for val in kwargs.values()]
+        if len(args)>1:
+            fullargs = args[1:]+[val for val in kwargs.values()]
+        else:
+            fullargs = [val for val in kwargs.values()]
         fullargn = self.argn+[k for k in self.kwargn.keys()]
         for i,st in enumerate(self.block):
             if isinstance(st, str):
                 newstr = st
                 for override in self.variablesPassedByReference:
-                    if override in kwargs.keys():
-                        newstr = re.sub(override, kwargs[override], st)
+                    if override in self.kwargn.keys() and override.split(self.nameSpace+'_')[1] not in kwargs.keys() and \
+                            override not in fullargn[0:len(fullargs)]:
+                        newstr = re.sub(override, self.kwargn[override], st) #pass in defaults for unmodified kw defaults
+                    elif override.split(self.nameSpace+'_')[1] in kwargs.keys():#[self.nameSpace+'_'+k for k in kwargs.keys() if self.nameSpace]:
+                        newstr = re.sub(override, kwargs[override.split(self.nameSpace+'_')[1]], st)
                     else:
                         newstr = re.sub(override, fullargs[fullargn.index(override)], st)
                 subBlock.append(newstr)

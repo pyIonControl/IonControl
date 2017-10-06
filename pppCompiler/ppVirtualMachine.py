@@ -59,11 +59,13 @@ class ppVirtualMachine:
 
     def runCode(self, printAll=False):
         """Execute pp code"""
+        totalsteps = 0
         i = 0
         pipe = 10
         self.timer = 0
         self.ddsWriteTimer = 0
         while i<len(self.code):
+            totalsteps += 1
             line = self.code[i]
             i += 1
             self.timer += 1
@@ -74,6 +76,7 @@ class ppVirtualMachine:
             m = re.match(r"^ *#", line, re.MULTILINE)
             if m:
                 self.timer -= 1
+                totalsteps -= 1
                 continue
             m = re.match(r"(var)\s(\S+)\s+(\S+), parameter, ([a-zA-Z_]+)",line)
             if m:
@@ -161,6 +164,13 @@ class ppVirtualMachine:
                     msg =  " --> CMP = {0} < {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
+            m = re.match(r"\s*(CMPLE)\s(\S+)", line)
+            if m:
+                self.CMP = int(self.varDict[m.group(2)]) >= self.R
+                if printAll:
+                    msg =  " --> CMP = {0} <= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                continue
             m = re.match(r"\s*(CMPGREATER)\s(\S+)", line)
             if m:
                 self.CMP = int(self.varDict[m.group(2)]) < self.R
@@ -168,11 +178,25 @@ class ppVirtualMachine:
                     msg =  " --> CMP = {0} > {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
+            m = re.match(r"\s*(CMPGE)\s(\S+)", line)
+            if m:
+                self.CMP = int(self.varDict[m.group(2)]) <= self.R
+                if printAll:
+                    msg =  " --> CMP = {0} >= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                continue
             m = re.match(r"\s*(CMPEQUAL)\s(\S+)", line)
             if m:
                 self.CMP = int(self.varDict[m.group(2)]) == self.R
                 if printAll:
                     msg = " --> CMP = {0} == {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                continue
+            m = re.match(r"\s*(CMPNOTEQUAL)\s(\S+)", line)
+            if m:
+                self.CMP = int(self.varDict[m.group(2)]) != self.R
+                if printAll:
+                    msg = " --> CMP = {0} != {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
             m = re.match(r"\s*(MULTW)\s(\S+)", line)
@@ -234,24 +258,30 @@ class ppVirtualMachine:
             m = re.match(r"\s*(INC)\s(\S+)", line)
             if m:
                 self.Rref = None
-                self.varDict[m.group(2)] = int(self.varDict[m.group(2)]) + 1
-                self.R = self.varDict[m.group(2)]
+                self.R = int(self.varDict[m.group(2)]) + 1
                 if printAll:
-                    msg = " --> {0} += 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
+                    msg = " --> self.R = {0} + 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
             m = re.match(r"\s*(DEC)\s(\S+)", line)
             if m:
                 self.Rref = None
-                self.varDict[m.group(2)] = int(self.varDict[m.group(2)]) - 1
-                self.R = self.varDict[m.group(2)]
+                self.R = int(self.varDict[m.group(2)]) - 1
                 if printAll:
-                    msg = " --> {0} -= 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
+                    msg = " --> self.R = {0} - 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
             m = re.match(r"\s*(JMPNCMP)\s(\S+)", line)
             if m:
                 if not self.CMP:
+                    i = self.labelDict[m.group(2)]
+                    if printAll:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                continue
+            m = re.match(r"\s*(JMPCMP)\s(\S+)", line)
+            if m:
+                if self.CMP:
                     i = self.labelDict[m.group(2)]
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
@@ -274,6 +304,15 @@ class ppVirtualMachine:
                         print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 pipe -= 1
                 continue
+            m = re.match(r"\s*(JMPPIPEAVAIL)\s(\S+)", line)
+            if m:
+                if pipe>0:
+                    i = self.labelDict[m.group(2)]
+                    if printAll:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                pipe -= 1
+                continue
             m = re.match(r"\s*(JMPNZ)\s(\S+)", line)
             if m:
                 if self.R:
@@ -287,6 +326,12 @@ class ppVirtualMachine:
                 i = self.labelDict[m.group(2)]
                 if printAll:
                     msg = " --> JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
+                continue
+            m = re.match(r"\s*(NOP)\s(\S+)", line)
+            if m:
+                if printAll:
+                    msg = " --> NOP"
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
             m = re.match(r"\s*(JMPNINTERRUPT)\s(\S+)", line)
@@ -369,7 +414,7 @@ class ppVirtualMachine:
                     msg = " --> PULSED UPDATE FOR {0} CLOCK CYCLES".format(self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(self.timer)))
                 continue
-            m = re.match(r"\s*(UPDATE)\s([a-zA-Z_]+)", line)
+            m = re.match(r"\s*(UPDATE)\s([a-zA-Z_0-9]+)", line)
             if m:
                 self.timer += int(self.varDict[m.group(2)])
                 if int(self.varDict[m.group(2)]) > self.ddsWriteTimer:
@@ -398,7 +443,7 @@ class ppVirtualMachine:
             print("\nUNNECESSARY LINES:")
             for l, line in uselessLines:
                 print("{0:5}: {1}".format(l,line))
-        print("ELAPSED CLOCK CYCLES: ", self.timer)
+        print("ELAPSED CLOCK CYCLES: ", self.timer, "TOTAL EXECUTED STEPS: ", totalsteps)
         return uselessLines
 
 def compareDicts(d1,d2):
