@@ -59,6 +59,7 @@ class astCompiler(ast.NodeTransformer):
         self.maincode = []
         self.funcDeps = defaultdict(set)
         self.localNameSpace = deque()
+        self.funcNames = set()
         self.chameleonLabelsDeque = deque()
         self.lvctr = 1          #inline declaration counter
         self.ifctr = 10       #number of if statements
@@ -253,8 +254,6 @@ class astCompiler(ast.NodeTransformer):
                 valDeque.append(n)
         if multipleComparesExist:
             valDeque.rotate(-1)
-
-
 
         for n in valDeque:
             if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
@@ -467,9 +466,10 @@ class astCompiler(ast.NodeTransformer):
                 break
         kwarglist = OrderedDict(reversed(list(zip(reversed(fullarglist),reversed(defaults)))))
         self.localNameSpace.append(node.name) # push function context for maintaining local variable definitions
-        if len(set(self.localNameSpace)) != len(self.localNameSpace):
-            print('RECURSION ERROR')
-            raise CompileException('Recursion not supported!')
+        self.funcNames.add(node.name)
+        #if len(set(self.localNameSpace)) != len(self.localNameSpace):
+            #print('RECURSION ERROR')
+            #raise CompileException('Recursion not supported!')
         self.safe_generic_visit(node)         # walk inner block
         self.localNameSpace.pop()             # pop function context
         self.codestr += ["end_function_label_{}: NOP".format(self.fnctr)]
@@ -593,6 +593,10 @@ class astCompiler(ast.NodeTransformer):
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
            that hadn't been defined yet and fills in the missing assembly code"""
+        functionDeclarations = list()
+        for fn in self.funcNames:
+            procedure = self.symbols.getProcedure(fn)
+            functionDeclarations += procedure.codegenInit(self.symbols)
         if self.requiredReturnCalls-self.returnSet:
             raise CompileException("Expected returned values form the following functions: {}",self.requiredReturnCalls-self.returnSet)
         containsList = True
@@ -615,7 +619,7 @@ class astCompiler(ast.NodeTransformer):
                         raise CompileException("Function {} is not declared!".format(line[1]))
             if justInCaseCounter > 1e6:
                 raise CompileException("Compiler seems to have encountered an endless loop! Perhaps there's some recursion it didn't catch!")
-        self.maincode = '\n'.join(self.maincode)+'\n'
+        self.maincode = '\n'.join(self.maincode+["END"]+functionDeclarations)+'\n'
         self.maincode += "END\n"
 
     def recursionMapper(self):

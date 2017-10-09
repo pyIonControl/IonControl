@@ -7,6 +7,7 @@ import copy
 import re
 import random
 from modules.quantity import Q
+from collections import deque
 
 def DDS(amp=0,freq=0,phase=0):
     return {'amp': amp, 'freq': freq, 'phase': phase}
@@ -27,6 +28,7 @@ class ppVirtualMachine:
         self.INDF = 0
         self.CMP = 0
         self.RAMADDRESS = 0
+        self.memoryLocationStack = deque()
         self.DDSChannels = 12
         self.DDSs = [DDS() for i in range(self.DDSChannels)]
         self.ddsWriteTimer = 0
@@ -69,9 +71,14 @@ class ppVirtualMachine:
         pipe = 100
         timer = 0
         self.ddsWriteTimer = 0
+        self.memoryLocationStack.clear()
+        memlocationChanged = False
         while i<len(self.code):
             totalsteps += 1
             line = self.code[i]
+            #if memlocationChanged:
+                #memlocationChanged = False
+            #else:
             i += 1
             timer += 1
             if self.ddsWriteTimer > 0:
@@ -298,6 +305,7 @@ class ppVirtualMachine:
             if m:
                 if not self.CMP:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -306,6 +314,7 @@ class ppVirtualMachine:
             if m:
                 if self.CMP:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -314,6 +323,7 @@ class ppVirtualMachine:
             if m:
                 if not self.R:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -322,6 +332,7 @@ class ppVirtualMachine:
             if m:
                 if pipe<=0:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -331,6 +342,7 @@ class ppVirtualMachine:
             if m:
                 if pipe>0:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -340,6 +352,7 @@ class ppVirtualMachine:
             if m:
                 if self.R:
                     i = self.labelDict[m.group(2)]
+                    memlocationChanged = True
                     if printAll:
                         msg = " --msg = > JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
@@ -347,8 +360,28 @@ class ppVirtualMachine:
             m = re.match(r"\s*(JMP)\s(\S+)", line)
             if m:
                 i = self.labelDict[m.group(2)]
+                memlocationChanged = True
                 if printAll:
                     msg = " --> JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                continue
+            m = re.match(r"\s*(JMPPUSHADDR)\s(\S+)", line)
+            if m:
+                self.memoryLocationStack.append(i)
+                i = self.labelDict[m.group(2)]
+                memlocationChanged = True
+                if printAll:
+                    msg = " --> PUSHING CURRENT ADDRESS TO STACK AND JUMPING TO: {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                continue
+            m = re.match(r"\s*(POPADDR)", line)
+            if m:
+                #i = self.labelDict[m.group(2)]
+                i = self.memoryLocationStack.pop()
+                memlocationChanged = True
+                #i += 2
+                if printAll:
+                    msg = " --> POP ADDRESS => JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
                 continue
             m = re.match(r"\s*NOP", line)
@@ -360,6 +393,7 @@ class ppVirtualMachine:
             m = re.match(r"\s*(JMPNINTERRUPT)\s(\S+)", line)
             if m:
                 i = self.labelDict[m.group(2)]
+                memlocationChanged = True
                 if printAll:
                     msg = " --> JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
