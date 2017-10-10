@@ -126,7 +126,7 @@ OPS = {'NOP'    : 0x00,
        'WAITFORSYNC' : 0x63,
        'PUSH': 0x64,
        'POP': 0x65,
-       'PUSHPC': 0x66,
+       'JMPPUSH': 0x66,
        'JMPPOP': 0x67,
        'END'    : 0xFF }
 
