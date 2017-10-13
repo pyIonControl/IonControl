@@ -1,0 +1,221 @@
+# const values
+const DDSLock_370 9
+const TickleDDS 7
+const MicrowaveDDS 5
+const PMTChannel 1
+# variables
+var NULL 0
+var FFFFFFFF 18446744073709551615
+var INTERRUPT_EXITCODE 18446198715942174720
+var endLabel 0xfffe000000000000, exitcode
+var IonLostExitcode 0xfffe000000000001, exitcode
+var currentexperiment 0
+var piTimeIntegrator 0
+var CoolPhotons 0
+var CoolingFreq 230, parameter, MHz, AD9912_FRQ
+var DetectFreq 250, parameter, MHz, AD9912_FRQ
+var TickleFreq 0, parameter, MHz, AD9912_FRQ
+var AppliedTickleFreq 0, parameter, MHz, AD9912_FRQ
+var AppliedMicrowaveFreq 0, parameter, MHz, AD9912_FRQ
+var MicrowaveFreqOffset 0, parameter, MHz, AD9912_FRQ
+var SpinEchoPhase 180, parameter, , AD9912_PHASE
+var MicrowaveAnalyzePhase 0, parameter, , AD9912_PHASE
+var MicrowaveInitPhase 0, parameter, , AD9912_PHASE
+var CoolingTime 2, parameter, ms
+var PumpTime 100, parameter, us
+var PumpTime2 100, parameter, us
+var DetectTime 1, parameter, ms
+var piTime 20, parameter, us
+var MicrowaveInitTime 40, parameter, us
+var MicrowaveAnalyzeTime 10, parameter, us
+var QubitWaitTime 0, parameter, ms
+var SpinEchoTime 0, parameter, ms
+var PumpHoldTime 2, parameter, us
+var updateTime 100, parameter, ms
+var experiments 100, parameter
+var BoolFreqScan 0, parameter
+var BoolTickle 0, parameter
+var BooluWaveScan 0, parameter
+var BoolSpinEcho 0, parameter
+var CoolingOn_mask 0, mask
+var CoolingOn 0, shutter CoolingOn_mask
+var PumpingOn_mask 0, mask
+var PumpingOn 0, shutter PumpingOn_mask
+var DetectOn_mask 0, mask
+var DetectOn 0, shutter DetectOn_mask
+var TickleOn_mask 0, mask
+var TickleOn 0, shutter TickleOn_mask
+var MicrowaveOn_mask 0, mask
+var MicrowaveOn 0, shutter MicrowaveOn_mask
+var InitializationShutter 1, shutter
+var ddsApplyAll 0, trigger
+var ddsLockPt 0, trigger
+var ddsuwave 0, trigger
+var CoolingCounters 0, counter
+var DetectCounters 0, counter
+var inlinevar_1 1
+var inlinevar_2 0
+# inline variables
+# end header
+
+  SHUTTERMASK FFFFFFFF
+  ASYNCSHUTTER InitializationShutter
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE NULL
+LDWR BoolTickle
+CMPEQUAL inlinevar_1
+JMPNCMP end_if_label_0
+  SHUTTERMASK TickleOn_mask
+  ASYNCSHUTTER TickleOn
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE NULL
+end_if_label_0:   JMPPIPEEMPTY end_while_label_1
+  JMPNINTERRUPT apply_next_scan_point
+  LDWR INTERRUPT_EXITCODE
+  WAIT
+  WRITEPIPE
+  END
+apply_next_scan_point:  READPIPEINDF
+  WRITEPIPEINDF
+  READPIPE
+  WRITEPIPE
+  STWI
+  JMPCMP apply_next_scan_point
+LDWR BoolTickle
+CMPEQUAL inlinevar_1
+JMPNCMP end_if_label_1
+  DDSFRQ TickleDDS, AppliedTickleFreq
+end_if_label_1:   DDSFRQ DDSLock_370, CoolingFreq
+  DDSFRQ MicrowaveDDS, AppliedMicrowaveFreq
+  DDSPHS MicrowaveDDS, MicrowaveInitPhase
+  TRIGGER ddsApplyAll
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE NULL
+LDWR inlinevar_2
+STWR currentexperiment
+begin_while_label_0: LDWR currentexperiment
+CMPLESS experiments
+JMPNCMP end_while_label_0
+LDWR BoolFreqScan
+CMPEQUAL inlinevar_1
+JMPNCMP end_if_cool_label_0
+  DDSFRQ DDSLock_370, CoolingFreq
+  TRIGGER ddsLockPt
+end_if_cool_label_0:   SHUTTERMASK CoolingOn_mask
+  ASYNCSHUTTER CoolingOn
+  COUNTERMASK CoolingCounters
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE 1, CoolingTime
+  COUNTERMASK NULL
+  SHUTTERMASK CoolingOn_mask
+  ASYNCINVSHUTTER CoolingOn
+  NOP
+  LDCOUNT PMTChannel
+STWR CoolPhotons
+end_function_cool_label_0: LDWR PumpTime
+CMPGREATER inlinevar_2
+JMPNCMP end_function_pump_label_0
+  SHUTTERMASK PumpingOn_mask
+  ASYNCSHUTTER PumpingOn
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE 1, PumpTime
+  COUNTERMASK NULL
+  SHUTTERMASK PumpingOn_mask
+  ASYNCINVSHUTTER PumpingOn
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE PumpHoldTime
+end_function_pump_label_0: LDWR MicrowaveInitTime
+CMPGREATER inlinevar_2
+JMPNCMP end_function_microwaveon_label_0
+  DDSPHS MicrowaveDDS, MicrowaveInitPhase
+LDWR BooluWaveScan
+CMPEQUAL inlinevar_1
+JMPNCMP end_if_microwaveon_label_0
+  DDSFRQ MicrowaveDDS, AppliedMicrowaveFreq
+end_if_microwaveon_label_0:   SHUTTERMASK MicrowaveOn_mask
+  ASYNCSHUTTER MicrowaveOn
+  TRIGGER ddsuwave
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE 1, MicrowaveInitTime
+  COUNTERMASK NULL
+  SHUTTERMASK MicrowaveOn_mask
+  ASYNCINVSHUTTER MicrowaveOn
+end_function_microwaveon_label_0: LDWR QubitWaitTime
+CMPGREATER inlinevar_2
+JMPNCMP end_if_label_2
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE QubitWaitTime
+end_if_label_2: LDWR BoolSpinEcho
+CMPGREATER inlinevar_2
+JMPNCMP end_if_label_3
+  DDSPHS MicrowaveDDS, SpinEchoPhase
+  SHUTTERMASK MicrowaveOn_mask
+  ASYNCSHUTTER MicrowaveOn
+  TRIGGER ddsuwave
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE 1, SpinEchoTime
+  COUNTERMASK NULL
+  SHUTTERMASK MicrowaveOn_mask
+  ASYNCINVSHUTTER MicrowaveOn
+end_function_spinecho_label_0: LDWR QubitWaitTime
+CMPGREATER inlinevar_2
+JMPNCMP end_if_label_3
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE QubitWaitTime
+end_if_label_3: LDWR MicrowaveAnalyzeTime
+CMPGREATER inlinevar_2
+JMPNCMP end_function_qubitAnalyze_label_0
+  DDSPHS MicrowaveDDS, MicrowaveAnalyzePhase
+  SHUTTERMASK MicrowaveOn_mask
+  ASYNCSHUTTER MicrowaveOn
+  TRIGGER ddsuwave
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE 1, MicrowaveAnalyzeTime
+  COUNTERMASK NULL
+  SHUTTERMASK MicrowaveOn_mask
+  ASYNCINVSHUTTER MicrowaveOn
+end_function_qubitAnalyze_label_0: LDWR DetectTime
+CMPGREATER inlinevar_2
+JMPNCMP end_function_detect_label_0
+LDWR BoolFreqScan
+CMPEQUAL inlinevar_1
+JMPNCMP end_if_detect_label_0
+  DDSFRQ DDSLock_370, DetectFreq
+  TRIGGER ddsLockPt
+end_if_detect_label_0:   WAITDDSWRITEDONE
+  WAIT
+  UPDATE updateTime
+  SHUTTERMASK DetectOn_mask
+  ASYNCSHUTTER DetectOn
+  COUNTERMASK DetectCounters
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE DetectTime
+  SHUTTERMASK DetectOn_mask
+  ASYNCINVSHUTTER DetectOn
+  SHUTTERMASK CoolingOn_mask
+  ASYNCSHUTTER CoolingOn
+  COUNTERMASK NULL
+  WAITDDSWRITEDONE
+  WAIT
+  UPDATE NULL
+end_function_detect_label_0: INC currentexperiment
+STWR currentexperiment
+JMP begin_while_label_0
+end_while_label_0: JMP end_if_label_0
+end_while_label_1:   LDWR endLabel
+  WAIT
+  WRITEPIPE
+  END
+END
