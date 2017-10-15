@@ -738,16 +738,8 @@ class astCompiler(ast.NodeTransformer):
     def reduceOneLineJMPs(self, m):
         return m.group(2)
 
-    #def reduceReturnJMPs(self, m):
-        #if m.group(1) == m.group(2):
-            #return m.group(2)+": NOP\n"
-        #return "JMP\s{0}\s*\S*\n{1}:\sNOP\n".format(m.group(1), m.group(2))
-
     def reduceDoubleSTWRs(self, m):
         return "STWR {0}\n".format(m.group('varname'))
-        #if m.group(1) == m.group(2):
-            #return "STWR {0}\n".format(m.group(1))
-        #return "STWR {0}\nSTWR {1}\n".format(m.group(1),m.group(2))
 
     def reduceDoubleLDWRs(self, m):
         return "LDWR {0}\n".format(m.group('varname'))
@@ -842,7 +834,7 @@ class astCompiler(ast.NodeTransformer):
 
     def collectShutters(self, code):
         """Parse shutter declarations with encoding and add them to symbols dictionary"""
-        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=1 if code.re.groups == 1 else code.group(2))
+        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=0 if code.re.groups == 1 else code.group(2))
         return ""
 
     def collectMaskedShutters(self, code):
