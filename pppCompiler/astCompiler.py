@@ -52,7 +52,21 @@ def list_rtrim( l, trimvalue=None ):
 class CompileException(Exception):
     pass
 
-class astCompiler(ast.NodeTransformer):
+def illegalLambda(error_message):
+    """Generic function for unsupported visitor methods"""
+    def gencall(self, node):
+        raise CompileException("{} not supported!".format(error_message))
+        self.generic_visit(node)
+    return gencall
+
+class astMeta(type):
+    """metaclass for instantiating visitor functions that handle illegal calls"""
+    def __new__(cls, name, bases, attrs):
+        baseattrs = dict(attrs)
+        baseattrs.update({"visit_{0}".format(name): illegalLambda(name) for name in fullASTPrimitives-allowedASTPrimitives})
+        return super().__new__(cls, name, bases, baseattrs)
+
+class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def __init__(self, optimizePassByReference=True):
         self.builtinBool = None
         self.codestr = []
@@ -734,16 +748,8 @@ class astCompiler(ast.NodeTransformer):
     def reduceOneLineJMPs(self, m):
         return m.group(2)
 
-    #def reduceReturnJMPs(self, m):
-        #if m.group(1) == m.group(2):
-            #return m.group(2)+": NOP\n"
-        #return "JMP\s{0}\s*\S*\n{1}:\sNOP\n".format(m.group(1), m.group(2))
-
     def reduceDoubleSTWRs(self, m):
         return "STWR {0}\n".format(m.group('varname'))
-        #if m.group(1) == m.group(2):
-            #return "STWR {0}\n".format(m.group(1))
-        #return "STWR {0}\nSTWR {1}\n".format(m.group(1),m.group(2))
 
     def reduceDoubleLDWRs(self, m):
         return "LDWR {0}\n".format(m.group('varname'))
@@ -888,30 +894,6 @@ class astCompiler(ast.NodeTransformer):
         header.append( "# end header")
         header.append( "" )
         return header
-
-###########################################################################################################
-#### The next set of functions handle the class creation by adding methods to handle unsupported calls ####
-###########################################################################################################
-
-def illegalLambda(error_message):
-    """Generic function for unsupported visitor methods"""
-    def gencall(self, node):
-        raise CompileException("{} not supported!".format(error_message))
-        self.generic_visit(node)
-    return gencall
-
-def instantiateIllegalCalls():
-    """Add all unsupported visitor methods to pppCompiler class"""
-    for name in fullASTPrimitives-allowedASTPrimitives:
-        visit_name = "visit_{0}".format(name)
-        visit_fn = illegalLambda(name)
-        setattr(astCompiler, visit_name, visit_fn)
-
-def pppCompiler(*args):
-    """used to instantiate a compiler object but adds a number of member functions to catch unsupported calls"""
-    instantiateIllegalCalls()
-    obj = astCompiler(*args)
-    return obj
 
 def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
     import os.path
@@ -1061,7 +1043,6 @@ arg3 = 2
 """
 
     ppAn = pppCompiler()
-    instantiateIllegalCalls()
     compcode = ppAn.compileString(mycode)
     print('-------------')
     print('Compiled Code')
