@@ -44,6 +44,7 @@ class ppVirtualMachine:
         # the parameters behind the colons to reduce the column widths
         self.fmtstr = "{0:50}{1:80}{2}"
         self.timestr = "ELAPSED CLOCK CYCLES: {0}"
+        self.outputcode = ""
 
     def printState(self):
         print(self.varDict)
@@ -64,11 +65,22 @@ class ppVirtualMachine:
     def replaceLabel(self, m):
         return m.group(2)
 
-    def runCode(self, printAll=False):
+    def runCode(self, printAll=False, outfile=None):
+        if outfile:
+            with outfile.open('a') as f:
+                self.runCodeMain(printAll,f)
+        else:
+            self.runCodeMain(printAll)
+
+    def runCodeMain(self, printAll=False, outfile=None):
         """Execute pp code"""
+        if outfile is None:
+            keepoutput = False
+        else:
+            keepoutput = True
         totalsteps = 0
         i = 0
-        pipe = 100
+        pipe = 10
         timer = 0
         self.ddsWriteTimer = 0
         self.memoryLocationStack.clear()
@@ -168,6 +180,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> self.R = {0}".format(self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> self.R = {0}".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(STWR)\s(\S+)", line)
             if m:
@@ -180,12 +195,18 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> {0} = {1}".format(m.group(2),self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> {0} = {1}".format(m.group(2),self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(STWI)", line)
             if m:
                 if printAll:
                     msg =  " --> STORING {0} INTO MEMORY ADDRESS {1}".format(self.R,self.INDF)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> STORING {0} INTO MEMORY ADDRESS {1}".format(self.R,self.INDF)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPLESS)\s(\S+)", line)
             if m:
@@ -193,6 +214,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> CMP = {0} < {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> CMP = {0} < {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPLE)\s(\S+)", line)
             if m:
@@ -200,6 +224,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> CMP = {0} <= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> CMP = {0} <= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPGREATER)\s(\S+)", line)
             if m:
@@ -207,6 +234,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> CMP = {0} > {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> CMP = {0} > {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPGE)\s(\S+)", line)
             if m:
@@ -214,6 +244,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg =  " --> CMP = {0} >= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg =  " --> CMP = {0} >= {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPEQUAL)\s(\S+)", line)
             if m:
@@ -221,6 +254,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> CMP = {0} == {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> CMP = {0} == {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(CMPNOTEQUAL)\s(\S+)", line)
             if m:
@@ -228,6 +264,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> CMP = {0} != {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> CMP = {0} != {1} = {2}".format(self.R, self.varDict[m.group(2)], self.CMP)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(MULTW)\s(\S+)", line)
             if m:
@@ -236,6 +275,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R *= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R *= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(ADDW)\s(\S+)", line)
             if m:
@@ -244,6 +286,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R += {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R += {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(SUBW)\s(\S+)", line)
             if m:
@@ -252,6 +297,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R -= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R -= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(ORW)\s(\S+)", line)
             if m:
@@ -260,6 +308,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R |= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R |= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(ANDW)\s(\S+)", line)
             if m:
@@ -268,6 +319,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R &= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R &= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(SHL)\s(\S+)", line)
             if m:
@@ -276,6 +330,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R <<= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R <<= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(SHR)\s(\S+)", line)
             if m:
@@ -284,6 +341,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> R >>= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R >>= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(INC)\s(\S+)", line)
             if m:
@@ -292,6 +352,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> self.R = {0} + 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> self.R = {0} + 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(DEC)\s(\S+)", line)
             if m:
@@ -300,6 +363,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> self.R = {0} - 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> self.R = {0} - 1 -> {1}".format(m.group(2),self.varDict[m.group(2)])
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPNCMP)\s(\S+)", line)
             if m:
@@ -309,6 +375,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPCMP)\s(\S+)", line)
             if m:
@@ -318,6 +387,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPZ)\s(\S+)", line)
             if m:
@@ -327,6 +399,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPPIPEEMPTY)\s(\S+)", line)
             if m:
@@ -336,6 +411,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 #pipe -= 1
                 continue
             m = re.match(r"\s*(JMPPIPEAVAIL)\s(\S+)", line)
@@ -346,6 +424,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --> JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --> JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 #pipe -= 1
                 continue
             m = re.match(r"\s*(JMPNZ)\s(\S+)", line)
@@ -356,6 +437,9 @@ class ppVirtualMachine:
                     if printAll:
                         msg = " --msg = > JUMPING TO LINE {0}".format(i)
                         print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                    if keepoutput:
+                        msg = " --msg = > JUMPING TO LINE {0}".format(i)
+                        print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMP)\s(\S+)", line)
             if m:
@@ -364,6 +448,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPPUSHADDR)\s(\S+)", line)
             if m:
@@ -373,6 +460,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> PUSHING CURRENT ADDRESS TO STACK AND JUMPING TO: {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> PUSHING CURRENT ADDRESS TO STACK AND JUMPING TO: {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(POPADDR)", line)
             if m:
@@ -383,12 +473,18 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> POP ADDRESS => JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> POP ADDRESS => JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*NOP", line)
             if m:
                 if printAll:
                     msg = " --> NOP"
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> NOP"
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(JMPNINTERRUPT)\s(\S+)", line)
             if m:
@@ -397,6 +493,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(DDSFRQ)\s(\S+),\s(\S+)", line)
             if m:
@@ -406,6 +505,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING FREQUENCY TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING FREQUENCY TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(DDSPHS)\s(\S+),\s(\S+)", line)
             if m:
@@ -415,6 +517,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING PHASE TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING PHASE TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(DDSAMP)\s(\S+),\s(\S+)", line)
             if m:
@@ -424,6 +529,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING AMPLITUDE TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING AMPLITUDE TO {0} ON DDS CHANNEL {1}".format(m.group(3),m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(LDCOUNT)\s(\S+)", line)
             if m:
@@ -432,6 +540,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> LOADED {0} (RANDOM) COUNTS FROM CHANNEL {1}".format(self.R,int(self.varDict[m.group(2)]))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> LOADED {0} (RANDOM) COUNTS FROM CHANNEL {1}".format(self.R,int(self.varDict[m.group(2)]))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(RAMREAD)", line)
             if m:
@@ -440,6 +551,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> READING FROM RAM: {} (RANDOM)".format(self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> READING FROM RAM: {} (RANDOM)".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(READPIPEINDF)", line)
             if m:
@@ -449,6 +563,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> READING PIPE INTO INDF: {} (RANDOM)".format(self.INDF)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> READING PIPE INTO INDF: {} (RANDOM)".format(self.INDF)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(READPIPE)", line)
             if m:
@@ -458,6 +575,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> READING PIPE INTO W REGISTER: {} (RANDOM)".format(self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> READING PIPE INTO W REGISTER: {} (RANDOM)".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(WRITEPIPEINDF)", line)
             if m:
@@ -466,6 +586,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> WRITING INDF INTO PIPE: {} (RANDOM)".format(self.INDF)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> WRITING INDF INTO PIPE: {} (RANDOM)".format(self.INDF)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(WRITEPIPE)", line)
             if m:
@@ -474,6 +597,20 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> WRITING W REGISTER INTO PIPE: {} (RANDOM)".format(self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> WRITING W REGISTER INTO PIPE: {} (RANDOM)".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
+                continue
+            m = re.match(r"\s*(WRITERESULTTOPIPE)\s(\S+),\s(\S+)", line)
+            if m:
+                #self.Rref = None
+                #self.INDF = random.randint(0,30)
+                if printAll:
+                    msg = " --> WRITING RESULT TO PIPE: {1} => {0}".format(m.group(1),m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> WRITING RESULT TO PIPE: {1} => {0}".format(m.group(1),m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(SETRAMADDR)\s+(\S+)", line)
             if m:
@@ -483,6 +620,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING RAM ADDRESS TO: {}".format(self.RAMADDRESS)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING RAM ADDRESS TO: {}".format(self.RAMADDRESS)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(COUNTERMASK)\s(\S+)", line)
             if m:
@@ -490,6 +630,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING COUNTER TO {0}".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING COUNTER TO {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(SHUTTERMASK)\s(\S+)", line)
             if m:
@@ -497,6 +640,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING COUNTER TO {0}".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING COUNTER TO {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r" *WAITDDSWRITEDONE", line)
             if m:
@@ -504,6 +650,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> WAITING {0} CLOCK CYCLES FOR DDS WRITE".format(self.ddsWriteTimer)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> WAITING {0} CLOCK CYCLES FOR DDS WRITE".format(self.ddsWriteTimer)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 self.ddsWriteTimer = 0
                 continue
             m = re.match(r"\s*(UPDATE)\s1, (\S+)", line)
@@ -516,6 +665,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> PULSED UPDATE FOR {0} CLOCK CYCLES".format(self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> PULSED UPDATE FOR {0} CLOCK CYCLES".format(self.varDict[m.group(2)])
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(UPDATE)\s([a-zA-Z_0-9]+)", line)
             if m:
@@ -527,18 +679,27 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> UPDATE FOR {0} CLOCK CYCLES".format(self.varDict[m.group(2)])
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> UPDATE FOR {0} CLOCK CYCLES".format(self.varDict[m.group(2)])
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(END)", line)
             if m:
                 if printAll:
                     msg = " --> PROGRAM END"
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> PROGRAM END"
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 break
             m = re.match(r"\s*(WAIT)", line)
             if m:
                 if printAll:
                     msg = " --> WAIT"
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> WAIT"
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(ASYNCINVSHUTTER)\s(\S+)", line)
             if m:
@@ -546,6 +707,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> INVERTING {0} SHUTTER".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> INVERTING {0} SHUTTER".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(ASYNCSHUTTER)\s(\S+)", line)
             if m:
@@ -553,6 +717,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> SETTING SHUTTER {0}".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SETTING SHUTTER {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*(TRIGGER)\s(\S+)", line)
             if m:
@@ -560,6 +727,9 @@ class ppVirtualMachine:
                 if printAll:
                     msg = " --> TRIGGER {0}".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> TRIGGER {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             raise Exception("I don't know how to interpret {}", line)
         uselessLines = self.unnecessaryLines-self.necessaryLines

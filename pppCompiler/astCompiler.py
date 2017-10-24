@@ -6,6 +6,8 @@
 import ast
 import copy
 import re
+import difflib
+from pathlib import Path
 from collections import deque, defaultdict, Counter, OrderedDict
 from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
 from functools import partial
@@ -99,6 +101,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.requiredReturnCalls = set()
         self.passToOldPPPCompiler = False
         self.gt02bool = False
+        self.inlineAll = False
         FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
 
     def safe_generic_visit(self, node):
@@ -219,7 +222,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         """handles boolean comparisons (>,<,!=,...) and iterates through all comparators for cases
            such as 10 < y < 20"""
         leftiter = node.left
+        #multCMPs = len(node.ops)>1
+        cmpcnt = 0
         for rightiter, opiter in zip(node.comparators, node.ops):
+            cmpcnt += 1
             if isinstance(leftiter, ast.Call):
                 currentcodestr = copy.copy(self.codestr)
                 self.codestr = []
@@ -234,6 +240,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             else:
                 raise CompileException("Objects of type {} not supported!".format(opiter.__class__), node)
             leftiter = rightiter
+            #self.codestr += ["LDWR {0}".format(left)]
+            #self.codestr += "{0} {1}".format(op,right).split('\n')
+            #if cmpcnt>1:
+                #self.codestr += ["CMPAND"]
             self.compTestPush(False, left, right, op)
 
     def checkIfBuiltinWithReturn(self,node, boolVal):
@@ -279,12 +289,21 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 elif retstr:
                     left = retstr
                     right, op = None, ''
+
+                    #self.codestr += ["LDWR {0}".format(left)]
+                    #self.codestr += ["CMPNOTEQUAL NULL"]
                 self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
             else:
                 currentCompTestPushLen = len(self.boolList)
                 self.visit(n)
                 if len(self.boolList) > currentCompTestPushLen:
                     self.boolList[-1] = True if isinstance(node.op, ast.Or) else False
+        #if isinstance(node.op, ast.Or):
+            #self.codestr += ["CMPOR"]
+        #elif isinstance(node.op, ast.And):
+            #self.codestr += ["CMPAND"]
+        #else:
+            #raise CompileException("Boolean operation '{0}' not recognized".format(node.op.__class__))
 
     def compTestPush(self, boolVal, leftVal, rightVal, opVal):
         """helper function to deal with multiple boolean statements in if and while tests"""
@@ -464,6 +483,12 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def visit_FunctionDef(self, node):
         """visitor for function definitions"""
+        inline = False
+        if node.decorator_list:
+            if node.decorator_list[0].id == 'inline':
+                inline = True
+        if self.inlineAll:
+            inline = True
         if node.name in self.symbols.keys():
             raise CompileException("Function {} has already been declared!".format(node.name), node)
         for arg in node.args.args:
@@ -610,10 +635,34 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
            that hadn't been defined yet and fills in the missing assembly code"""
+        functionDeclarations = list()
+        for fn in self.funcNames:
+            procedure = self.symbols.getProcedure(fn)
+            if not procedure.inline:
+                functionDeclarations += procedure.codegenInit(self.symbols)
         if self.requiredReturnCalls-self.returnSet:
             raise CompileException("Expected returned values form the following functions: {}",self.requiredReturnCalls-self.returnSet)
-        containsList = True
         justInCaseCounter = 0
+        containsList = True
+        while containsList:
+            justInCaseCounter += 1
+            containsList = False
+            for ln, line in enumerate(functionDeclarations):
+                if not isinstance(line, str):
+                    containsList=True
+                    try:
+                        procedure = line[0](line[1])
+                        functionDeclarations[ln] = procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])
+                        if len(functionDeclarations)-1 > ln:
+                            functionDeclarations = functionDeclarations[:ln]+procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])+functionDeclarations[ln+1:]
+                        else:
+                            functionDeclarations = functionDeclarations[:ln]+procedure.codegen(self.symbols, arg=line[2], kwarg=line[3])
+                        break
+                    except:
+                        raise CompileException("Function {} is not declared!".format(line[1]))
+            if justInCaseCounter > 1e6:
+                raise CompileException("Compiler seems to have encountered an endless loop! Perhaps there's some recursion it didn't catch!")
+        containsList = True
         while containsList:
             justInCaseCounter += 1
             containsList = False
@@ -632,7 +681,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                         raise CompileException("Function {} is not declared!".format(line[1]))
             if justInCaseCounter > 1e6:
                 raise CompileException("Compiler seems to have encountered an endless loop! Perhaps there's some recursion it didn't catch!")
-        self.maincode = '\n'.join(self.maincode)+'\n'
+        self.maincode = '\n'.join(self.maincode+["END"]+functionDeclarations)+'\n'
         self.maincode += "END\n"
 
     def recursionMapper(self):
@@ -799,6 +848,9 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         if code.group(1) == 'SUBSTITUTE_BOOL_FOR_GREATER_THAN_ZERO':
             if code.group(2) == 'True':
                 self.gt02bool = True
+        if code.group(1) == 'INLINE_ALL_FUNCTIONS':
+            if code.group(2) == 'True':
+                self.inlineAll = True
         return ""
 
     def collectConstants(self, code):
@@ -926,16 +978,26 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
     if os.path.exists( referencefile ):
         with open(referencefile, "r") as f:
             referencecode = f.read()
+        outfilenew = None
+        outfileref = None
+        if keepoutput:
+            outfilenew = Path(targetfile+'.vm')
+            outfileref = Path(referencefile+'.vm')
+            outfilenew.write_text("#NewFile")
+            outfileref.write_text("#RefFile")
         ppvm = ppVirtualMachine(assemblercode)
-        ppvm.runCode(verbose)
+        ppvm.runCode(verbose, outfile=outfilenew)
         dast = ppvm.varDict
         ppvm2 = ppVirtualMachine(referencecode)
-        ppvm2.runCode(verbose)
+        ppvm2.runCode(verbose, outfile=outfileref)
         dcomp = ppvm2.varDict
         dictComparison = compareDicts(dast,dcomp)
         if dictComparison:
             print(dictComparison)
             return False
+        if keepoutput:
+            for line in difflib.unified_diff(outfilenew.read_text().splitlines(), outfileref.read_text().splitlines()):
+                print(line)
         return True
     return True
 
