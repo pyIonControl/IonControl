@@ -81,6 +81,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.maincode = []
         self.funcDeps = defaultdict(set)
         self.localNameSpace = deque()
+        self.funcNames = set()
         self.chameleonLabelsDeque = deque()
         self.lvctr = 1          #inline declaration counter
         self.ifctr = 10       #number of if statements
@@ -508,6 +509,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 break
         kwarglist = OrderedDict(reversed(list(zip(reversed(fullarglist),reversed(defaults)))))
         self.localNameSpace.append(node.name) # push function context for maintaining local variable definitions
+        self.funcNames.add(node.name)
         if len(set(self.localNameSpace)) != len(self.localNameSpace):
             print('RECURSION ERROR')
             raise CompileException('Recursion not supported!', node)
@@ -959,7 +961,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         header.append( "" )
         return header
 
-def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
+def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput=False ):
     import os.path
     try:
         with open(sourcefile, "r") as f:
