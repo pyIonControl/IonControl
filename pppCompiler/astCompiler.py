@@ -50,22 +50,42 @@ def list_rtrim( l, trimvalue=None ):
     return l
 
 class CompileException(Exception):
-    pass
+    def __init__(self, message, obj=None):
+        self.message = message
+        if obj and hasattr(obj, 'lineno'):
+            self.lineno = "Exception on line {} of ppp file: ".format(obj.lineno)
+        else:
+            self.lineno = ""
+        super().__init__(self.lineno+self.message)
 
-class astCompiler(ast.NodeTransformer):
+def illegalLambda(error_message):
+    """Generic function for unsupported visitor methods"""
+    def gencall(self, node):
+        raise CompileException("{} not supported!".format(error_message), node)
+        self.generic_visit(node)
+    return gencall
+
+class astMeta(type):
+    """metaclass for instantiating visitor functions that handle illegal calls"""
+    def __new__(cls, name, bases, attrs):
+        baseattrs = dict(attrs)
+        baseattrs.update({"visit_{0}".format(name): illegalLambda(name) for name in fullASTPrimitives-allowedASTPrimitives})
+        return super().__new__(cls, name, bases, baseattrs)
+
+class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def __init__(self, optimizePassByReference=True):
         self.builtinBool = None
         self.codestr = []
         self.maincode = []
         self.funcDeps = defaultdict(set)
         self.localNameSpace = deque()
-        self.funcNames = set()
         self.chameleonLabelsDeque = deque()
         self.lvctr = 1          #inline declaration counter
         self.ifctr = 10       #number of if statements
         self.elsectr = 10     #number of else statements
         self.whilectr = 10    #number of while statements
         self.fnctr = 10
+        self.orctr = 10
         self.symbols = SymbolTable()
         self.localVarDict = dict()
         self.preamble = ""
@@ -78,6 +98,7 @@ class astCompiler(ast.NodeTransformer):
         self.returnSet = set() #list of functions with return values
         self.requiredReturnCalls = set()
         self.passToOldPPPCompiler = False
+        self.gt02bool = False
         FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
 
     def safe_generic_visit(self, node):
@@ -88,6 +109,8 @@ class astCompiler(ast.NodeTransformer):
         """Look for preexisting variables in local and global scopes, if return value is a number then
            return a flag that instantiates an inline variable or can be handled later"""
         if isinstance(obj, ast.Num):
+            if obj.n == 0:
+                return 'NULL', False
             return obj.n, True
         elif isinstance(obj, ast.Name):
             if self.localNameSpace:
@@ -105,7 +128,10 @@ class astCompiler(ast.NodeTransformer):
                 return 1, True
             else:
                 return 0, True
-        return obj.id, False
+        if hasattr(obj, 'id'):
+            return obj.id, False
+        else:
+            raise CompileException("Can't get a value from {0} object on line {1}".format(obj.__class__, obj.lineno))
 
     def localVarHandler(self, nv):
         """Looks up pre-existing variables and declares undeclared variables"""
@@ -203,7 +229,10 @@ class astCompiler(ast.NodeTransformer):
             else:
                 left,_ = self.localVarHandler(leftiter)
             right,_ = self.localVarHandler(rightiter)
-            op = ComparisonLUT[opiter.__class__]
+            if opiter.__class__ in ComparisonLUT.keys():
+                op = ComparisonLUT[opiter.__class__]
+            else:
+                raise CompileException("Objects of type {} not supported!".format(opiter.__class__), node)
             leftiter = rightiter
             self.compTestPush(False, left, right, op)
 
@@ -227,40 +256,11 @@ class astCompiler(ast.NodeTransformer):
 
     def visit_BoolOp(self, node):
         """visitor for boolean operators such as and/or"""
-        multipleComparesExist = False
-        valDeque = deque()
         for n in node.values:
-            if isinstance(n, ast.BoolOp):
-                raise CompileException("Multiple differing boolean comparisons not yet supported!")
-            elif isinstance(n, ast.Compare):
-                if len(n.comparators)>1 and isinstance(node.op, ast.Or):
-                    if multipleComparesExist:
-                        raise CompileException("Can't support multiple comparators with or statements")
-                    #node.values = reversed(node.values)
-                    valDeque.appendleft(n)
-                    multipleComparesExist = True
-            elif isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not) and hasattr(n.operand, 'func') and \
-                n.operand.func.id in ['pipe_empty','read_ram_valid']:
-                if multipleComparesExist:
-                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
-                multipleComparesExist = True
-                valDeque.appendleft(n)
-            elif isinstance(n, ast.Call) and n.func.id in ['pipe_empty','read_ram_valid']:
-                if multipleComparesExist:
-                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
-                multipleComparesExist = True
-                valDeque.appendleft(n)
-            else:
-                valDeque.append(n)
-        if multipleComparesExist:
-            valDeque.rotate(-1)
-
-        for n in valDeque:
             if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
                 op, retstr = self.checkIfBuiltinWithReturn(n.operand, True)
                 if op:
-                    left, right = None, None
-                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                    raise CompileException("{} not currently supported with other boolean statements!".format(n.operand.func.id), n)
                 elif retstr:
                     left = retstr
                     right, op = None, 'N'
@@ -275,8 +275,7 @@ class astCompiler(ast.NodeTransformer):
             elif isinstance(n, ast.Call):
                 op, retstr = self.checkIfBuiltinWithReturn(n, False)
                 if op:
-                    left, right = None, None
-                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id), n)
                 elif retstr:
                     left = retstr
                     right, op = None, ''
@@ -333,8 +332,14 @@ class astCompiler(ast.NodeTransformer):
     def testStatementHandler(self, label1, label2):
         """generates assembly for boolean arguments for if and while loops, handles special JMP types 
            as well as and/or statements with multiple boolean tests"""
+        self.boolList[-1] = False
+        totalOrs = sum(self.boolList)
+        orcnt = 0
+        orLabelNeeded = False
+        orlabel = "or_label_{0}".format(self.orctr)
         for ind,orStatement,right,left,op in zip(list(reversed(range(len(self.leftlist)))), self.boolList, self.rightlist, self.leftlist, self.oplist):
             if orStatement:
+                orcnt += 1
                 if left is None:
                     self.codestr += "{0} {1}".format(reverseJMPLUT[op],label1).split('\n')
                     continue
@@ -345,12 +350,12 @@ class astCompiler(ast.NodeTransformer):
                     self.codestr += ["LDWR {0}".format(left)]
                 if ind:
                     if right is None:
-                        self.codestr += "JMP{0}Z {1}".format('' if op else 'N',label1).split('\n')
+                        self.codestr += ["JMP{0}Z {1}".format('' if op else 'N',label1)]
                     else:
                         self.codestr += "{0} {1}\nJMPCMP {2}".format(op,right,label1).split('\n')
                 else:
                     if left is None:
-                        self.codestr += "{0} {1}".format(op,label2).split('\n')
+                        self.codestr += ["{0} {1}".format(op,label2)]
                         continue
                     elif isinstance(left, list):
                         self.requiredReturnCalls.add(left[0])
@@ -358,9 +363,14 @@ class astCompiler(ast.NodeTransformer):
                     else:
                         self.codestr += ["LDWR {0}".format(left)]
                     if right is None:
-                        self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
                     else:
                         self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                if orLabelNeeded:
+                    self.codestr += [orlabel+": NOP"]
+                    self.orctr += 1
+                    orlabel = "or_label_{0}".format(self.orctr)
+                    orLabelNeeded = False
             else:
                 if left is None:
                     self.codestr += "{0} {1}".format(op,label2).split('\n')
@@ -370,10 +380,17 @@ class astCompiler(ast.NodeTransformer):
                     self.codestr += left[1]
                 else:
                     self.codestr += ["LDWR {0}".format(left)]
-                if right is None:
-                    self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                if orcnt == totalOrs:
+                    if right is None:
+                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
+                    else:
+                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
                 else:
-                    self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                    orLabelNeeded = True
+                    if right is None:
+                        self.codestr += ["JMP{0}Z {1}".format(op,orlabel)]
+                    else:
+                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,orlabel).split('\n')
         self.compTestClear()
 
     def visit_If(self, node):
@@ -448,7 +465,7 @@ class astCompiler(ast.NodeTransformer):
     def visit_FunctionDef(self, node):
         """visitor for function definitions"""
         if node.name in self.symbols.keys():
-            raise CompileException("Function {} has already been declared!".format(node.name))
+            raise CompileException("Function {} has already been declared!".format(node.name), node)
         for arg in node.args.args:
             target = node.name+"_"+arg.arg
             self.symbols[target] = VarSymbol(name=target, value=0)
@@ -466,10 +483,9 @@ class astCompiler(ast.NodeTransformer):
                 break
         kwarglist = OrderedDict(reversed(list(zip(reversed(fullarglist),reversed(defaults)))))
         self.localNameSpace.append(node.name) # push function context for maintaining local variable definitions
-        self.funcNames.add(node.name)
-        #if len(set(self.localNameSpace)) != len(self.localNameSpace):
-            #print('RECURSION ERROR')
-            #raise CompileException('Recursion not supported!')
+        if len(set(self.localNameSpace)) != len(self.localNameSpace):
+            print('RECURSION ERROR')
+            raise CompileException('Recursion not supported!', node)
         self.safe_generic_visit(node)         # walk inner block
         self.localNameSpace.pop()             # pop function context
         self.codestr += ["end_function_label_{}: NOP".format(self.fnctr)]
@@ -486,7 +502,7 @@ class astCompiler(ast.NodeTransformer):
             if self.localNameSpace:
                 self.funcDeps[self.localNameSpace[-1]].add(node.func.id)
             if len(set(self.localNameSpace)) != len(self.localNameSpace):
-                raise CompileException('Recursion not supported!')
+                raise CompileException('Recursion not supported!', node)
             if node.func.id in self.symbols.keys(): # if the function has already been defined, incorporate its code directly
                 procedure = self.symbols.getProcedure(node.func.id)
                 if node.keywords:
@@ -504,7 +520,7 @@ class astCompiler(ast.NodeTransformer):
                 else:
                     self.codestr += procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
                 if True in self.codestr:
-                    raise CompileException('Bool in codestr')
+                    raise CompileException('Bool in codestr', node)
             else: # put in a placeholder that can be used to generate the assembly after the function is defined
                 if node.keywords:
                     kwdict = {kw.arg: self.localVarHandler(kw.value)[0] for kw in node.keywords}
@@ -533,8 +549,7 @@ class astCompiler(ast.NodeTransformer):
         if self.localNameSpace:
             self.returnSet.add(self.localNameSpace[-1])
         else:
-            raise CompileException("Function return called outside of function definition!")
-        #self.safe_generic_visit(node)
+            raise CompileException("Function return called outside of function definition!", node)
 
     def compileString(self, code):
         """Compile the ppp code"""
@@ -589,14 +604,12 @@ class astCompiler(ast.NodeTransformer):
         self.optimizeOneLineJMPs()
         self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
         self.optimizeLabelNOPs()            # Remove unnecessary NOPs after labels -> put label in front of next line
+        if self.gt02bool:
+            self.optimizeBoolForGt0()
 
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
            that hadn't been defined yet and fills in the missing assembly code"""
-        functionDeclarations = list()
-        for fn in self.funcNames:
-            procedure = self.symbols.getProcedure(fn)
-            functionDeclarations += procedure.codegenInit(self.symbols)
         if self.requiredReturnCalls-self.returnSet:
             raise CompileException("Expected returned values form the following functions: {}",self.requiredReturnCalls-self.returnSet)
         containsList = True
@@ -619,7 +632,7 @@ class astCompiler(ast.NodeTransformer):
                         raise CompileException("Function {} is not declared!".format(line[1]))
             if justInCaseCounter > 1e6:
                 raise CompileException("Compiler seems to have encountered an endless loop! Perhaps there's some recursion it didn't catch!")
-        self.maincode = '\n'.join(self.maincode+["END"]+functionDeclarations)+'\n'
+        self.maincode = '\n'.join(self.maincode)+'\n'
         self.maincode += "END\n"
 
     def recursionMapper(self):
@@ -731,6 +744,9 @@ class astCompiler(ast.NodeTransformer):
             self.maincode = re.sub(r"(\S*label\S*: ) *(NOP\n)", self.reduceRedundantNOPs, self.maincode)
         return
 
+    def optimizeBoolForGt0(self):
+        self.maincode = re.sub(r"CMPGREATER NULL\nJMPNCMP (\S+)", self.reduceGt02Bool, self.maincode)
+
     ###########################################
     #### Helper functions for re.sub calls ####
     ###########################################
@@ -763,6 +779,9 @@ class astCompiler(ast.NodeTransformer):
     def reduceChameleonLabels(self, repl, m):
         return repl
 
+    def reduceGt02Bool(self, m):
+        return "JMPZ {}".format(m.group(1))
+
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####
     ########################################################################
@@ -777,6 +796,9 @@ class astCompiler(ast.NodeTransformer):
             if code.group(2) == 'True':
                 self.passToOldPPPCompiler = True
                 print("REVERT TO OLD COMPILER")
+        if code.group(1) == 'SUBSTITUTE_BOOL_FOR_GREATER_THAN_ZERO':
+            if code.group(2) == 'True':
+                self.gt02bool = True
         return ""
 
     def collectConstants(self, code):
@@ -834,7 +856,7 @@ class astCompiler(ast.NodeTransformer):
 
     def collectShutters(self, code):
         """Parse shutter declarations with encoding and add them to symbols dictionary"""
-        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=0 if code.re.groups == 1 else code.group(2))
+        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=1 if code.re.groups == 1 else code.group(2))
         return ""
 
     def collectMaskedShutters(self, code):
@@ -884,30 +906,6 @@ class astCompiler(ast.NodeTransformer):
         header.append( "# end header")
         header.append( "" )
         return header
-
-###########################################################################################################
-#### The next set of functions handle the class creation by adding methods to handle unsupported calls ####
-###########################################################################################################
-
-def illegalLambda(error_message):
-    """Generic function for unsupported visitor methods"""
-    def gencall(self, node):
-        raise CompileException("{} not supported!".format(error_message))
-        self.generic_visit(node)
-    return gencall
-
-def instantiateIllegalCalls():
-    """Add all unsupported visitor methods to pppCompiler class"""
-    for name in fullASTPrimitives-allowedASTPrimitives:
-        visit_name = "visit_{0}".format(name)
-        visit_fn = illegalLambda(name)
-        setattr(astCompiler, visit_name, visit_fn)
-
-def pppCompiler(*args):
-    """used to instantiate a compiler object but adds a number of member functions to catch unsupported calls"""
-    instantiateIllegalCalls()
-    obj = astCompiler(*args)
-    return obj
 
 def pppcompile( sourcefile, targetfile, referencefile, verbose=False ):
     import os.path
@@ -984,7 +982,7 @@ def myFunc(c,j):
     b = c*2 if c < 4 else c*3
     #b=c
     while k<15:
-        if 12 > b:
+        if 12 > b or b < 56 and b:
             b *= k
             b = b
         elif b == 36:
@@ -1057,7 +1055,6 @@ arg3 = 2
 """
 
     ppAn = pppCompiler()
-    instantiateIllegalCalls()
     compcode = ppAn.compileString(mycode)
     print('-------------')
     print('Compiled Code')
