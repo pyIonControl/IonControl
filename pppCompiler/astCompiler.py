@@ -65,6 +65,7 @@ class astCompiler(ast.NodeTransformer):
         self.elsectr = 10     #number of else statements
         self.whilectr = 10    #number of while statements
         self.fnctr = 10
+        self.orctr = 10
         self.symbols = SymbolTable()
         self.localVarDict = dict()
         self.preamble = ""
@@ -77,6 +78,7 @@ class astCompiler(ast.NodeTransformer):
         self.returnSet = set() #list of functions with return values
         self.requiredReturnCalls = set()
         self.passToOldPPPCompiler = False
+        self.gt02bool = False
         FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
 
     def safe_generic_visit(self, node):
@@ -87,6 +89,8 @@ class astCompiler(ast.NodeTransformer):
         """Look for preexisting variables in local and global scopes, if return value is a number then
            return a flag that instantiates an inline variable or can be handled later"""
         if isinstance(obj, ast.Num):
+            if obj.n == 0:
+                return 'NULL', False
             return obj.n, True
         elif isinstance(obj, ast.Name):
             if self.localNameSpace:
@@ -226,42 +230,12 @@ class astCompiler(ast.NodeTransformer):
 
     def visit_BoolOp(self, node):
         """visitor for boolean operators such as and/or"""
-        multipleComparesExist = False
-        valDeque = deque()
         for n in node.values:
-            if isinstance(n, ast.BoolOp):
-                raise CompileException("Multiple differing boolean comparisons not yet supported!")
-            elif isinstance(n, ast.Compare):
-                if len(n.comparators)>1 and isinstance(node.op, ast.Or):
-                    if multipleComparesExist:
-                        raise CompileException("Can't support multiple comparators with or statements")
-                    #node.values = reversed(node.values)
-                    valDeque.appendleft(n)
-                    multipleComparesExist = True
-            elif isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not) and hasattr(n.operand, 'func') and \
-                n.operand.func.id in ['pipe_empty','read_ram_valid']:
-                if multipleComparesExist:
-                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
-                multipleComparesExist = True
-                valDeque.appendleft(n)
-            elif isinstance(n, ast.Call) and n.func.id in ['pipe_empty','read_ram_valid']:
-                if multipleComparesExist:
-                    raise CompileException("Can't support multiple comparators with {}".format(n.operand.func.id))
-                multipleComparesExist = True
-                valDeque.appendleft(n)
-            else:
-                valDeque.append(n)
-        if multipleComparesExist:
-            valDeque.rotate(-1)
-
-
-
-        for n in valDeque:
             if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
                 op, retstr = self.checkIfBuiltinWithReturn(n.operand, True)
                 if op:
                     left, right = None, None
-                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                    raise CompileException("{} not currently supported with other boolean statements!".format(n.operand.func.id))
                 elif retstr:
                     left = retstr
                     right, op = None, 'N'
@@ -334,8 +308,14 @@ class astCompiler(ast.NodeTransformer):
     def testStatementHandler(self, label1, label2):
         """generates assembly for boolean arguments for if and while loops, handles special JMP types 
            as well as and/or statements with multiple boolean tests"""
+        self.boolList[-1] = False
+        totalOrs = sum(self.boolList)
+        orcnt = 0
+        orLabelNeeded = False
+        orlabel = "or_label_{0}".format(self.orctr)
         for ind,orStatement,right,left,op in zip(list(reversed(range(len(self.leftlist)))), self.boolList, self.rightlist, self.leftlist, self.oplist):
             if orStatement:
+                orcnt += 1
                 if left is None:
                     self.codestr += "{0} {1}".format(reverseJMPLUT[op],label1).split('\n')
                     continue
@@ -346,12 +326,12 @@ class astCompiler(ast.NodeTransformer):
                     self.codestr += ["LDWR {0}".format(left)]
                 if ind:
                     if right is None:
-                        self.codestr += "JMP{0}Z {1}".format('' if op else 'N',label1).split('\n')
+                        self.codestr += ["JMP{0}Z {1}".format('' if op else 'N',label1)]
                     else:
                         self.codestr += "{0} {1}\nJMPCMP {2}".format(op,right,label1).split('\n')
                 else:
                     if left is None:
-                        self.codestr += "{0} {1}".format(op,label2).split('\n')
+                        self.codestr += ["{0} {1}".format(op,label2)]
                         continue
                     elif isinstance(left, list):
                         self.requiredReturnCalls.add(left[0])
@@ -359,9 +339,14 @@ class astCompiler(ast.NodeTransformer):
                     else:
                         self.codestr += ["LDWR {0}".format(left)]
                     if right is None:
-                        self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
                     else:
                         self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                if orLabelNeeded:
+                    self.codestr += [orlabel+": NOP"]
+                    self.orctr += 1
+                    orlabel = "or_label_{0}".format(self.orctr)
+                    orLabelNeeded = False
             else:
                 if left is None:
                     self.codestr += "{0} {1}".format(op,label2).split('\n')
@@ -371,10 +356,17 @@ class astCompiler(ast.NodeTransformer):
                     self.codestr += left[1]
                 else:
                     self.codestr += ["LDWR {0}".format(left)]
-                if right is None:
-                    self.codestr += "JMP{0}Z {1}".format(op,label2).split('\n')
+                if orcnt == totalOrs:
+                    if right is None:
+                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
+                    else:
+                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
                 else:
-                    self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                    orLabelNeeded = True
+                    if right is None:
+                        self.codestr += ["JMP{0}Z {1}".format(op,orlabel)]
+                    else:
+                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,orlabel).split('\n')
         self.compTestClear()
 
     def visit_If(self, node):
@@ -589,6 +581,8 @@ class astCompiler(ast.NodeTransformer):
         self.optimizeOneLineJMPs()
         self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
         self.optimizeLabelNOPs()            # Remove unnecessary NOPs after labels -> put label in front of next line
+        if self.gt02bool:
+            self.optimizeBoolForGt0()
 
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
@@ -727,6 +721,10 @@ class astCompiler(ast.NodeTransformer):
             self.maincode = re.sub(r"(\S*label\S*: ) *(NOP\n)", self.reduceRedundantNOPs, self.maincode)
         return
 
+    def optimizeBoolForGt0(self):
+        #while re.search(r"CMPGREATER NULL\nJMPNCMP (\S+)"):
+        self.maincode = re.sub(r"CMPGREATER NULL\nJMPNCMP (\S+)", self.reduceGt02Bool, self.maincode)
+
     ###########################################
     #### Helper functions for re.sub calls ####
     ###########################################
@@ -767,6 +765,9 @@ class astCompiler(ast.NodeTransformer):
     def reduceChameleonLabels(self, repl, m):
         return repl
 
+    def reduceGt02Bool(self, m):
+        return "JMPZ {}".format(m.group(1))
+
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####
     ########################################################################
@@ -781,6 +782,9 @@ class astCompiler(ast.NodeTransformer):
             if code.group(2) == 'True':
                 self.passToOldPPPCompiler = True
                 print("REVERT TO OLD COMPILER")
+        if code.group(1) == 'SUBSTITUTE_BOOL_FOR_GREATER_THAN_ZERO':
+            if code.group(2) == 'True':
+                self.gt02bool = True
         return ""
 
     def collectConstants(self, code):
@@ -988,7 +992,7 @@ def myFunc(c,j):
     b = c*2 if c < 4 else c*3
     #b=c
     while k<15:
-        if 12 > b:
+        if 12 > b or b < 56 and b:
             b *= k
             b = b
         elif b == 36:

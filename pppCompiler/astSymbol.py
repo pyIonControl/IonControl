@@ -79,6 +79,7 @@ class FunctionSymbol(Symbol):
 
     def incrementTags(self):
         self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
+        self.maincode.orctr += self.incrementLabels(r"(or_\S+_label_)(\d+)", self.maincode.orctr)
         #self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
         self.maincode.elsectr += self.incrementLabels(r"(else_\S+_label_)(\d+)", self.maincode.elsectr)
         self.maincode.whilectr += self.incrementLabels(r"(while_\S+_label_)(\d+)", self.maincode.whilectr)
@@ -92,9 +93,9 @@ class FunctionSymbol(Symbol):
         self.labelsCustomized = True
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(while_|if_|end_function_|else_)+(label_)(\d+)", st)
+                m = re.search(r"(or_|while_|if_|function_|else_)+(label_)(\d+)", st)
                 if m:
-                    self.block[i]=re.sub(r"(while_|if_|end_function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
+                    self.block[i]=re.sub(r"(or_|while_|if_|function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
             else:
                 self.labelsCustomized = False
 

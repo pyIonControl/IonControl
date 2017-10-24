@@ -550,23 +550,27 @@ def compareDicts(d1,d2):
 ########################################################################################################################
 
 def evalRawCode(code):
-    preprocessed_code = re.sub(r"const\s+(\S+)\s*=\s*(\S+)\s*\n", correctDeclarations, code)
-    preprocessed_code = re.sub(r"parameter\<\S+\>\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\s+(\S+)\s+=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"var\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"shutter\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"trigger\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"counter\s+(\S+)\s*=\s*(\S+).*\n", correctDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"const\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\<\S+\>\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"parameter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"var\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"masked_shutter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"shutter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"trigger\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
-    preprocessed_code = re.sub(r"counter\s+(\S+)\s*\n", correctEmptyDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", correctDeclarations, code)
+    preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"^ *var\s*(\S+)\s*=\s*(\S+) *$", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"var\s*(\S+)\s*=\s*([0-9x.]+) *([a-zA-Z]+)", correctDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"var\s*(\S+)", correctEmptyDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", correctTypedDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+)", correctTypedDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)", correctEmptyDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+)", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^parameter\s*(\S+)", correctEmptyDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"masked_shutter\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"^shutter\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^trigger\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^counter\s*(\S+)\s*=\s*(\S+)", correctDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"masked_shutter\s*(\S+)", correctEmptyDeclarations, preprocessed_code)
+    preprocessed_code = re.sub(r"^shutter\s*(\S+)", correctEmptyDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^trigger\s*(\S+)", correctEmptyDeclarations, preprocessed_code, flags=re.MULTILINE)
+    preprocessed_code = re.sub(r"^counter\s*(\S+)", correctEmptyDeclarations, preprocessed_code, flags=re.MULTILINE)
     preprocessed_code = re.sub(r"(\s*)(\S+)\s=\s(.*)", printAllSettings, preprocessed_code)
-
     print('---------------------------------------')
     print('Preprocessed Code For Python Evaluation')
     print('---------------------------------------')
@@ -578,6 +582,10 @@ def evalRawCode(code):
 def correctDeclarations(code):
     """Parse var declarations with no value and add them to symbols dictionary"""
     return "{0} = {1}\n".format(code.group(1), code.group(2))
+
+def correctTypedDeclarations(code):
+    """Parse var declarations with no value and add them to symbols dictionary"""
+    return "{0} = {1}\n".format(code.group(2), code.group(3))
 
 def correctEmptyDeclarations(code):
     """Parse var declarations with no value and add them to symbols dictionary"""

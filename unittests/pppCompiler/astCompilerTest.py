@@ -66,16 +66,15 @@ masked_shutter shutter2
 shutter mainshutter
 
 
-var d = 5
 
 def myFunc(c,j):
     d = 5
     k = 3
     b = c*2
     #b=c
-    while k<15:
-        if 12 < b:
-            b *= k
+    while k<18:
+        if 1 < b and b < 1006 or 12 < k < b < 20000000:
+            b = b*k
         elif b:
             b -= 12
         elif b == 36:
@@ -85,7 +84,7 @@ def myFunc(c,j):
             b <<= 2
         k += 1
         d = b << 1
-        if d > 30:
+        if d > 3000000000:
             return d
     #set_dds(channel=chan, phase=xx)
     #rand_seed(d)
@@ -127,7 +126,7 @@ arg1 = 4
 arg2 = 4
 #myFunc(arg1,arg2)
 retval = 10
-arg2 = 6
+arg2 = 5
 retval8 = secf(arg2)
 g*=2
 arg2 = 4
@@ -142,18 +141,18 @@ arg3 = 2
 
 
 
-    #ppAn = pppCompiler.pppCompiler()
-    #ppAn.compileString(mycode)
-    ##ppAn.visit(tree)
-    #print(ppAn.preamble + ppAn.maincode)
+    ppAn = pppCompiler.pppCompiler()
+    ppAn.compileString(mycode)
+    #ppAn.visit(tree)
+    print(ppAn.preamble + ppAn.maincode)
 
-    #compcode = ppAn.preamble + ppAn.maincode
-    #ppvm = pppCompiler.ppVirtualMachine(compcode)
-    #ppvm.runCode()
-    #ppvm.printState()
-    #dcomp = ppvm.varDict
-    #draw = pppCompiler.evalRawCode(mycode)
-    #print(draw)
-    #print("Dicts equal? ", pppCompiler.compareDicts(dcomp,draw))
+    compcode = ppAn.preamble + ppAn.maincode
+    ppvm = pppCompiler.ppVirtualMachine(compcode)
+    ppvm.runCode()
+    ppvm.printState()
+    dcomp = ppvm.varDict
+    draw = pppCompiler.evalRawCode(mycode)
+    print(draw)
+    print("Dicts equal? ", pppCompiler.compareDicts(dcomp,draw))
 
 
