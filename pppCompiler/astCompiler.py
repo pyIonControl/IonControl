@@ -50,12 +50,18 @@ def list_rtrim( l, trimvalue=None ):
     return l
 
 class CompileException(Exception):
-    pass
+    def __init__(self, message, obj=None):
+        self.message = message
+        if obj and hasattr(obj, 'lineno'):
+            self.lineno = "Exception on line {} of ppp file: ".format(obj.lineno)
+        else:
+            self.lineno = ""
+        super().__init__(self.lineno+self.message)
 
 def illegalLambda(error_message):
     """Generic function for unsupported visitor methods"""
     def gencall(self, node):
-        raise CompileException("{} not supported!".format(error_message))
+        raise CompileException("{} not supported!".format(error_message), node)
         self.generic_visit(node)
     return gencall
 
@@ -122,7 +128,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 return 1, True
             else:
                 return 0, True
-        return obj.id, False
+        if hasattr(obj, 'id'):
+            return obj.id, False
+        else:
+            raise CompileException("Can't get a value from {0} object on line {1}".format(obj.__class__, obj.lineno))
 
     def localVarHandler(self, nv):
         """Looks up pre-existing variables and declares undeclared variables"""
@@ -220,7 +229,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             else:
                 left,_ = self.localVarHandler(leftiter)
             right,_ = self.localVarHandler(rightiter)
-            op = ComparisonLUT[opiter.__class__]
+            if opiter.__class__ in ComparisonLUT.keys():
+                op = ComparisonLUT[opiter.__class__]
+            else:
+                raise CompileException("Objects of type {} not supported!".format(opiter.__class__), node)
             leftiter = rightiter
             self.compTestPush(False, left, right, op)
 
@@ -248,8 +260,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.Not):
                 op, retstr = self.checkIfBuiltinWithReturn(n.operand, True)
                 if op:
-                    left, right = None, None
-                    raise CompileException("{} not currently supported with other boolean statements!".format(n.operand.func.id))
+                    raise CompileException("{} not currently supported with other boolean statements!".format(n.operand.func.id), n)
                 elif retstr:
                     left = retstr
                     right, op = None, 'N'
@@ -264,8 +275,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             elif isinstance(n, ast.Call):
                 op, retstr = self.checkIfBuiltinWithReturn(n, False)
                 if op:
-                    left, right = None, None
-                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id))
+                    raise CompileException("{} not current supported with other boolean statements!".format(n.operand.func.id), n)
                 elif retstr:
                     left = retstr
                     right, op = None, ''
@@ -455,7 +465,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def visit_FunctionDef(self, node):
         """visitor for function definitions"""
         if node.name in self.symbols.keys():
-            raise CompileException("Function {} has already been declared!".format(node.name))
+            raise CompileException("Function {} has already been declared!".format(node.name), node)
         for arg in node.args.args:
             target = node.name+"_"+arg.arg
             self.symbols[target] = VarSymbol(name=target, value=0)
@@ -475,7 +485,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.localNameSpace.append(node.name) # push function context for maintaining local variable definitions
         if len(set(self.localNameSpace)) != len(self.localNameSpace):
             print('RECURSION ERROR')
-            raise CompileException('Recursion not supported!')
+            raise CompileException('Recursion not supported!', node)
         self.safe_generic_visit(node)         # walk inner block
         self.localNameSpace.pop()             # pop function context
         self.codestr += ["end_function_label_{}: NOP".format(self.fnctr)]
@@ -492,7 +502,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             if self.localNameSpace:
                 self.funcDeps[self.localNameSpace[-1]].add(node.func.id)
             if len(set(self.localNameSpace)) != len(self.localNameSpace):
-                raise CompileException('Recursion not supported!')
+                raise CompileException('Recursion not supported!', node)
             if node.func.id in self.symbols.keys(): # if the function has already been defined, incorporate its code directly
                 procedure = self.symbols.getProcedure(node.func.id)
                 if node.keywords:
@@ -510,7 +520,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 else:
                     self.codestr += procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
                 if True in self.codestr:
-                    raise CompileException('Bool in codestr')
+                    raise CompileException('Bool in codestr', node)
             else: # put in a placeholder that can be used to generate the assembly after the function is defined
                 if node.keywords:
                     kwdict = {kw.arg: self.localVarHandler(kw.value)[0] for kw in node.keywords}
@@ -539,8 +549,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         if self.localNameSpace:
             self.returnSet.add(self.localNameSpace[-1])
         else:
-            raise CompileException("Function return called outside of function definition!")
-        #self.safe_generic_visit(node)
+            raise CompileException("Function return called outside of function definition!", node)
 
     def compileString(self, code):
         """Compile the ppp code"""
@@ -736,7 +745,6 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         return
 
     def optimizeBoolForGt0(self):
-        #while re.search(r"CMPGREATER NULL\nJMPNCMP (\S+)"):
         self.maincode = re.sub(r"CMPGREATER NULL\nJMPNCMP (\S+)", self.reduceGt02Bool, self.maincode)
 
     ###########################################
