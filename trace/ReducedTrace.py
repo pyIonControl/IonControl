@@ -51,7 +51,7 @@ class ReducedTrace:
             pairs = [(myx, myy.mean) for myx, myy in sorted(self._x_cache.items())]
         else:
             pairs = sorted(zip(self.x, self.y), key=lambda x: x[0]) if len(self.x) > 0 else list(zip(self.x, self.y))
-        if self._combinePoints:
+        if int(self._combinePoints):
             num_points = int(self._combinePoints)
             extra = len(pairs) % num_points
             if extra > 0:

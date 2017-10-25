@@ -30,7 +30,7 @@ import logging
 from collections import OrderedDict
 
 from trace.PlottedStructure import PlottedStructure
-from trace.PlottedTrace import PlottedTrace
+from trace.PlottedTrace import PlottedTrace, PlottedTraceProperties
 
 try:
     from fit import FitFunctions
@@ -83,10 +83,19 @@ class PlottingList(list):
 
     @staticmethod
     def fromXmlElement(element, traceCollection):
+        logger = logging.getLogger(__name__)
         l = PlottingList()
         for plottingelement in element.findall("TracePlotting"):
             plotting = PlottedTrace(traceCollection)
-            plotting.__setstate__(plottingelement.attrib)
+            # added workaraound for PlottedTraceProperties since xml loading via findall isn't recursive and returned
+            # a string instance of the PlottedTraceProperties object, probably best to derive a new class from ElementTree
+            attribdict = plottingelement.attrib
+            if "properties" in attribdict.keys() and isinstance(attribdict['properties'], str):
+                try:
+                    attribdict['properties'] = PlottedTraceProperties(**plottingelement.findall("PlottedTraceProperties")[0].attrib)
+                except Exception:
+                    logger.warning("Couldn't resolve PlottedTraceProperties in {}".format(traceCollection.filename))
+            plotting.__setstate__(attribdict)
             plotting.type = int(plotting.type) if hasattr(plotting, 'type') else 0
             if plottingelement.find("FitFunction") is not None:
                 plotting.fitFunction = FitFunctions.fromXmlElement(plottingelement.find("FitFunction"))
