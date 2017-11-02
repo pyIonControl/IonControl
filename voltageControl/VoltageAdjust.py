@@ -239,7 +239,7 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         return sorted(self.shuttlingGraph.nodes()) 
     
     def currentShuttlingPosition(self):
-        return self.shuttlingGraph.currentPositionName
+        return self.shuttlingGraph.currentPositionName or self.shuttlingGraph.currentPosition
 
     def onCurrentPositionEvent(self, event):
         self.adjust.line = event.line
@@ -252,8 +252,9 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         destination = str(destination)
         logger = logging.getLogger(__name__)
         logger.info( "ShuttleSequence" )
-        path = self.shuttlingGraph.shuttlePath(None, destination)
-        if path:  
+        path, preShuttle, postShuttle = self.shuttlingGraph.shuttlePath(None, destination, allow_position=True)
+        if path:
+            #  TODO: do the pre and post shuttle
             if instant:
                 edge = path[-1][2]
                 _, toLine = (edge.startLine, edge.stopLine) if path[-1][0]==edge.startName else (edge.stopLine, edge.startLine)
