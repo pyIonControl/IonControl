@@ -58,9 +58,12 @@ class OverrideRecord:
         return updatedOverrideRecord
 
     def apply(self, globalDict, shutterDict, pulser, voltageControl):
-        for name, value in self.shutters.items():
-            pulser.setShutterBit(shutterDict.channel(name), value)
-        for name, value in self.globals.items():
-            globalDict[name] = value
-        if self.voltages is not None:
-            voltageControl.shuttleTo(self.voltages, onestep=not self.shuttle)
+        try:
+            for name, value in self.shutters.items():
+                pulser.setShutterBit(shutterDict.channel(name), value)
+            for name, value in self.globals.items():
+                globalDict[name] = value
+            if self.voltages is not None:
+                     voltageControl.shuttleTo(self.voltages, onestep=not self.shuttle)
+        except Exception as e:
+            logging.getLogger(__name__).exception("Cannot apply setting in autoload {}".format(e))

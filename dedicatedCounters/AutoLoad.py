@@ -116,7 +116,7 @@ class AutoLoadSettings(object):
                 {'name': 'Beyond threshold time', 'type': 'magnitude', 'value': self.beyondThresholdTime, 'tip': "Time in the state BeyondThreshold before dumping ions", 'field': 'dumpTime', 'dimension': 's'},
                 {'name': 'Dump time', 'type': 'magnitude', 'value': self.dumpTime, 'tip': "Time in the state dump to reset (kick out) the ions", 'field': 'beyondThresholdTime', 'dimension': 's'},
                 {'name': 'History timespan', 'type': 'magnitude', 'value': self.historyLength, 'tip': "Time range to display loading history", 'field': 'historyLength'},
-                {'name': 'Max load check cycles', ' type': ' magnitude', 'value': self.maxLoadCheckCycles, 'tip': "Maximum number of load check cycles before giving up", 'field': "maxLoadCheckCycles"}]
+                {'name': 'Max load check cycles', 'type': 'magnitude', 'value': self.maxLoadCheckCycles, 'tip': "Maximum number of load check cycles before giving up", 'field': "maxLoadCheckCycles"}]
 
     def update(self, param, changes):
         """
