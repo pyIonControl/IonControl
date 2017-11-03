@@ -25,14 +25,21 @@ class MKSReader:
         
     def close(self):
         self.conn.close()
+
+    def write(self, text):
+        self.conn.write(text.encode('ascii'))
+
+    def read(self, length):
+        data = self.conn.read(length)
+        return data.decode('ascii')
         
     def query(self, question, length=100):
-        self.conn.write(question)
-        return self.conn.read(length)
+        self.write(question)
+        return self.read(length)
         
     def setupDatalogger(self, time):
-        self.conn.write("@{0}DLT!{1};FF".format(self.deviceaddr, time))
-        reply = self.conn.read(100)
+        self.write("@{0}DLT!{1};FF".format(self.deviceaddr, time))
+        reply = self.read(100)
         print(reply)
         
     def startLogger(self):
@@ -58,11 +65,9 @@ class MKSReader:
         return self.pr3()
     
     
-
-
 if __name__=="__main__":
-    mks = MKSReader()
+    mks = MKSReader('COM11')
     mks.open()
-    mks.pr3()
+    print(mks.pr3())
     mks.close()
     

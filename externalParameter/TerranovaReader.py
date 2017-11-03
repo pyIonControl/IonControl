@@ -25,17 +25,24 @@ class TerranovaReader:
         
     def close(self):
         self.conn.close()
-        
+
+    def write(self, text):
+        self.conn.write(text.encode('ascii'))
+
+    def read(self, length):
+        data = self.conn.read(length)
+        return data.decode('ascii')
+
     def query(self, question, length=100):
-        self.conn.write(question)
-        return self.conn.read(length)
+        self.write(question)
+        return self.read(length)
                 
     def value(self):
-        reply = self.query(b"F").decode('ascii').rstrip('\n\r')
+        reply = self.query("F").rstrip('\n\r')
         m = re.match('\s*(\d+)\s+([-0-9]+)\s*', reply)
         mantissa = float(m.group(1))
         exponent = int(m.group(2))
-        return  mantissa * math.pow(10, exponent)
+        return mantissa * math.pow(10, exponent)
 
 if __name__=="__main__":
     mks = TerranovaReader()
