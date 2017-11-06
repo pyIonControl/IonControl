@@ -29,7 +29,7 @@ class VarSymbol(Symbol):
 
 class FunctionSymbol(Symbol):
     passByReferenceCheckCompleted = False
-    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False):
+    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=False):
         super(FunctionSymbol, self).__init__(name)
         self.block = block
         self.codestr = list()
@@ -43,12 +43,12 @@ class FunctionSymbol(Symbol):
         self.variablesPassedByReference = set()
         self.returnval = returnval
         self.startLabel = "begin_function_{}_label_0".format(self.name)
+        self.inline = inline
         #self.startLabel = ["begin_function_{}_label_0: NOP".format(self.name)]
 
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
-        self.variablesPassedByReference = set()
+        #self.variablesPassedByReference = set()
         self.codestr = list()
-        #self.codestr += self.startLabel
         fullargn = self.argn+[k for k in self.kwargn.keys()]
         if len(args)>1:
             for i,arg in enumerate(args[1:]):
@@ -83,6 +83,7 @@ class FunctionSymbol(Symbol):
 
     def incrementTags(self):
         self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
+        self.maincode.orctr += self.incrementLabels(r"(or_\S+_label_)(\d+)", self.maincode.orctr)
         #self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
         self.maincode.elsectr += self.incrementLabels(r"(else_\S+_label_)(\d+)", self.maincode.elsectr)
         self.maincode.whilectr += self.incrementLabels(r"(while_\S+_label_)(\d+)", self.maincode.whilectr)
@@ -96,9 +97,9 @@ class FunctionSymbol(Symbol):
         self.labelsCustomized = True
         for i,st in enumerate(self.block):
             if isinstance(st, str):
-                m = re.search(r"(while_|if_|function_|else_)+(label_)(\d+)", st)
+                m = re.search(r"(or_|while_|if_|function_|else_)+(label_)(\d+)", st)
                 if m:
-                    self.block[i]=re.sub(r"(while_|if_|function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
+                    self.block[i]=re.sub(r"(or_|while_|if_|function_|else_)+(label_)(\d+)", lambda s: m.group(1)+self.name+'_{0}{1}'.format(m.group(2),m.group(3)), st)
             else:
                 self.labelsCustomized = False
 
@@ -145,31 +146,34 @@ class FunctionSymbol(Symbol):
         return subBlock
 
     def codegenInit(self, symboltable, arg=list(), kwarg=dict()):
-        if not self.labelsCustomized:
-            self.customizeLabels()
-        #if not self.passByReferenceCheckCompleted:
-            #self.checkForVariablesPassedByReference()
-        #self.instantiateInputParameters(arg,kwarg)
-
-        self.incrementTags()
-        #overrideBlock = self.substituteReferenceVars(arg, kwarg)
-        overrideBlock = self.block
-        localBlock = [self.startLabel+': NOP']+overrideBlock+["POPADDR\n"]
-        return localBlock
-        #return '\n'.join(localBlock)
+        if not self.inline:
+            if not self.labelsCustomized:
+                self.customizeLabels()
+            #if not self.passByReferenceCheckCompleted:
+                #self.checkForVariablesPassedByReference()
+            #self.instantiateInputParameters(arg,kwarg)
+            self.incrementTags()
+            #overrideBlock = self.substituteReferenceVars(arg, kwarg)
+            overrideBlock = self.block
+            localBlock = [self.startLabel+': NOP']+overrideBlock+["POPADDR\n"]
+            return localBlock
+            #return '\n'.join(localBlock)
+        return ["\n"]
 
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
-        #if not self.labelsCustomized:
-            #self.customizeLabels()
-        #if not self.passByReferenceCheckCompleted:
-            #self.checkForVariablesPassedByReference()
+        if self.inline:
+            if not self.labelsCustomized:
+                self.customizeLabels()
+            if not self.passByReferenceCheckCompleted:
+                self.checkForVariablesPassedByReference()
         self.instantiateInputParameters(arg,kwarg)
-        #self.incrementTags()
-        #overrideBlock = self.substituteReferenceVars(arg, kwarg)
-        #localBlock = self.codestr+overrideBlock+["POPADDR"]
-        localBlock = self.codestr+"JMPPUSHADDR {}".format(self.startLabel).split('\n')
+        if self.inline:
+            self.incrementTags()
+            overrideBlock = self.substituteReferenceVars(arg, kwarg)
+            localBlock = self.codestr+overrideBlock#+["POPADDR"]
+        else:
+            localBlock = self.codestr+"JMPPUSHADDR {}".format(self.startLabel).split('\n')
         return localBlock
-
 
 class Builtin(FunctionSymbol):
     def __init__(self, name, codegen):
