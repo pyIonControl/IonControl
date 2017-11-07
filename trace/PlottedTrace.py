@@ -345,11 +345,11 @@ class PlottedTrace(object):
         if self._graphicsView is not None:
             if self.hasHeightColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), height=(self.height),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x), y=numpy.array(self.y), height=numpy.array(self.height),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), height=(self.height[self.filt>0]),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x[self.filt>0]), y=numpy.array(self.y[self.filt>0]), height=numpy.array(self.height[self.filt>0]),
                                                      pen=self.penList[penindex][0])
                     self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), height=(self.height[self.filt<1]),
                                                               pen=self.penList[penindex][5])
@@ -357,7 +357,7 @@ class PlottedTrace(object):
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
             elif self.hasTopColumn and self.hasBottomColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x), y=numpy.array(self.y), top=numpy.array(self.top), bottom=numpy.array(self.bottom),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
@@ -557,9 +557,9 @@ class PlottedTrace(object):
                 self.curve.setData(self.x, self.y)
         if hasattr(self, 'errorBarItem') and self.errorBarItem is not None:
             if self.hasHeightColumn:
-                self.errorBarItem.setData(x=self.x, y=self.y, height=self.height)
+                self.errorBarItem.setData(x=numpy.array(self.x), y=numpy.array(self.y), height=numpy.array(self.height))
             else:
-                self.errorBarItem.setOpts(x=self.x, y=self.y, top=self.top, bottom=self.bottom)
+                self.errorBarItem.setOpts(x=numpy.array(self.x), y=numpy.array(self.y), top=numpy.array(self.top), bottom=numpy.array(self.bottom))
         if self.fitFunction is not None:
             if self.type == self.Types.default:
                 self.replotFitFunction()
