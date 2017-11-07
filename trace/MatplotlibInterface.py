@@ -91,31 +91,43 @@ class MatplotWindow(QtWidgets.QDialog):
     def onChangeFileName(self, name):
         self.filenamePattern = name
 
-    def styleLookup(self, plottedtrace):
-        return self.styleDict[self.styleNames.get(plottedtrace.style, 'lines')](plottedtrace)
+    def styleLookup(self, plottedtrace, style=None):
+        return self.styleDict[self.styleNames.get(style if style is not None else plottedtrace.style, 'lines')](plottedtrace)
 
     def translateColor(self, plottedtrace):
         return (i/255 for i in plottedtrace.penList[plottedtrace.curvePen][4])
 
     def plot(self, plottedtrace):
         self.plottedTraces.append(plottedtrace)
-        plottedTraces = self.plottedTraces
         if self.traceind == 0:
-            xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel is not None else ""
-            xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit is not None else ""
-            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel is not None else ""
-            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit is not None else ""
+            xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel else ""
+            xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit else ""
+            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel else ""
+            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit else ""
             plt.xlabel(xlab+xunit)
             plt.ylabel(ylab+yunit)
             plt.tight_layout()
             self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\nplt.tight_layout()\n".format(xlab+xunit,ylab+yunit)
+        if plottedtrace.fitFunction:
+            style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
+            style.update(self.styleLookup(plottedtrace, 'lines'))
+            ax = self.fig.add_subplot(111)
+            ax.plot(plottedtrace.fitx, plottedtrace.fity, **style)
+            self.canvas.draw()
+            styleStr = ', '.join([k+'='+str(v if not isinstance(v,str) else "'{}'".format(v)) for k,v in style.items()])
+            self.code += """ax.plot(plottedTraces[{0}].fitx, plottedTraces[{0}].fity, {1})\n""".format(self.traceind, styleStr)
         style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
         style.update(self.styleLookup(plottedtrace))
         ax = self.fig.add_subplot(111)
-        ax.plot(plottedtrace.x, plottedtrace.y, **style)
-        self.canvas.draw()
         styleStr = ', '.join([k+'='+str(v if not isinstance(v,str) else "'{}'".format(v)) for k,v in style.items()])
-        self.code += """ax.plot(plottedTraces[{0}].x, plottedTraces[{0}].y, {1})\n""".format(self.traceind, styleStr)
+        if 'errorbar' in self.styleNames.get(plottedtrace.style,'lines') and plottedtrace.hasHeightColumn:
+            self.code += """ax.errorbar(plottedTraces[{0}].x, plottedTraces[{0}].y, plottedTraces[{0}].height, {1})\n""".format(self.traceind, styleStr)
+            ax.errorbar(plottedtrace.x, plottedtrace.y, plottedtrace.height, **style)
+            self.canvas.draw()
+        else:
+            self.code += """ax.plot(plottedTraces[{0}].x, plottedTraces[{0}].y, {1})\n""".format(self.traceind, styleStr)
+            ax.plot(plottedtrace.x, plottedtrace.y, **style)
+            self.canvas.draw()
         self.textEdit.setPlainText(self.header+self.code+self.footer)
         self.traceind += 1
 
@@ -137,6 +149,4 @@ class MatplotWindow(QtWidgets.QDialog):
         for filetype, cwidget in self.fCheckWidgets.items():
             if cwidget.isChecked():
                 self.fig.savefig(str(file.with_suffix('.'+filetype)))
-
-
 
