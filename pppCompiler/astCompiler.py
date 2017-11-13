@@ -520,7 +520,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.symbols[node.name] = FunctionSymbol(node.name, copy.copy(self.codestr),
                                                  nameSpace=node.name, argn=arglist,
                                                  kwargn=kwarglist, symbols=self.symbols,
-                                                 maincode=self, returnval=node.name in self.returnSet)
+                                                 maincode=self, returnval=node.name in self.returnSet,
+                                                 inline=inline)
         self.codestr = []
 
     def visit_Call(self, node):
