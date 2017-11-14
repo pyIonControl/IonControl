@@ -571,9 +571,13 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             self.visit(node.value)
             self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
         else:
-            res, _ = self.localVarHandler(node.value)
-            self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
-            self.safe_generic_visit(node)
+            if isinstance(node.value, ast.Name):
+                res, _ = self.localVarHandler(node.value)
+                self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
+                self.safe_generic_visit(node)
+            else:
+                self.visit(node.value)
+                self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
         if self.localNameSpace:
             self.returnSet.add(self.localNameSpace[-1])
         else:
