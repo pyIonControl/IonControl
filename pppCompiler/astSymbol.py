@@ -27,6 +27,18 @@ class VarSymbol(Symbol):
         self.value = value
         self.unit = unit
 
+class AssemblyFunctionSymbol(Symbol):
+    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=True):
+        super().__init__(name)
+        self.name = name
+        self.block = []
+        self.block = list(map(lambda x: x.lstrip(), block.lstrip().rstrip().splitlines()))
+        self.argn, self.kwargn, self.nameSpace, self.symbols, \
+        self.maincode, self.returnval, self.inline = argn, kwargn, nameSpace, symbols, maincode, returnval, inline
+
+    def codegen(self, symboltable, arg=list(), kwarg=dict()):
+        return self.block
+
 class FunctionSymbol(Symbol):
     passByReferenceCheckCompleted = False
     def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=False):
@@ -250,7 +262,7 @@ class SymbolTable(OrderedDict):
         return self[name]
 
     def getProcedure(self, name):
-        if name not in self or not isinstance( self[name], FunctionSymbol):
+        if name not in self or (not isinstance( self[name], FunctionSymbol) and not isinstance( self[name], AssemblyFunctionSymbol)):
             raise SymbolException("Function '{0}' is not defined".format(name))
         return self[name]
 
