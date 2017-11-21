@@ -9,7 +9,7 @@ import re
 import difflib
 from pathlib import Path
 from collections import deque, defaultdict, Counter, OrderedDict
-from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol
+from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol, AssemblyFunctionSymbol
 from functools import partial
 from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
 from .pppCompiler import pppCompiler as oldpppCompiler
@@ -488,6 +488,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         if node.decorator_list:
             if node.decorator_list[0].id == 'inline':
                 inline = True
+            elif node.decorator_list[0].id == 'assembly':
+                code = node.body[0].value.s
+                self.symbols[node.name] = AssemblyFunctionSymbol(node.name, code)
+                return
         if self.inlineAll:
             inline = True
         if node.name in self.symbols.keys():
@@ -520,7 +524,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.symbols[node.name] = FunctionSymbol(node.name, copy.copy(self.codestr),
                                                  nameSpace=node.name, argn=arglist,
                                                  kwargn=kwarglist, symbols=self.symbols,
-                                                 maincode=self, returnval=node.name in self.returnSet)
+                                                 maincode=self, returnval=node.name in self.returnSet,
+                                                 inline=inline)
         self.codestr = []
 
     def visit_Call(self, node):
@@ -570,9 +575,13 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             self.visit(node.value)
             self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
         else:
-            res, _ = self.localVarHandler(node.value)
-            self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
-            self.safe_generic_visit(node)
+            if isinstance(node.value, ast.Name):
+                res, _ = self.localVarHandler(node.value)
+                self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
+                self.safe_generic_visit(node)
+            else:
+                self.visit(node.value)
+                self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
         if self.localNameSpace:
             self.returnSet.add(self.localNameSpace[-1])
         else:
