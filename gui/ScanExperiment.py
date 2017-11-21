@@ -24,6 +24,7 @@ import itertools
 import yaml
 
 from modules.InkscapeConversion import addPdfMetaData
+from modules.doProfile import doprofile
 from persist.StringTable import DataStore
 from pygsti_addons.QubitDataSet import QubitDataSet
 from trace import Traceui
@@ -603,66 +604,89 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         names = [self.context.evaluation.ev.name for self.context.evaluation.ev in self.context.evaluation.evalList]
         results = [(x, res[0]) for res in evaluated]
         self.evaluatedDataSignal.emit(dict(list(zip(names, results))))
-        
+
+    def preparePlotting(self, x, evaluated, timeinterval, timeTickOffset):
+        traceCollection = TraceCollection(record_timestamps=True)
+        traceCollection.recordTimeinterval(timeTickOffset)
+        self.plottedTraceList = list()
+        for (index, result), evaluation in zip(enumerate(evaluated), self.context.evaluation.evalList):
+            if result is not None:  # result is None if there were no counter results
+                (_, error, _) = result
+                showerror = error is not None
+                yColumnName = evaluation.name
+                rawColumnName = '{0}_raw'.format(evaluation.name)
+                if showerror:
+                    topColumnName = '{0}_top'.format(evaluation.name)
+                    bottomColumnName = '{0}_bottom'.format(evaluation.name)
+                    plottedTrace = PlottedTrace(traceCollection,
+                                                self.plotDict[self.context.evaluation.evalList[index].plotname] if
+                                                self.context.evaluation.evalList[index].plotname != 'None' else None,
+                                                pens.penList,
+                                                xColumn=self.context.evaluation.evalList[index].abszisse.columnName,
+                                                yColumn=yColumnName, topColumn=topColumnName,
+                                                bottomColumn=bottomColumnName,
+                                                rawColumn=rawColumnName,
+                                                name=self.context.evaluation.evalList[index].name,
+                                                xAxisUnit=self.context.scan.xUnit,
+                                                xAxisLabel=self.context.scan.scanParameter,
+                                                windowName=self.context.evaluation.evalList[index].plotname,
+                                                combinePoints=evaluation.settings['combinePoints'],
+                                                averageSameX=evaluation.settings['averageSameX'],
+                                                averageType=evaluation.settings['averageType'])
+                else:
+                    plottedTrace = PlottedTrace(traceCollection,
+                                                self.plotDict[self.context.evaluation.evalList[index].plotname] if
+                                                self.context.evaluation.evalList[index].plotname != 'None' else None,
+                                                pens.penList,
+                                                xColumn=self.context.evaluation.evalList[index].abszisse.columnName,
+                                                yColumn=yColumnName, rawColumn=rawColumnName,
+                                                name=self.context.evaluation.evalList[index].name,
+                                                xAxisUnit=self.context.scan.xUnit,
+                                                xAxisLabel=self.context.scan.scanParameter,
+                                                windowName=self.context.evaluation.evalList[index].plotname,
+                                                combinePoints=evaluation.settings['combinePoints'],
+                                                averageSameX=evaluation.settings['averageSameX'],
+                                                averageType=evaluation.settings['averageType'])
+                xRange = self.context.generator.xRange() if is_Q(self.context.scan.start) and Q(1,
+                                                                                                self.context.scan.xUnit).dimensionality == self.context.scan.start.dimensionality else None
+                if xRange:
+                    self.plotDict["Scan Data"]["view"].setXRange(*xRange)
+                else:
+                    self.plotDict["Scan Data"]["view"].enableAutoRange(axis=ViewBox.XAxis)
+                self.context.plottedTraceList.append(plottedTrace)
+        if self.context.qubitData:
+            traceCollection.structuredData['qubitData'] = self.context.qubitData
+            traceCollection.structuredDataFormat['qubitData'] = self.context.scan.qubitDataFormat
+            if self.context.qubitData.is_gst:
+                plottedStructure = PlottedStructure(traceCollection, 'qubitData', self.plotDict['Qubit'], 'Qubit',
+                                                    properties=self.context.scan.gateSequenceSettings.plotProperties.copy())
+                self.context.plottedTraceList.append(plottedStructure)
+        self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
+        self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
+        self.context.plottedTraceList[0].traceCollection.description["PulseProgram"] = self.pulseProgramUi.description()
+        self.context.plottedTraceList[0].traceCollection.description["Scan"] = self.context.scan.description()
+        self.context.plottedTraceList[0].traceCollection.autoSave = self.context.scan.autoSave
+        self.context.plottedTraceList[0].traceCollection.filenamePattern = self.context.scan.filename
+        if len(self.context.plottedTraceList) == 1:
+            category = None
+        elif self.context.scan.autoSave:
+            category = self.traceui.getUniqueCategory(self.context.plottedTraceList[0].traceCollection.filename)
+        else:
+            category = "UNSAVED_" + self.context.plottedTraceList[0].traceCollection.filenamePattern + "_{0}".format(
+                self.unsavedTraceCount)
+        for plottedTrace in self.context.plottedTraceList:
+            plottedTrace.category = category
+        if not self.context.scan.autoSave: self.unsavedTraceCount += 1
+        self.context.generator.appendData(self.context.plottedTraceList, x, evaluated, timeinterval)
+        for index, plottedTrace in reversed(list(enumerate(self.context.plottedTraceList))):
+            self.traceui.addTrace(plottedTrace, pen=-1)
+        if self.traceui.expandNew:
+            self.traceui.expand(self.context.plottedTraceList[0])
+        self.traceui.resizeColumnsToContents()
+
     def updateMainGraph(self, x, evaluated, timeinterval, timeTickOffset, queue_size): # evaluated is list of mean, error, raw
         if not self.context.plottedTraceList:
-            traceCollection = TraceCollection(record_timestamps=True)
-            traceCollection.recordTimeinterval(timeTickOffset)
-            self.plottedTraceList = list()
-            for (index, result), evaluation in zip(enumerate(evaluated), self.context.evaluation.evalList):
-                if result is not None:  # result is None if there were no counter results
-                    (_, error, _) = result
-                    showerror = error is not None
-                    yColumnName = evaluation.name
-                    rawColumnName = '{0}_raw'.format(evaluation.name)
-                    if showerror:
-                        topColumnName = '{0}_top'.format(evaluation.name)
-                        bottomColumnName = '{0}_bottom'.format(evaluation.name)
-                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname] if self.context.evaluation.evalList[index].plotname != 'None' else None,
-                                                    pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName,
-                                                    yColumn=yColumnName, topColumn=topColumnName, bottomColumn=bottomColumnName, 
-                                                    rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name, xAxisUnit = self.context.scan.xUnit,
-                                                    xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname,
-                                                    combinePoints=evaluation.settings['combinePoints'], averageSameX=evaluation.settings['averageSameX'], averageType=evaluation.settings['averageType'])
-                    else:                
-                        plottedTrace = PlottedTrace(traceCollection, self.plotDict[self.context.evaluation.evalList[index].plotname] if self.context.evaluation.evalList[index].plotname != 'None' else None,
-                                                    pens.penList, xColumn=self.context.evaluation.evalList[index].abszisse.columnName, yColumn=yColumnName, rawColumn=rawColumnName, name=self.context.evaluation.evalList[index].name,
-                                                    xAxisUnit = self.context.scan.xUnit, xAxisLabel = self.context.scan.scanParameter, windowName=self.context.evaluation.evalList[index].plotname,
-                                                    combinePoints=evaluation.settings['combinePoints'], averageSameX=evaluation.settings['averageSameX'], averageType=evaluation.settings['averageType'])
-                    xRange = self.context.generator.xRange() if is_Q(self.context.scan.start) and Q(1, self.context.scan.xUnit).dimensionality == self.context.scan.start.dimensionality else None
-                    if xRange:
-                        self.plotDict["Scan Data"]["view"].setXRange( *xRange )
-                    else:
-                        self.plotDict["Scan Data"]["view"].enableAutoRange(axis=ViewBox.XAxis)     
-                    self.context.plottedTraceList.append( plottedTrace )
-            if self.context.qubitData:
-                traceCollection.structuredData['qubitData'] = self.context.qubitData
-                traceCollection.structuredDataFormat['qubitData'] = self.context.scan.qubitDataFormat
-                if self.context.qubitData.is_gst:
-                    plottedStructure = PlottedStructure(traceCollection, 'qubitData', self.plotDict['Qubit'], 'Qubit',
-                                                        properties=self.context.scan.gateSequenceSettings.plotProperties.copy())
-                    self.context.plottedTraceList.append(plottedStructure)
-            self.context.plottedTraceList[0].traceCollection.name = self.context.scan.settingsName
-            self.context.plottedTraceList[0].traceCollection.description["comment"] = ""
-            self.context.plottedTraceList[0].traceCollection.description["PulseProgram"] = self.pulseProgramUi.description()
-            self.context.plottedTraceList[0].traceCollection.description["Scan"] = self.context.scan.description()
-            self.context.plottedTraceList[0].traceCollection.autoSave = self.context.scan.autoSave
-            self.context.plottedTraceList[0].traceCollection.filenamePattern = self.context.scan.filename
-            if len(self.context.plottedTraceList)==1:
-                category = None
-            elif self.context.scan.autoSave:
-                category = self.traceui.getUniqueCategory(self.context.plottedTraceList[0].traceCollection.filename)
-            else:
-                category = "UNSAVED_"+self.context.plottedTraceList[0].traceCollection.filenamePattern+"_{0}".format(self.unsavedTraceCount)
-            for plottedTrace in self.context.plottedTraceList:
-                plottedTrace.category = category
-            if not self.context.scan.autoSave: self.unsavedTraceCount+=1
-            self.context.generator.appendData( self.context.plottedTraceList, x, evaluated, timeinterval )
-            for index, plottedTrace in reversed(list(enumerate(self.context.plottedTraceList))):
-                self.traceui.addTrace(plottedTrace, pen=-1)
-            if self.traceui.expandNew:
-                self.traceui.expand(self.context.plottedTraceList[0])
-            self.traceui.resizeColumnsToContents()
+            self.preparePlotting(x, evaluated, timeinterval, timeTickOffset)
         else:
             self.context.generator.appendData(self.context.plottedTraceList, x, evaluated, timeinterval )
             if queue_size < 2 or time.time() - self.last_plot_time > 5:
