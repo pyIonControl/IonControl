@@ -26,7 +26,7 @@ def is_Q(q):
     return isinstance(q, Q)
 
 
-def value(q, unit=None):
+def value(q, unit=""):
     if is_Q(q):
         return q.m_as(unit)
     if not unit or not q:
