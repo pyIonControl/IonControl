@@ -225,7 +225,7 @@ class VariableDictionary(SequenceDict):
             
     def recalculateAll(self):
         g = self.dependencyGraph.reverse()
-        for node, indegree in g.in_degree_iter():
+        for node, indegree in g.in_degree():
             if indegree==0:
                 for calcnode in dfs_postorder_nodes(g, node):
                     self.recalculateNode(calcnode)
