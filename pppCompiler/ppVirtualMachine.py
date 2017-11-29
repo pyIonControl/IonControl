@@ -452,7 +452,7 @@ class ppVirtualMachine:
                     msg = " --> JUMPING TO LINE {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
-            m = re.match(r"\s*(JMPPUSHADDR)\s(\S+)", line)
+            m = re.match(r"\s*(JMPPUSH)\s(\S+)", line)
             if m:
                 self.memoryLocationStack.append(i)
                 i = self.labelDict[m.group(2)]
@@ -464,7 +464,7 @@ class ppVirtualMachine:
                     msg = " --> PUSHING CURRENT ADDRESS TO STACK AND JUMPING TO: {0}".format(i)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
-            m = re.match(r"\s*(POPADDR)", line)
+            m = re.match(r"\s*(JMPPOP)", line)
             if m:
                 #i = self.labelDict[m.group(2)]
                 i = self.memoryLocationStack.pop()
@@ -475,6 +475,31 @@ class ppVirtualMachine:
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
                 if keepoutput:
                     msg = " --> POP ADDRESS => JUMPING TO LINE {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
+                continue
+            m = re.match(r"\s*(PUSH)\s(\S+)", line)
+            if m:
+                self.memoryLocationStack.append(m.group(2))
+                #i = self.labelDict[m.group(2)]
+                #memlocationChanged = True
+                if printAll:
+                    msg = " --> PUSHING W TO STACK: {0}".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> PUSHING W TO STACK: {0}".format(i)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
+                continue
+            m = re.match(r"\s*(POP)", line)
+            if m:
+                #i = self.labelDict[m.group(2)]
+                self.R = self.memoryLocationStack.pop()
+                memlocationChanged = True
+                #i += 2
+                if printAll:
+                    msg = " --> POP => W = {0}".format(self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> POP => W = {0}".format(self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             m = re.match(r"\s*NOP", line)

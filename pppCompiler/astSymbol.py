@@ -167,7 +167,7 @@ class FunctionSymbol(Symbol):
             self.incrementTags()
             #overrideBlock = self.substituteReferenceVars(arg, kwarg)
             overrideBlock = self.block
-            localBlock = [self.startLabel+': NOP']+overrideBlock+["POPADDR\n"]
+            localBlock = [self.startLabel+': NOP']+overrideBlock+["JMPPOP\n"]
             return localBlock
             #return '\n'.join(localBlock)
         return ["\n"]
@@ -184,7 +184,7 @@ class FunctionSymbol(Symbol):
             overrideBlock = self.substituteReferenceVars(arg, kwarg)
             localBlock = self.codestr+overrideBlock#+["POPADDR"]
         else:
-            localBlock = self.codestr+"JMPPUSHADDR {}".format(self.startLabel).split('\n')
+            localBlock = self.codestr+"JMPPUSH {}".format(self.startLabel).split('\n')
         return localBlock
 
 class Builtin(FunctionSymbol):
