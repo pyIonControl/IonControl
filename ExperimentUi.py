@@ -546,7 +546,8 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dedicatedCountersWindow.show()
         self.dedicatedCountersWindow.setWindowState(QtCore.Qt.WindowActive)
         self.dedicatedCountersWindow.raise_()
-        self.dedicatedCountersWindow.onStart() #Start displaying data immediately
+        self.dedicatedCountersWindow.onEnableDataTaking(True) #Start displaying data immediately
+        self.dedicatedCountersWindow.onEnableDataPlotting(True)
 
     def showLogicAnalyzer(self):
         self.logicAnalyzerWindow.show()

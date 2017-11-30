@@ -68,6 +68,8 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.plotDict = dict()
         self.lastPlotTime = 0
         self.area = None
+        self.enableDataPlotting = False
+        self.enableDataTaking = False
 #        [
 #            AnalogInputCalibration.PowerDetectorCalibration(),
 #            AnalogInputCalibration.PowerDetectorCalibrationTwo(),
@@ -83,8 +85,8 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.setupPlots()
         self.actionSave.triggered.connect( self.onSave )
         self.actionClear.triggered.connect( self.onClear )
-        self.actionStart.triggered.connect( self.onStart )
-        self.actionStop.triggered.connect( self.onStop )
+        self.actionData_Reporting.triggered.connect(self.onEnableDataTaking)
+        self.actionPlot_Data.triggered.connect(self.onEnableDataPlotting)
         self.settingsUi = DedicatedCountersSettings.DedicatedCountersSettings(self.config,self.plotDict)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget( self.settingsUi )
@@ -232,17 +234,25 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             self.pulserHardware.dedicatedDataAvailable.connect( self.onData )
             self.dataSlotConnected = True
         
-    def onStart(self):
-        self.pulserHardware.counterMask = self.settings.counterMask
-        self.pulserHardware.adcMask = self.settings.adcMask
-        self.state = self.OpStates.running
-        self.onSettingsChanged()
+    def onEnableDataTaking(self, checked):
+        self.enableDataTaking = checked
+        if checked:
+            self.pulserHardware.counterMask = self.settings.counterMask
+            self.pulserHardware.adcMask = self.settings.adcMask
+            self.state = self.OpStates.running
+            self.onSettingsChanged()
+        else:
+            self.pulserHardware.counterMask = 0
+            self.pulserHardware.adcMask = 0
+            self.state = self.OpStates.idle
+            self.onSettingsChanged()
+        if self.actionData_Reporting.isChecked() != checked:
+            self.actionData_Reporting.setChecked(checked)
 
-    def onStop(self):
-        self.pulserHardware.counterMask = 0
-        self.pulserHardware.adcMask = 0
-        self.state = self.OpStates.idle
-        self.onSettingsChanged()
+    def onEnableDataPlotting(self, checked):
+        self.enableDataPlotting = checked
+        if self.actionPlot_Data.isChecked() != checked:
+            self.actionPlot_Data.setChecked(checked)
                 
     def onSave(self):
         logger = logging.getLogger(__name__)
@@ -272,13 +282,17 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
 
     def onData(self, data, queueSize):
         self.tick += 1
-        self.displayUi.values = data.data[0:4]
-        self.displayUi2.values = data.data[4:8]
-        self.displayUiADC.values = self.convertAnalog(data.analog())
-        data.analogValues = self.displayUiADC.values
-        # if data.data[16] is not None and data.data[16] in self.integrationTimeLookup:
-        #     self.dataIntegrationTime = self.integrationTimeLookup[ data.data[16] ]
-        # else:
+        if self.enableDataTaking:
+            self.displayUi.values = data.data[0:4]
+            self.displayUi2.values = data.data[4:8]
+            self.displayUiADC.values = self.convertAnalog(data.analog())
+            data.analogValues = self.displayUiADC.values
+            self.statusDisplay.setData(data)
+            if self.enableDataPlotting:
+                self.plotData(data, queueSize)
+        self.dataAvailable.emit(data)
+
+    def plotData(self, data, queueSize):
         self.dataIntegrationTime = self.settings.integrationTime
         data.integrationTime = self.dataIntegrationTime
         self.plotDisplayData = self.settingsUi.settings.plotDisplayData
@@ -305,11 +319,6 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         lag = time() - self.lastPlotTime
         if queueSize < 2 or (queueSize < 20 and lag > 1) or lag > 2:
             self.replot()
-        self.statusDisplay.setData(data)
-        self.dataAvailable.emit(data)
-        # logging.getLogger(__name__).info("Max bytes read {0}".format(data.maxBytesRead))
-        self.statusDisplay.setData(data)
-        self.dataAvailable.emit(data)
 
     def replot(self):
         for name, plotwin in self.curvesDict.items():

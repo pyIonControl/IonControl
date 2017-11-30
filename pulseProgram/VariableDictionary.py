@@ -18,7 +18,7 @@ if float(nx_version) < 2:
         return g.in_degree_iter()
 else:
     def nx_indegree_iter(g):
-        return g.indegree()
+        return g.in_degree()
 
 class CyclicDependencyException(Exception):
     pass
