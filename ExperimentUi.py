@@ -378,6 +378,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.actionSave_GUI.triggered.connect(self.onSaveGUI)
         self.actionSave_GUI_Yaml.triggered.connect(self.onSaveGUIYaml)
 
+        self.actionProfiling.triggered.connect(self.setProfiling)
         self.actionStart.triggered.connect(self.onStart)
         self.actionStop.triggered.connect(self.onStop)
         self.actionAbort.triggered.connect(self.onAbort)
@@ -603,6 +604,9 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             
     def onStart(self, checked=False, globalOverrides=list()):
         self.currentTab.onStart(globalOverrides)
+
+    def setProfiling(self, checked=False):
+        print("OnProfiling", checked, self.actionProfiling.isChecked())
 
     def onStash(self):
         if hasattr(self.currentTab, 'onStash'):
