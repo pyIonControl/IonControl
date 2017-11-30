@@ -348,4 +348,10 @@ def apply_next_scan_point( symboltable, arg=list(), kwarg=dict()):
               "  WRITEPIPE",
               "  STWI",
               "  JMPCMP apply_next_scan_point"  ]
-    
+
+
+def nop(symboltable, arg=list(), kwarg=dict()):
+    """
+    Add pp NOP command to delay execution by a clock cycle
+    """
+    return ["NOP"]

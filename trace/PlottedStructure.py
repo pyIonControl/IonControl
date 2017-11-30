@@ -1,3 +1,4 @@
+import hashlib
 from xml.etree import ElementTree
 from math import floor, ceil, sqrt
 import pickle
@@ -8,12 +9,19 @@ from pygsti import logl_terms, logl_max_terms
 from pyqtgraph.parametertree.Parameter import Parameter
 
 from modules.LRUCache import LRUCache
+from modules.SQLiteLRUCache import SQLiteLRUCache
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 
 
 class QubitPlotSettings:
     def __init__(self):
         self.gateSet = None
+
+
+def digest(bytes_obj):
+    m = hashlib.sha256()
+    m.update(bytes_obj)
+    return m.hexdigest()
 
 
 class PlottedStructureProperties:
@@ -76,7 +84,7 @@ class PlottedStructureProperties:
 
 
 class PlottedStructure:
-    _evaltree_cache = LRUCache(capacity=64)
+    _evaltree_cache = SQLiteLRUCache(capacity=64, filename="evaltree.db")
     serializeFields = ('qubitDataKey', 'name', 'windowName', 'properties')
     xmlPropertFields = ('qubitDataKey', 'name', 'windowName')
     def __init__(self, traceCollection, qubitDataKey, plot=None, windowName=None, properties=None, tracePlotting=None, name=None):
@@ -174,12 +182,14 @@ class PlottedStructure:
         self._spam_lbl_rows = {sl: i for (i, sl) in enumerate(self._spamLabels)}
         self._probs = numpy.empty((len(self._spamLabels), len(self.qubitData.gatestring_list)), 'd')
         try:
-            evaltree_dependency_hash = hash(pickle.dumps((self._gateSet, self.qubitData.gatestring_list)))
+            m = hashlib.sha1()
+            m.update(str(self._gateSet).encode())
+            m.update((",".join([str(s) for s in self.qubitData.gatestring_list])).encode())
+            evaltree_dependency_hash = m.hexdigest()
             self._evaltree = PlottedStructure._evaltree_cache[evaltree_dependency_hash]
         except KeyError:
             self._evaltree = self._gateSet.bulk_evaltree(self.qubitData.gatestring_list)
             PlottedStructure._evaltree_cache[evaltree_dependency_hash] = self._evaltree
-        print(PlottedStructure._evaltree_cache.hits, PlottedStructure._evaltree_cache.misses)
         self._gateSet.bulk_fill_probs(self._probs, self._spam_lbl_rows, self._evaltree, (-1e6, 1e6))
 
     def _assemble_data(self):

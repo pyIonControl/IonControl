@@ -5,6 +5,8 @@
 # *****************************************************************
 from copy import deepcopy
 
+import logging
+
 
 class OverrideRecord:
     def __init__(self, state, shutters=None, globals=None, voltages=None, shuttle=True):
@@ -21,17 +23,20 @@ class OverrideRecord:
         will change. However, if the previous state had changed something that is also changed by this state, the current
         value is not the correct value to revert to at the end. Therefore, o is then updated with the contents of 'revert',
         which is another OverrideRecord which has the reversions that the previous state required."""
-        o = OverrideRecord('-' + self.state,
-                       globals=dict((name, globalDict[name]) for name in self.globals),
-                       shutters=dict((name, bool(shutter & (1 << shutterDict.channel(name)))) for name in self.shutters),
-                       voltages=voltageControl.currentShuttlingPosition() if self.voltages else None,
-                       shuttle=self.shuttle)
-        if revert is not None:
-            o.globals.update((key, value) for key, value in revert.globals.items() if key in o.globals)
-            o.shutters.update((key, value) for key, value in revert.shutters.items() if key in o.shutters)
-            if revert.voltages is not None:
-                o.voltages = revert.voltages
-                o.shuttle = revert.shuttle
+        try:
+            o = OverrideRecord('-' + self.state,
+                           globals=dict((name, globalDict[name]) for name in self.globals),
+                           shutters=dict((name, bool(shutter & (1 << shutterDict.channel(name)))) for name in self.shutters),
+                           voltages=voltageControl.currentShuttlingPosition() if self.voltages else None,
+                           shuttle=self.shuttle)
+            if revert is not None:
+                o.globals.update((key, value) for key, value in revert.globals.items() if key in o.globals)
+                o.shutters.update((key, value) for key, value in revert.shutters.items() if key in o.shutters)
+                if revert.voltages is not None:
+                    o.voltages = revert.voltages
+                    o.shuttle = revert.shuttle
+        except Exception as e:
+            logging.getLogger(__name__).exception("Cannot apply setting in autoload {}".format(e))
         return o
 
     def update(self, other):
@@ -53,9 +58,12 @@ class OverrideRecord:
         return updatedOverrideRecord
 
     def apply(self, globalDict, shutterDict, pulser, voltageControl):
-        for name, value in self.shutters.items():
-            pulser.setShutterBit(shutterDict.channel(name), value)
-        for name, value in self.globals.items():
-            globalDict[name] = value
-        if self.voltages is not None:
-            voltageControl.shuttleTo(self.voltages, onestep=not self.shuttle)
+        try:
+            for name, value in self.shutters.items():
+                pulser.setShutterBit(shutterDict.channel(name), value)
+            for name, value in self.globals.items():
+                globalDict[name] = value
+            if self.voltages is not None:
+                     voltageControl.shuttleTo(self.voltages, onestep=not self.shuttle)
+        except Exception as e:
+            logging.getLogger(__name__).exception("Cannot apply setting in autoload {}".format(e))
