@@ -7,6 +7,7 @@ import cProfile
 import pstats
 import webbrowser
 
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
 import PyQt5.uic
 
@@ -114,6 +115,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dbConnection = project.dbConnection
         self.objectListToSaveContext = list()
         self.voltageControlWindow = None
+        self.profilingEnabled = False
 
         localpath = getProject().configDir+'/UserFunctions/'
         userFuncLoader(localpath)
@@ -610,12 +612,18 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         if checked:
             self.profile = cProfile.Profile()
             self.profile.enable()
+            self.profilingEnabled = True
+            self.profilingStartTime = time.time()
         else:
             self.profile.disable()
+            self.profilingEnabled = False
             sortby = 'tottime'
             ps = pstats.Stats(self.profile).sort_stats(sortby)
             ps.print_stats()
-            ps.dump_stats("profile.pkl")
+            timestr = time.strftime("%Y%m%d_%H%M", time.localtime())
+            duration = int(time.time() - self.profilingStartTime)
+            filename = "profile_{}_{}.pkl".format(timestr, duration)
+            ps.dump_stats(filename)
 
     def onStash(self):
         if hasattr(self.currentTab, 'onStash'):

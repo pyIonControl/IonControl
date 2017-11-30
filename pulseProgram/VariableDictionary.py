@@ -7,11 +7,18 @@
 import logging
 
 from networkx import DiGraph, simple_cycles, dfs_postorder_nodes, dfs_preorder_nodes
+from networkx import __version__ as nx_version
 
 from modules.Expression import Expression
 from modules.SequenceDict import SequenceDict
 import copy
 
+if float(nx_version) < 2:
+    def nx_indegree_iter(g):
+        return g.in_degree_iter()
+else:
+    def nx_indegree_iter(g):
+        return g.indegree()
 
 class CyclicDependencyException(Exception):
     pass
@@ -225,13 +232,14 @@ class VariableDictionary(SequenceDict):
             
     def recalculateAll(self):
         g = self.dependencyGraph.reverse()
-        for node, indegree in g.in_degree():
+        for node, indegree in nx_indegree_iter(g):  # work around the incompatibility between networkx 1 and 2
             if indegree==0:
                 for calcnode in dfs_postorder_nodes(g, node):
                     self.recalculateNode(calcnode)
                     
     def bareDictionaryCopy(self):
         return SequenceDict( self )
+
 
 if __name__=="__main__":
     class variable:
