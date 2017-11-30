@@ -3,7 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+import cProfile
+import pstats
 import webbrowser
 
 from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
@@ -606,7 +607,15 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.currentTab.onStart(globalOverrides)
 
     def setProfiling(self, checked=False):
-        print("OnProfiling", checked, self.actionProfiling.isChecked())
+        if checked:
+            self.profile = cProfile.Profile()
+            self.profile.enable()
+        else:
+            self.profile.disable()
+            sortby = 'tottime'
+            ps = pstats.Stats(self.profile).sort_stats(sortby)
+            ps.print_stats()
+            ps.dump_stats("profile.pkl")
 
     def onStash(self):
         if hasattr(self.currentTab, 'onStash'):
