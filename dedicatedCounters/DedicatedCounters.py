@@ -281,20 +281,20 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                 subdict[n].setData(self.xData[n], self.yData[n])
 
     def onData(self, data, queueSize):
-        self.tick += 1
         if self.enableDataTaking:
-            self.displayUi.values = data.data[0:4]
-            self.displayUi2.values = data.data[4:8]
+            self.tick += 1
+            self.dataIntegrationTime = self.settings.integrationTime
+            data.integrationTime = self.dataIntegrationTime
             self.displayUiADC.values = self.convertAnalog(data.analog())
             data.analogValues = self.displayUiADC.values
+            self.displayUi.values = data.data[0:4]
+            self.displayUi2.values = data.data[4:8]
             self.statusDisplay.setData(data)
             if self.enableDataPlotting:
                 self.plotData(data, queueSize)
-        self.dataAvailable.emit(data)
+            self.dataAvailable.emit(data)
 
     def plotData(self, data, queueSize):
-        self.dataIntegrationTime = self.settings.integrationTime
-        data.integrationTime = self.dataIntegrationTime
         self.plotDisplayData = self.settingsUi.settings.plotDisplayData
         msIntegrationTime = self.dataIntegrationTime.m_as('ms')
         for index, value in enumerate(data.data[:16]):
