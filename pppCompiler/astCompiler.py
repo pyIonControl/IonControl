@@ -8,8 +8,8 @@ import copy
 import re
 import difflib
 from pathlib import Path
-from collections import deque, defaultdict, Counter, OrderedDict
-from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol, AssemblyFunctionSymbol
+from collections import deque, defaultdict, Counter, OrderedDict, UserList
+from .astSymbol import SymbolTable, FunctionSymbol, ConstSymbol, VarSymbol, AssemblyFunctionSymbol, Builtin
 from functools import partial
 from .ppVirtualMachine import ppVirtualMachine, compareDicts, evalRawCode
 from .pppCompiler import pppCompiler as oldpppCompiler
@@ -28,7 +28,6 @@ fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'Async
 #List of visitor nodes supported in ppp
 allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Break','Call', 'Compare', 'BoolOp',
                         'Eq', 'Expr', 'Expression', 'FunctionDef', 'Gt', 'GtE', 'If', 'IfExp', 'Load', #'Lambda',
-                        #'Index', 'Interactive', 'Invert', 'Is', 'IsNot', 'Lambda', 'List', 'ListComp',
                         'LShift', 'Lt', 'LtE', 'Mod', 'Module', 'Mult', 'Name', 'NameConstant', 'Not', 'NotEq',
                         'Num', 'Or', 'Pass', 'RShift', 'Return',
                         'Store', 'Str', 'Sub', 'Suite', 'UAdd', 'USub', 'UnaryOp', 'While' }
@@ -50,6 +49,12 @@ def list_rtrim( l, trimvalue=None ):
     while len(l)>0 and l[-1]==trimvalue:
         l.pop()
     return l
+
+class OrderedSet(UserList):
+    """Not really a set, more of a list that only contains unique elements"""
+    def add(self, other):
+        if other not in self.data:
+            self.data.append(other)
 
 class CompileException(Exception):
     def __init__(self, message, obj=None):
@@ -81,9 +86,9 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.maincode = []
         self.funcDeps = defaultdict(set)
         self.localNameSpace = deque()
-        self.funcNames = set()
+        self.funcNames = OrderedSet()
         self.chameleonLabelsDeque = deque()
-        self.lvctr = 1          #inline declaration counter
+        self.lvctr = 1        #inline declaration counter
         self.ifctr = 10       #number of if statements
         self.elsectr = 10     #number of else statements
         self.whilectr = 10    #number of while statements
@@ -98,12 +103,29 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.rightlist = []
         self.oplist = []
         self.boolList = []
+        self.boolLineNo = []
         self.returnSet = set() #list of functions with return values
         self.requiredReturnCalls = set()
+        self.enableOptimizations = True
         self.passToOldPPPCompiler = False
         self.gt02bool = False
-        self.inlineAll = False
+        self.inlineAll = True
+        self.EnableNumericLabels = False
         FunctionSymbol.passByReferenceCheckCompleted = not optimizePassByReference
+        self.ppRegexStr = r"# PPP LINE: +\d+"
+        self.pplinnoColW = 105
+        self.codeFmtStr = "{0:80} # PPP LINE: {1:>4}"
+        self.numberInitLines = 0
+
+    def _ppFormatLine(self, code, lineno):
+        return self.codeFmtStr.format(code, lineno+self.numberInitLines)
+
+    def ppFormatLine(self, code, lineno):
+        if isinstance(code, list):
+            return list(map(lambda c: self.ppFormatLine(c, lineno), code))
+        elif '\n' in code:
+            return '\n'.join(self.ppFormatLine(code.split('\n'), lineno))
+        return self._ppFormatLine(code, lineno)
 
     def safe_generic_visit(self, node):
         """Modified generic_visit call, currently just returning generic_visit directly"""
@@ -158,9 +180,9 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 self.symbols[target] = VarSymbol(name=target, value=0)
             if any(map(lambda t: isinstance(node.value, t), [ast.Name, ast.Num, ast.NameConstant])):
                 right,_ = self.localVarHandler(node.value)
-                self.codestr += ["LDWR {0}".format(right)]
+                self.codestr += [self.ppFormatLine("LDWR {0}".format(right), node.lineno)]
         self.safe_generic_visit(node)
-        self.codestr += ["STWR {0}".format(target)]
+        self.codestr += [self.ppFormatLine("STWR {0}".format(target), node.lineno)]
         if not self.localNameSpace:
             self.maincode += self.codestr
             self.codestr = []
@@ -172,27 +194,27 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             if nodetid not in self.symbols.keys():
                 nodetid = node.target.id
             if isinstance(node.op, ast.Add):
-                self.codestr += "INC {0}\nSTWR {0}".format(nodetid).split('\n')
+                self.codestr += self.ppFormatLine("INC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.Sub):
-                self.codestr += "DEC {0}\nSTWR {0}".format(nodetid).split('\n')
+                self.codestr += self.ppFormatLine("DEC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
         else:
             nodetid,_ = self.localVarHandler(node.target)
             nodevid,_ = self.localVarHandler(node.value)
-            self.codestr += ["LDWR {}".format(nodetid)]
+            self.codestr += [self.ppFormatLine("LDWR {}".format(nodetid), node.lineno)]
             if isinstance(node.op, ast.Add):
-                self.codestr += "ADDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("ADDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.Sub):
-                self.codestr += "SUBW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("SUBW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.Mult):
-                self.codestr += "MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.RShift):
-                self.codestr += "SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.LShift):
-                self.codestr += "SHL {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("SHL {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.BitAnd):
-                self.codestr += "ANDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("ANDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.BitOr):
-                self.codestr += "ORW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n')
+                self.codestr += self.ppFormatLine("ORW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
         self.safe_generic_visit(node)
         if not self.localNameSpace:
             self.maincode += self.codestr
@@ -202,28 +224,27 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         """Node visitor for binary (inline) operations like +,-,*,&,|,<<,>>"""
         nodetid,_ = self.localVarHandler(node.left)
         nodevid,_ = self.localVarHandler(node.right)
-        self.codestr += ["LDWR {}".format(nodetid)]
+        self.codestr += [self.ppFormatLine("LDWR {}".format(nodetid), node.lineno)]
         if isinstance(node.op, ast.Add):
-            self.codestr += ["ADDW {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("ADDW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Sub):
-            self.codestr += ["SUBW {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("SUBW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Mult):
-            self.codestr += ["MULTW {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.RShift):
-            self.codestr += ["SHR {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.LShift):
-            self.codestr += ["SHL {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("SHL {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.BitAnd):
-            self.codestr += ["ANDW {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("ANDW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.BitOr):
-            self.codestr += ["ORW {0}".format(nodevid)]
+            self.codestr += [self.ppFormatLine("ORW {0}".format(nodevid), node.lineno)]
         self.safe_generic_visit(node)
 
     def visit_Compare(self, node):
         """handles boolean comparisons (>,<,!=,...) and iterates through all comparators for cases
            such as 10 < y < 20"""
         leftiter = node.left
-        #multCMPs = len(node.ops)>1
         cmpcnt = 0
         for rightiter, opiter in zip(node.comparators, node.ops):
             cmpcnt += 1
@@ -241,11 +262,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             else:
                 raise CompileException("Objects of type {} not supported!".format(opiter.__class__), node)
             leftiter = rightiter
-            #self.codestr += ["LDWR {0}".format(left)]
-            #self.codestr += "{0} {1}".format(op,right).split('\n')
-            #if cmpcnt>1:
-                #self.codestr += ["CMPAND"]
-            self.compTestPush(False, left, right, op)
+            self.compTestPush(False, left, right, op, node.lineno)
 
     def checkIfBuiltinWithReturn(self,node, boolVal):
         """Special function that handles the dictionary output from pipe_empty and read_ram_valid builtins"""
@@ -278,11 +295,11 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 else:
                     left,_ = self.localVarHandler(n.operand)
                     right, op = None, 'N'
-                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
+                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op, node.lineno)
             elif isinstance(n, ast.Name) or isinstance(n, ast.NameConstant):
                 left,_ = self.localVarHandler(n)
                 right, op = None, ''
-                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
+                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op, node.lineno)
             elif isinstance(n, ast.Call):
                 op, retstr = self.checkIfBuiltinWithReturn(n, False)
                 if op:
@@ -290,28 +307,20 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 elif retstr:
                     left = retstr
                     right, op = None, ''
-
-                    #self.codestr += ["LDWR {0}".format(left)]
-                    #self.codestr += ["CMPNOTEQUAL NULL"]
-                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op)
+                self.compTestPush(True if isinstance(node.op, ast.Or) else False, left, right, op, node.lineno)
             else:
                 currentCompTestPushLen = len(self.boolList)
                 self.visit(n)
                 if len(self.boolList) > currentCompTestPushLen:
                     self.boolList[-1] = True if isinstance(node.op, ast.Or) else False
-        #if isinstance(node.op, ast.Or):
-            #self.codestr += ["CMPOR"]
-        #elif isinstance(node.op, ast.And):
-            #self.codestr += ["CMPAND"]
-        #else:
-            #raise CompileException("Boolean operation '{0}' not recognized".format(node.op.__class__))
 
-    def compTestPush(self, boolVal, leftVal, rightVal, opVal):
+    def compTestPush(self, boolVal, leftVal, rightVal, opVal, lineno):
         """helper function to deal with multiple boolean statements in if and while tests"""
         self.leftlist.append(leftVal)
         self.rightlist.append(rightVal)
         self.oplist.append(opVal)
         self.boolList.append(boolVal)
+        self.boolLineNo.append(lineno)
 
     def compTestClear(self):
         """helper function to clear multiple boolean statements once they've been parsed"""
@@ -319,6 +328,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.rightlist.clear()
         self.leftlist.clear()
         self.oplist.clear()
+        self.boolLineNo.clear()
 
     def visit_IfTests(self, node):
         """intermediate visitor for handling boolean tests in if and while statements"""
@@ -326,26 +336,26 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             op, retstr = self.checkIfBuiltinWithReturn(node.test.operand, True)
             if op:
                 left, right = None, None
-                self.compTestPush(False, left, right, op)
+                self.compTestPush(False, left, right, op, node.lineno)
             elif retstr:
                 left = retstr
                 right, op = None, 'N'
-                self.compTestPush(False, left, right, op)
+                self.compTestPush(False, left, right, op, node.lineno)
             else:
                 left,_ = self.localVarHandler(node.test.operand)
-                self.compTestPush(False, left, None, 'N')
+                self.compTestPush(False, left, None, 'N', node.lineno)
         elif isinstance(node.test, ast.Name) or isinstance(node.test, ast.NameConstant):
             left,_ = self.localVarHandler(node.test)
-            self.compTestPush(False, left, None, '')
+            self.compTestPush(False, left, None, '', node.lineno)
         elif isinstance(node.test, ast.Call):
             op, retstr = self.checkIfBuiltinWithReturn(node.test, False)
             if op:
                 left, right = None, None
-                self.compTestPush(False, left, right, op)
+                self.compTestPush(False, left, right, op, node.lineno)
             elif retstr:
                 left = retstr
                 right, op = None, ''
-                self.compTestPush(False, left, right, op)
+                self.compTestPush(False, left, right, op, node.lineno)
         else:
             self.visit(node.test)
 
@@ -357,73 +367,73 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         orcnt = 0
         orLabelNeeded = False
         orlabel = "or_label_{0}".format(self.orctr)
-        for ind,orStatement,right,left,op in zip(list(reversed(range(len(self.leftlist)))), self.boolList, self.rightlist, self.leftlist, self.oplist):
+        for ind,orStatement,right,left,op,lineno in zip(list(reversed(range(len(self.leftlist)))), self.boolList, self.rightlist, self.leftlist, self.oplist, self.boolLineNo):
             if orStatement:
                 orcnt += 1
                 if left is None:
-                    self.codestr += "{0} {1}".format(reverseJMPLUT[op],label1).split('\n')
+                    self.codestr += self.ppFormatLine("{0} {1}".format(reverseJMPLUT[op],label1).split('\n'), lineno)
                     continue
                 elif isinstance(left, list):
                     self.requiredReturnCalls.add(left[0])
-                    self.codestr += left[1]
+                    self.codestr += self.ppFormatLine(left[1], lineno)
                 else:
-                    self.codestr += ["LDWR {0}".format(left)]
+                    self.codestr += self.ppFormatLine(["LDWR {0}".format(left)], lineno)
                 if ind:
                     if right is None:
-                        self.codestr += ["JMP{0}Z {1}".format('' if op else 'N',label1)]
+                        self.codestr += self.ppFormatLine(["JMP{0}Z {1}".format('' if op else 'N',label1)], lineno)
                     else:
-                        self.codestr += "{0} {1}\nJMPCMP {2}".format(op,right,label1).split('\n')
+                        self.codestr += self.ppFormatLine("{0} {1}\nJMPCMP {2}".format(op,right,label1).split('\n'), lineno)
                 else:
                     if left is None:
-                        self.codestr += ["{0} {1}".format(op,label2)]
+                        self.codestr += self.ppFormatLine(["{0} {1}".format(op,label2)], lineno)
                         continue
                     elif isinstance(left, list):
                         self.requiredReturnCalls.add(left[0])
-                        self.codestr += left[1]
+                        self.codestr += self.ppFormatLine(left[1], lineno)
                     else:
-                        self.codestr += ["LDWR {0}".format(left)]
+                        self.codestr += self.ppFormatLine(["LDWR {0}".format(left)], lineno)
                     if right is None:
-                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
+                        self.codestr += self.ppFormatLine(["JMP{0}Z {1}".format(op,label2)], lineno)
                     else:
-                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                        self.codestr += self.ppFormatLine("{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n'), lineno)
                 if orLabelNeeded:
-                    self.codestr += [orlabel+": NOP"]
+                    self.codestr += self.ppFormatLine([orlabel+": NOP"], lineno)
                     self.orctr += 1
                     orlabel = "or_label_{0}".format(self.orctr)
                     orLabelNeeded = False
             else:
                 if left is None:
-                    self.codestr += "{0} {1}".format(op,label2).split('\n')
+                    self.codestr += self.ppFormatLine("{0} {1}".format(op,label2).split('\n'), lineno)
                     continue
                 elif isinstance(left, list):
                     self.requiredReturnCalls.add(left[0])
-                    self.codestr += left[1]
+                    self.codestr += self.ppFormatLine(left[1], lineno)
                 else:
-                    self.codestr += ["LDWR {0}".format(left)]
+                    self.codestr += self.ppFormatLine(["LDWR {0}".format(left)], lineno)
                 if orcnt == totalOrs:
                     if right is None:
-                        self.codestr += ["JMP{0}Z {1}".format(op,label2)]
+                        self.codestr += self.ppFormatLine(["JMP{0}Z {1}".format(op,label2)], lineno)
                     else:
-                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n')
+                        self.codestr += self.ppFormatLine("{0} {1}\nJMPNCMP {2}".format(op,right,label2).split('\n'), lineno)
                 else:
                     orLabelNeeded = True
                     if right is None:
-                        self.codestr += ["JMP{0}Z {1}".format(op,orlabel)]
+                        self.codestr += self.ppFormatLine(["JMP{0}Z {1}".format(op,orlabel)], lineno)
                     else:
-                        self.codestr += "{0} {1}\nJMPNCMP {2}".format(op,right,orlabel).split('\n')
+                        self.codestr += self.ppFormatLine("{0} {1}\nJMPNCMP {2}".format(op,right,orlabel).split('\n'), lineno)
         self.compTestClear()
 
     def visit_If(self, node):
         """Node visitor for if statements, handles else and elif statements via subnodes"""
         currentIfCtr = copy.copy(self.ifctr)
-        appendStr = ["end_if_label_{0}: NOP".format(currentIfCtr)]
+        appendStr = [self.ppFormatLine("end_if_label_{0}: NOP".format(currentIfCtr), node.lineno)]
         self.ifctr += 1
         self.compTestClear()
         self.visit_IfTests(node)
-        prependStr = ["begin_if_label_{0}: NOP".format(currentIfCtr)]
+        prependStr = [self.ppFormatLine("begin_if_label_{0}: NOP".format(currentIfCtr), node.lineno)]
         if node.orelse:
             currentElseCtr = copy.copy(self.elsectr)
-            appendElse = "JMP end_if_label_{0}\nelse_label_{1}: NOP".format(currentIfCtr,currentElseCtr).split('\n')
+            appendElse = self.ppFormatLine("JMP end_if_label_{0}\nelse_label_{1}: NOP".format(currentIfCtr,currentElseCtr).split('\n'), node.lineno)
             self.elsectr += 1
             self.testStatementHandler('begin_if_label_{0}'.format(currentIfCtr), 'else_label_{0}'.format(currentElseCtr))
             self.codestr += prependStr
@@ -462,15 +472,15 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def visit_While(self, node):
         """Node visitor for while statements"""
         currentWhileCtr = copy.copy(self.whilectr)
-        self.codestr += ["begin_while_label_{}: NOP".format(currentWhileCtr)]
+        self.codestr += [self.ppFormatLine("begin_while_label_{}: NOP".format(currentWhileCtr), node.lineno)]
         self.compTestClear()
         self.visit_IfTests(node)
         self.testStatementHandler('begin_body_while_label_{0}'.format(currentWhileCtr), 'end_while_label_{0}'.format(currentWhileCtr))
-        self.codestr += ["begin_body_while_label_{0}: NOP".format(currentWhileCtr)]
+        self.codestr += [self.ppFormatLine("begin_body_while_label_{0}: NOP".format(currentWhileCtr), node.lineno)]
         self.whilectr += 1
         self.loopLabelStack.append(["JMP end_while_label_{0}".format(currentWhileCtr)])
         self.safe_generic_visit(node)
-        self.codestr += "JMP begin_while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr).split('\n')
+        self.codestr += self.ppFormatLine("JMP begin_while_label_{0}\nend_while_label_{0}: NOP".format(currentWhileCtr).split('\n'), node.lineno)
         self.loopLabelStack.pop()
         if not self.localNameSpace:
             self.maincode += self.codestr
@@ -479,19 +489,18 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
     def visit_Break(self, node):
         """visitor for break statements"""
         if self.loopLabelStack:
-            self.codestr += self.loopLabelStack[-1]
+            self.codestr += self.ppFormatLine(self.loopLabelStack[-1], node.lineno)
         self.safe_generic_visit(node)
 
     def visit_FunctionDef(self, node):
         """visitor for function definitions"""
         inline = False
+        assy = False
         if node.decorator_list:
             if node.decorator_list[0].id == 'inline':
                 inline = True
             elif node.decorator_list[0].id == 'assembly':
-                code = node.body[0].value.s
-                self.symbols[node.name] = AssemblyFunctionSymbol(node.name, code)
-                return
+                assy = True
         if self.inlineAll:
             inline = True
         if node.name in self.symbols.keys():
@@ -519,13 +528,17 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             raise CompileException('Recursion not supported!', node)
         self.safe_generic_visit(node)         # walk inner block
         self.localNameSpace.pop()             # pop function context
-        self.codestr += ["end_function_label_{}: NOP".format(self.fnctr)]
+        self.codestr += [self.ppFormatLine("end_function_label_{}: NOP".format(self.fnctr), node.lineno)]
         self.fnctr += 1
-        self.symbols[node.name] = FunctionSymbol(node.name, copy.copy(self.codestr),
-                                                 nameSpace=node.name, argn=arglist,
-                                                 kwargn=kwarglist, symbols=self.symbols,
-                                                 maincode=self, returnval=node.name in self.returnSet,
-                                                 inline=inline)
+        if assy:
+            code = node.body[0].value.s
+            self.symbols[node.name] = AssemblyFunctionSymbol(node.name, code, nameSpace=node.name, argn=arglist, kwargn=kwarglist, startline=node.lineno)
+        else:
+            self.symbols[node.name] = FunctionSymbol(node.name, copy.copy(self.codestr),
+                                                     nameSpace=node.name, argn=arglist,
+                                                     kwargn=kwarglist, symbols=self.symbols,
+                                                     maincode=self, returnval=node.name in self.returnSet,
+                                                     inline=inline, startline=node.lineno)
         self.codestr = []
 
     def visit_Call(self, node):
@@ -550,7 +563,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                     #if isinstance(retdict, dict): #special case for dealing with dicts returned by pipe_empty/read_ram_valid
                         #self.codestr[-1] = retdict[self.builtinBool]+self.codestr[-1]
                 else:
-                    self.codestr += procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
+                    if isinstance(self.symbols[node.func.id], Builtin):
+                        self.codestr += self.ppFormatLine(procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict), node.lineno)
+                    else:
+                        self.codestr += procedure.codegen(self.symbols, arg=arglist, kwarg=kwdict)
                 if True in self.codestr:
                     raise CompileException('Bool in codestr', node)
             else: # put in a placeholder that can be used to generate the assembly after the function is defined
@@ -573,15 +589,15 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         """Node visitor for return statements"""
         if isinstance(node.value, ast.Call):
             self.visit(node.value)
-            self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
+            self.codestr += [self.ppFormatLine("JMP end_function_label_{0}".format(self.fnctr), node.lineno)]
         else:
             if isinstance(node.value, ast.Name):
                 res, _ = self.localVarHandler(node.value)
-                self.codestr += ["LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr)]
+                self.codestr += [self.ppFormatLine("LDWR {0}\nJMP end_function_label_{1}".format(res,self.fnctr), node.lineno)]
                 self.safe_generic_visit(node)
             else:
                 self.visit(node.value)
-                self.codestr += ["JMP end_function_label_{0}".format(self.fnctr)]
+                self.codestr += [self.ppFormatLine("JMP end_function_label_{0}".format(self.fnctr), node.lineno)]
         if self.localNameSpace:
             self.returnSet.add(self.localNameSpace[-1])
         else:
@@ -589,9 +605,12 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def compileString(self, code):
         """Compile the ppp code"""
-        splitcode = code.split('\n')
+        splitcode = code.splitlines()
+        initlines = len(splitcode)*1
         for l,line in enumerate(splitcode):
             splitcode[l] = self.preprocessCode(splitcode[l])
+        finlines = len(splitcode)
+        self.numberInitLines = initlines-finlines
         preprocessed_code = '\n'.join(splitcode)
         if self.passToOldPPPCompiler:
             oldcompiler = oldpppCompiler()
@@ -600,12 +619,13 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         self.visit(tree)
         self.optimize()
         self.preamble = '\n'.join(self.createHeader())+'\n'
+        self.reverseLineLookup = self.generateReverseLineLookup(self.preamble+self.maincode)
         return self.preamble+self.maincode
 
     def preprocessCode(self, code):
         """Code preprocessor to collect all variable declarations"""
         preprocessed_code = re.sub(r"#COMPILER_FLAG *(\S+) *= *(\S+)", self.checkCompilerFlags, code)
-        preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1)+'\n', preprocessed_code)
+        preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1), preprocessed_code)
         preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
         preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
         preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
@@ -632,16 +652,20 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         """Optimizes final pp code by condensing unnecessary calls"""
         self.recursionMapper()              # Look for any mutually recursive calls
         self.assembleMainCode()             # Finalize assembly by filling in placeholder declarations
-        self.optimizeRedundantSTWR_LDWRs()  # Get rid of STWR x\nLDWR x (the load is unnecessary)
-        self.optimizeDoubleSTWRs()          # Get rid of STWR x\nSTWR x that shows up from function returns
-        self.optimizeDoubleLDWRs()          # Get rid of LDWR x\nLDWR x that shows up from function returns
-        self.optimizeRedundantSTWR_LDWRs_STWRs()
-        self.optimizeChameleonLabels()      # Collapse consecutive labels into a single label
-        self.optimizeOneLineJMPs()
-        self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
-        self.optimizeLabelNOPs()            # Remove unnecessary NOPs after labels -> put label in front of next line
+        if self.enableOptimizations:
+            self.optimizeRedundantSTWR_LDWRs()  # Get rid of STWR x\nLDWR x (the load is unnecessary)
+            self.optimizeDoubleSTWRs()          # Get rid of STWR x\nSTWR x that shows up from function returns
+            self.optimizeDoubleLDWRs()          # Get rid of LDWR x\nLDWR x that shows up from function returns
+            self.optimizeRedundantSTWR_LDWRs_STWRs()
+            self.optimizeChameleonLabels()      # Collapse consecutive labels into a single label
+            self.optimizeOneLineJMPs()
+            self.optimizeLabelNumbers()         # Re-number all labels in a sensible way
+            self.optimizeLabelNOPs()            # Remove unnecessary NOPs after labels -> put label in front of next line
         if self.gt02bool:
             self.optimizeBoolForGt0()
+        self.cleanupPPLineNumbers()
+        if self.EnableNumericLabels:
+            self.replaceWithNumericLabels()
 
     def assembleMainCode(self):
         """Goes through main code and looks for functions that include calls to other functions
@@ -728,10 +752,10 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def optimizeChameleonLabels(self):
         """reduce redundant labels of mixed type"""
-        m = re.search(r"^(\S+_label_\d+):\sNOP\n(\S+_label_\d+):\sNOP", self.maincode, flags=re.MULTILINE)
+        m = re.search(r"^(\S+_label_\d+):\sNOP *.*\n(\S+_label_\d+):\sNOP *.*", self.maincode, flags=re.MULTILINE)
         while m:
-            self.maincode = re.sub(r"^(\S+_label_\d+):\sNOP\n(\S+_label_\d+):\sNOP", self.reduceChameleonEndLabels, self.maincode, flags=re.MULTILINE)
-            m = re.search(r"^(\S+_label_\d+):\sNOP\n(\S+_label_\d+):\sNOP", self.maincode, flags=re.MULTILINE)
+            self.maincode = re.sub(r"^(\S+_label_\d+):\sNOP *({0})*\n(\S+_label_\d+):\sNOP *({0})*".format(self.ppRegexStr), self.reduceChameleonEndLabels, self.maincode, flags=re.MULTILINE)
+            m = re.search(r"^(\S+_label_\d+):\sNOP *.*\n(\S+_label_\d+):\sNOP *.*", self.maincode, flags=re.MULTILINE)
         while self.chameleonLabelsDeque:
             replList = self.chameleonLabelsDeque.popleft()
             self.maincode = re.sub(replList[1], partial(self.reduceChameleonLabels,replList[0]), self.maincode, flags=re.MULTILINE)
@@ -739,7 +763,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def optimizeOneLineJMPs(self):
         """Remove JMP statements for return statements that occur at the end of a function"""
-        self.maincode = re.sub(r"JMP\s(?P<labelName>\S+_label_\d+)\s*((?P=labelName):.*)", self.reduceOneLineJMPs, self.maincode)
+        self.maincode = re.sub(r"JMP\s(?P<labelName>\S+_label_\d+)\s*({0})*\s*((?P=labelName):)".format(self.ppRegexStr), self.reduceOneLineJMPs, self.maincode)
         return
 
     def optimizeRedundantSTWR_LDWRs(self):
@@ -751,7 +775,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             ...
 
             """
-        self.maincode = re.sub("STWR\s(\S+)\nLDWR\s(\S+)\n", self.reduceRedundantStLd, self.maincode)
+        self.maincode = re.sub("STWR\s(\S+) *({0})*\nLDWR\s(\S+) *({0})*\n".format(self.ppRegexStr), self.reduceRedundantStLd, self.maincode)
         return
 
     def optimizeRedundantSTWR_LDWRs_STWRs(self):
@@ -763,7 +787,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             ...
 
             """
-        self.maincode = re.sub("( *LDWR\s(?P<varname>\S+)\n *STWR\s\S+)\n *LDWR\s(?P=varname)\n", self.reduceRedundantStLdSt, self.maincode)
+        self.maincode = re.sub("( *LDWR\s(?P<varname>\S+) *({0})*\n *STWR\s\S+ *({0})*)\n *LDWR\s(?P=varname) *({0})*\n".format(self.ppRegexStr), self.reduceRedundantStLdSt, self.maincode)
         return
 
     def optimizeDoubleSTWRs(self):
@@ -780,7 +804,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                    return a
                
            """
-        self.maincode = re.sub(r"STWR (?P<varname>\S+)\nSTWR (?P=varname)\n", self.reduceDoubleSTWRs, self.maincode)
+        self.maincode = re.sub(r"STWR (?P<varname>\S+)\s*({0})*\nSTWR (?P=varname)\s*({0})*\n".format(self.ppRegexStr), self.reduceDoubleSTWRs, self.maincode)
         return
 
     def optimizeDoubleLDWRs(self):
@@ -790,7 +814,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                LDWR a
            
            """
-        self.maincode = re.sub(r"LDWR (?P<varname>\S+)\nLDWR (?P=varname)\n", self.reduceDoubleLDWRs, self.maincode)
+        self.maincode = re.sub(r"LDWR (?P<varname>\S+)\s*({0})*\nLDWR (?P=varname)\s*({0})*\n".format(self.ppRegexStr), self.reduceDoubleLDWRs, self.maincode)
         return
 
     def optimizeLabelNOPs(self):
@@ -800,47 +824,125 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 STWR a
             
             """
-        while re.search(r"(\S*label\S*: ) *(NOP\n)", self.maincode):
-            self.maincode = re.sub(r"(\S*label\S*: ) *(NOP\n)", self.reduceRedundantNOPs, self.maincode)
+        #while re.search(r"(\S*label\S*: ) *NOP *({0})*\n([^\n]+)".format(self.ppRegexStr), self.maincode):
+            #self.maincode = re.sub(r"(\S*label\S*: ) *NOP *({0})*\n([^\n]+)".format(self.ppRegexStr), self.reduceRedundantNOPs, self.maincode)
+        while re.search(r"(\S*label\S*: ) *NOP.*\n([^\n]+)".format(self.ppRegexStr), self.maincode):
+            self.maincode = re.sub(r"(\S*label\S*: ) *NOP.*\n([^\n]+)".format(self.ppRegexStr), self.reduceRedundantNOPs, self.maincode)
         return
 
     def optimizeBoolForGt0(self):
-        self.maincode = re.sub(r"CMPGREATER NULL\nJMPNCMP (\S+)", self.reduceGt02Bool, self.maincode)
+        self.maincode = re.sub(r"CMPGREATER NULL *({0})*\nJMPNCMP (\S+) *({0})*".format(self.ppRegexStr), self.reduceGt02Bool, self.maincode)
+
+
+    def cleanupPPLineNumbers(self):
+        newcode = []
+        for line in self.maincode.splitlines():
+            if '#' in line:
+                parts = line.split('# PPP LINE:')
+                newcode += ["{1:{0}} # PPP LINE:{2}".format(self.pplinnoColW, parts[0].rstrip(), parts[1])]
+            else:
+                newcode += [line]
+        self.maincode = '\n'.join(newcode)
+
+    def replaceWithNumericLabels(self):
+        self.labelLUT = dict()
+        preambleLen = len(self.createHeader())+1
+        newcode = []
+        for lineno, line in enumerate(self.maincode.splitlines()):
+            if '# PPP LINE' in line:
+                lsplit = line.split('# PPP LINE:')
+                if ':' in lsplit[0]:
+                    lsplit0 = lsplit[0].split(':')
+                    newl = "{0:6}{1} #{2}".format("{0}: ".format(lineno+preambleLen), lsplit0[1].strip(), lsplit0[0])
+                    self.labelLUT[lsplit0[0]] = lineno+preambleLen
+                    lsplit[0] = "{1:{0}}".format(self.pplinnoColW, newl)
+                    newcode += ["{1:{0}} # PPP LINE:{2}".format(self.pplinnoColW, newl, lsplit[1])]
+                else:
+                    newcode += ["      {1:{0}} # PPP LINE:{2}".format(self.pplinnoColW-6, lsplit[0].strip(), lsplit[1])]
+            else:
+                lsplit = [line]
+                if ':' in lsplit[0]:
+                    lsplit0 = lsplit[0].split(':')
+                    newl = "{0:6}{1} #{2}".format("{0}: ".format(lineno+preambleLen), lsplit0[1].strip(), lsplit0[0])
+                    newcode += ["{1:{0}}".format(self.pplinnoColW, newl)]
+                else:
+                    newcode += ["      {1:{0}}".format(self.pplinnoColW-6, line.strip())]
+        self.maincode = '\n'.join(newcode)
+        self.fixJumps()
+
+    def cleanupPPLineNumbers2(self):
+        newcode = []
+        for line in self.maincode.splitlines():
+            if '# PPP LINE' in line:
+                parts = line.split('# PPP LINE:')
+                subparts = parts[0].split('#')
+                if len(subparts)>1:
+                    newcode += ["{2:{0}} #{3:{1}} # PPP LINE:{4}".format(self.pplinnoColW-42, 40, subparts[0].rstrip(), subparts[1].strip(), parts[1])]
+                else:
+                    newcode += ["{1:{0}} # PPP LINE:{2}".format(self.pplinnoColW, parts[0].rstrip(), parts[1])]
+            else:
+                newcode += [line]
+        self.maincode = '\n'.join(newcode)
+
+    def fixJumps(self):
+        newcode = []
+        for line in self.maincode.splitlines():
+            if 'label' in line:
+                newcode += [re.sub(r"(\s*\S+\s+)(\S+label_\d+)(.*)", self.numericLabelLookup, line)]
+            else:
+                newcode += [line]
+        self.maincode = '\n'.join(newcode)
+        self.cleanupPPLineNumbers2()
+
+    def numericLabelLookup(self, m):
+        if m.group(2) in self.labelLUT.keys():
+            if len(m.group(3).split('# PPP LINE:'))>1:
+                pplinespl = m.group(3).split('# PPP LINE:')
+                newstr = "{0}{1} {2}".format(m.group(1),self.labelLUT[m.group(2)], pplinespl[0].strip())
+                return "{1:{0}} # PPP LINE:{2}".format(self.pplinnoColW, newstr, pplinespl[1])
+            newstr = "{0}{1}".format(m.group(1),self.labelLUT[m.group(2)])
+            return "{1:{0}} {2}".format(self.pplinnoColW, newstr, m.group(3).strip())
+        return m.group(1)+m.group(2)+m.group(3)
 
     ###########################################
     #### Helper functions for re.sub calls ####
     ###########################################
 
+    def reformatLineNumbers(self, m):
+        print(m.group(1))
+        print(m.group(2))
+        return self.codeFmtStr.format(m.group(1).strip(), m.group(2).strip())
+
     def reduceOneLineJMPs(self, m):
-        return m.group(2)
+        return m.group(3)
 
     def reduceDoubleSTWRs(self, m):
-        return "STWR {0}\n".format(m.group('varname'))
+        return "STWR {1:{0}} {2}\n".format(self.pplinnoColW, m.group('varname'), m.group(2) or " ")
 
     def reduceDoubleLDWRs(self, m):
-        return "LDWR {0}\n".format(m.group('varname'))
+        return "LDWR {0} {1}\n".format(m.group('varname'), m.group(2) or " ")
 
     def reduceRedundantStLd(self, m):
-        p1,p2 = m.group(1),m.group(2)
+        p1,p2 = m.group(1),m.group(3)
         if p1 == p2:
-            return "STWR {}\n".format(m.group(1))
-        return "STWR "+m.group(1)+"\nLDWR "+ m.group(2)+"\n"
+            return "STWR {0:60} {1}\n".format(m.group(1), m.group(2) or " ")
+        return "STWR {0:60} {1}\nLDWR {2:60} {3}\n".format(m.group(1), m.group(2) or " ", m.group(3), m.group(4) or " ")
 
     def reduceRedundantStLdSt(self, m):
         return m.group(1)+'\n'
 
     def reduceRedundantNOPs(self, m):
-        return m.group(1)
+        return "{0} {1}".format(m.group(1), m.group(2))
 
     def reduceChameleonEndLabels(self, m):
-        self.chameleonLabelsDeque.append([m.group(1),m.group(2)])
-        return m.group(1)+": NOP"
+        self.chameleonLabelsDeque.append([m.group(1),m.group(3)])
+        return "{0:60} {1}".format(m.group(1)+": NOP", m.group(2))
 
     def reduceChameleonLabels(self, repl, m):
         return repl
 
     def reduceGt02Bool(self, m):
-        return "JMPZ {}".format(m.group(1))
+        return "JMPZ {0:60} {1}".format(m.group(1), m.group(2))
 
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####
@@ -850,18 +952,53 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         if code.group(1) == 'SAFE_PASS_BY_REFERENCE':
             if code.group(2) == 'True':
                 FunctionSymbol.passByReferenceCheckCompleted = False
-            else:
+            elif code.group(2) == 'False':
                 FunctionSymbol.passByReferenceCheckCompleted = True
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
         if code.group(1) == 'USE_STANDARD_PPP_COMPILER':
             if code.group(2) == 'True':
                 self.passToOldPPPCompiler = True
-                print("REVERT TO OLD COMPILER")
+            elif code.group(2) == 'False':
+                self.passToOldPPPCompiler = False
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
         if code.group(1) == 'SUBSTITUTE_BOOL_FOR_GREATER_THAN_ZERO':
             if code.group(2) == 'True':
                 self.gt02bool = True
+            elif code.group(2) == 'False':
+                self.gt02bool = False
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
+        if code.group(1) == 'ENABLE_OPTIMIZATIONS':
+            if code.group(2) == 'True':
+                self.enableOptimizations = True
+            elif code.group(2) == 'False':
+                self.enableOptimizations = False
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
         if code.group(1) == 'INLINE_ALL_FUNCTIONS':
             if code.group(2) == 'True':
                 self.inlineAll = True
+            elif code.group(2) == 'False':
+                self.inlineAll = False
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
+        if code.group(1) == 'USE_NUMERIC_LABELS':
+            if code.group(2) == 'True':
+                self.EnableNumericLabels = True
+            elif code.group(2) == 'False':
+                self.EnableNumericLabels = False
+            else:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be True or False".format(code.group(1), code.group(2)))
+        if code.group(1) == 'PPP_LINE_COLUMN_OFFSET':
+            try:
+                coloffset = int(code.group(2))
+                if coloffset < 0:
+                    raise CompileException("Unable to set compiler flag {0} to {1}, must be a positive integer".format(code.group(1), code.group(2)))
+                self.pplinnoColW = int(code.group(2))
+            except:
+                raise CompileException("Unable to set compiler flag {0} to {1}, must be an integer".format(code.group(1), code.group(2)))
         return ""
 
     def collectConstants(self, code):
@@ -970,6 +1107,18 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         header.append( "" )
         return header
 
+    def generateReverseLineLookup(self, codetext):
+        lookup = dict()
+        sourceline = 0
+        for codeline, line in enumerate(codetext.splitlines()):
+            m = re.search('# PPP LINE: *(\d+)', line)
+            if m:
+                sourceline = int(m.group(1))
+                lookup[codeline+1] = sourceline
+            else:
+                lookup[codeline+1] = sourceline
+        return lookup
+
 def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput=False ):
     import os.path
     try:
@@ -1031,7 +1180,6 @@ def virtualMachineOptimization(assemblercode):
         del assemblercodeSplit[l-1]
     print("fin length: ", len(assemblercodeSplit))
     return '\n'.join(assemblercodeSplit)
-
 
 
 

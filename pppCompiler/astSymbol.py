@@ -28,22 +28,43 @@ class VarSymbol(Symbol):
         self.unit = unit
 
 class AssemblyFunctionSymbol(Symbol):
-    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=True):
+    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=True, startline=0):
         super().__init__(name)
         self.name = name
-        self.block = []
-        self.block = list(map(lambda x: x.lstrip(), block.lstrip().rstrip().splitlines()))
+        self.startline = startline
+        self.block = [l+"   # PPP LINE: {0:>4}".format(lineno+self.startline+3) for lineno,l in enumerate(list(map(lambda x: x.lstrip(), block.lstrip().rstrip().splitlines())))]
         self.argn, self.kwargn, self.nameSpace, self.symbols, \
         self.maincode, self.returnval, self.inline = argn, kwargn, nameSpace, symbols, maincode, returnval, inline
 
+    def substituteReferenceVars(self, args, kwargs):
+        subBlock = []
+        if len(args)>1:
+            fullargs = args[1:]+[val for val in kwargs.values()]
+        else:
+            fullargs = [val for val in kwargs.values()]
+        fullargn = self.argn+[k for k in self.kwargn.keys()]
+        for i,st in enumerate(self.block):
+            if isinstance(st, str):
+                newstr = st
+                for argn, argv in zip(fullargn, fullargs):
+                    substr = argn if self.nameSpace+'_' not in argn else argn.split(self.nameSpace+'_')[-1]
+                    newstr = re.sub(r" {}".format(substr), ' '+argv, st)
+                    #if newstr != st:
+                        #break
+                subBlock.append(newstr)
+            else:
+                return self.block
+        return subBlock
+
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
-        return self.block
+        return self.substituteReferenceVars(arg, kwarg)
 
 class FunctionSymbol(Symbol):
     passByReferenceCheckCompleted = False
-    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=False):
+    def __init__(self, name, block=None, argn=list(), kwargn=OrderedDict(), nameSpace=None, symbols=None, maincode=None, returnval=False, inline=False, startline=0):
         super(FunctionSymbol, self).__init__(name)
         self.block = block
+        self.startline = startline
         self.codestr = list()
         self.nameSpace = nameSpace
         self.argn = argn
@@ -59,7 +80,6 @@ class FunctionSymbol(Symbol):
         #self.startLabel = ["begin_function_{}_label_0: NOP".format(self.name)]
 
     def instantiateInputParameters(self, args=list(), kwargs=dict()):
-        #self.variablesPassedByReference = set()
         self.codestr = list()
         fullargn = self.argn+[k for k in self.kwargn.keys()]
         if len(args)>1:
@@ -71,7 +91,7 @@ class FunctionSymbol(Symbol):
                             argf = arg
                     else:
                         argf = arg
-                    self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])]
+                    self.codestr += self.maincode.ppFormatLine(["LDWR {0}\nSTWR {1}".format(argf, fullargn[i])], self.startline)
         for k,v in kwargs.items():
             if k not in self.variablesPassedByReference:
                 if self.nameSpace:
@@ -80,7 +100,7 @@ class FunctionSymbol(Symbol):
                         argf = v
                 else:
                     argf = v
-                self.codestr += ["LDWR {0}\nSTWR {1}".format(argf, k)]
+                self.codestr += self.maincode.ppFormatLine(["LDWR {0}\nSTWR {1}".format(argf, k)], self.startline)
         return True
 
     def incrementLabels(self, repstr, ctr):
@@ -96,7 +116,6 @@ class FunctionSymbol(Symbol):
     def incrementTags(self):
         self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
         self.maincode.orctr += self.incrementLabels(r"(or_\S+_label_)(\d+)", self.maincode.orctr)
-        #self.maincode.ifctr += self.incrementLabels(r"(if_\S+_label_)(\d+)", self.maincode.ifctr)
         self.maincode.elsectr += self.incrementLabels(r"(else_\S+_label_)(\d+)", self.maincode.elsectr)
         self.maincode.whilectr += self.incrementLabels(r"(while_\S+_label_)(\d+)", self.maincode.whilectr)
         self.maincode.fnctr += self.incrementLabels(r"(end_function_\S+_label_)(\d+)", self.maincode.fnctr)
@@ -161,15 +180,10 @@ class FunctionSymbol(Symbol):
         if not self.inline:
             if not self.labelsCustomized:
                 self.customizeLabels()
-            #if not self.passByReferenceCheckCompleted:
-                #self.checkForVariablesPassedByReference()
-            #self.instantiateInputParameters(arg,kwarg)
             self.incrementTags()
-            #overrideBlock = self.substituteReferenceVars(arg, kwarg)
             overrideBlock = self.block
             localBlock = [self.startLabel+': NOP']+overrideBlock+["JMPPOP\n"]
             return localBlock
-            #return '\n'.join(localBlock)
         return ["\n"]
 
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
@@ -182,9 +196,9 @@ class FunctionSymbol(Symbol):
         if self.inline:
             self.incrementTags()
             overrideBlock = self.substituteReferenceVars(arg, kwarg)
-            localBlock = self.codestr+overrideBlock#+["POPADDR"]
+            localBlock = self.codestr+overrideBlock
         else:
-            localBlock = self.codestr+"JMPPUSH {}".format(self.startLabel).split('\n')
+            localBlock = self.codestr+self.maincode.ppFormatLine("JMPPUSH {}".format(self.startLabel).split('\n'), self.startline)
         return localBlock
 
 class Builtin(FunctionSymbol):
@@ -192,7 +206,6 @@ class Builtin(FunctionSymbol):
         super(Builtin, self).__init__(name)
         self.codegen = codegen
         self.doc = inspect.getdoc(codegen)
-
 
 class SymbolTable(OrderedDict):
 
