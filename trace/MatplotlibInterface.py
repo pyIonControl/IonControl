@@ -102,8 +102,8 @@ class MatplotWindow(QtWidgets.QDialog):
         if self.traceind == 0:
             xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel else ""
             xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit else ""
-            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel else ""
-            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit else ""
+            ylab = "{0}".format(plottedtrace.yAxisLabel) if hasattr(plottedtrace, 'yAxisLabel') and plottedtrace.yAxisLabel else ""
+            yunit = " ({0})".format(plottedtrace.yAxisUnit) if hasattr(plottedtrace, 'yAxisUnit') and plottedtrace.yAxisUnit else ""
             plt.xlabel(xlab+xunit)
             plt.ylabel(ylab+yunit)
             plt.tight_layout()
