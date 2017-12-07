@@ -26,7 +26,14 @@ def is_Q(q):
     return isinstance(q, Q)
 
 
-def value(q, unit=""):
+def to_Q(value, unit):
+    try:
+        return (Q(v, unit) for v in value)
+    except TypeError:  # not iterable
+        return Q(value, unit)
+
+
+def value(q, unit=None):
     if is_Q(q):
         return q.m_as(unit)
     if not unit or not q:

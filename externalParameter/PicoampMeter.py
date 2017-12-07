@@ -5,6 +5,7 @@
 # *****************************************************************
 import logging
 import re
+from modules.quantity import Q, is_Q
 
 try:
     import visa  #@UnresolvedImport
@@ -73,6 +74,8 @@ class PicoampMeter:
         
     
     def setVoltage(self, voltage):
+        # if not is_Q(voltage):
+        #     voltage = Q(voltage)
         if self.instrument:        
             self.instrument.write("SOUR:VOLT {0}".format(voltage.m_as("V")))
             self.voltage = voltage

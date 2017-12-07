@@ -110,9 +110,9 @@ def rand_seed(symboltable, arg=list(), kwarg=dict()):
     with a true random number generator based on a oscillating gate. Thus, seeding
     will NOT allow to generate repeatable random numbers.
     """
-    if len(arg)!=2:
+    if len(arg)!=1:
         raise CompileException( "expected exactly one argument in rand_seed()" )
-    symbol = symboltable.getVar( arg[1] )
+    symbol = symboltable.getVar( arg[0] )
     return ["  RANDSEED {0}".format(symbol.name)]
 
 def set_trigger( symboltable, arg=list(), kwarg=dict()):
@@ -339,15 +339,15 @@ def apply_next_scan_point( symboltable, arg=list(), kwarg=dict()):
     """
     if len(arg)!=1:
         raise CompileException( "apply_next_scan_point does not take arguments" )
-    return [  "  JMPNINTERRUPT apply_next_scan_point",
+    return [  "  JMPNINTERRUPT apply_next_scan_point_label_0",
               "  LDWR INTERRUPT_EXITCODE",
               "  WAIT", "  WRITEPIPE", "  END",
-              "apply_next_scan_point:  READPIPEINDF",
+              "apply_next_scan_point_label_0:  READPIPEINDF",
               "  WRITEPIPEINDF",
               "  READPIPE",
               "  WRITEPIPE",
               "  STWI",
-              "  JMPCMP apply_next_scan_point"  ]
+              "  JMPCMP apply_next_scan_point_label_0"  ]
 
 
 def nop(symboltable, arg=list(), kwarg=dict()):

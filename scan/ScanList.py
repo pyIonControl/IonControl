@@ -11,6 +11,7 @@ import numpy
 
 from modules import enum
 from modules.concatenate_iter import interleave_iter
+from modules.quantity import is_Q, to_Q
 
 ScanType = enum.enum('LinearUp', 'LinearDown', 'Randomized', 'CenterOut', 'LinearUpDown', 'LinearDownUp')
 
@@ -21,6 +22,8 @@ def shuffle( mylist ):
     
 def scanspace( start, stop, steps, scanSelect=0 ):
     if scanSelect==0:
+        if is_Q(start) and is_Q(stop):
+            return list(to_Q(numpy.linspace(start.m, stop.m_as(start.u), steps), start.u))
         return numpy.linspace(start, stop, steps)
     else:
         mysteps = abs(steps) if stop>start else -abs(steps)
@@ -51,7 +54,8 @@ def scanList( start, stop, steps, scantype=ScanType.LinearUp, scanSelect=0 ):
 
 
 if __name__ == "__main__":
-    from modules.quantity import Q
+    from modules.quantity import Q, is_Q, to_Q
+
     start = Q(12642, 'MHz')
     stop = Q(12652, 'MHz')
     steps = 11
