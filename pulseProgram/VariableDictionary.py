@@ -232,6 +232,8 @@ class VariableDictionary(SequenceDict):
             
     def recalculateAll(self):
         g = self.dependencyGraph.reverse()
+
+        # for node, indegree in g.in_degree():
         for node, indegree in nx_indegree_iter(g):  # work around the incompatibility between networkx 1 and 2
             if indegree==0:
                 for calcnode in dfs_postorder_nodes(g, node):
