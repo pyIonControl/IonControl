@@ -3,10 +3,9 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from pyqtgraph.parametertree import Parameter
 
-from modules.SequenceDict import SequenceDict
 from trace import pens
 
 from PyQt5 import QtCore

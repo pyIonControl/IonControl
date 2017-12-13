@@ -1,5 +1,5 @@
 import hashlib
-from xml.etree import ElementTree
+import lxml.etree as ElementTree
 from math import floor, ceil, sqrt
 import pickle
 

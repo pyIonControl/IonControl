@@ -11,7 +11,7 @@ from networkx import MultiGraph, shortest_path
 from modules.pairs_iter import pairs_iter
 from modules.Observable import Observable
 from modules.firstNotNone import firstNotNone
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.quantity import Q
 from uiModules.SoftStart import StartTypes
 from itertools import chain, product

@@ -7,7 +7,7 @@ import os
 from collections import OrderedDict
 import operator
 
-import xml.etree.ElementTree as etree
+from lxml import etree
 
 from pygsti.objects import GateString
 from pygsti.io import load_gateset, load_gatestring_list

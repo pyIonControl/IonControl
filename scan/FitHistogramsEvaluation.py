@@ -11,7 +11,7 @@ import logging
 from scipy.optimize import leastsq
 from math import sqrt
 from trace.TraceCollection import TraceCollection
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from itertools import zip_longest
 from copy import deepcopy
 from os import path

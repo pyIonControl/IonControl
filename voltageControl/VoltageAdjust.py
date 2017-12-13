@@ -10,15 +10,13 @@ import logging
 from PyQt5 import QtCore
 import PyQt5.uic
 
-from modules.doProfile import doprofile
 from voltageControl.ShuttleEdgeTableModel import ShuttleEdgeTableModel
 from voltageControl.ShuttlingDefinition import ShuttlingGraph, ShuttleEdge
 from modules.PyqtUtility import updateComboBoxItems, BlockSignals
 from modules.firstNotNone import firstNotNone
 from modules.Utility import unique
 from modules.GuiAppearance import restoreGuiState, saveGuiState
-from xml.etree import ElementTree 
-from xml.dom import minidom
+import lxml.etree as ElementTree
 import os.path
 from modules.Expression import Expression
 from gui.ExpressionValue import ExpressionValue
@@ -303,9 +301,7 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
     def prettify(self, elem):
         """Return a pretty-printed XML string for the Element.
         """
-        rough_string = ElementTree.tostring(elem, 'utf-8')
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent="  ")
+        return ElementTree.tostring(elem, 'utf-8', pretty_print=True)
 
     def loadShuttleDef(self, filename):
         if filename is not None:

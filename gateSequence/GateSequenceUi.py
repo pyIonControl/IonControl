@@ -21,7 +21,7 @@ from .GateSequenceContainer import GateSequenceContainer
 from modules.enum import enum
 from modules.PyqtUtility import updateComboBoxItems, BlockSignals, setCurrentComboText
 from modules.HashableDict import HashableDict
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.XmlUtilit import xmlEncodeAttributes, xmlParseAttributes,\
     xmlEncodeDictionary, xmlParseDictionary
 from ProjectConfig.Project import getProject

@@ -6,7 +6,7 @@
 
 from modules.Expression import Expression
 import logging
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.XmlUtilit import xmlEncodeAttributes, xmlParseAttributes
 
 

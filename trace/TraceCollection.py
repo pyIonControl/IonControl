@@ -22,7 +22,7 @@ import numpy
 
 from modules.XmlUtilit import prettify
 from modules.enum import enum
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 import time
 import pytz
 from modules.DataDirectory import DataDirectory

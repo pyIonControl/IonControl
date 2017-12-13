@@ -13,7 +13,7 @@ import re
 import os
 import struct
 import copy
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 
 from modules.XmlUtilit import xmlEncodeAttributes, xmlParseAttributes
 from modules.quantity import Q
