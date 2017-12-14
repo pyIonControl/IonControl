@@ -89,7 +89,7 @@ class PlottingList(list):
             plotting = PlottedTrace(traceCollection)
             # added workaraound for PlottedTraceProperties since xml loading via findall isn't recursive and returned
             # a string instance of the PlottedTraceProperties object, probably best to derive a new class from ElementTree
-            attribdict = plottingelement.attrib
+            attribdict = dict(plottingelement.attrib)
             if "properties" in attribdict.keys() and isinstance(attribdict['properties'], str):
                 try:
                     attribdict['properties'] = PlottedTraceProperties(**plottingelement.findall("PlottedTraceProperties")[0].attrib)
