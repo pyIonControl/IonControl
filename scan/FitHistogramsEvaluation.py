@@ -144,7 +144,8 @@ class FitHistogramEvaluation(EvaluationBase):
         parameterDict['Load Reference Data'] = Parameter(name='Load Reference Data', dataType='action', value='loadReferenceData')
         return parameterDict
 
-    def leastsq(self, x, y, parameters=None, sigma=None):
+    def leastsq(self, x, y, parameters=None, sigma=None, filt=None):
+        # TODO: Need to honor filtering
         logger = logging.getLogger(__name__)
         if parameters is None:
             parameters = [0.3, 0.3]

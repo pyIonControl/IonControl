@@ -27,7 +27,8 @@ class SelectLast(FitFunctionBase):
         v,  = self.parameters if p is None else p
         return numpy.array( [v for _ in range(len(x))] )
 
-    def leastsq(self, x, y, parameters=None, sigma=None):
+    def leastsq(self, x, y, parameters=None, sigma=None, filt=None):
+        # TODO: need to honor filtering
         if parameters is None:
             parameters = [float(param) for param in self.startParameters]
         self.parameters = [ y[-1] ]
@@ -46,7 +47,8 @@ class SelectMax(FitFunctionBase):
         v,m  = self.parameters if p is None else p
         return numpy.array( [m for _ in range(len(x))] )
 
-    def leastsq(self, x, y, parameters=None, sigma=None):
+    def leastsq(self, x, y, parameters=None, sigma=None, filt=None):
+        # TODO: Need to honor filtering
         if parameters is None:
             parameters = [float(param) for param in self.startParameters]
         self.parameters = [x[numpy.argmax(y)], numpy.max(y)]
