@@ -23,7 +23,7 @@ def typeName( obj ):
 def prettify(elem, commentchar=None):
     """Return a pretty-printed XML string for the Element.
     """
-    text = ElementTree.tostring(elem, 'utf-8', pretty_print=True)
+    text = ElementTree.tostring(elem, encoding='unicode', pretty_print=True)
     if not commentchar:
         return text
     return ''.join(['# {0}\n'.format(line) for line in text.splitlines()])

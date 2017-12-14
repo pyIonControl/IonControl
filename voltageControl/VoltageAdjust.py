@@ -301,7 +301,7 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
     def prettify(self, elem):
         """Return a pretty-printed XML string for the Element.
         """
-        return ElementTree.tostring(elem, 'utf-8', pretty_print=True)
+        return ElementTree.tostring(elem, encoding='unicode', pretty_print=True)
 
     def loadShuttleDef(self, filename):
         if filename is not None:
