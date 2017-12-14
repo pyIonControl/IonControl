@@ -942,7 +942,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         return repl
 
     def reduceGt02Bool(self, m):
-        return "JMPZ {0:60} {1}".format(m.group(1), m.group(2))
+        return "JMPZ {0:60} {1}".format(m.group(2), m.group(3))
 
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####
