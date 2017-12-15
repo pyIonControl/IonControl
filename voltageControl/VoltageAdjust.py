@@ -295,13 +295,13 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         root = ElementTree.Element('VoltageAdjust')
         self.shuttlingGraph.toXmlElement(root)
         if self.shuttlingDefinitionFile:
-            with open(self.shuttlingDefinitionFile, 'w') as f:
+            with open(self.shuttlingDefinitionFile, 'wb') as f:
                 f.write(self.prettify(root))
             
     def prettify(self, elem):
         """Return a pretty-printed XML string for the Element.
         """
-        return ElementTree.tostring(elem, encoding='unicode', pretty_print=True)
+        return ElementTree.tostring(elem, encoding='utf-8', pretty_print=True, xml_declaration=True)
 
     def loadShuttleDef(self, filename):
         if filename is not None:

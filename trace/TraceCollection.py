@@ -510,7 +510,7 @@ class TraceCollection(keydefaultdict):
             position = instream.tell()
             firstline = instream.readline()
             instream.seek(position)
-            if firstline.find("<?xml version")>0:
+            if firstline.find("<?xml version") > 0 or firstline.find("<DataFileHeader>") > 0:
                 self.loadTraceXml(instream)
             else:
                 self.loadTraceText(instream)
