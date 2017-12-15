@@ -7,9 +7,13 @@ import os
 
 import logging
 import sys
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-import PyQt5.uic
+isPy3 = sys.version_info[0] > 2
+if isPy3:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    import PyQt5.uic
+else:
+    from PyQt4 import QtCore, QtGui, QtWidgets
+    import PyQt4.uic
 
 from mylogging.ExceptionLogButton import ExceptionLogButton
 from mylogging import LoggingSetup  #@UnusedImport

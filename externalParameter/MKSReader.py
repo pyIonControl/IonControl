@@ -4,9 +4,14 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 
-import serial   #@UnresolvedImport @UnusedImport
-import serial.tools.list_ports
 import re
+import sys
+
+import serial  # @UnresolvedImport @UnusedImport
+import serial.tools.list_ports
+
+isPy3 = sys.version_info[0] > 2
+
 
 class MKSReader:
     @staticmethod
@@ -27,12 +32,14 @@ class MKSReader:
         self.conn.close()
 
     def write(self, text):
-        self.conn.write(text.encode('ascii'))
+        if isPy3:
+            data = text.encode('ascii')
+        self.conn.write(data)
 
     def read(self, length):
         data = self.conn.read(length)
-        return data.decode('ascii')
-        
+        return data.decode('ascii') if isPy3 else data
+
     def query(self, question, length=100):
         self.write(question)
         return self.read(length)

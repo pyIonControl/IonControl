@@ -8,6 +8,10 @@ import serial.tools.list_ports
 import re
 import math
 
+import sys
+
+isPy3 = sys.version_info[0] > 2
+
 class TerranovaReader:
     @staticmethod
     def connectedInstruments():
@@ -19,7 +23,7 @@ class TerranovaReader:
         self.timeout = timeout
         self.conn = None
         self.deviceaddr = deviceaddr
-        
+
     def open(self):
         self.conn = serial.Serial( self.instrument, self.baud, timeout=self.timeout)
         
@@ -27,11 +31,13 @@ class TerranovaReader:
         self.conn.close()
 
     def write(self, text):
-        self.conn.write(text.encode('ascii'))
+        if isPy3:
+            data = text.encode('ascii')
+        self.conn.write(data)
 
     def read(self, length):
         data = self.conn.read(length)
-        return data.decode('ascii')
+        return data.decode('ascii') if isPy3 else data
 
     def query(self, question, length=100):
         self.write(question)
