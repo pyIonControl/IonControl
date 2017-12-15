@@ -3,27 +3,29 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from . import logging
+import logging
+import os
 
-from PyQt5 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 
-from .mylogging.ExceptionLogButton import ExceptionLogButton
-from .mylogging.LoggerLevelsUi import LoggerLevelsUi
-from .mylogging import LoggingSetup  #@UnusedImport
-from .gui import ProjectSelection
-from .gui import ProjectSelectionUi
-from .modules import DataDirectory
-from .persist import configshelve
-from .uiModules import MagnitudeParameter #@UnusedImport
-from .externalParameter.PicoampMeter import PicoampMeter
-from .externalParameter.PicoampMeterControl import PicoampMeterControl 
+from ProjectConfig.Project import Project
+from mylogging.ExceptionLogButton import ExceptionLogButton
+from mylogging.LoggerLevelsUi import LoggerLevelsUi
+from mylogging import LoggingSetup  #@UnusedImport
+#from gui import ProjectSelection
+#from gui import ProjectSelectionUi
+from modules import DataDirectory
+from persist import configshelve
+from uiModules import MagnitudeParameter #@UnusedImport
+from externalParameter.PicoampMeter import PicoampMeter
+from externalParameter.PicoampMeterControl import PicoampMeterControl
 
-from .trace import Traceui
-from .trace import pens
+from trace import Traceui
+from trace import pens
 
 from pyqtgraph.dockarea import DockArea, Dock
-from .uiModules.CoordinatePlotWidget import CoordinatePlotWidget
+from uiModules.CoordinatePlotWidget import CoordinatePlotWidget
 
 WidgetContainerForm, WidgetContainerBase = PyQt5.uic.loadUiType(r'ui\PicoampMeterUi.ui')
 
@@ -237,24 +239,22 @@ class PicoampMeterUi(WidgetContainerBase, WidgetContainerForm):
 if __name__ == "__main__":
     #The next three lines make it so that the icon in the Windows taskbar matches the icon set in Qt Designer
     import ctypes, sys
-    myappid = 'TrappedIons.DigitalLockUi' # arbitrary string
+    myappid = 'TrappedIons.PicoAmpMeter' # arbitrary string
     ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     
     app = QtWidgets.QApplication(sys.argv)
-
+    project = Project()  # loads in the project through the config files/config GUIs
     logger = logging.getLogger("")
+    overrideConfigFile = project.projectConfig.get('configurationFile')
+    overrideFileType = {'.yml': 'yaml', '.yaml': 'yaml', '.db': 'sqlite'}.get(os.path.splitext(overrideConfigFile)[1],
+                                                                              'sqlite') if overrideConfigFile else None
+    loadFromDate = project.projectConfig.get('configurationFile')
 
-    project, projectDir, dbConnection, accepted = ProjectSelectionUi.GetProjectSelection(True)
-    
-    if accepted:
-        if project:
-            DataDirectory.DefaultProject = project
-            
-            with configshelve.configshelve( ProjectSelection.guiConfigFile() ) as config:
-                with PicoampMeterUi(config) as ui:
-                    ui.setupUi(ui)
-                    LoggingSetup.qtHandler.textWritten.connect(ui.onMessageWrite)
-                    ui.show()
-                    sys.exit(app.exec_())
-        else:
-            logger.warning( "No project selected. Nothing I can do about that ;)" )
+    with configshelve.configshelve(project.dbConnection,
+                                   loadFromDate=project.projectConfig.get('loadFromDateTime', None),
+                                   filename=overrideConfigFile, filetype=overrideFileType) as config:
+        with PicoampMeterUi(config) as ui:
+            ui.setupUi(ui)
+            LoggingSetup.qtHandler.textWritten.connect(ui.onMessageWrite)
+            ui.show()
+            sys.exit(app.exec_())

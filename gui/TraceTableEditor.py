@@ -169,19 +169,51 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
 
     def insertRow(self, position, index=QtCore.QModelIndex()):
         numRows = len(self.nodelookup[0]['data'])
-        for k in self.nodelookup.keys():
-            v = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
-            if len(v) == 0:
-                self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.append(v, 0.0)
+        insertableKeys = self.acceptableKeys()
+        allColsZero = True
+        for k in insertableKeys:
+            if len(self.nodelookup[0]['parent'].traceCollection[k]) != 0:
+                allColsZero = False
+                break
+        for k in insertableKeys:
+            v = self.nodelookup[0]['parent'].traceCollection[k]
+            if len(v) == 0 and allColsZero:
+                self.nodelookup[0]['parent'].traceCollection[k] = numpy.append(v, 0.0)
                 retval = range(0,1)
             else:
-                self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.insert(v, position[0].row()+1, 0.0 if str(v) != 'nan' else 'nan')
+                setval = 0.0
+                if all(map(lambda x: x == 'nan',v)):
+                    setval = 'nan'
+                elif '_filt' in k:
+                    setval = 1.0
+                self.nodelookup[0]['parent'].traceCollection[k] = numpy.insert(v, position[0].row()+1, setval)
+                #self.nodelookup[0]['parent'].traceCollection[k] = numpy.insert(v, position[0].row()+1, 0.0 if not all(map(lambda x: x == 'nan',v)) else 'nan')
                 retval = range(position[0].row(), numRows)
-            self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
+        for i in self.nodelookup.keys():
+            self.nodelookup[i]['data'] = self.nodelookup[i]['parent'].traceCollection[self.nodelookup[i]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         self.updateUndo.emit()
         self.layoutChanged.emit()
         return retval
+
+    def acceptableKeys(self):
+        allKeys = set(self.nodelookup[0]['parent'].traceCollection.keys())
+        displayedColumns = set()
+        for k in self.nodelookup.keys():
+            for key in allKeys:
+                if self.nodelookup[k]['column'] in key or key is 'x' or key is 'y':
+                    displayedColumns.add(key)
+        return displayedColumns
+
+    def copy_rowsorig(self, rows, position):
+        for k, v in self.nodelookup[0]['parent'].traceCollection.items():
+            if type(v) is numpy.ndarray and len(v) > 0:
+                self.nodelookup[0]['parent'].traceCollection[k] = numpy.insert(v, position+1, v[rows])
+        for k, v in self.nodelookup.items():
+            self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.layoutChanged.emit()
+        return True
 
     def copy_rows(self, rows, position):
         for k, v in self.nodelookup[0]['parent'].traceCollection.items():
@@ -193,10 +225,26 @@ class NamedTraceTableModel(QtCore.QAbstractTableModel):
         self.layoutChanged.emit()
         return True
 
+    def set_rows(self, data, position):
+        initrow = position[0].row()
+        initcol = position[0].column()
+        for ci, cv in enumerate(range(initcol, initcol+len(data[0]))):
+            if cv in self.nodelookup.keys():#< len(self.nodelookup):
+                tracedata = self.nodelookup[cv]['parent'].traceCollection[self.nodelookup[cv]['column']]
+                for ri, rv in enumerate(range(initrow, initrow+len(data))):
+                    if rv < len(tracedata):
+                        tracedata[rv] = data[ri][ci]
+                self.nodelookup[cv]['data'] = copy.copy(tracedata)
+        self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
+        self.layoutChanged.emit()
+        return True
+
     def removeRows(self, position, rows=1, index=QtCore.QModelIndex()):
-        for k in range(len(self.nodelookup)):
-            self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']] = numpy.delete(self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']], range(position, position+rows))
-            self.nodelookup[k]['data'] = self.nodelookup[k]['parent'].traceCollection[self.nodelookup[k]['column']]
+        for key in self.acceptableKeys():
+            if len(self.nodelookup[0]['parent'].traceCollection[key]) > position:
+                self.nodelookup[0]['parent'].traceCollection[key] = numpy.delete(self.nodelookup[0]['parent'].traceCollection[key], range(position, position+rows))
+        for i in self.nodelookup.keys():
+            self.nodelookup[i]['data'] = self.nodelookup[i]['parent'].traceCollection[self.nodelookup[i]['column']]
         self.dataChanged.emit(QtCore.QModelIndex(), QtCore.QModelIndex())
         self.updateUndo.emit()
         self.layoutChanged.emit()
@@ -306,13 +354,31 @@ class TraceTableEditor(QtWidgets.QWidget):
                 for index in indexes:
                     selectionModel.select(self.tablemodel.createIndex(index.row()+delta, index.column()), QtCore.QItemSelectionModel.Select)
 
-    def copy_to_clipboard(self):
+    def copy_to_clipboard_orig(self):
         """ Copy the list of selected rows to the clipboard as a string. """
         clip = QtWidgets.QApplication.clipboard()
         rows = sorted(unique([ i.row() for i in self.tableview.selectedIndexes()]))
         clip.setText(str(rows))
 
-    def paste_from_clipboard(self):
+    def copy_to_clipboard(self):
+        """ Copy the list of selected rows to the clipboard as a string. """
+        clip = QtWidgets.QApplication.clipboard()
+        data = []
+        dataline = []
+        oldrow = None
+        for ind in sorted(self.tableview.selectedIndexes(), key=lambda x: x.row()*1000+x.column()):
+            if oldrow is None:
+                oldrow = ind.row()
+            if oldrow != ind.row():
+                oldrow = ind.row()
+                data.append('\t'.join(dataline))
+                dataline = []
+            dataline += [str(self.tablemodel.nodelookup[ind.column()]['data'][ind.row()])]
+        data.append('\t'.join(dataline))
+        clip.setText('\n'.join(data))
+        return True
+
+    def paste_from_clipboard_orig(self):
         """ Append the string of rows from the clipboard to the end of the TODO list. """
         clip = QtWidgets.QApplication.clipboard()
         row_string = str(clip.text())
@@ -323,3 +389,19 @@ class TraceTableEditor(QtWidgets.QWidget):
         zeroColSelInd = self.tableview.selectedIndexes()
         initRow = zeroColSelInd[-1].row()
         self.tablemodel.copy_rows(row_list, initRow)
+
+
+    def paste_from_clipboard(self):
+        """ Append the string of rows from the clipboard to the end of the TODO list. """
+        clip = QtWidgets.QApplication.clipboard()
+        row_string = str(clip.text())
+        row_list = row_string.splitlines()
+        raw_data = []
+        for row in row_list:
+            try:
+                raw_data.append(list(map(float, row.split('\t'))))
+            except ValueError:
+                raise ValueError("Invalid data on clipboard. Cannot paste into editor.")
+        zeroColSelInd = self.tableview.selectedIndexes()
+        self.tablemodel.set_rows(raw_data, zeroColSelInd)
+

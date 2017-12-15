@@ -551,12 +551,8 @@ class TraceuiMixin:
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
         dataNodes = self.model.getDataNodes(uniqueSelectedNodes[0])
         path = dataNodes[0].content.traceCollection.filename.replace('\\', '/')
-        ctypes.windll.ole32.CoInitialize(None)
         upath = str(Path(path))
-        pidl = ctypes.windll.shell32.ILCreateFromPathW(upath)
-        ctypes.windll.shell32.SHOpenFolderAndSelectItems(pidl, 0, None, 0)
-        ctypes.windll.shell32.ILFree(pidl)
-        ctypes.windll.ole32.CoUninitialize()
+        subprocess.Popen(r'explorer /select,"{}"'.format(upath))
 
     def saveConfig(self):
         """Execute when the UI is closed. Save the settings to the config file."""

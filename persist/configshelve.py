@@ -49,7 +49,7 @@ class ShelveEntry(Base):
        
     @property
     def value(self):
-        return pickle.loads(self.pvalue, encoding='Latin-1')
+        return pickle.loads(self.pvalue)  # , encoding='Latin-1')
         
     @value.setter
     def value(self, value):

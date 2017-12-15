@@ -1,3 +1,4 @@
+
 # *****************************************************************
 # IonControl:  Copyright 2016 Sandia Corporation
 # This Software is released under the GPL license detailed
@@ -29,7 +30,7 @@ class FunctionSymbol(Symbol):
     def __init__(self, name, block=None):
         super(FunctionSymbol, self).__init__(name)
         self.block = block
-        
+
     def codegen(self, symboltable, arg=list(), kwarg=dict()):
         if len(arg)>1:
             raise SymbolException( "defined functions cannot have arguments" )
@@ -40,19 +41,19 @@ class Builtin(FunctionSymbol):
         super(Builtin, self).__init__(name)
         self.codegen = codegen
         self.doc = inspect.getdoc(codegen)
-        
-    
+
+
 class SymbolTable(OrderedDict):
-    
+
     def __init__(self):
         super(SymbolTable, self).__init__()
         self.addBuiltins()
-        self.inlineParameterValues = dict() 
+        self.inlineParameterValues = dict()
         self.setInlineParameter( 'NULL', 0 )
         self.setInlineParameter( 'FFFFFFFF', 0xffffffffffffffff )
         self.setInlineParameter( 'INTERRUPT_EXITCODE', 0xfffe100000000000 )
         self.labelNumber = 0
-        
+
     def addBuiltins(self):
         self['set_shutter'] = Builtin('set_shutter', Builtins.set_shutter)
         self['set_inv_shutter'] = Builtin('set_inv_shutter', Builtins.set_inv_shutter)
@@ -78,22 +79,22 @@ class SymbolTable(OrderedDict):
         self['pulse'] = Builtin( 'pulse', Builtins.pulse )
         self['rand'] = Builtin('rand', Builtins.rand)
         self['rand_seed'] = Builtin('rand_seed', Builtins.rand_seed)
-        
+
     def setInlineParameter(self, name, value):
         self.inlineParameterValues[value] = name
         self[name] = VarSymbol(name=name, value=value)
-        
+
     def getInlineParameter(self, prefix, value):
         if value not in self.inlineParameterValues:
             name = "{0}_{1}".format(prefix, len(self.inlineParameterValues))
             self.inlineParameterValues[value] = name
             self[name] = VarSymbol(name=name, value=value)
         return self.inlineParameterValues[value]
-    
+
     def getLabelNumber(self):
         self.labelNumber += 1
         return self.labelNumber
-        
+
     def getConst(self, name):
         """get a const symbol"""
         if name not in self or not isinstance( self[name], ConstSymbol):
@@ -108,7 +109,7 @@ class SymbolTable(OrderedDict):
         if type_ is not None and var.type_!=type_:
             raise SymbolException("Variable '{0}' is of type {1}, required type: {2}".format(name, var.type_, type_))
         return self[name]
-        
+
     def getProcedure(self, name):
         if name not in self or not isinstance( self[name], FunctionSymbol):
             raise SymbolException("Function '{0}' is not defined".format(name))
@@ -117,12 +118,12 @@ class SymbolTable(OrderedDict):
     def checkAvailable(self, name):
         if name in self:
             raise SymbolException("symbol {0} already exists.".format(name))
-        
+
     def getAllConst(self):
         return [value for value in list(self.values()) if isinstance(value, ConstSymbol)]
 
     def getAllVar(self):
         return [value for value in list(self.values()) if isinstance(value, VarSymbol)]
-        
-        
-    
+
+
+

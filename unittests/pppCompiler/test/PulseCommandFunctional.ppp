@@ -1,0 +1,213 @@
+###########################################################################
+#
+# GateSet Tomography with Microwaves
+#
+#COMPILER_FLAG SAFE_PASS_BY_REFERENCE = False
+
+const DDSDetect = 1
+const DDSMicrowave = 2
+const PMTChannel = 8
+const CalibrationCounterNo = 5
+const PiTimeChannel = 1
+const DebugChannel = 2
+const DebugChannel2 = 3
+
+# DDS frequencies and amplitudes
+parameter<AD9912_FRQ> DetectFreq = 100 MHz
+parameter DetectAmp = 1023
+parameter<AD9912_FRQ> MicrowaveFreq = 40 MHz
+parameter<AD9912_PHASE> MicrowaveInitPhase = 0
+parameter<AD9912_PHASE> MicrowaveAnalyzePhase = 0
+
+# masks and shutters
+shutter InitializationShutter = 1
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter MicrowaveOn
+masked_shutter DetectOn
+
+# times
+parameter CoolingTime = 1 ms
+parameter PumpTime = 0 ms
+parameter PreWaitTime = 0 ms
+parameter MicrowaveInitTime = 0 ms
+parameter GateInit = 1
+parameter QubitWaitTime = 0 ms
+parameter MicrowaveAnalyzeTime = 0 ms
+parameter PostWaitTime = 0ms
+parameter DetectTime = 1 ms
+parameter piTime = 40 us
+parameter GateTime = 0 ms
+parameter PostPulseWaitTime = 0 ms
+
+# control parameters
+parameter MaxInitRepeat = 10
+parameter experiments  = 100
+counter CheckIonCounters = 0
+counter DetectCounters = 0
+trigger ddsApplyTrigger = 3
+trigger ddsMicrowaveApply = 0
+parameter PresenceThreshold = 6
+parameter UseGateSequence = 0
+parameter offset = 40ns
+
+# exitcodes
+exitcode IonLostExitcode = 0xfffe0001
+exitcode endLabel = 0xfffe0000
+
+# internal variables
+var experimentsleft = 100
+var initRemaining = 0
+var trainPhase = 0
+parameter pulseTime = 0
+parameter gapTime = 0
+var PulsesRemaining = 0
+address RamStartAddress = 0
+var currentexperiment = 0
+#var coolPhotons = 0
+
+#PiTimeCalibration
+parameter NumberIgnoredBits
+parameter CalibrateEvery
+parameter DetectThreshold = 1
+parameter CalibrationGates
+var PiTimeIntegrator
+var CalibrationSkipCounter = 0
+var MicrowaveCalibrationTime
+counter CalibrationCounters
+var CalibrationDetectPhotons
+var temp
+var one = 1
+
+def docool(coolTime=CoolingTime):
+    #if coolTime:#5000000000 > coolTime > 100:
+    pulse( shutter=CoolingOn, counter=CheckIonCounters, duration=coolTime, end_shutter=CoolingOn )
+    update( )
+    #coolPhotons = load_count( PMTChannel )
+    set_inv_shutter( CoolingOn )
+    return load_count( PMTChannel )
+
+def cool(coolTime):
+    if coolTime:
+        #docool(coolTime=coolTime)
+        if MaxInitRepeat:# and coolTime and MaxInitRepeat:
+            initRemaining = MaxInitRepeat
+            while docool(coolTime)<PresenceThreshold:
+                if not initRemaining:
+                    exit( IonLostExitcode )
+                initRemaining -= 1
+                #docool()
+
+def pump(pumptime):
+    if pumptime:
+        pulse( shutter=PumpingOn, duration=pumptime )
+
+def qubitInit():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    pulse( shutter=MicrowaveOn, trigger=ddsMicrowaveApply, duration=MicrowaveInitTime )
+
+def gateInit():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    temp = GateTime*GateInit
+    pulse( shutter=MicrowaveOn, trigger=ddsMicrowaveApply, duration=temp )
+
+def calibrationPulse():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+    pulse( shutter=MicrowaveOn, trigger=ddsMicrowaveApply, duration=MicrowaveCalibrationTime )
+
+def qubitAnalyze():
+    set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveAnalyzePhase )
+    pulse( shutter=MicrowaveOn, trigger=ddsMicrowaveApply, duration=MicrowaveAnalyzeTime )
+
+def detect():
+    set_dds( channel=DDSDetect, freq=DetectFreq )
+    pulse( shutter=DetectOn, counter=DetectCounters, trigger=ddsApplyTrigger, duration=DetectTime )
+    update()
+
+def calibrationDetect():
+    set_dds( channel=DDSDetect, freq=DetectFreq )
+    pulse( shutter=DetectOn, counter=CalibrationCounters, trigger=ddsApplyTrigger, duration=DetectTime )
+    update()
+
+def gateSequence():
+    PulsesRemaining = read_ram()
+    while PulsesRemaining>0:
+        PulsesRemaining -= 1
+        trainPhase = read_ram()
+        gapTime = read_ram()
+        if gapTime>0:
+            set_dds( channel=DDSMicrowave, phase=trainPhase )
+            pulse( trigger=ddsMicrowaveApply, duration=gapTime )
+        pulseTime = read_ram()     # has to be given in units of pi/2 time
+        pulseTime *= GateTime
+        if pulseTime>0:
+            pulseTime += offset     # we don't want an exdended I
+            pulse( shutter=MicrowaveOn, duration=pulseTime )
+            update( PostPulseWaitTime )
+
+def calibrate():
+    cool(CoolingTime)
+    pump(PumpTime)
+    MicrowaveCalibrationTime = GateTime*CalibrationGates
+    calibrationPulse()
+    if DetectTime:
+        calibrationDetect()
+        CalibrationDetectPhotons = load_count(CalibrationCounterNo)
+        if CalibrationDetectPhotons > DetectThreshold:
+            PiTimeIntegrator -= 1
+        else:
+            PiTimeIntegrator += 1
+        write_result( DebugChannel, CalibrationDetectPhotons )
+        GateTime = PiTimeIntegrator >> NumberIgnoredBits
+        piTime = GateTime >> one
+        write_result( PiTimeChannel, PiTimeIntegrator )
+        return piTime
+    return PumpTime
+
+def testFunc(val):
+    return val
+
+# startup switching on cooling quickly
+set_shutter( InitializationShutter )
+set_dds( channel=DDSDetect, freq=DetectFreq, amp=DetectAmp )
+set_dds( channel=DDSMicrowave, freq=MicrowaveFreq, phase=MicrowaveInitPhase )
+set_trigger( ddsApplyTrigger )
+set_trigger( ddsMicrowaveApply )
+PiTimeIntegrator = GateTime << NumberIgnoredBits
+
+while not pipe_empty():
+    #if pipe_empty():
+        #break
+    update()
+    apply_next_scan_point()
+
+    currentexperiment = 0
+    while 0 <= currentexperiment < experiments or experiments == 5:
+        set_ram_address( RamStartAddress )
+        cool(CoolingTime)
+        pump(PumpTime)
+        if testFunc(PreWaitTime):
+            update( PreWaitTime )
+        if MicrowaveInitTime:
+            qubitInit()
+        if GateInit:
+           gateInit()
+        if UseGateSequence:
+            gateSequence()
+        if QubitWaitTime:
+            update( QubitWaitTime )
+        if MicrowaveAnalyzeTime:
+            qubitAnalyze()
+        if PostWaitTime:
+            update( PostWaitTime )
+        if DetectTime:
+            detect()
+        if CalibrateEvery:
+#            if CalibrationSkipCounter > CalibrateEvery:
+            calibrate()
+#                CalibrationSkipCounter = 0
+#            else:
+#                CalibrationSkipCounter += 1
+        currentexperiment += 1
+
+exit( endLabel )
