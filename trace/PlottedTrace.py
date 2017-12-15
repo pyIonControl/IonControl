@@ -344,25 +344,40 @@ class PlottedTrace(object):
         if self._graphicsView is not None:
             if self.hasHeightColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x), y=numpy.array(self.y), height=numpy.array(self.height),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x),
+                                                     y=numpy.array(self.y),
+                                                     height=numpy.array(self.height),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x[self.filt>0]), y=numpy.array(self.y[self.filt>0]), height=numpy.array(self.height[self.filt>0]),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x)[numpy.array(self.filt)>0],
+                                                     y=numpy.array(self.y)[numpy.array(self.filt)>0],
+                                                     height=numpy.array(self.height)[numpy.array(self.filt)>0],
                                                      pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), height=(self.height[self.filt<1]),
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)<1]),
+                                                              y=(numpy.array(self.y)[numpy.array(self.filt)<1]),
+                                                              height=(numpy.array(self.height)[numpy.array(self.filt)<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
             elif self.hasTopColumn and self.hasBottomColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x), y=numpy.array(self.y), top=numpy.array(self.top), bottom=numpy.array(self.bottom),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x),
+                                                     y=numpy.array(self.y),
+                                                     top=numpy.array(self.top),
+                                                     bottom=numpy.array(self.bottom),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), top=(self.top[self.filt>0]), bottom=(self.bottom[self.filt>0]),
-                                                               pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), top=(self.top[self.filt<1]), bottom=(self.bottom[self.filt<1]),
+                    self.errorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)>0]),
+                                                     y=(numpy.array(self.y)[numpy.array(self.filt)>0]),
+                                                     top=(numpy.array(self.top)[numpy.array(self.filt)>0]),
+                                                     bottom=(numpy.array(self.bottom)[numpy.array(self.filt)>0]),
+                                                     pen=self.penList[penindex][0])
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)<1]),
+                                                              y=(numpy.array(self.y)[numpy.array(self.filt)<1]),
+                                                              top=(numpy.array(self.top)[numpy.array(self.filt)<1]),
+                                                              bottom=(numpy.array(self.bottom)[numpy.array(self.filt)<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
@@ -422,9 +437,9 @@ class PlottedTrace(object):
                     self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
                                                         symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
                 else:
-                    self.curve = self._graphicsView.plot((self.x[self.filt>0]), (self.y[self.filt>0]), pen=None, symbol=self.penList[penindex][1],
+                    self.curve = self._graphicsView.plot((numpy.array(self.x)[numpy.array(self.filt[:len(self.x)])>0]), (numpy.array(self.y)[numpy.array(self.filt[:len(self.y)])>0]), pen=None, symbol=self.penList[penindex][1],
                                                          symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                    self.auxiliaryCurves.append(self._graphicsView.plot((self.x[self.filt<1]), (self.y[self.filt<1]), pen=None, symbol=self.penList[penindex][1],
+                    self.auxiliaryCurves.append(self._graphicsView.plot((numpy.array(self.x)[numpy.array(self.filt[:len(self.x)])<1]), (numpy.array(self.y)[numpy.array(self.filt[:len(self.y)])<1]), pen=None, symbol=self.penList[penindex][1],
                                                           symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
             if self.xAxisLabel:
                 if self.xAxisUnit:
