@@ -267,7 +267,7 @@ class ShuttlingGraph(list):
         if startLine != edge.startLine and (startLine not in self.nodeLookup or self.nodeLookup[startLine] == edge.startName):
             self.nodeLookup.pop(edge.startLine)
             edge.startLine = startLine
-            self.shuttlingGraph.edge[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
+            self.shuttlingGraph.adj[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
             self.rgenerateNodeLookup()
             self.graphChangedObservable.firebare()
             self.setPosition(self.currentPosition)
@@ -280,7 +280,7 @@ class ShuttlingGraph(list):
         if stopLine != edge.stopLine and (stopLine not in self.nodeLookup or self.nodeLookup[stopLine] == edge.stopName):
             self.nodeLookup.pop(edge.stopLine)
             edge.stopLine = stopLine
-            self.shuttlingGraph.edge[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
+            self.shuttlingGraph.adj[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
             self.rgenerateNodeLookup()
             self.graphChangedObservable.firebare()
             self.setPosition(self.currentPosition)
@@ -334,7 +334,7 @@ class ShuttlingGraph(list):
             sp = shortest_path(self.shuttlingGraph, fromName, toName)
         path = list()
         for a, b in pairs_iter(sp):
-            edge = sorted(self.shuttlingGraph.edge[a][b].values(), key=itemgetter('weight'))[0]['edge']
+            edge = sorted(self.shuttlingGraph.adj[a][b].values(), key=itemgetter('weight'))[0]['edge']
             path.append((a, b, edge, self.index(edge)))
         return path, preShuttle, postShuttle if allow_position else path
     
