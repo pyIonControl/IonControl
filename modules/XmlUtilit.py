@@ -26,7 +26,7 @@ def prettify(elem, commentchar=None):
     text = ElementTree.tostring(elem, encoding='unicode', pretty_print=True)
     if not commentchar:
         return text
-    return ''.join(['# {0}\n'.format(line) for line in text.splitlines()])
+    return ''.join(['# <?xml version="1.0" ?>\n']+['# {0}\n'.format(line) for line in text.splitlines()])
 
 def stringToStringOrNone(string):
     if string is None:

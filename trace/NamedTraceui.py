@@ -270,7 +270,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
                     shortenedCode = code.split('\n')[2+len(files):]
                     plottedTraces = [self.openFile(f)[0] for f in files]
                     from trace.MatplotlibInterface import MatplotWindow
-                    mpw = MatplotWindow(exitSig=self.exitSignal)
+                    mpw = MatplotWindow(config=self.config, exitSig=self.exitSignal)
                     mpw.show()
                     for pt in plottedTraces:
                         mpw.plot(pt)

@@ -25,6 +25,7 @@ from modules.DataDirectory import DataDirectory
 from modules.RollingUpdate import rollingUpdate
 from modules.SequenceDict import SequenceDict
 from modules.quantity import is_Q
+from trace.PlottedTrace import PlottedTrace
 from trace.TraceCollection import TraceCollection
 from trace.pens import penList, penArgList
 from uiModules.BlockAutoRange import BlockAutoRange
@@ -268,7 +269,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     else:
                         trace.description["ADC"] = str(plotName)
                     filename, _ = DataDirectory().sequencefile("DedicatedCounter_{0}.txt".format(n))
-                    trace.addplotting( TracePlotting(name="Counter {0}".format(n)) )
+                    trace.addPlotting(PlottedTrace(Trace=trace, name="Counter {0}".format(n)))
                     trace.save()
         logger.info("saving dedicated counters")
     

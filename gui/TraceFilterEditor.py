@@ -48,7 +48,7 @@ class TraceFilterTableModel(QtCore.QAbstractTableModel):
 
     def bgFilterLookup(self, index):
         if index.column() == self.numcols:
-            if self.nodelookup[0]['filter'][index.row()]:
+            if index.row() >= len(self.nodelookup[0]['filter']) or self.nodelookup[0]['filter'][index.row()]:
                 return QtGui.QColor(0, 205, 0, 255)
             else:
                 return QtGui.QColor(205, 0, 0, 255)

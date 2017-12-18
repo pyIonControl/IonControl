@@ -372,8 +372,9 @@ class TraceCollection(keydefaultdict):
                 self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
             if "tracePlottingList" not in self.description:
                 self.description["tracePlottingList"] = PlottingList(
-                    TracePlotting(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
-                                  rawColumn=None, filtColumn=None, name=""))
+                    [PlottedTrace(Trace=self, xColumn='x', yColumn='y', topColumn=None, bottomColumn=None,
+                                 heightColumn=None,
+                                 rawColumn=None, filtColumn=None, name="")])
             try:
                 with myzip.open('structuredDataFormat.json') as f:
                     self.structuredDataFormat = FormatDict(json.loads(f.read().decode()))
@@ -509,11 +510,11 @@ class TraceCollection(keydefaultdict):
             position = instream.tell()
             firstline = instream.readline()
             instream.seek(position)
-            if firstline.find("<?xml version")>0:
+            if firstline.find("<?xml version") > 0 or firstline.find("<DataFileHeader>") > 0:
                 self.loadTraceXml(instream)
             else:
                 self.loadTraceText(instream)
-                self.description["tracePlottingList"].append(TracePlotting())
+                self.description["tracePlottingList"].append(PlottedTrace())
         self.filename = filename
 
     def loadTraceXml(self, stream):
@@ -559,7 +560,9 @@ class TraceCollection(keydefaultdict):
             self[colname] = list(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-        self.description["tracePlottingList"] = PlottingList(TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name=""))
+        self.description["tracePlottingList"] = PlottingList(
+            [PlottedTrace(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
+                          rawColumn=None, filtColumn=None, name="")])
             
     def setPlotfunction(self, callback):
         self.plotfunction = callback
