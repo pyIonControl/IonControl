@@ -149,23 +149,35 @@ class TwoModeMotionalRabiFlopping(FitFunctionBase):
     def update(self,parameters=None):
         A, n, omega, mass, angle, trapFrequency, wavelength, delta_n, n_2, trapFrequency_2 = self.parameters if parameters is None else parameters #@UnusedVariable
         m = mass * constants.m_p
+        if not is_Q(trapFrequency):
+            trapFrequency = Q(trapFrequency, 'MHz')
+        if not is_Q(trapFrequency_2):
+            trapFrequency_2 = Q(trapFrequency_2, 'MHz')
+        if not is_Q(wavelength):
+            wavelength = Q(wavelength, 'nm')
         secfreq = trapFrequency*10**6
         secfreq2 = trapFrequency_2*10**6
-        eta = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
+        eta = ( (2*pi/(wavelength.m_as('m')*10**-9))*cos(angle*pi/180)
                      * sqrt(constants.hbar/(2*m*2*pi*secfreq)) )
-        eta2 = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
+        eta2 = ( (2*pi/(wavelength.m_as('m')*10**-9))*cos(angle*pi/180)
                      * sqrt(constants.hbar/(2*m*2*pi*secfreq2)) )
         self.results['eta'] = ResultRecord( name='eta', value=eta )
         self.results['eta_2'] = ResultRecord( name='eta_2', value=eta2 )
                
     def updateTables(self, p):
         A, n, omega, mass, angle, trapFrequency, wavelength, delta_n, n_2, trapFrequency_2 = p #@UnusedVariable
+        if not is_Q(trapFrequency):
+            trapFrequency = Q(trapFrequency, 'MHz')
+        if not is_Q(trapFrequency_2):
+            trapFrequency_2 = Q(trapFrequency_2, 'MHz')
+        if not is_Q(wavelength):
+            wavelength = Q(wavelength, 'nm')
         secfreq = trapFrequency.m_as('Hz') * 10**6
         secfreq2 = trapFrequency_2.m_as('Hz') * 10**6
         m = mass * constants.m_p
-        eta = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
+        eta = ( (2*pi/(wavelength.m_as('m')*10**-9))*cos(angle*pi/180)
                      * sqrt(constants.hbar/(2*m*2*pi*secfreq)) )
-        eta2 = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
+        eta2 = ( (2*pi/(wavelength.m_as('m')*10**-9))*cos(angle*pi/180)
                      * sqrt(constants.hbar/(2*m*2*pi*secfreq2)) )
         self.laguerreTable = laguerreTable(eta, delta_n)
         self.laguerreTable2 = laguerreTable(eta2, 0)

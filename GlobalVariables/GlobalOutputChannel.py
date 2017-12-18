@@ -11,7 +11,7 @@ class GlobalOutputChannel:
     def __init__(self, device, channelName):
         self.device = device
         self.channelName = channelName
-        self._savedValue = None
+        self._savedValue = 0 #None  #set to 0 for temporary fix
 
     @property
     def name(self):
@@ -51,7 +51,7 @@ class GlobalOutputChannel:
         return False
 
     def saveValue(self, overwrite=True):
-        if self._savedValue is None or overwrite:
+        if self._savedValue is None or overwrite and False: #false added for quick bug bypass
             self._savedValue = self.device[self.channelName]
 
     def restoreValue(self):
@@ -61,7 +61,7 @@ class GlobalOutputChannel:
         until it returns True in order to restore the saved value.
         """
         value = self._savedValue
-        self._savedValue = None
+        self._savedValue = 0 #None #set to 0 for temporary fix
         self.device[self.channelName] = value
         return value
 

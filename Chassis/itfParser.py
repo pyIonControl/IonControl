@@ -97,7 +97,8 @@ class itfParser(fileParser):
         for i, item in enumerate(dataList):
             if item == '':
                 break
-            dataDict.update({self.tableHeader[i]:float64(item)})
+            if i<len(self.tableHeader):
+                dataDict.update({self.tableHeader[i]:float64(item)})
         return dataDict
 
     def _checkForDuplicates(self, testlist ):
