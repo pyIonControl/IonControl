@@ -27,7 +27,7 @@ import yaml
 import datetime
 import copy
 from wrapt import synchronized
-from threading import Thread
+from threading import Thread, Event
 
 Base = declarative_base()
 defaultcategory = 'main'
@@ -106,7 +106,7 @@ class configshelve:
         self.filename = filename
         self.loadFromDate = loadFromDate
         self.filetype = filetype
-        self.worker = None
+        self.commit_ready = None
 
     @synchronized
     def loadFromDatabase(self):
@@ -152,6 +152,7 @@ class configshelve:
                 self.buffer.update(yaml.load(f))
 
     def commitToDatabase(self):
+        self.commit_ready = Event()
         t = Thread(target=self._commitToDatabase)
         t.start()
 
@@ -166,6 +167,7 @@ class configshelve:
                     self.dbDigest[key] = entry.digest
         self.session.commit()
         self.session = self.Session()
+        self.commit_ready.set()
         
     @synchronized
     def saveConfig(self, copyTo=None, yamlfile=None):
@@ -182,6 +184,10 @@ class configshelve:
                 print(yaml.dump(self.buffer, default_flow_style=False), file=f)
         self.commitToDatabase()
 
+    @synchronized
+    def sessionCommit(self):
+        self.session.commit()
+
     def __enter__(self):
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
@@ -193,7 +199,9 @@ class configshelve:
         
     def __exit__(self, exittype, value, tb):
         self.commitToDatabase()
-        self.session.commit()
+        if self.commit_ready is not None:
+            self.commit_ready.wait()
+        self.sessionCommit()
 
     @synchronized
     def __setitem__(self, key, value):

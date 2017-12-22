@@ -177,6 +177,7 @@ class InstrumentLoggingUi(WidgetContainerBase, WidgetContainerForm):
         self.initMenu()
         self.actionProject.triggered.connect( self.onProjectSelection)
         self.actionExit.triggered.connect(self.onClose)
+        self.actionSave.triggered.connect(self.onSave)
 
     def onProjectSelection(self):
         ui = ProjectInfoUi(self.project)

@@ -8,6 +8,8 @@ import serial.tools.list_ports
 
 from modules.quantity import Q
 
+import minimalmodbus
+minimalmodbus.BAUDRATE = 9600
 
 class Settings:
     pass
@@ -76,6 +78,7 @@ class OmegaCN7500Reader(object):
 if __name__=="__main__":
     mks = OmegaCN7500Reader()
     mks.open()
+    mks.conn.debug = True
     result = mks.value()
     print(result)
     mks.close()
