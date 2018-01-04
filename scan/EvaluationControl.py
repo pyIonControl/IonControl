@@ -152,7 +152,9 @@ class EvaluationControl(ControlForm, ControlBase ):
         self.counterNames = counterNames
         # History and Dictionary
         try:
-            self.settingsDict = self.config.get(self.configname+'.dict', dict())
+            self.settingsDict = dict(self.config.items_startswith(self.configname+'.dict.'))
+            if not self.settingsDict:
+                self.settingsDict = self.config.get(self.configname+'.dict', dict())
         except (TypeError, UnpicklingError):
             logger.info( "Unable to read scan control settings dictionary. Setting to empty dictionary." )
             self.settingsDict = dict()
@@ -347,7 +349,7 @@ class EvaluationControl(ControlForm, ControlBase ):
         
     def saveConfig(self):
         self.config[self.configname] = self.settings
-        self.config[self.configname+'.dict'] = self.settingsDict
+        self.config.set_string_dict(self.configname + '.dict', self.settingsDict)
         self.config[self.configname+'.settingsName'] = self.settingsName
         self.config[self.configname+'.parameters'] = self.parameters
     

@@ -89,7 +89,9 @@ class AnalysisControl(ControlForm, ControlBase ):
         self.evaluationNames = evaluationNames
         # History and Dictionary
         try:
-            self.analysisDefinitionDict = self.config.get(self.configname+'.dict', dict())
+            self.analysisDefinitionDict = dict(self.config.items_startswith(self.configname + '.dict.'))
+            if not self.analysisDefinitionDict:
+                self.analysisDefinitionDict = self.config.get(self.configname+'.dict', dict())
         except TypeError:
             logging.getLogger(__name__).info( "Unable to read analysis control settings dictionary. Setting to empty dictionary." )
             self.analysisDefinitionDict = dict()
@@ -311,7 +313,7 @@ class AnalysisControl(ControlForm, ControlBase ):
         return self.currentAnalysisName != '' and ( self.currentAnalysisName not in self.analysisDefinitionDict or not (self.analysisDefinitionDict[self.currentAnalysisName] == self.analysisDefinition))            
                 
     def saveConfig(self):
-        self.config[self.configname+'.dict'] = self.analysisDefinitionDict
+        self.config.set_string_dict(self.configname + '.dict', self.analysisDefinitionDict)
         self.config[self.configname] = self.analysisDefinition
         self.config[self.configname+'.settingsName'] = self.currentAnalysisName
         self.config[self.configname+'.guiState'] = saveGuiState( self )

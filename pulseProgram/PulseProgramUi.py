@@ -165,8 +165,11 @@ class PulseProgramUi(PulseProgramWidget, PulseProgramBase):
         super(PulseProgramUi, self).setupUi(parent)
         self.setCentralWidget(None) #No central widget
         self.experimentname = experimentname
-        self.configname = 'PulseProgramUi.'+self.experimentname
-        self.contextDict = self.config.get( self.configname+'.contextdict', dict() )
+        self.configname = 'PulseProgramUi.' + self.experimentname
+        self.contextConfigname = self.configname + '.contextdict'
+        self.contextDict = dict(self.config.items_startswith(self.contextConfigname + "."))
+        if not self.contextDict:
+            self.contextDict = self.config.get(self.contextConfigname, dict())
         self.populateDependencyGraph()
         for context in self.contextDict.values():    # set the global dict as this field does not survive pickling
             context.setGlobaldict(self.globaldict)
@@ -670,7 +673,7 @@ class PulseProgramUi(PulseProgramWidget, PulseProgramBase):
         self.configParams.lastContextName = str(self.contextComboBox.currentText())
         self.config[self.configname+".state"] = self.saveState() #Arrangement of dock widgets
         self.config[self.configname] = self.configParams
-        self.config[self.configname+'.contextdict'] = self.contextDict 
+        self.config.set_string_dict(self.contextConfigname, self.contextDict)
         self.config[self.configname+'.currentContext'] = self.currentContext
         self.config[self.configname+'.docSplitter'] = self.docSplitter.saveState()
         self.variableTableModel.saveConfig()
