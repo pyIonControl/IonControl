@@ -68,7 +68,7 @@ class TestPulserFirmware(unittest.TestCase):
         self.pulser.ppStart()
         data = bytearray()
         while len(data) < datalength * 8:
-            dataslice, overrun, externalStatus = self.pulser.ppReadData(8)
+            dataslice, overrun, externalStatus = self.pulser.ppReadWriteData(8)
             if dataslice is not None:
                 data += dataslice
                 print("{0} bytes".format(len(data)))

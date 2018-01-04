@@ -119,6 +119,30 @@ penList = [ (solidYellowPen,),
             (dashedPurplePen, 't', dashedPurplePen, blank, purple, filterPen(dashedPurplePen), filterPen(blank, isbrush=True)),
             (dashedDarkPinkPen, 't', dashedDarkPinkPen, blank, darkpink, filterPen(dashedDarkPinkPen), filterPen(blank, isbrush=True))]
 
+penArgList = [{'color': yellow, 'width': penWidth, 'style': solid},
+              {'color': blue, 'width': penWidth, 'style': solid},
+              {'color': red, 'width': penWidth, 'style': solid},
+              {'color': orange, 'width': penWidth, 'style': solid},
+              {'color': cyan, 'width': penWidth, 'style': solid},
+              {'color': magenta, 'width': penWidth, 'style': solid},
+              {'color': black, 'width': penWidth, 'style': solid},
+              {'color': aquamarine, 'width': penWidth, 'style': solid},
+              {'color': lightblue, 'width': penWidth, 'style': solid},
+              {'color': purple, 'width': penWidth, 'style': solid},
+              {'color': darkpink, 'width': penWidth, 'style': solid},
+              {'color': yellow, 'width': penWidth, 'style': dashed},
+              {'color': blue, 'width': penWidth, 'style': dashed},
+              {'color': red, 'width': penWidth, 'style': dashed},
+              {'color': orange, 'width': penWidth, 'style': dashed},
+              {'color': cyan, 'width': penWidth, 'style': dashed},
+              {'color': magenta, 'width': penWidth, 'style': dashed},
+              {'color': black, 'width': penWidth, 'style': dashed},
+              {'color': aquamarine, 'width': penWidth, 'style': dashed},
+              {'color': lightblue, 'width': penWidth, 'style': dashed},
+              {'color': purple, 'width': penWidth, 'style': dashed},
+              {'color': darkpink, 'width': penWidth, 'style': dashed},
+              ]
+
 class penicons:
     def penicons(self):
         if not hasattr(self, 'icons'):

@@ -170,7 +170,10 @@ class Statemachine:
                     self.makeTransition( thistransition )
                     break
         elif eventType not in self.ignoreEventTypes:
-            self.eventQueue.append((eventType, args, kwargs))
+            if len(self.eventQueue) < 100:
+                self.eventQueue.append((eventType, args, kwargs))
+            else:
+                logging.getLogger(__name__).debug("Now in state {0}".format(self.currentState))
         return self.currentState
 
     def confirmStateReached(self):
@@ -178,6 +181,7 @@ class Statemachine:
         if self.confirmationFunction is not None:
             self.confirmationFunction()
             self.confirmationFunction = None
+
         for eventType, args, kwargs in self.eventQueue:
             self.processEvent(eventType, *args, **kwargs)
         self.eventQueue.clear()

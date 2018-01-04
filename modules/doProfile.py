@@ -22,6 +22,7 @@ def doprofile(func):
             ps = pstats.Stats(profile).sort_stats(sortby)            
             ps.print_stats()
             ps.dump_stats("profile.pkl")
+            ps.dump_stats(func.__name__ + ".pkl")
     return profiled_func
 
 

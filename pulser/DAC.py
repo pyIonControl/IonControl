@@ -116,7 +116,7 @@ class DAC:
         logger = logging.getLogger(__name__)
         if self.pulser:
             self.commandBuffer.extend([(0x12, data),
-                                       (0x1e, (1 << 14) | (channel & 0xff) << 4 | (cmd & 0xf))])
+                                       (0x1e, (1 << 14) | ((channel & 0xff) << 4) | (cmd & 0xf))])
             if self.autoFlush:
                 self.flush()
         else:

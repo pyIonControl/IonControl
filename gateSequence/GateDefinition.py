@@ -7,7 +7,7 @@
 from collections import OrderedDict
 import logging
 
-import xml.etree.ElementTree as etree
+from lxml import etree
 
 
 class Pulse(object):

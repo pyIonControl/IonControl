@@ -13,7 +13,7 @@ import re
 import os
 import struct
 import copy
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 
 from modules.XmlUtilit import xmlEncodeAttributes, xmlParseAttributes
 from modules.quantity import Q
@@ -122,6 +122,12 @@ OPS = {'NOP'    : 0x00,
        'JMPNINTERRUPT': 0x5d,
        'RAND': 0x60,
        'RANDSEED': 0x61,
+       'SETSYNCTIME' : 0x62,
+       'WAITFORSYNC' : 0x63,
+       'PUSH': 0x64,
+       'POP': 0x65,
+       'JMPPUSH': 0x66,
+       'JMPPOP': 0x67,
        'END'    : 0xFF }
 
 

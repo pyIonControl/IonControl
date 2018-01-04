@@ -97,6 +97,8 @@
     <addaction name="separator"/>
     <addaction name="actionStash"/>
     <addaction name="actionResume"/>
+    <addaction name="separator"/>
+    <addaction name="actionProfiling"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -693,6 +695,19 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionProfiling">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/kde/icons/profiling-off.png</normaloff>
+     <activeon>:/kde/icons/profiling-on.png</activeon>:/kde/icons/profiling-off.png</iconset>
+   </property>
+   <property name="text">
+    <string>Profiling</string>
    </property>
   </action>
  </widget>

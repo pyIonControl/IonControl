@@ -10,20 +10,22 @@ var INTERRUPT_EXITCODE 18446198715942174720
 var a 1
 var b 2
 var inlinevar_3 2
+var inlinevar_4 3
+var inlinevar_5 1
 # inline variables
 # end header
 
-# line 10 if statement if a<b:
-# line 10 condition if a<b:
+# line 12 if statement if a < b:
+# line 12 condition if a < b:
   LDWR a
   CMPLESS b
   JMPNCMP else_label_1
 # IF block
-# line 11: add_assignment:     a += b
+# line 13: add_assignment:     a += b
   LDWR a
   ADDW b
   STWR a
-# line 12: procedurecall     test()
+# line 14: procedurecall     test()
 # line 5: add_assignment:     a += b
   LDWR a
   ADDW b
@@ -36,14 +38,26 @@ var inlinevar_3 2
   WAITDDSWRITEDONE
   WAIT
   UPDATE NULL
+# line 8 while_statement     while a < 3:
+while_label_2: NOP
+# line 8 condition     while a < 3:
+  LDWR a
+  CMPLESS inlinevar_4
+  JMPNCMP end_while_label_2
+# line 9: add_assignment:         a += 1
+  INC a
+  STWR a
+  JMP while_label_2
+end_while_label_2: NOP
+# end while
   JMP end_if_label_1
 else_label_1: NOP
 # ELSE block
-# line 14: add_assignment:     a -= b
+# line 16: add_assignment:     a -= b
   LDWR a
   SUBW b
   STWR a
-# line 15: procedurecall     test()
+# line 17: procedurecall     test()
 # line 5: add_assignment:     a += b
   LDWR a
   ADDW b
@@ -56,5 +70,17 @@ else_label_1: NOP
   WAITDDSWRITEDONE
   WAIT
   UPDATE NULL
+# line 8 while_statement     while a < 3:
+while_label_3: NOP
+# line 8 condition     while a < 3:
+  LDWR a
+  CMPLESS inlinevar_4
+  JMPNCMP end_while_label_3
+# line 9: add_assignment:         a += 1
+  INC a
+  STWR a
+  JMP while_label_3
+end_while_label_3: NOP
+# end while
 end_if_label_1: NOP
 # end if

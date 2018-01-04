@@ -10,7 +10,7 @@ from externalParameter.persistence import DBPersist
 from externalParameter.decimation import StaticDecimation
 from modules.quantity import is_Q, Q
 from collections import deque, MutableMapping
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.MagnitudeParser import parse
 from expressionFunctions.ExprFuncDecorator import ExprFunUpdate, NamedTraceUpdate, SystemExprFuncs, \
                                                   UserExprFuncs, NamedTraceDict

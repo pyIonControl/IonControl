@@ -30,8 +30,8 @@
    </attribute>
    <addaction name="actionSave"/>
    <addaction name="actionClear"/>
-   <addaction name="actionStart"/>
-   <addaction name="actionStop"/>
+   <addaction name="actionData_Reporting"/>
+   <addaction name="actionPlot_Data"/>
   </widget>
   <widget class="QDockWidget" name="settingsDock">
    <property name="windowTitle">
@@ -76,6 +76,36 @@
    </property>
    <property name="text">
     <string>Stop</string>
+   </property>
+  </action>
+  <action name="actionData_Reporting">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/kde/icons/gear.png</normaloff>:/kde/icons/gear.png</iconset>
+   </property>
+   <property name="text">
+    <string>Data Reporting</string>
+   </property>
+   <property name="toolTip">
+    <string>enable reporting of data from the FPGA</string>
+   </property>
+  </action>
+  <action name="actionPlot_Data">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/openicon/icons/office-chart-line.png</normaloff>:/openicon/icons/office-chart-line.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Data</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot data</string>
    </property>
   </action>
  </widget>

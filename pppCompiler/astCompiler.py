@@ -26,7 +26,7 @@ fullASTPrimitives = {'AST', 'Add', 'And', 'Assert', 'Assign', 'AsyncFor', 'Async
     'UnaryOp', 'While', 'With', 'Yield', 'YieldFrom'}
 
 #List of visitor nodes supported in ppp
-allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Break','Call', 'Compare', 'BoolOp',
+allowedASTPrimitives = {'Add', 'Sub','And', 'Assign', 'AugAssign', 'BinOp', 'BitAnd', 'BitOr', 'Break','Call', 'Compare', 'BoolOp', 'Div',
                         'Eq', 'Expr', 'Expression', 'FunctionDef', 'Gt', 'GtE', 'If', 'IfExp', 'Load', #'Lambda',
                         'LShift', 'Lt', 'LtE', 'Mod', 'Module', 'Mult', 'Name', 'NameConstant', 'Not', 'NotEq',
                         'Num', 'Or', 'Pass', 'RShift', 'Return',
@@ -626,26 +626,27 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         """Code preprocessor to collect all variable declarations"""
         preprocessed_code = re.sub(r"#COMPILER_FLAG *(\S+) *= *(\S+)", self.checkCompilerFlags, code)
         preprocessed_code = re.sub(r"(.*)(#.*)", lambda m: m.group(1), preprocessed_code)
-        preprocessed_code = re.sub(r"const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
-        preprocessed_code = re.sub(r"exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
-        preprocessed_code = re.sub(r"address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
-        preprocessed_code = re.sub(r"^ *var\s*(\S+)\s*=\s*(\S+) *$", self.collectVars, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"var\s*(\S+)\s*=\s*([0-9x.]+) *([a-zA-Z]+)", self.collectVars, preprocessed_code)
-        preprocessed_code = re.sub(r"var\s*(\S+)", self.collectVars, preprocessed_code)
-        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^parameter\s*<(\S+)>\s*(\S+)", self.collectTypedParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^parameter\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^parameter\s*(\S+)", self.collectParameters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"masked_shutter\s*(\S+)\s*=\s*(\S+)", self.collectMaskedShutters, preprocessed_code)
-        preprocessed_code = re.sub(r"^shutter\s*(\S+)\s*=\s*(\S+)", self.collectShutters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^trigger\s*(\S+)\s*=\s*(\S+)", self.collectTriggers, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^counter\s*(\S+)\s*=\s*(\S+)", self.collectCounters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"masked_shutter\s*(\S+)", self.collectMaskedShutters, preprocessed_code)
-        preprocessed_code = re.sub(r"^shutter\s*(\S+)", self.collectShutters, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^trigger\s*(\S+)", self.collectTriggers, preprocessed_code, flags=re.MULTILINE)
-        preprocessed_code = re.sub(r"^counter\s*(\S+)", self.collectCounters, preprocessed_code, flags=re.MULTILINE)
+        preprocessed_code = re.sub(r"^\s*const\s*(\S+)\s*=\s*(\S+)", self.collectConstants, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*exitcode\s*(\S+)\s*=\s*(\S+)", self.collectExitcodes, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*address\s*(\S+)\s*=\s*(\S+)", self.collectAddresses, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*address\s*(\S+)", self.collectAddresses, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*var\s*(\S+)\s*=\s*(\S+) *$", self.collectVars, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*var\s*(\S+)\s*=\s*([0-9x.]+) *([a-zA-Z]+)", self.collectVars, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*var\s*(\S+)", self.collectVars, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectTypedParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*<(\S+)>\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectTypedParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*<(\S+)>\s*(\S+)", self.collectTypedParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*(\S+)\s*=\s*([0-9\.x]+) *([a-zA-Z]+)", self.collectParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*(\S+)\s*=\s*([0-9\.x]+)", self.collectParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*parameter\s*(\S+)", self.collectParameters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*masked_shutter\s*(\S+)\s*=\s*(\S+)", self.collectMaskedShutters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*shutter\s*(\S+)\s*=\s*(\S+)", self.collectShutters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*trigger\s*(\S+)\s*=\s*(\S+)", self.collectTriggers, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*counter\s*(\S+)\s*=\s*(\S+)", self.collectCounters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*masked_shutter\s*(\S+)", self.collectMaskedShutters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*shutter\s*(\S+)", self.collectShutters, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*trigger\s*(\S+)", self.collectTriggers, preprocessed_code)
+        preprocessed_code = re.sub(r"^\s*counter\s*(\S+)", self.collectCounters, preprocessed_code)
         return preprocessed_code
 
     def optimize(self):
@@ -942,7 +943,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         return repl
 
     def reduceGt02Bool(self, m):
-        return "JMPZ {0:60} {1}".format(m.group(1), m.group(2))
+        return "JMPZ {0:60} {1}".format(m.group(2), m.group(3))
 
     ########################################################################
     #### Grab all parameters/vars/triggers/... instantiated in the code ####

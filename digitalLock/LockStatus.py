@@ -268,7 +268,7 @@ class LockStatus(Form, Base):
                 self.trace['bottom'] = rollingUpdate(self.trace['bottom'], bottom, self.settings.maxSamples)
                 self.trace['top'] = rollingUpdate(self.trace['top'], top, self.settings.maxSamples)
             if self.errorSigCurve is None:
-                self.errorSigCurve = PlottedTrace(self.trace, self.plotDict[self.settings.errorSigPlot]['view'], pen=-1, style=PlottedTrace.Styles.points, name="Error Signal", windowName=self.settings.errorSigPlot)  #@UndefinedVariable 
+                self.errorSigCurve = PlottedTrace(self.trace, self.plotDict[self.settings.errorSigPlot], pen=-1, style=PlottedTrace.Styles.points, name="Error Signal", windowName=self.settings.errorSigPlot)  #@UndefinedVariable
                 self.errorSigCurve.plot()
                 self.traceui.addTrace( self.errorSigCurve, pen=-1 )
             else:
@@ -282,7 +282,7 @@ class LockStatus(Form, Base):
             self.trace['freqBottom'] = rollingUpdate(self.trace['freqBottom'], bottom, self.settings.maxSamples)
             self.trace['freqTop'] = rollingUpdate(self.trace['freqTop'], top, self.settings.maxSamples)
             if self.freqCurve is None:
-                self.freqCurve = PlottedTrace(self.trace, self.plotDict[self.settings.frequencyPlot]['view'], pen=-1, style=PlottedTrace.Styles.points, name="Repetition rate", #@UndefinedVariable
+                self.freqCurve = PlottedTrace(self.trace, self.plotDict[self.settings.frequencyPlot], pen=-1, style=PlottedTrace.Styles.points, name="Repetition rate", #@UndefinedVariable
                                               xColumn='x', yColumn='freq', topColumn='freqTop', bottomColumn='freqBottom', windowName=self.settings.frequencyPlot)  
                 self.freqCurve.plot()
                 self.traceui.addTrace( self.freqCurve, pen=-1 )

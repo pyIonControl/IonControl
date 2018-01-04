@@ -15,6 +15,7 @@ from numpy import linspace
 from modules import MyException
 from modules.SequenceDict import SequenceDict
 from modules.doProfile import doprofile
+from modules.quantity import value
 from .AdjustValue import AdjustValue
 from ProjectConfig.Project import getProject
 from uiModules.ImportErrorPopup import importErrorPopup
@@ -366,14 +367,19 @@ class VoltageBlender(QtCore.QObject):
 
     stateFields = ('lineGain', 'globalGain', 'adjustGain')
     def shuttlingDataHash(self):
-        h = hash(itertools.chain((getattr(self, field).to_tuple() for field in self.stateFields),
-                                 (q.to_tuple() for q in self.adjustDict.values()),
-                                 (q.to_tuple() for q in self.localAdjustVoltages)))
+        data1 = tuple(value(getattr(self, field) for field in self.stateFields))
+        data2 = tuple(value(v.value) for v in self.adjustDict.values())
+        data3 = tuple((a.gainValue, a.solutionHash) for a in self.localAdjustVoltages)
+        h = hash((data1, data2, data3))
         logging.getLogger(__name__).info("Shuttling Hash: {0:x}".format(h))
+        logging.getLogger(__name__).debug(str((data1, data2, data3)))
         return h
     
     def shuttlingDataValid(self):
-        return self.shuttlingDataHash()==self.uploadedDataHash
+        valid = self.shuttlingDataHash() == self.uploadedDataHash
+        if not valid:
+            logging.getLogger(__name__).info("Shuttling data hash: {:x}, uploaded data hash {:x}".format(self.shuttlingDataHash(), self.uploadedDataHash))
+        return valid
         
     def trigger(self):
         self.dacController.triggerShuttling()

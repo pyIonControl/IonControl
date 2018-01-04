@@ -12,7 +12,7 @@ import numpy
 from scipy.optimize import leastsq
 
 from modules.SequenceDict import SequenceDict
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.Expression import Expression
 from modules.Observable import Observable
 from modules.quantity import Q

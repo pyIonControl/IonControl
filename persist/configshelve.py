@@ -29,6 +29,8 @@ import copy
 from wrapt import synchronized
 from threading import Thread, Event
 
+from modules.hasher import hexdigest
+
 Base = declarative_base()
 defaultcategory = 'main'
 
@@ -90,7 +92,7 @@ class PgShelveEntry(Base):
     def value(self, value):
         try:
             self.pvalue = pickle.dumps(value, 4)
-            self.digest = hashlib.sha224(self.pvalue).digest()
+            self.digest = hexdigest(self.pvalue, hashlib.sha224).encode()
         except Exception as e:
             logging.getLogger(__name__).error("Pickling of {0} failed {1}".format(self.key, str(e)))
 
@@ -219,6 +221,16 @@ class configshelve:
     @synchronized
     def __getitem__(self, key):
         return self.buffer[key]
+
+    @synchronized
+    def items_startswith(self, key_start):
+        start_length = len(key_start)
+        return [(key[start_length:].strip("."), value) for key, value in self.buffer.items() if key.startswith(key_start)]
+
+    @synchronized
+    def set_string_dict(self, prefix, string_dict):
+        for key, value in string_dict.items():
+            self.buffer[prefix + "." + key] = value
             
     @synchronized
     def __contains__(self, key):

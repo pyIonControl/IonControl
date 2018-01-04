@@ -33,6 +33,14 @@ def updateComboBoxItems( combo, items, selected=None):
     return str(combo.currentText())
 
 
+def setCurrentComboText(combo, text, sort=False):
+    index = combo.findText(text)
+    if index==-1:
+        combo.addItem(text)
+        index = combo.findText(text)
+    combo.setCurrentIndex(index)
+
+
 class BlockSignals:
     """Encapsulate blockSignals in __enter__ __exit__ idiom"""
     def __init__(self, widget):

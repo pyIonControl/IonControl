@@ -10,6 +10,8 @@ from PyQt5 import QtCore
 import logging
 import copy
 import numpy
+from uiModules.ParameterTable import Parameter
+
 
 EvaluationAlgorithms = {}
 
@@ -35,13 +37,35 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
         self.setDefault()
         self.settingsName = None
 
+    @property
+    def useQubitEvaluation(self):
+        return hasattr(self, 'qubitEvaluation')
+
+    @property
+    def useDetailEvaluation(self):
+        return hasattr(self, 'detailEvaluation')
+
+    @property
+    def qubitPlotWindow(self):
+        return 'Qubit' if self.useQubitEvaluation else None
+
     def setDefault(self):
-        pass
+        self.settings.setdefault('averageSameX', False)
+        self.settings.setdefault('combinePoints', 0)
+        self.settings.setdefault('averageType', 0)
 
     def parameters(self):
         """return the parameter definitions used by the parameterTable"""
-        return SequenceDict()
-               
+        parameterDict = SequenceDict()
+        parameterDict['averageSameX'] = Parameter(name='averageSameX', dataType='bool',
+                                                    value=self.settings['averageSameX'],
+                                                    tooltip="average all values for same x value")
+        parameterDict['combinePoints'] = Parameter(name='combinePoints', dataType='magnitude',
+                                                  value=self.settings['combinePoints'])
+        parameterDict['averageType'] = Parameter(name='averageType', dataType='magnitude',
+                                                  value=self.settings['averageType'])
+        return parameterDict
+
     def update(self, parameter):
         """update the parameter changed in the parameterTable"""
         if parameter.dataType != 'action':

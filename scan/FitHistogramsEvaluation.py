@@ -11,7 +11,7 @@ import logging
 from scipy.optimize import leastsq
 from math import sqrt
 from trace.TraceCollection import TraceCollection
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from itertools import zip_longest
 from copy import deepcopy
 from os import path
@@ -81,7 +81,7 @@ class FitHistogramEvaluation(EvaluationBase):
                 if path.exists(filename):
                     t = TraceCollection()
                     t.loadTrace(filename)
-                    yColumnName = t.tracePlottingList[0].yColumn
+                    yColumnName = t.plottingList[0]._yColumn
                     setattr(self.fitFunction, name, self.normalizeHistogram(t[yColumnName]))
                 else:
                     logging.getLogger(__name__).error("Reference data file '{0}' does not exist.".format(filename))
@@ -90,6 +90,7 @@ class FitHistogramEvaluation(EvaluationBase):
         self.dataLoaded = True
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Path', r'C:\Users\Public\Documents')
         self.settings.setdefault('ZeroBright', 'ZeroBright')
         self.settings.setdefault('OneBright', 'OneBright')
@@ -144,7 +145,8 @@ class FitHistogramEvaluation(EvaluationBase):
         parameterDict['Load Reference Data'] = Parameter(name='Load Reference Data', dataType='action', value='loadReferenceData')
         return parameterDict
 
-    def leastsq(self, x, y, parameters=None, sigma=None):
+    def leastsq(self, x, y, parameters=None, sigma=None, filt=None):
+        # TODO: Need to honor filtering
         logger = logging.getLogger(__name__)
         if parameters is None:
             parameters = [0.3, 0.3]
