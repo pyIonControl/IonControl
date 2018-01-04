@@ -161,7 +161,10 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         self.globalDict = globalVariablesUi.globalDict
         # History and Dictionary
         try:
-            self.settingsDict = self.config.get(self.configname+'.dict', dict())
+            self.settingsDict = dict(self.config.items_startswith(self.configname+'.dict.'))
+            # if there are no individual entries, try loading the whole dictionary
+            if not self.settingsDict:
+                self.settingsDict = self.config.get(self.configname+'.dict', dict())
         except (TypeError, AttributeError):
             logger.info( "Unable to read scan control settings dictionary. Setting to empty dictionary." )
             self.settingsDict = dict()
@@ -537,7 +540,7 @@ class ScanControl(ScanControlForm, ScanControlBase ):
         for e in self.settingsDict.values():
             e.scanTarget = str(e.scanTarget)
             e.scanParameter = str(e.scanParameter)
-        self.config[self.configname+'.dict'] = self.settingsDict
+        self.config.set_string_dict(self.configname+'.dict', self.settingsDict)
         self.config[self.configname+'.settingsName'] = self.settingsName
         self.config[self.configname+'.parameters'] = self.parameters
 

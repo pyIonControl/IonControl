@@ -213,6 +213,16 @@ class configshelve:
     @synchronized
     def __getitem__(self, key):
         return self.buffer[key]
+
+    @synchronized
+    def items_startswith(self, key_start):
+        start_length = len(key_start)
+        return [(key[start_length:].strip("."), value) for key, value in self.buffer.items() if key.startswith(key_start)]
+
+    @synchronized
+    def set_string_dict(self, prefix, string_dict):
+        for key, value in string_dict.items():
+            self.buffer[prefix + "." + key] = value
             
     @synchronized
     def __contains__(self, key):
