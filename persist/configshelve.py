@@ -29,6 +29,8 @@ import copy
 from wrapt import synchronized
 from threading import Thread
 
+from modules.hasher import hexdigest
+
 Base = declarative_base()
 defaultcategory = 'main'
 
@@ -90,7 +92,7 @@ class PgShelveEntry(Base):
     def value(self, value):
         try:
             self.pvalue = pickle.dumps(value, 4)
-            self.digest = hashlib.sha224(self.pvalue).digest()
+            self.digest = hexdigest(self.pvalue, hashlib.sha224).encode()
         except Exception as e:
             logging.getLogger(__name__).error("Pickling of {0} failed {1}".format(self.key, str(e)))
 
