@@ -31,7 +31,9 @@ testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "R
               "PulseCommand",
               "indented_blocks",
               "Master_uWave_program_v2",
-              "Declarations"
+              "Declarations",
+              "Microwave",
+              "Division"
             ]
 
 def test_generator(name):
