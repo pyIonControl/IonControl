@@ -207,6 +207,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 self.codestr += self.ppFormatLine("SUBW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.Mult):
                 self.codestr += self.ppFormatLine("MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+            elif isinstance(node.op, ast.Div):
+                self.codestr += self.ppFormatLine("DIVW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.RShift):
                 self.codestr += self.ppFormatLine("SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
             elif isinstance(node.op, ast.LShift):
@@ -231,6 +233,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
             self.codestr += [self.ppFormatLine("SUBW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Mult):
             self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
+        elif isinstance(node.op, ast.Div):
+            self.codestr += [self.ppFormatLine("DIVW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.RShift):
             self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.LShift):
