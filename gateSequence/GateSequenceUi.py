@@ -44,7 +44,7 @@ class Settings:
                    'generatorType', 'gateSet', 'preparationFiducials', 'measurementFiducials',
                    'germs', 'lengths', 'keepFraction', 'keepSeed', 'preparationFiducialsCache',
                    'measurementFiducialsCache', 'germsCache', 'lengthsCache', 'gateSetCache',
-                   'plotProperties']
+                   'plotProperties', 'packWidth']
     XMLTagName = "GateSequence"
     class GeneratorType(Enum):
         GateSequenceList = 0
@@ -76,6 +76,7 @@ class Settings:
         self.germsCache = HashableDict()
         self.lengthsCache = HashableDict()
         self.plotProperties = PlottedStructureProperties()
+        self.packWidth = 0  # if != 0 pack data using that many bits
 
     def __setstate__(self, d):
         self.__dict__ = d
@@ -101,6 +102,7 @@ class Settings:
         self.__dict__.setdefault('lengthsCache', HashableDict())
         self.__dict__.setdefault('gateSetCache', HashableDict())
         self.__dict__.setdefault('plotProperties', PlottedStructureProperties())
+        self.__dict__.setdefault('packWidth', 0)
         if isinstance(self.generatorType, str):
             self.generatorType = self.GeneratorType.GateSequenceList
         if not isinstance(self.gate, GateString):
@@ -198,6 +200,8 @@ class GateSequenceUi(Form, Base):
         self.MeasurementBox.lineEdit().editingFinished.connect(self.loadMeasurement)
         self.GermsBox.lineEdit().editingFinished.connect(self.loadGerms)
         self.LengthsBox.lineEdit().editingFinished.connect(self.loadLengths)
+        self.packWidthCombo.addItems(['0', '2', '4', '8', '16', '32', '64'])
+        self.packWidthCombo.currentIndexChanged[str].connect(self.onPackWidthChanged)
         self.project = getProject()
         self.defaultGateSequencesDir = self.project.configDir + '/GateSequences'
         if not os.path.exists(self.defaultGateSequencesDir):
@@ -206,6 +210,9 @@ class GateSequenceUi(Form, Base):
             shutil.copytree(exampleGateSequencesDir,
                             self.defaultGateSequencesDir)  # Copy over all example gate sequence files
         self.treeWidget.setParameters(self.settings.plotProperties.parameters())
+
+    def onPackWidthChanged(self, value):
+        self.settings.packWidth = int(value)
 
     def onChangeSource(self, index):
         try:
@@ -236,6 +243,7 @@ class GateSequenceUi(Form, Base):
         self.GateSequenceFrame.setEnabled( self.settings.enabled )
         self.GateEdit.setText(str(self.settings.gate))
         self.repetitionSpinBox.setValue( self.settings.thisSequenceRepetition )
+        self.packWidthCombo.setCurrentIndex(self.packWidthCombo.findText(str(self.settings.packWidth)))
         if self.settings.startAddressParam:
             self.StartAddressBox.setCurrentIndex(self.StartAddressBox.findText(self.settings.startAddressParam) )
         else:
@@ -408,10 +416,10 @@ class GateSequenceUi(Form, Base):
 
     def gateSequenceScanData(self):
         if self._usePyGSTi:
-            address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer)
+            address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer, self.settings.packWidth)
         else:
             if self.settings.active == self.Mode.FullList:
-                address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer)
+                address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer, self.settings.packWidth)
             else:
                 self.gateSequenceCompiler.gateCompile(self.gateSequenceContainer.gateDefinition)
                 data = self.gateSequenceCompiler.gateSequenceCompile(self.settings.gate)

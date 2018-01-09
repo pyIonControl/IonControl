@@ -7,9 +7,12 @@ import logging
 
 from modules.Expression import Expression
 from modules.quantity import Q, is_Q
+from itertools import zip_longest
+
 
 class GateSequenceCompilerException(Exception):
     pass
+
 
 class GateSequenceCompiler(object):
     expression = Expression()
@@ -20,7 +23,7 @@ class GateSequenceCompiler(object):
     """Compile all gate sequences into binary representation
         returns tuple of start address list and bytearray data"""
 
-    def gateSequencesCompile(self, gatesets):
+    def gateSequencesCompile(self, gatesets, packDataWidth):
         logger = logging.getLogger(__name__)
         logger.info("compiling {0} gateSequences.".format(len(gatesets.sequenceList)))
         self.gateCompile(gatesets.gateDefinition)
@@ -28,21 +31,37 @@ class GateSequenceCompiler(object):
         data = list()
         index = 0
         for gatestring in gatesets.sequenceList:
-            gatestringdata = self.gateSequenceCompile(gatestring)
+            gatestringdata = self.gateSequenceCompile(gatestring, packDataWidth)
             addresses.append(index)
             data.extend(gatestringdata)
             index += len(gatestringdata) * 8
         return addresses, data
 
+    @staticmethod
+    def packData(data, width):
+        if width == 0 or width == 64:
+            return data
+        if 64 % width != 0:
+            raise AttributeError("width must be factor of 64")
+        chunk_size = 64 // width
+        packed_data = list()
+        args = [iter(data)] * chunk_size
+        for chunk in zip_longest(*args, fillvalue=0):
+            p = 0
+            for i, value in enumerate(chunk):
+                p |= value << (i * width)
+            packed_data.append(p)
+        return packed_data
+
     """Compile one gateset into its binary representation"""
-    def gateSequenceCompile(self, gate_string):
+    def gateSequenceCompile(self, gate_string, packWidth):
         data = list()
         length = 0
         for gate in gate_string:
             thisCompiledGate = self.compiledGates[gate]
-            data.extend( thisCompiledGate )
+            data.extend(self.packData(thisCompiledGate))
             length += len(thisCompiledGate) // self.pulseListLength
-        return [length] + data
+        return [length] + self.packData(data, packWidth)
 
     """Compile each gate definition into its binary representation"""
     def gateCompile(self, gateDefinition ):
