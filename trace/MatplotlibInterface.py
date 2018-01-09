@@ -57,7 +57,7 @@ class MatplotWindow(QtWidgets.QDialog):
         self.traceind = 0
         self.code = ""
         self.header = """# Previous definitions:\n# import matplotlib.pyplot as plt\n# fig = plt.figure()\n# canvas = FigureCanvas(fig)\n\nplt.clf()\nax = fig.add_subplot(111)\n"""
-        self.footer = """\ncanvas.draw()"""
+        self.footer = """\nplt.tight_layout()\ncanvas.draw()"""
 
         self.savebutton.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.savebutton.setToolTip('<b>Right click for more options</b>\n\n<i>Saving plots with this button provides\nbetter quality figures, as they are saved\nnatively with matplotlib instead of\nthrough the Qt backend.<\i>')
@@ -128,13 +128,13 @@ class MatplotWindow(QtWidgets.QDialog):
             yunit = " ({0})".format(plottedtrace.yAxisUnit) if hasattr(plottedtrace, 'yAxisUnit') and plottedtrace.yAxisUnit else ""
             plt.xlabel(xlab+xunit)
             plt.ylabel(ylab+yunit)
-            plt.tight_layout()
-            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\nplt.tight_layout()\n".format(xlab+xunit,ylab+yunit)
+            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\n".format(xlab+xunit,ylab+yunit)
         if plottedtrace.fitFunction:
             style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
             style.update(self.styleLookup(plottedtrace, 'lines'))
             ax = self.fig.add_subplot(111)
             ax.plot(plottedtrace.fitx, plottedtrace.fity, **style)
+            plt.tight_layout()
             self.canvas.draw()
             styleStr = ', '.join([k+'='+str(v if not isinstance(v,str) else "'{}'".format(v)) for k,v in style.items()])
             self.code += """ax.plot(plottedTraces[{0}].fitx, plottedTraces[{0}].fity, {1})\n""".format(self.traceind, styleStr)
@@ -145,10 +145,12 @@ class MatplotWindow(QtWidgets.QDialog):
         if 'errorbar' in self.styleNames.get(plottedtrace.style,'lines') and plottedtrace.hasHeightColumn:
             self.code += """ax.errorbar(plottedTraces[{0}].x, plottedTraces[{0}].y, plottedTraces[{0}].height, {1})\n""".format(self.traceind, styleStr)
             ax.errorbar(plottedtrace.x, plottedtrace.y, plottedtrace.height, **style)
+            plt.tight_layout()
             self.canvas.draw()
         else:
             self.code += """ax.plot(plottedTraces[{0}].x, plottedTraces[{0}].y, {1})\n""".format(self.traceind, styleStr)
             ax.plot(plottedtrace.x, plottedtrace.y, **style)
+            plt.tight_layout()
             self.canvas.draw()
         self.textEdit.setPlainText(self.header+self.code+self.footer)
         self.traceind += 1
