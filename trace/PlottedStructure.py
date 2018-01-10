@@ -1,14 +1,12 @@
 import hashlib
 import lxml.etree as ElementTree
 from math import floor, ceil, sqrt
-import pickle
 
 import numpy
 from PyQt5 import QtCore
 from gateSequence.loglikelyhood import logl_terms, logl_max_terms
 from pyqtgraph.parametertree.Parameter import Parameter
 
-from modules.LRUCache import LRUCache
 from modules.SQLiteLRUCache import SQLiteLRUCache
 from pyqtgraphAddons.GSTGraphItem import GSTGraphItem
 
