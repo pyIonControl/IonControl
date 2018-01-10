@@ -5,9 +5,10 @@
 # *****************************************************************
 #from pyparsing import ParserElement
 #ParserElement.enablePackrat()
+import pytest
+
 from unittests import loggingConfig
 from pppCompiler import astCompiler as pppCompiler
-from unittest import TestCase, main
 import os
 
 def ppCompile(assemblerfile):
@@ -36,25 +37,15 @@ testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "R
               "Microwave",
               "Division"]
 
-def test_generator(name):
-    def test(self):
-        print("File: ", name)
-        self.assertTrue(pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
+
+@pytest.mark.parametrize("name", testfiles)
+def test_astCompile(name):
+    result = (pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
                                                os.path.join(folder, name + ".ppc.reference"), verbose=verbose))
-    return test
-
-
-class pppCompilerTest(TestCase):
-    pass
-
-for name in testfiles:
-    test_name = "test_{0}".format(name)
-    test = test_generator(name)
-    setattr(pppCompilerTest, test_name, test)
+    assert result
 
 
 if __name__ == "__main__":
-    main()
 
     mycode = """#code
     
