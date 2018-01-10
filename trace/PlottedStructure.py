@@ -5,7 +5,7 @@ import pickle
 
 import numpy
 from PyQt5 import QtCore
-from pygsti import logl_terms, logl_max_terms
+from gateSequence.loglikelyhood import logl_terms, logl_max_terms
 from pyqtgraph.parametertree.Parameter import Parameter
 
 from modules.LRUCache import LRUCache
