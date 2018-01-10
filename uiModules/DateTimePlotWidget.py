@@ -37,7 +37,7 @@ class DateTimePlotWidget(CoordinatePlotWidget):
 
 
 if __name__ == '__main__':
-    from PyQt5 import QtGui
+    from PyQt5 import QtGui, QtWidgets
     from uiModules import CoordinatePlotWidget as cw
     
     cw.icons_dir = '../ui/icons/'

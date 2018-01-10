@@ -6,21 +6,25 @@
 """
 Encapsulation of the Pulse Programmer Hardware 
 """
-from queue import Queue
 import logging
 import multiprocessing
-from multiprocessing.sharedctypes import Array
 from ctypes import c_longlong
-import numpy
+from multiprocessing.sharedctypes import Array
+from queue import Queue
+from threading import Condition
+from time import time
 
+import numpy
 from PyQt5 import QtCore
+from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication
 
 from modules.quantity import Q
-from .ServerProcess import FinishException
-from pulser.OKBase import ErrorMessages, FPGAException
-from .PulserHardwareServer import PulserHardwareServer
-from pulser.PulserHardwareServer import PulserHardwareException
 from pulser.LoggingReader import LoggingReader
+from pulser.OKBase import ErrorMessages, FPGAException
+from pulser.PulserHardwareServer import PulserHardwareException
+from .PulserHardwareServer import PulserHardwareServer
+from .ServerProcess import FinishException
 
 
 def check(number, command):
@@ -29,19 +33,20 @@ def check(number, command):
 
 
 class QueueReader(QtCore.QThread):      
-    def __init__(self, pulserHardware, dataQueue, parent = None):
+    def __init__(self, pulserHardware, dataQueue, condition_var, parent = None):
         QtCore.QThread.__init__(self, parent)
         self.exiting = False
         self.pulserHardware = pulserHardware
         self.running = False
         self.dataMutex = QtCore.QMutex()           # protects the thread data
         self.dataQueue = dataQueue
+        self.condition_var = condition_var
         self.dataHandler = { 'Data': lambda data, size : self.pulserHardware.dataAvailable.emit(data, size),
-                             'DedicatedData': lambda data, size: self.pulserHardware.dedicatedDataAvailable.emit(data),
+                             'DedicatedData': lambda data, size: self.pulserHardware.dedicatedDataAvailable.emit(data, size),
                              'FinishException': lambda data, size: self.raise_(FinishException()),
-                             'LogicAnalyzerData': lambda data, size: self.onLogicAnalyzerData(data) }
+                             'LogicAnalyzerData': self.onLogicAnalyzerData}
    
-    def onLogicAnalyzerData(self, data): 
+    def onLogicAnalyzerData(self, data, size):
         self.pulserHardware.logicAnalyzerDataAvailable.emit(data)
         
     def raise_(self, ex):
@@ -52,13 +57,24 @@ class QueueReader(QtCore.QThread):
         logger.info( "QueueReader thread started." )
         while True:
             try:
-                data = self.dataQueue.get()
-                self.dataHandler[ data.__class__.__name__ ]( data, self.dataQueue.qsize() )
+                for _ in range(10):
+                    data = self.dataQueue.get()
+                    # print("data from queue", time(), data.__class__.__name__)
+                    self.dataHandler[data.__class__.__name__](data, self.dataQueue.qsize())
+                # print("data dispatched", time())
+                #  use condition_var to wait until gui thread has processed data and all other events
+                #  this generates a handshake with the event loop, we send out a signal to the event loop
+                #  the signal gets added to the end of the queue, once it is processed, it signals back to this thread
+                #  that the next data element can be submitted
+                with self.condition_var:
+                    self.pulserHardware.next_data_trigger.emit()
+                    self.condition_var.wait(1)
+                    # print("condition stop wait", time())
             except (KeyboardInterrupt, SystemExit, FinishException):
                 break
             except Exception:
                 logger.exception("Exception in QueueReader")
-        logger.info( "QueueReader thread finished." )
+        logger.info( "PulserHardware QueueReader thread finished." )
 
 
 class PulserHardware(QtCore.QObject):
@@ -66,10 +82,11 @@ class PulserHardware(QtCore.QObject):
     sleepQueue = Queue()   # used to be able to interrupt the sleeping procedure
 
     dataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject', object )
-    dedicatedDataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject' )
+    dedicatedDataAvailable = QtCore.pyqtSignal(object, object)
     logicAnalyzerDataAvailable = QtCore.pyqtSignal( 'PyQt_PyObject' )
     shutterChanged = QtCore.pyqtSignal( 'PyQt_PyObject' )
-    ppActiveChanged = QtCore.pyqtSignal( object )
+    ppActiveChanged = QtCore.pyqtSignal(object)
+    next_data_trigger = QtCore.pyqtSignal()
     
     timestep = Q(5, 'ns')
 
@@ -79,7 +96,6 @@ class PulserHardware(QtCore.QObject):
         self._shutter = 0
         self._trigger = 0
         self.xem = None
-        self.Mutex = QtCore.QMutex
         self._adcCounterMask = 0
         self._integrationTime = Q(100, 'ms')
         
@@ -91,18 +107,25 @@ class PulserHardware(QtCore.QObject):
         self.serverProcess = self.serverClass(self.dataQueue, self.serverPipe, self.loggingQueue, self.sharedMemoryArray )
         self.serverProcess.start()
 
-        self.queueReader = QueueReader(self, self.dataQueue)
+        self.condition_var = Condition()
+        self.next_data_trigger.connect(self.next_data_notify)
+        self.queueReader = QueueReader(self, self.dataQueue, self.condition_var)
         self.queueReader.start()
         
         self.loggingReader = LoggingReader(self.loggingQueue)
         self.loggingReader.start()
         self.ppActive = False
         self._pulserConfiguration = None
-        
+
+    def next_data_notify(self):
+        with self.condition_var:
+            self.condition_var.notifyAll()
+
     def shutdown(self):
         self.clientPipe.send(('finish', (), {}))
         self.serverProcess.join()
         self.queueReader.wait()
+        QApplication.processEvents()
         self.loggingReader.wait()
         logging.getLogger(__name__).debug("PulseHardwareClient Shutdown completed")
         

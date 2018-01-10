@@ -11,10 +11,10 @@ from networkx import MultiGraph, shortest_path
 from modules.pairs_iter import pairs_iter
 from modules.Observable import Observable
 from modules.firstNotNone import firstNotNone
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.quantity import Q
 from uiModules.SoftStart import StartTypes
-from itertools import chain
+from itertools import chain, product
 from numpy import linspace
 
 
@@ -57,7 +57,11 @@ class ShuttleEdge(object):
         edge.startGenerator = StartTypes[edge._startType]()
         edge.stopGenerator = StartTypes[edge._startType]()
         return edge
-    
+
+    @property
+    def names(self):
+        return (self.startName, self.stopName)
+
     @property
     def startType(self):
         return self._startType
@@ -128,7 +132,17 @@ class ShuttlingGraph(list):
         self.graphChangedObservable = Observable()
         self.initGraph()
         self._hasChanged = True
-        
+
+    def get_edge(self, position):
+        """get the first edge that is containing the position"""
+        try:
+            for edge in self:
+                if edge.startLine <= position <= edge.stopLine:
+                    return edge
+            return None
+        except:
+            return None
+
     def initGraph(self):
         self.shuttlingGraph = MultiGraph()
         for edge in self:
@@ -253,7 +267,7 @@ class ShuttlingGraph(list):
         if startLine != edge.startLine and (startLine not in self.nodeLookup or self.nodeLookup[startLine] == edge.startName):
             self.nodeLookup.pop(edge.startLine)
             edge.startLine = startLine
-            self.shuttlingGraph.edge[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
+            self.shuttlingGraph.adj[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
             self.rgenerateNodeLookup()
             self.graphChangedObservable.firebare()
             self.setPosition(self.currentPosition)
@@ -266,7 +280,7 @@ class ShuttlingGraph(list):
         if stopLine != edge.stopLine and (stopLine not in self.nodeLookup or self.nodeLookup[stopLine] == edge.stopName):
             self.nodeLookup.pop(edge.stopLine)
             edge.stopLine = stopLine
-            self.shuttlingGraph.edge[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
+            self.shuttlingGraph.adj[edge.startName][edge.stopName][hash(edge)]['weight'] = abs(edge.stopLine-edge.startLine)
             self.rgenerateNodeLookup()
             self.graphChangedObservable.firebare()
             self.setPosition(self.currentPosition)
@@ -283,19 +297,46 @@ class ShuttlingGraph(list):
         self[edgeno].steps = steps
         return True      
     
-    def shuttlePath(self, fromName, toName ):
+    def shuttlePath(self, fromName, toName, allow_position=False):
         fromName = firstNotNone(fromName, self.currentPositionName)
         fromName = fromName if fromName else self.position(float(self.currentPosition))
+        fromName = fromName if fromName is not None else self.currentPosition
+        fromEdge = None
+        toEdge = None
         if fromName not in self.shuttlingGraph:
-            raise ShuttlingGraphException("Shuttling failed, origin '{0}' is not a valid shuttling node".format(fromName))
+            if allow_position:
+                fromEdge = self.get_edge(fromName)
+            if fromEdge is None:
+                raise ShuttlingGraphException("Shuttling failed, origin '{0}' is not a valid shuttling node".format(fromName))
         if toName not in self.shuttlingGraph:
-            raise ShuttlingGraphException("Shuttling failed, target '{0}' is not a valid shuttling node".format(toName))
-        sp = shortest_path(self.shuttlingGraph, fromName, toName)
+            if allow_position:
+                toEdge = self.get_edge(toName)
+            if toEdge is None:
+                raise ShuttlingGraphException("Shuttling failed, target '{0}' is not a valid shuttling node".format(toName))
+        preShuttle, postShuttle = None, None
+        if fromEdge is not None and toEdge is not None:
+            p = [shortest_path(self.shuttlingGraph, s, t) for s, t in product(fromEdge.names, toEdge.names)]
+            min_index, min_value = min(enumerate(len(q) for q in p), key=itemgetter(1))
+            sp = p[min_index]
+            preShuttle = (fromName, None)  # TODO: set correctly
+            postShuttle = (None, toName)  # TODO: set correctly
+        elif fromEdge is not None:
+            p = [shortest_path(self.shuttlingGraph, s, toName) for s in fromEdge.names]
+            min_index, min_value = min(enumerate(len(q) for q in p), key=itemgetter(1))
+            sp = p[min_index]
+            preShuttle = (fromName, None)  # TODO: set correctly
+        elif toEdge is not None:
+            p = [shortest_path(self.shuttlingGraph, fromName, t) for t in toEdge.names]
+            min_index, min_value = min(enumerate(len(q) for q in p), key=itemgetter(1))
+            sp = p[min_index]
+            postShuttle = (None, toName)  # TODO: set correctly
+        else:
+            sp = shortest_path(self.shuttlingGraph, fromName, toName)
         path = list()
         for a, b in pairs_iter(sp):
-            edge = sorted(self.shuttlingGraph.edge[a][b].values(), key=itemgetter('weight'))[0]['edge']
+            edge = sorted(self.shuttlingGraph.adj[a][b].values(), key=itemgetter('weight'))[0]['edge']
             path.append((a, b, edge, self.index(edge)))
-        return path
+        return path, preShuttle, postShuttle if allow_position else path
     
     def nodes(self):
         return self.shuttlingGraph.nodes()

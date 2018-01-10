@@ -130,7 +130,9 @@ class TodoList(Form, Base):
         Form.__init__(self)
         self.config = config
         self.settings = config.get('TodolistSettings', Settings())
-        self.settingsCache = config.get( 'TodolistSettings.Cache', dict())
+        self.settingsCache = dict(config.items_startswith('TodolistSettings.Cache.'))
+        if not self.settingsCache:
+            self.settingsCache = config.get('TodolistSettings.Cache', dict())
         self.masterSettings = config.get( 'Todolist.MasterSettings', MasterSettings())
         self.scanModules = scanModules
         self.scripting = scriptingUi
@@ -779,7 +781,7 @@ class TodoList(Form, Base):
         
     def saveConfig(self):
         self.config['TodolistSettings'] = self.settings
-        self.config['TodolistSettings.Cache'] = self.settingsCache
+        self.config.set_string_dict('TodolistSettings.Cache', self.settingsCache)
         for i in range(len(self.masterSettings.columnWidths)):
             self.masterSettings.columnWidths[i] = self.tableView.columnWidth(i)
         self.config['Todolist.MasterSettings'] = self.masterSettings

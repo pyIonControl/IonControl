@@ -27,7 +27,9 @@ import yaml
 import datetime
 import copy
 from wrapt import synchronized
-from threading import Thread
+from threading import Thread, Event
+
+from modules.hasher import hexdigest
 
 Base = declarative_base()
 defaultcategory = 'main'
@@ -90,7 +92,7 @@ class PgShelveEntry(Base):
     def value(self, value):
         try:
             self.pvalue = pickle.dumps(value, 4)
-            self.digest = hashlib.sha224(self.pvalue).digest()
+            self.digest = hexdigest(self.pvalue, hashlib.sha224).encode()
         except Exception as e:
             logging.getLogger(__name__).error("Pickling of {0} failed {1}".format(self.key, str(e)))
 
@@ -106,7 +108,7 @@ class configshelve:
         self.filename = filename
         self.loadFromDate = loadFromDate
         self.filetype = filetype
-        self.worker = None
+        self.commit_ready = None
 
     @synchronized
     def loadFromDatabase(self):
@@ -152,6 +154,7 @@ class configshelve:
                 self.buffer.update(yaml.load(f))
 
     def commitToDatabase(self):
+        self.commit_ready = Event()
         t = Thread(target=self._commitToDatabase)
         t.start()
 
@@ -166,6 +169,7 @@ class configshelve:
                     self.dbDigest[key] = entry.digest
         self.session.commit()
         self.session = self.Session()
+        self.commit_ready.set()
         
     @synchronized
     def saveConfig(self, copyTo=None, yamlfile=None):
@@ -182,6 +186,10 @@ class configshelve:
                 print(yaml.dump(self.buffer, default_flow_style=False), file=f)
         self.commitToDatabase()
 
+    @synchronized
+    def sessionCommit(self):
+        self.session.commit()
+
     def __enter__(self):
         Base.metadata.create_all(self.engine)
         self.Session = sessionmaker(bind=self.engine)
@@ -193,7 +201,9 @@ class configshelve:
         
     def __exit__(self, exittype, value, tb):
         self.commitToDatabase()
-        self.session.commit()
+        if self.commit_ready is not None:
+            self.commit_ready.wait()
+        self.sessionCommit()
 
     @synchronized
     def __setitem__(self, key, value):
@@ -211,6 +221,16 @@ class configshelve:
     @synchronized
     def __getitem__(self, key):
         return self.buffer[key]
+
+    @synchronized
+    def items_startswith(self, key_start):
+        start_length = len(key_start)
+        return [(key[start_length:].strip("."), value) for key, value in self.buffer.items() if key.startswith(key_start)]
+
+    @synchronized
+    def set_string_dict(self, prefix, string_dict):
+        for key, value in string_dict.items():
+            self.buffer[prefix + "." + key] = value
             
     @synchronized
     def __contains__(self, key):

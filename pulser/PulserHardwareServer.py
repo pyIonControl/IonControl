@@ -46,6 +46,7 @@ class Data(object):
         self.timeTick = defaultdict(list)
         self.timeTickOffset = 0.0
         self.timingViolations = None
+        self.post_time = None
         
     @property
     def creationTime(self):
@@ -152,6 +153,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
         self.logicAnalyzerBuffer = bytearray()
         self.logicAnalyzerReadStatus = 0      #
         self._pulserConfiguration = None
+        self._data_fifo_buffer = bytearray()
         
     def syncTime(self):
         if self.xem:
@@ -161,6 +163,11 @@ class PulserHardwareServer(ServerProcess, OKBase):
             logging.getLogger(__name__).error("No time synchronization because FPGA is not available")
         self.timeTickOffset = time_time()        
             
+    def queueData(self):
+        self.data.timeTickOffset = self.timeTickOffset
+        self.data.post_time = time_time()
+        self.dataQueue.put(self.data)
+        self.data = Data()
 
     analyzingState = enum.enum('normal', 'scanparameter', 'dependentscanparameter')
     def readDataFifo(self):
@@ -209,8 +216,9 @@ class PulserHardwareServer(ServerProcess, OKBase):
                     elif header==5: # aux data
                         self.logicAnalyzerReadStatus = 5
                     elif header==6:
-                        self.logicAnalyzerReadStatus = 6                                       
-                    logger.debug("Time {0:x} header {1} pattern {2:x} {3:x} {4:x}".format(self.logicAnalyzerTime, header, pattern, code, self.logicAnalyzerData.countOffset))
+                        self.logicAnalyzerReadStatus = 6
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug("Time {0:x} header {1} pattern {2:x} {3:x} {4:x}".format(self.logicAnalyzerTime, header, pattern, code, self.logicAnalyzerData.countOffset))
                 elif self.logicAnalyzerReadStatus==3:
                     (pattern, ) = struct.unpack('Q', s) 
                     self.logicAnalyzerData.data.append( (self.logicAnalyzerTime, pattern) )
@@ -230,7 +238,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
             self.logicAnalyzerBuffer = bytearray( sliceview_remainder(self.logicAnalyzerBuffer, 8) )           
 
                    
-        data, self.data.overrun, self.data.externalStatus = self.ppReadData(8)
+        data, self.data.overrun, self.data.externalStatus = self.ppReadWriteData(8)
         self.dedicatedData.externalStatus = self.data.externalStatus
         self.dedicatedData.maxBytesRead = max(self.dedicatedData.maxBytesRead, len(data) if data else 0)
         if data:
@@ -239,16 +247,16 @@ class PulserHardwareServer(ServerProcess, OKBase):
                 #print(hex(token))
                 if self.state == self.analyzingState.dependentscanparameter:
                     self.data.dependentValues.append(token)
-                    logger.debug( "Dependent value {0} received".format(token) )
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug( "Dependent value {0} received".format(token) )
                     self.state = self.analyzingState.normal
                 elif self.state == self.analyzingState.scanparameter:
-                    logger.debug( "Scan value {0} received".format(token) )
+                    if logger.isEnabledFor(logging.DEBUG):
+                        logger.debug( "Scan value {0} received".format(token) )
                     if self.data.scanvalue is None:
                         self.data.scanvalue = token
                     else:
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
-                        self.data = Data()
+                        self.queueData()
                         self.data.scanvalue = token
                     self.state = self.analyzingState.normal
                 elif token & 0xff00000000000000 == 0xee00000000000000: # dedicated results
@@ -268,17 +276,13 @@ class PulserHardwareServer(ServerProcess, OKBase):
                     if token == 0xffffffffffffffff:    # end of run
                         self.data.final = True
                         self.data.exitcode = 0x0000
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
+                        self.queueData()
                         logger.info( "End of Run marker received" )
-                        self.data = Data()
                     elif token & 0xffff000000000000 == 0xfffe000000000000:  # exitparameter
                         self.data.final = True
                         self.data.exitcode = token & 0x0000ffffffffffff
                         logger.info( "Exitcode {0:x} received".format(self.data.exitcode) )
-                        self.data.timeTickOffset = self.timeTickOffset
-                        self.dataQueue.put( self.data )
-                        self.data = Data()
+                        self.queueData()
                     elif token == 0xfffd000000000000:
                         self.timestampOffset += (1<<40)
                     elif token & 0xffff000000000000 == 0xfffc000000000000:  # new scan parameter
@@ -299,7 +303,13 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         value = token & 0x000000ffffffffff
                         if self.data.timestamp is None:
                             self.data.timestamp = defaultdict(list)
-                        self.data.timestamp[channel][-1].append(self.timestampOffset + value - self.data.timestampZero[channel][-1])
+                        try:
+                            self.data.timestamp[channel][-1].append(self.timestampOffset + value - self.data.timestampZero[channel][-1])
+                        except IndexError:
+                            logger.error("channel: {}".format(channel))
+                            logger.error("timestampZero: {}".format(self.data.timestampZero))
+                            logger.error("timestamp: {}".format(self.data.timestamp))
+                            raise
                     elif key==3:  # timestamp gate start
                         channel = (token >>40) & 0xffff 
                         value = token & 0x000000ffffffffff
@@ -336,9 +346,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         self.data.other.append(token)
             if self.data.overrun:
                 logger.info( "Overrun detected, triggered data queue" )
-                self.data.timeTickOffset = self.timeTickOffset
-                self.dataQueue.put( self.data )
-                self.data = Data()
+                self.queueData()
                 self.clearOverrun()
                 
             
@@ -572,6 +580,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
         self.sleepQueue.put(False)
 
     def ppWriteData(self, data):
+        """Write data to the FPGA input fifo"""
         if self.xem:
             if isinstance(data, bytearray):
                 return self.xem.WriteToPipeIn(0x81, data)
@@ -584,10 +593,37 @@ class PulserHardwareServer(ServerProcess, OKBase):
         else:
             logging.getLogger(__name__).warning("Pulser Hardware not available")
             return None
-                
-    def ppReadData(self,minbytes=8):
+
+    def ppWriteDataBuffered(self, data):
+        if self.xem:
+            if isinstance(data, bytearray):
+                self._data_fifo_buffer.extend(data)
+            else:
+                code = bytearray()
+                for item in data:
+                    code.extend(struct.pack('Q' if item>0 else 'q', item))
+                self._data_fifo_buffer.extend(code)
+            self.readDataFifo()  # This makes sure data is written before we return
+        else:
+            logging.getLogger(__name__).warning("Pulser Hardware not available")
+            return None
+
+    def _write_buffer(self, min_words=512):
+        """Write data from the buffer to the fifo if there is space available"""
+        if self._data_fifo_buffer:
+            write_count = 2040 - (self.xem.GetWireOutValue(0x26) >> 2)  # number of 64 bit words that can be written to data fifo
+            if write_count > min_words:
+                do_write_count = min(len(self._data_fifo_buffer), 8*write_count)
+                self.xem.WriteToPipeIn(0x81, self._data_fifo_buffer[:do_write_count])
+                self._data_fifo_buffer = self._data_fifo_buffer[do_write_count:]
+                logger = logging.getLogger(__name__)
+                if logger.isEnabledFor(logging.DEBUG):
+                    logger.debug("_write_buffer wrote {} bytes {} remaining".format(do_write_count, len(self._data_fifo_buffer)))
+
+    def ppReadWriteData(self, minbytes=8, minwrite=512):
         if self.xem:
             self.xem.UpdateWireOuts()
+            self._write_buffer(minwrite)
             wirevalue = self.xem.GetWireOutValue(0x25)   # pipe_out_available
             byteswaiting = (wirevalue & 0x1ffe)*2
             externalStatus = self.xem.GetWireOutValue(0x30) | (self.xem.GetWireOutValue(0x31) << 16)
@@ -697,6 +733,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
 
     def ppClearWriteFifo(self):
         if self.xem:
+            self._data_fifo_buffer = bytearray()
             self.xem.ActivateTriggerIn(0x41, 3)
         else:
             logging.getLogger(__name__).warning("Pulser Hardware not available")

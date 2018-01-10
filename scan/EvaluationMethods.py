@@ -12,6 +12,8 @@ algorithms are expected to defined the fileds as stated in MeanEvaluation
 
 """
 import math
+from collections import Counter
+from itertools import repeat
 
 import numpy
 
@@ -35,8 +37,10 @@ class MeanEvaluation(EvaluationBase):
                                    'min max': self.evaluateMinMax}
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('errorBarType', 'shotnoise')
         self.settings.setdefault('transformation', "")
+        self.settings.setdefault('timestamp_id', 0)
         if type(self.settings['errorBarType']) in (int, float):
             self.settings['errorBarType'] = self.errorBarTypes[self.settings['errorBarType']]
          
@@ -81,7 +85,37 @@ class MeanEvaluation(EvaluationBase):
                                                   choices=self.errorBarTypes, value=self.settings['errorBarType'])
         parameterDict['transformation'] = Parameter(name='transformation', dataType='str',
                                                     value=self.settings['transformation'], tooltip="use y for the result in a mathematical expression")
+        parameterDict['timestamp_id'] = Parameter(name='timestamp_id', dataType='magnitude',
+                                                  value=self.settings['timestamp_id'])
         return parameterDict
+
+    def detailEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
+        countarray = evaluation.getChannelData(data)
+        timestamps = data.timeTick.get(self.settings['timestamp_id'], None)
+        # we will return 3-tuple of lists: value, repeats, timestamp
+        # if we do not find a timestamp we will accumulate the data, otherwise send back every event
+        if countarray:
+            if timestamps is None or len(timestamps) != len(countarray):
+                mean, (minus, plus), raw = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+                if self.settings['transformation'] != "":
+                    mydict = {'y': mean}
+                    if ppDict:
+                        mydict.update(ppDict)
+                    mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
+                return [mean], [data._creationTime]
+            else:
+                if self.settings['transformation'] != "":
+                    mydict = dict()
+                    if ppDict:
+                        mydict.update(ppDict)
+                    values = list()
+                    for value in countarray:
+                        mydict['y'] = value
+                        values.append(float(self.expression.evaluate(self.settings['transformation'], mydict)))
+                else:
+                    values = countarray
+                return values, timestamps
+        return [], []
 
 class NumberEvaluation(EvaluationBase):
     name = 'Number'
@@ -106,6 +140,7 @@ class FeedbackEvaluation(EvaluationBase):
         self.lastUpdate = None
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('SetPoint', Q(0))
         self.settings.setdefault('P', Q(0))
         self.settings.setdefault('I', Q(0))
@@ -167,20 +202,30 @@ class ThresholdEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
-        
-    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
-        countarray = evaluation.getChannelData(data)
-        if not countarray:
-            return 0, None, 0
-        N = float(len(countarray))
+        self.settings.setdefault('timestamp_id', 0)
+        self.settings.setdefault('color_box_plot', False)
+
+    def _evaluate(self, data, evaluation, countarray):
+        if evaluation.name in data.evaluated:
+            return data.evaluated[evaluation.name]
         if self.settings['invert']:
             discriminated = [ 0 if count > self.settings['threshold'] else 1 for count in countarray ]
         else:
             discriminated = [ 1 if count > self.settings['threshold'] else 0 for count in countarray ]
         if evaluation.name:
             data.evaluated[evaluation.name] = discriminated
+        return discriminated
+
+
+    def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
+        countarray = evaluation.getChannelData(data)
+        if not countarray:
+            return 0, None, 0
+        N = float(len(countarray))
+        discriminated = self._evaluate(data, evaluation, countarray)
         x = numpy.sum( discriminated )
         p = x/N
         # Wilson score interval with continuity correction
@@ -191,6 +236,18 @@ class ThresholdEvaluation(EvaluationBase):
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0            
         return p, (p-bottom, top-p), x
 
+    def qubitEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
+        countarray = evaluation.getChannelData(data)
+        timestamps = data.timeTick.get(int(self.settings['timestamp_id']), None)
+        # we will return 3-tuple of lists: value, repeats, timestamp
+        # if we do not find a timestamp we will accumulate the data, otherwise send back every event
+        discriminated = self._evaluate(data, evaluation, countarray)
+        if timestamps is None or len(timestamps) != len(countarray):
+            c = Counter(discriminated)
+            return c.keys(), c.values(), repeat(data._creationTime, len(c))
+        else:
+            return discriminated, [1]*len(discriminated), timestamps
+
     def parameters(self):
         parameterDict = super(ThresholdEvaluation, self).parameters()
         name='threshold'
@@ -198,6 +255,8 @@ class ThresholdEvaluation(EvaluationBase):
                                         value=self.settings[name], text=self.settings.get( (name, 'text') ),
                                         tooltip='Threshold evaluation (the threshold value itself is excluded)')
         parameterDict['invert'] = Parameter(name='invert', dataType='bool', value=self.settings['invert'])
+        parameterDict['timestamp_id'] = Parameter(name='timestamp_id', dataType='magnitude', value=self.settings['timestamp_id'])
+        parameterDict['color_box_plot'] = Parameter(name='color_box_plot', dataType='bool', value=self.settings['color_box_plot'])
         return parameterDict
 
 class RangeEvaluation(EvaluationBase):
@@ -208,6 +267,7 @@ class RangeEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('min',0)
         self.settings.setdefault('max',1)
         self.settings.setdefault('invert',False)
@@ -252,6 +312,7 @@ class DoubleRangeEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('min_1',0)
         self.settings.setdefault('max_1',1)
         self.settings.setdefault('min_2',0)
@@ -308,6 +369,7 @@ class FidelityEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         
@@ -355,6 +417,7 @@ class ParityEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
 
@@ -400,6 +463,7 @@ class TwoIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
         
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('dd',1)
@@ -463,6 +527,7 @@ class CounterSumMeanEvaluation(EvaluationBase):
                                    'min max': self.evaluateMinMax}
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('errorBarType', 'shotnoise')
         self.settings.setdefault('transformation', "")
         self.settings.setdefault('counters', [])
@@ -538,6 +603,7 @@ class CounterSumThresholdEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('threshold',1)
         self.settings.setdefault('invert',False)
         self.settings.setdefault('counters', [])
@@ -594,6 +660,7 @@ class ThreeIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('Ion_3','')
@@ -677,6 +744,7 @@ class FourIonEvaluation(EvaluationBase):
         EvaluationBase.__init__(self, globalDict, settings)
 
     def setDefault(self):
+        super().setDefault()
         self.settings.setdefault('Ion_1','')
         self.settings.setdefault('Ion_2','')
         self.settings.setdefault('Ion_3','')

@@ -98,8 +98,13 @@ class Evaluation:
         self.roiWidth = Q(1, 'ms')
         self.integrateTimestamps = 0
         self.timestampsChannel = 0
+        self.timestampsId = 0
         self.saveRawData = False
-        
+
+    @property
+    def timestampsKey(self):
+        return ((self.timestampsId & 0xff) << 8) | (self.timestampsChannel & 0xff)
+
     def __setstate__(self, state):
         """this function ensures that the given fields are present in the class object
         after unpickling. Only new class attributes need to be added here.
@@ -107,6 +112,7 @@ class Evaluation:
         self.__dict__ = state
         self.__dict__.setdefault('evalList', list())
         self.__dict__.setdefault('histogramBins', 50)
+        self.__dict__.setdefault('timestampsId', 0)
 
     def __eq__(self, other):
         try:
@@ -122,7 +128,7 @@ class Evaluation:
         return hash(tuple(getattr(self, field) for field in self.stateFields))
         
     stateFields = [ 'histogramBins', 'integrateHistogram', 'enableTimestamps', 'binwidth', 'roiStart', 'roiWidth', 'integrateTimestamps', 'timestampsChannel', 
-                    'saveRawData', 'evalList', 'counterChannel']
+                    'saveRawData', 'evalList', 'counterChannel', 'timestampsId']
 
 
 class EvaluationControlParameters(AttributeComparisonEquality):
@@ -146,7 +152,9 @@ class EvaluationControl(ControlForm, ControlBase ):
         self.counterNames = counterNames
         # History and Dictionary
         try:
-            self.settingsDict = self.config.get(self.configname+'.dict', dict())
+            self.settingsDict = dict(self.config.items_startswith(self.configname+'.dict.'))
+            if not self.settingsDict:
+                self.settingsDict = self.config.get(self.configname+'.dict', dict())
         except (TypeError, UnpicklingError):
             logger.info( "Unable to read scan control settings dictionary. Setting to empty dictionary." )
             self.settingsDict = dict()
@@ -212,6 +220,7 @@ class EvaluationControl(ControlForm, ControlBase ):
             self.saveRawDataCheckBox.stateChanged.connect( functools.partial(self.onStateChanged, 'saveRawData' ) )
             self.integrateCombo.currentIndexChanged[int].connect( self.onIntegrationChanged )
             self.channelSpinBox.valueChanged.connect( functools.partial(self.onBareValueChanged, 'timestampsChannel') )
+            self.idSpinBox.valueChanged.connect(functools.partial(self.onBareValueChanged, 'timestampsId'))
         else:
             self.settings.enableTimestamps = False
             timestampsWidget = self.toolBox.widget(1)
@@ -251,6 +260,7 @@ class EvaluationControl(ControlForm, ControlBase ):
             self.roiWidthSpinBox.setValue(self.settings.roiWidth)
             self.integrateCombo.setCurrentIndex( self.settings.integrateTimestamps )
             self.channelSpinBox.setValue( self.settings.timestampsChannel )
+            self.idSpinBox.setValue(self.settings.timestampsId)
         self.checkSettingsSavable()
         self.evalAlgorithmList = []
         for evaluation in self.settings.evalList:
@@ -339,7 +349,7 @@ class EvaluationControl(ControlForm, ControlBase ):
         
     def saveConfig(self):
         self.config[self.configname] = self.settings
-        self.config[self.configname+'.dict'] = self.settingsDict
+        self.config.set_string_dict(self.configname + '.dict', self.settingsDict)
         self.config[self.configname+'.settingsName'] = self.settingsName
         self.config[self.configname+'.parameters'] = self.parameters
     

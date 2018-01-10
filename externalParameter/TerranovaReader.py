@@ -8,6 +8,10 @@ import serial.tools.list_ports
 import re
 import math
 
+import sys
+
+isPy3 = sys.version_info[0] > 2
+
 class TerranovaReader:
     @staticmethod
     def connectedInstruments():
@@ -19,23 +23,32 @@ class TerranovaReader:
         self.timeout = timeout
         self.conn = None
         self.deviceaddr = deviceaddr
-        
+
     def open(self):
         self.conn = serial.Serial( self.instrument, self.baud, timeout=self.timeout)
         
     def close(self):
         self.conn.close()
-        
+
+    def write(self, text):
+        if isPy3:
+            data = text.encode('ascii')
+        self.conn.write(data)
+
+    def read(self, length):
+        data = self.conn.read(length)
+        return data.decode('ascii') if isPy3 else data
+
     def query(self, question, length=100):
-        self.conn.write(question)
-        return self.conn.read(length)
+        self.write(question)
+        return self.read(length)
                 
     def value(self):
-        reply = self.query(b"F").decode('ascii').rstrip('\n\r')
+        reply = self.query("F").rstrip('\n\r')
         m = re.match('\s*(\d+)\s+([-0-9]+)\s*', reply)
         mantissa = float(m.group(1))
         exponent = int(m.group(2))
-        return  mantissa * math.pow(10, exponent)
+        return mantissa * math.pow(10, exponent)
 
 if __name__=="__main__":
     mks = TerranovaReader()

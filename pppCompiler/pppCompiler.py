@@ -442,7 +442,7 @@ class pppCompiler:
 
         codetext = "\n".join(header + allcode)
         return codetext
-    
+
     def compileString(self, programText):
         self.programText = programText
         self.currentFile = "Memory"
@@ -520,7 +520,6 @@ def pppcompile( sourcefile, targetfile, referencefile ):
             print(line)
             comppass = False
     return comppass
-
 
 def pppCompileString(sourcecode):
     compiler = pppCompiler()

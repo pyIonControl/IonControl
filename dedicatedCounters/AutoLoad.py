@@ -20,7 +20,6 @@ import pytz
 
 import PyQt5.uic
 from PyQt5 import QtCore, QtNetwork, QtWidgets
-from pyqtgraph.parametertree.Parameter import Parameter
 
 from dedicatedCounters.LoadingHistoryModel import LoadingHistoryModel
 from dedicatedCounters.WavemeterInterlockTableModel import WavemeterInterlockTableModel
@@ -99,6 +98,7 @@ class AutoLoadSettings(object):
         self.maxTime = Q(600, 's')
         self.beyondThresholdTime = Q(3, 's')
         self.dumpTime = Q(3, 's')
+        self.maxLoadCheckCycles = Q(3)
 
     def paramDef(self):
         """
@@ -115,7 +115,8 @@ class AutoLoadSettings(object):
                 {'name': 'Max failed autoload', 'type': 'magnitude', 'value': self.maxFailedAutoload, 'tip': "maximum number of consecutive failed loading attempts", 'field': 'maxFailedAutoload'},
                 {'name': 'Beyond threshold time', 'type': 'magnitude', 'value': self.beyondThresholdTime, 'tip': "Time in the state BeyondThreshold before dumping ions", 'field': 'dumpTime', 'dimension': 's'},
                 {'name': 'Dump time', 'type': 'magnitude', 'value': self.dumpTime, 'tip': "Time in the state dump to reset (kick out) the ions", 'field': 'beyondThresholdTime', 'dimension': 's'},
-                {'name': 'History timespan', 'type': 'magnitude', 'value': self.historyLength, 'tip': "Time range to display loading history", 'field': 'historyLength'}]
+                {'name': 'History timespan', 'type': 'magnitude', 'value': self.historyLength, 'tip': "Time range to display loading history", 'field': 'historyLength'},
+                {'name': 'Max load check cycles', 'type': 'magnitude', 'value': self.maxLoadCheckCycles, 'tip': "Maximum number of load check cycles before giving up", 'field': "maxLoadCheckCycles"}]
 
     def update(self, param, changes):
         """
@@ -157,10 +158,11 @@ class AutoLoadSettings(object):
         self.__dict__.setdefault('beyondThresholdTime', Q(10, 's'))
         self.__dict__.setdefault('dumpTime', Q(10, 's'))
         self.__dict__.setdefault('ovenCoolDownTime', Q(10, 's'))
+        self.__dict__.setdefault('maxLoadCheckCycles', Q(3))
 
     stateFields = ['maxTime', 'ovenCoolDownTime', 'checkTime', 'useInterlock', 'interlock',
                    'autoReload', 'waitForComebackTime', 'maxFailedAutoload', 'postSequenceWaitTime', 'historyLength',
-                   'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime']
+                   'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime', 'maxLoadCheckCycles']
 
     def __eq__(self, other):
         return isinstance(other, AutoLoadSettings) and tuple(getattr(self,field) for field in self.stateFields) == \
@@ -238,7 +240,12 @@ class AutoLoad(UiForm, UiBase):
         self.wavemeterAddress = wavemeterHardwareSetting.get('uri', None)
         self.wavemeterAvailable = wavemeterHardwareSetting.get('enabled', False) and bool(self.wavemeterAddress)
         self.wavemeterOutOfLock = False
+        self._loadCheckCycleCounter = 0
         logging.getLogger(__name__).info("Wavemeter URI: {0} {1}".format(self.wavemeterAddress, "available" if self.wavemeterAvailable else "not available"))
+
+    @property
+    def loadCheckCycleOkay(self):
+        return self._loadCheckCycleCounter <= self.settings.maxLoadCheckCycles
 
     def constructStatemachine(self):
         self.statemachine = Statemachine('AutoLoad', now=now )
@@ -300,7 +307,10 @@ class AutoLoad(UiForm, UiBase):
                                         self.loadingToTrapped,
                                         description="Success!")
         self.statemachine.addTransition('data', 'Check', 'Load',
-                                        self.countsUnderRange,
+                                        lambda state, data: self.countsUnderRange(state, data) and self.loadCheckCycleOkay,
+                                        description="lost ion during check")
+        self.statemachine.addTransition('data', 'Check', 'AutoReloadFailed',
+                                        lambda state, data: self.countsUnderRange(state, data) and not self.loadCheckCycleOkay,
                                         description="lost ion during check")
         self.statemachine.addTransition('data', 'Check', 'BeyondThreshold',
                                         self.countsOverRange,
@@ -793,6 +803,7 @@ class AutoLoad(UiForm, UiBase):
         self.numFailedAutoload += 1
         self.timerNullTime = now()
         self.preheatStartTime = now()
+        self._loadCheckCycleCounter = 0
 
     def setOvenCooldown(self):
         self.changeSettings('OvenCooldown')
@@ -813,6 +824,7 @@ class AutoLoad(UiForm, UiBase):
         self.stopButton.setEnabled( True )
         self.elapsedLabel.setStyleSheet("QLabel { color:purple; }")
         self.statusLabel.setText("Loading")
+        self._loadCheckCycleCounter += 1
 
     def setPeriodicCheck(self):
         """Execute when periodicly checking for an ion."""

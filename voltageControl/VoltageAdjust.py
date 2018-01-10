@@ -10,15 +10,13 @@ import logging
 from PyQt5 import QtCore
 import PyQt5.uic
 
-from modules.doProfile import doprofile
 from voltageControl.ShuttleEdgeTableModel import ShuttleEdgeTableModel
 from voltageControl.ShuttlingDefinition import ShuttlingGraph, ShuttleEdge
 from modules.PyqtUtility import updateComboBoxItems, BlockSignals
 from modules.firstNotNone import firstNotNone
 from modules.Utility import unique
 from modules.GuiAppearance import restoreGuiState, saveGuiState
-from xml.etree import ElementTree 
-from xml.dom import minidom
+import lxml.etree as ElementTree
 import os.path
 from modules.Expression import Expression
 from gui.ExpressionValue import ExpressionValue
@@ -239,7 +237,7 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         return sorted(self.shuttlingGraph.nodes()) 
     
     def currentShuttlingPosition(self):
-        return self.shuttlingGraph.currentPositionName
+        return self.shuttlingGraph.currentPositionName or self.shuttlingGraph.currentPosition
 
     def onCurrentPositionEvent(self, event):
         self.adjust.line = event.line
@@ -252,8 +250,9 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         destination = str(destination)
         logger = logging.getLogger(__name__)
         logger.info( "ShuttleSequence" )
-        path = self.shuttlingGraph.shuttlePath(None, destination)
-        if path:  
+        path, preShuttle, postShuttle = self.shuttlingGraph.shuttlePath(None, destination, allow_position=True)
+        if path:
+            #  TODO: do the pre and post shuttle
             if instant:
                 edge = path[-1][2]
                 _, toLine = (edge.startLine, edge.stopLine) if path[-1][0]==edge.startName else (edge.stopLine, edge.startLine)
@@ -296,15 +295,13 @@ class VoltageAdjust(VoltageAdjustForm, VoltageAdjustBase ):
         root = ElementTree.Element('VoltageAdjust')
         self.shuttlingGraph.toXmlElement(root)
         if self.shuttlingDefinitionFile:
-            with open(self.shuttlingDefinitionFile, 'w') as f:
+            with open(self.shuttlingDefinitionFile, 'wb') as f:
                 f.write(self.prettify(root))
             
     def prettify(self, elem):
         """Return a pretty-printed XML string for the Element.
         """
-        rough_string = ElementTree.tostring(elem, 'utf-8')
-        reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent="  ")
+        return ElementTree.tostring(elem, encoding='utf-8', pretty_print=True, xml_declaration=True)
 
     def loadShuttleDef(self, filename):
         if filename is not None:

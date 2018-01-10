@@ -5,7 +5,7 @@
 # *****************************************************************
 import logging
 
-from .InstrumentReader import wrapInstrument
+from externalParameter.InstrumentReader import wrapInstrument
 LoggingInstruments = dict()
 
 try:
@@ -19,7 +19,13 @@ try:
     LoggingInstruments["Ion Gauge"] = wrapInstrument( "TerranovaInstrumentReader", TerranovaReader)
 except:
     logging.getLogger(__name__).info("Ion gauge reader not available")
-    
+
+try:
+    from externalParameter.Keithley2010Reader import Keithley2010Reader
+    LoggingInstruments['Keithley 2010'] = wrapInstrument("Keithley2010ReaderInstrumentReader", Keithley2010Reader)
+except:
+    logging.getLogger(__name__).info("Keithley 2010 reader not available")
+
 try:
     from .MultiMeterReader import MultiMeterReader
     from .Keithley2010Reader import Keithley2010Reader
@@ -31,7 +37,9 @@ try:
     LoggingInstruments['N9342Peak'] = wrapInstrument( "SpectrumAnalyzerN9342PeakReader", SpectrumAnalyzerN9342Peak )
 except:
     logging.getLogger(__name__).info("Multi Meter reader not available")
-    
+
+
+
 try:
     from .PhotodiodeReader import PhotoDiodeReader
     LoggingInstruments['Photodiode'] = wrapInstrument( "PhotodiodeInstrumentReader", PhotoDiodeReader )

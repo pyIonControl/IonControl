@@ -3,6 +3,8 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import lxml.etree as ElementTree
+from pyqtgraph.parametertree import Parameter
 
 from trace import pens
 
@@ -12,91 +14,166 @@ from pyqtgraph.graphicsItems.ErrorBarItem import ErrorBarItem
 from pyqtgraph.graphicsItems.PlotCurveItem import PlotCurveItem
 
 from modules import enum
-from trace.TraceCollection import TracePlotting
-import time 
+import time
 from modules import WeakMethod
 from functools import partial
 from collections import deque
 
-def sort_lists_by(lists, key_list=0, desc=False):
-    return list(zip(*sorted(zip(*lists), reverse=desc,
-                 key=lambda x: x[key_list])))
+from trace.ReducedTrace import ReducedTrace
+from trace.sortlists import sort_lists_by
+from uiModules.MagnitudeParameter import MagnitudeParameter
+
+
+class PlottedTraceProperties:
+    stateFields = ('averageSameX', 'combinePoints', 'averageType')
+    xmlPropertFields = ('averageSameX', 'combinePoints', 'averageType')
+    def __init__(self, averageSameX=False, combinePoints=0, averageType=None):
+        self.averageSameX = averageSameX
+        self.combinePoints = combinePoints
+        self.averageType = averageType
+
+    def __getstate__(self):
+        return {key: getattr(self, key) for key in self.stateFields}
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
+    def paramDef(self):
+        return [{'name': 'average same x', 'type': 'bool', 'value': self.averageSameX, 'field': 'averageSameX'},
+         {'name': 'combine Points', 'type': 'magnitude', 'value': self.combinePoints, 'field': 'combinePoints'},
+         {'name': 'averageType', 'type': 'magnitude', 'value': self.averageType,'field': 'averageType'}]
+
+    def parameters(self):
+        self._parameter = Parameter.create(name='Settings', type='group', children=self.paramDef())
+        self._parameter.sigTreeStateChanged.connect(self.update, QtCore.Qt.UniqueConnection)
+        return self._parameter
+
+    def update(self, param, changes):
+        """
+        update the parameter, called by the signal of pyqtgraph parametertree
+        """
+        prop_changed = False
+        for param, change, data in changes:
+            if change == 'value':
+                value = float(data.m_as('')) if isinstance(data, MagnitudeParameter) else data
+                setattr(self, param.opts['field'], value)
+                prop_changed = True
+            elif change == 'activated':
+                getattr(self, param.opts['field'])()
+        return prop_changed
+
+    def copy(self):
+        p = PlottedTraceProperties()
+        p.__setstate__(self.__getstate__())
+        return p
+
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'PlottedTraceProperties',
+                               dict((name, str(getattr(self, name))) for name in self.xmlPropertFields))
+        #sub = ElementTree.subElement(e, 'Properties')
+        return e
+
 
 class PlottedTrace(object):
     Styles = enum.enum('lines', 'points', 'linespoints', 'lines_with_errorbars', 'points_with_errorbars', 'linepoints_with_errorbars')
     PointsStyles = [ 1, 4 ]
     Types = enum.enum('default', 'steps')
-    def __init__(self,Trace,graphicsView,penList=None,pen=0,style=None,plotType=None,
-                 xColumn='x',yColumn='y',topColumn='top',bottomColumn='bottom',heightColumn='height',
-                 rawColumn='raw', filtColumn=None, tracePlotting=None, name="", xAxisLabel = None,
-                 xAxisUnit = None, yAxisLabel = None, yAxisUnit = None, fill=True, windowName=None):
-        self.category = None
+    serializeFields = ('_xColumn','_yColumn','_topColumn', '_bottomColumn','_heightColumn', '_filtColumn', 'name',
+                       'type', 'xAxisUnit', 'xAxisLabel', 'yAxisLabel', 'windowName', '_rawColumn', 'fill', 'style',
+                       'type', '_fitFunction', 'properties')
+    fieldReplacements = {'xColumn': '_xColumn',  'yColumn': '_yColumn', 'topColumn': '_topColumn',
+                          'bottomColumn': '_bottomColumn', 'heightColumn': '_heightColumn',
+                          'filtColumn': '_filtColumn', 'rawColumn': '_rawColumn'}
+    def __init__(self, Trace=None, graphics=None, penList=None, pen=0, style=None, plotType=None,
+                 xColumn='x', yColumn='y', topColumn='top', bottomColumn='bottom', heightColumn='height',
+                 rawColumn='raw', filtColumn=None, name="", xAxisLabel=None,
+                 xAxisUnit=None, yAxisLabel=None, yAxisUnit=None, fill=True, windowName=None,
+                 averageSameX=False, combinePoints=0, averageType=None):
+        self.properties = PlottedTraceProperties(averageSameX=averageSameX, combinePoints=combinePoints, averageType=averageType)
+        self.trace = None
+        self._xColumn = xColumn
+        self._yColumn = yColumn
+        self._topColumn = topColumn
+        self._bottomColumn = bottomColumn
+        self._heightColumn = heightColumn
+        self._rawColumn = rawColumn
+        self._filtColumn = filtColumn
+        self.xAxisUnit = xAxisUnit
+        self.xAxisLabel = xAxisLabel
+        self.yAxisUnit = yAxisUnit
+        self.yAxisLabel = yAxisLabel
         self.fill = fill
+        self.style = self.Styles.lines if style is None else style
+        self.type = self.Types.default if plotType is None else plotType
+        self.setup(Trace, graphics, penList, pen, windowName, name)
+        self._fitFunction = None
+
+    def setup(self, traceCollection, graphics, penList=None, pen=-1, windowName=None, name=None, properties=None):
+        self.category = None
         if penList is None:
             penList = pens.penList
         self.penList = penList
-        self._graphicsView = graphicsView
+        self._graphicsView = graphics and graphics.get('view')
         if self._graphicsView is not None:
             if not hasattr(self._graphicsView, 'penUsageDict'):
                 self._graphicsView.penUsageDict = [0]*len(pens.penList)
             self.penUsageDict = self._graphicsView.penUsageDict        # TODO circular reference
-        self.trace = Trace
         self.curve = None
         self.auxiliaryCurves = deque()
         self.fitcurve = None
         self.errorBarItem = None
         self.auxiliaryErrorBarItem = None
-        self.style = self.Styles.lines if style is None else style
-        self.type = self.Types.default if plotType is None else plotType
         self.curvePen = 0
         self.name = name
-        self.xAxisLabel = xAxisLabel
-        self.xAxisUnit = xAxisUnit
-        self.yAxisLabel = yAxisLabel
-        self.yAxisUnit = yAxisUnit
         self.lastPlotTime = time.time()
         self.needsReplot = False
         # we use pointers to the relevant columns in trace
-        if tracePlotting is not None:
-            self.tracePlotting = tracePlotting
-            self._xColumn = tracePlotting.xColumn
-            self._yColumn = tracePlotting.yColumn
-            self._topColumn = tracePlotting.topColumn
-            self._bottomColumn = tracePlotting.bottomColumn
-            self._heightColumn = tracePlotting.heightColumn
-            self._rawColumn = tracePlotting.rawColumn
-            self._filtColumn = tracePlotting.filtColumn
-            self.type = tracePlotting.type
-            self.xAxisLabel = tracePlotting.xAxisLabel
-            self.xAxisUnit = tracePlotting.xAxisUnit
-            self.windowName = tracePlotting.windowName
-        elif self.trace is not None:
-            self._xColumn = xColumn
-            self._yColumn = yColumn
-            self._topColumn = topColumn
-            self._bottomColumn = bottomColumn
-            self._heightColumn = heightColumn
-            self._rawColumn = rawColumn
-            self._filtColumn = filtColumn
-            self.tracePlotting = TracePlotting(xColumn=self._xColumn, yColumn=self._yColumn, topColumn=self._topColumn, bottomColumn=self._bottomColumn,   # TODO double check for reference
-                                               heightColumn=self._heightColumn, rawColumn=self._rawColumn, filtColumn=self._filtColumn, name=name, type_=self.type, xAxisUnit=self.xAxisUnit,
-                                               xAxisLabel=self.xAxisLabel, windowName=windowName )
-            self.trace.addTracePlotting( self.tracePlotting )   # TODO check for reference
         self.windowName = windowName
-        self.stylesLookup = { self.Styles.lines: partial( WeakMethod.ref(self.plotLines), errorbars=False),
-                         self.Styles.points: partial( WeakMethod.ref(self.plotPoints), errorbars=False),
-                         self.Styles.linespoints: partial( WeakMethod.ref(self.plotLinespoints), errorbars=False), 
-                         self.Styles.lines_with_errorbars: partial( WeakMethod.ref(self.plotLines), errorbars=True),
-                         self.Styles.points_with_errorbars: partial( WeakMethod.ref(self.plotPoints), errorbars=True),
-                         self.Styles.linepoints_with_errorbars: partial( WeakMethod.ref(self.plotLinespoints), errorbars=True)}
+        self.stylesLookup = {self.Styles.lines: partial(WeakMethod.ref(self.plotLines), errorbars=False),
+                             self.Styles.points: partial(WeakMethod.ref(self.plotPoints), errorbars=False),
+                             self.Styles.linespoints: partial(WeakMethod.ref(self.plotLinespoints), errorbars=False),
+                             self.Styles.lines_with_errorbars: partial(WeakMethod.ref(self.plotLines), errorbars=True),
+                             self.Styles.points_with_errorbars: partial(WeakMethod.ref(self.plotPoints),
+                                                                        errorbars=True),
+                             self.Styles.linepoints_with_errorbars: partial(WeakMethod.ref(self.plotLinespoints),
+                                                                            errorbars=True)}
+        if self.trace is None and traceCollection is not None:
+            traceCollection.addPlotting(self)
+        self.trace = traceCollection
+        self._reducedTrace = ReducedTrace(traceCollection, self.properties.averageSameX, self.properties.combinePoints,
+                                          self.properties.averageType,
+                                          self._xColumn, self._yColumn, self._bottomColumn, self._topColumn,
+                                          self._heightColumn)
+
+    def __getstate__(self):
+        return {key: getattr(self, key) for key in PlottedTrace.serializeFields}
+
+    def __setstate__(self, state):
+        self.__dict__.update({PlottedTrace.fieldReplacements.get(key, key): value for key, value in state.items()})
+        self.__dict__.setdefault('_fitFunction', None)
+        self.__dict__.setdefault('trace', None)
+        self.__dict__.setdefault('yAxisLabel', None)
+        self.__dict__.setdefault('properties', PlottedTraceProperties())
+        self._reducedTrace = ReducedTrace(self.trace, self.properties.averageSameX, self.properties.combinePoints,
+                                          self.properties.averageType,
+                                          self._xColumn, self._yColumn, self._bottomColumn, self._topColumn,
+                                          self._heightColumn)
+
+    def toXML(self, element):
+        e = ElementTree.SubElement(element, 'TracePlotting',
+                               dict((name, str(getattr(self, name))) for name in self.serializeFields))
+        if self.fitFunction:
+            self.fitFunction.toXmlElement(e)
+        self.properties.toXML(e)
+        return e
 
     def setGraphicsView(self, graphicsView, name):
+        graphicsView = graphicsView['view']
         if graphicsView!=self._graphicsView:
             self.removePlots()
             self._graphicsView = graphicsView
             self._graphicsView.vb.menu.axes[0].xlabelWidget.setText('aa')#self._graphicsView.getLabel('bottom'))
             self.windowName = name
-            self.tracePlotting.windowName = name
             self.plot()
 
     @property
@@ -196,7 +273,6 @@ class PlottedTrace(object):
     def filt(self, column):
         if self._filtColumn is None:
            self._filtColumn = self._yColumn+'_filt'
-           self.tracePlotting.filtColumn = self._filtColumn
         self.trace[self._filtColumn] = column
 
     @property
@@ -268,25 +344,40 @@ class PlottedTrace(object):
         if self._graphicsView is not None:
             if self.hasHeightColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), height=(self.height),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x),
+                                                     y=numpy.array(self.y),
+                                                     height=numpy.array(self.height),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), height=(self.height[self.filt>0]),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x)[numpy.array(self.filt)>0],
+                                                     y=numpy.array(self.y)[numpy.array(self.filt)>0],
+                                                     height=numpy.array(self.height)[numpy.array(self.filt)>0],
                                                      pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), height=(self.height[self.filt<1]),
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)<1]),
+                                                              y=(numpy.array(self.y)[numpy.array(self.filt)<1]),
+                                                              height=(numpy.array(self.height)[numpy.array(self.filt)<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
             elif self.hasTopColumn and self.hasBottomColumn:
                 if self.filt is None or all(self.filt):
-                    self.errorBarItem = ErrorBarItem(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom),
+                    self.errorBarItem = ErrorBarItem(x=numpy.array(self.x),
+                                                     y=numpy.array(self.y),
+                                                     top=numpy.array(self.top),
+                                                     bottom=numpy.array(self.bottom),
                                                      pen=self.penList[penindex][0])
                     self._graphicsView.addItem(self.errorBarItem)
                 else:
-                    self.errorBarItem = ErrorBarItem(x=(self.x[self.filt>0]), y=(self.y[self.filt>0]), top=(self.top[self.filt>0]), bottom=(self.bottom[self.filt>0]),
-                                                               pen=self.penList[penindex][0])
-                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(self.x[self.filt<1]), y=(self.y[self.filt<1]), top=(self.top[self.filt<1]), bottom=(self.bottom[self.filt<1]),
+                    self.errorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)>0]),
+                                                     y=(numpy.array(self.y)[numpy.array(self.filt)>0]),
+                                                     top=(numpy.array(self.top)[numpy.array(self.filt)>0]),
+                                                     bottom=(numpy.array(self.bottom)[numpy.array(self.filt)>0]),
+                                                     pen=self.penList[penindex][0])
+                    self.auxiliaryErrorBarItem = ErrorBarItem(x=(numpy.array(self.x)[numpy.array(self.filt)<1]),
+                                                              y=(numpy.array(self.y)[numpy.array(self.filt)<1]),
+                                                              top=(numpy.array(self.top)[numpy.array(self.filt)<1]),
+                                                              bottom=(numpy.array(self.bottom)[numpy.array(self.filt)<1]),
                                                               pen=self.penList[penindex][5])
                     self._graphicsView.addItem(self.errorBarItem)
                     self._graphicsView.addItem(self.auxiliaryErrorBarItem)
@@ -300,18 +391,22 @@ class PlottedTrace(object):
 
     def plotLines(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
-            if errorbars:
-                self.plotErrorBars(penindex)
-            if self.filt is None or all(self.filt):
-                x, y = sort_lists_by((self.x, self.y), key_list=0) if len(self.x) > 0 else (self.x, self.y)
-                self.curve = self._graphicsView.plot(numpy.array(x), numpy.array(y), pen=self.penList[penindex][0])
+            if self.properties.averageSameX or self.properties.combinePoints:
+                x, y = self._reducedTrace.plotData
+                self.curve = self._graphicsView.plot(x, y, pen=self.penList[penindex][0])
             else:
-                x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
-                self.curve = self._graphicsView.plot(numpy.array(x), numpy.array(y), pen=self.penList[penindex][0])
-                contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0, extended=True)
-                for cslice in contiguousSlices:
-                    if not numpy.array(filt)[cslice][0]:
-                        self.auxiliaryCurves.append(self._graphicsView.plot(numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5]))
+                if errorbars:
+                    self.plotErrorBars(penindex)
+                if self.filt is None or all(self.filt):
+                    x, y = sort_lists_by((self.x, self.y), key_list=0) if len(self.x) > 0 else (self.x, self.y)
+                    self.curve = self._graphicsView.plot(numpy.array(x), numpy.array(y), pen=self.penList[penindex][0])
+                else:
+                    x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
+                    self.curve = self._graphicsView.plot(numpy.array(x), numpy.array(y), pen=self.penList[penindex][0])
+                    contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0, extended=True)
+                    for cslice in contiguousSlices:
+                        if not numpy.array(filt)[cslice][0]:
+                            self.auxiliaryCurves.append(self._graphicsView.plot(numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5]))
             if self.xAxisLabel:
                 if self.xAxisUnit:
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
@@ -331,16 +426,21 @@ class PlottedTrace(object):
 
     def plotPoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
-            if errorbars:
-                self.plotErrorBars(penindex)
-            if self.filt is None or all(self.filt):
-                self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
-                                                    symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-            else:
-                self.curve = self._graphicsView.plot((self.x[self.filt>0]), (self.y[self.filt>0]), pen=None, symbol=self.penList[penindex][1],
+            if self.properties.averageSameX or self.properties.combinePoints:
+                x, y = self._reducedTrace.plotData
+                self.curve = self._graphicsView.plot(x, y, pen=None, symbol=self.penList[penindex][1],
                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                self.auxiliaryCurves.append(self._graphicsView.plot((self.x[self.filt<1]), (self.y[self.filt<1]), pen=None, symbol=self.penList[penindex][1],
-                                                      symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
+            else:
+                if errorbars:
+                    self.plotErrorBars(penindex)
+                if self.filt is None or all(self.filt):
+                    self.curve = self._graphicsView.plot((self.x), (self.y), pen=None, symbol=self.penList[penindex][1],
+                                                        symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+                else:
+                    self.curve = self._graphicsView.plot((numpy.array(self.x)[numpy.array(self.filt[:len(self.x)])>0]), (numpy.array(self.y)[numpy.array(self.filt[:len(self.y)])>0]), pen=None, symbol=self.penList[penindex][1],
+                                                         symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+                    self.auxiliaryCurves.append(self._graphicsView.plot((numpy.array(self.x)[numpy.array(self.filt[:len(self.x)])<1]), (numpy.array(self.y)[numpy.array(self.filt[:len(self.y)])<1]), pen=None, symbol=self.penList[penindex][1],
+                                                          symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
             if self.xAxisLabel:
                 if self.xAxisUnit:
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
@@ -360,21 +460,26 @@ class PlottedTrace(object):
 
     def plotLinespoints(self,penindex, errorbars=True ):
         if self._graphicsView is not None:
-            if errorbars:
-                self.plotErrorBars(penindex)
-            if self.filt is None or all(self.filt):
-                x, y = sort_lists_by( (self.x, self.y), key_list=0)
-                self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
-                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+            if self.properties.averageSameX or self.properties.combinePoints:
+                x, y = self._reducedTrace.plotData
+                self.curve = self._graphicsView.plot(x, y, pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
+                                                     symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
             else:
-                x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
-                self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
-                                                      symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
-                contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0)
-                for cslice in contiguousSlices:
-                    if not numpy.array(filt)[cslice][0]:
-                        self.auxiliaryCurves.append(self._graphicsView.plot( numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5], symbol=self.penList[penindex][1],
-                                                      symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
+                if errorbars:
+                    self.plotErrorBars(penindex)
+                if self.filt is None or all(self.filt):
+                    x, y = sort_lists_by( (self.x, self.y), key_list=0)
+                    self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
+                                                          symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+                else:
+                    x, y, filt = sort_lists_by((self.x, self.y, self.filt), key_list=0) if len(self.x) > 0 else (self.x, self.y, self.filt)
+                    self.curve = self._graphicsView.plot( numpy.array(x), numpy.array(y), pen=self.penList[penindex][0], symbol=self.penList[penindex][1],
+                                                          symbolPen=self.penList[penindex][2], symbolBrush=self.penList[penindex][3])
+                    contiguousSlices = self.findContiguousArrays(numpy.array(filt)>0)
+                    for cslice in contiguousSlices:
+                        if not numpy.array(filt)[cslice][0]:
+                            self.auxiliaryCurves.append(self._graphicsView.plot( numpy.array(x)[cslice], numpy.array(y)[cslice], pen=self.penList[penindex][5], symbol=self.penList[penindex][1],
+                                                          symbolPen=self.penList[penindex][5], symbolBrush=self.penList[penindex][6]))
             if self.xAxisLabel:
                 if self.xAxisUnit:
                     self._graphicsView.setLabel('bottom', text = "{0} ({1})".format(self.xAxisLabel, self.xAxisUnit))
@@ -448,31 +553,31 @@ class PlottedTrace(object):
                 self.penUsageDict[penindex] += 1
             self.curvePen = penindex
         
-    def replot(self):
+    def replot(self, forceNow=False):
         if self._graphicsView is not None:
-            if len(self.x)>500 and time.time()-self.lastPlotTime<len(self.x)/500.:
+            if not forceNow and len(self.x)>500 and time.time()-self.lastPlotTime<len(self.x)/500.:
                 if not self.needsReplot:
                     self.needsReplot = True
                     QtCore.QTimer.singleShot(len(self.x)*2, self._replot) 
             else:
                 self._replot()
-            
+
     def _replot(self):
         if hasattr(self, 'curve') and self.curve is not None:
-            if self.style not in self.PointsStyles and self.type==self.Types.default:
-                x, y = sort_lists_by((self.x, self.y), key_list=0) if len(self.x) > 0 else (self.x, self.y)
-                self.curve.setData( numpy.array(x), numpy.array(y) )
+            if self.type == self.Types.default:
+                x, y = self._reducedTrace.plotData
+                self.curve.setData(numpy.array(x), numpy.array(y))
             else:
-                self.curve.setData( (self.x), (self.y) )
+                self.curve.setData(self.x, self.y)
         if hasattr(self, 'errorBarItem') and self.errorBarItem is not None:
             if self.hasHeightColumn:
-                self.errorBarItem.setData(x=(self.x), y=(self.y), height=(self.height))
+                self.errorBarItem.setData(x=numpy.array(self.x), y=numpy.array(self.y), height=numpy.array(self.height))
             else:
-                self.errorBarItem.setOpts(x=(self.x), y=(self.y), top=(self.top), bottom=(self.bottom))
+                self.errorBarItem.setOpts(x=numpy.array(self.x), y=numpy.array(self.y), top=numpy.array(self.top), bottom=numpy.array(self.bottom))
         if self.fitFunction is not None:
-            if self.type==self.Types.default:
+            if self.type == self.Types.default:
                 self.replotFitFunction()
-            elif self.type==self.Types.steps: 
+            elif self.type == self.Types.steps:
                 self.replotStepsFitFunction()
         elif self.fitcurve is not None:
             self._graphicsView.removeItem(self.fitcurve)
@@ -487,14 +592,25 @@ class PlottedTrace(object):
             
     @property
     def fitFunction(self):
-        return self.tracePlotting.fitFunction if self.tracePlotting else None
-    
+        return self._fitFunction
+
     @fitFunction.setter
     def fitFunction(self, fitfunction):
-        self.tracePlotting.fitFunction = fitfunction
+        self._fitFunction = fitfunction
 
-#     def __del__(self):
-#         super(PlottedTrace, self)__del__()
+    def parameters(self):
+        return Parameter.create(name='Settings', type='group', children=[])
+
+    def parameters(self):
+        self._parameter = Parameter.create(name='Settings', type='group', children=self.properties.paramDef())
+        self._parameter.sigTreeStateChanged.connect(self.update, QtCore.Qt.UniqueConnection)
+        return self._parameter
+
+    def update(self, param, changes):
+        if self.properties.update(param, changes):
+            changed = self._reducedTrace.update(self.properties.averageSameX, self.properties.combinePoints, self.properties.averageType)
+            if changed:
+                self.replot(True)
 
 if __name__=="__main__":
     from trace.TraceCollection import TraceCollection

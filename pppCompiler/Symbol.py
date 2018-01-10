@@ -79,6 +79,10 @@ class SymbolTable(OrderedDict):
         self['pulse'] = Builtin( 'pulse', Builtins.pulse )
         self['rand'] = Builtin('rand', Builtins.rand)
         self['rand_seed'] = Builtin('rand_seed', Builtins.rand_seed)
+        self['set_sync_time'] = Builtin('set_sync_time', Builtins.set_sync_time)
+        self['wait_sync'] = Builtin('wait_sync', Builtins.wait_sync)
+        self['nop'] = Builtin('nop', Builtins.nop)
+        
 
     def setInlineParameter(self, name, value):
         self.inlineParameterValues[value] = name

@@ -165,7 +165,7 @@ class TraceModel(CategoryTreeModel):
         plottedTrace = node.content
         plotname = str(value)
         if plotname in self.graphicsViewDict:
-            plottedTrace.setGraphicsView(self.graphicsViewDict[plotname]['view'], plotname)
+            plottedTrace.setGraphicsView(self.graphicsViewDict[plotname], plotname)
             leftInd = self.indexFromNode(node, col=self.column.name)
             rightInd = self.indexFromNode(node, col=self.column.window)
             self.dataChanged.emit(leftInd, rightInd)

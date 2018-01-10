@@ -1,0 +1,486 @@
+# useful constants for keeping track of things like DDSs and counter channels etc..
+
+const DDSLock_370 = 9
+const TickleDDS = 2
+const Microwave2DDS = 6
+const MicrowaveDDS = 7
+const PMTChannel = 1
+const PiCalibrator = 16
+const FreqCalibrator = 17
+const TestChan = 18
+const TestChan2 = 19
+
+# various shutter sequences
+shutter InitializationShutter
+masked_shutter CoolingOn
+masked_shutter PumpingOn
+masked_shutter DetectOn
+masked_shutter TickleOn
+masked_shutter MicrowaveOn
+masked_shutter Microwave1On
+masked_shutter Microwave2On
+
+# parameters that can be controlled from the parameter window, show up in order listed below
+parameter <AD9912_FRQ> CoolingFreq = 230 MHz
+parameter <AD9912_FRQ> DetectFreq = 250 MHz
+parameter <AD9912_FRQ> TickleFreq = 0 MHz
+parameter <AD9912_FRQ> AppliedTickleFreq = 0 MHz
+parameter <AD9912_FRQ> AppliedMicrowaveFreq = 0 MHz
+parameter <AD9912_FRQ_SIGN> MicrowaveFreqOffset = 0 MHz
+parameter <AD9912_FRQ> AppliedMicrowave2Freq = 0 MHz
+parameter <AD9912_FRQ_SIGN> Microwave2FreqOffset = 0 MHz
+parameter <AD9912_FRQ> MicrowaveFreqConst = 0 MHz
+
+parameter<AD9912_PHASE> SpinEchoPhase = 180
+parameter<AD9912_PHASE> MicrowaveAnalyzePhase = 0
+parameter<AD9912_PHASE> MicrowaveInitPhase = 0
+parameter<AD9912_PHASE> Microwave2AnalyzePhase = 0
+parameter<AD9912_PHASE> Microwave2InitPhase = 0
+
+# BB1 parameters
+parameter<AD9912_PHASE> xPhi = 0
+parameter<AD9912_PHASE> xPhim = 0
+parameter<AD9912_PHASE> xPhi1 = 0
+parameter<AD9912_PHASE> xPhi2 = 0
+parameter<AD9912_PHASE> yPhi = 0
+parameter<AD9912_PHASE> yPhi1 = 0
+parameter<AD9912_PHASE> yPhi2 = 0
+
+parameter CoolingTime = 2 ms
+parameter PumpTime = 100 us
+parameter PumpHoldTime = 6 us
+parameter DetectTime = 1 ms
+parameter ResetHold = 1 ms
+
+parameter piTime = 20 us
+parameter piTime2 = 20 us
+parameter MicrowaveLoop = 1
+parameter MicrowaveInitTime = 40 us
+parameter MicrowaveAnalyzeTime = 10 us
+parameter Microwave2InitTime = 40 us
+parameter Microwave2AnalyzeTime = 10 us
+parameter MicrowaveAmp = 0
+parameter Microwave2Amp = 1000
+parameter QubitWaitTime = 0 ms
+parameter SpinEchoTime = 0 ms
+parameter PumpHoldTime = 4 us
+parameter updateTime = 20 us
+parameter experiments = 100
+parameter MaxInitRepeat = 20
+parameter PresenceThreshold = 10 kHz
+parameter pulsenum = 5
+parameter CalibrateEvery = 5
+parameter CalibrateFreqEvery = 1
+parameter MicrowaveCalGateNum = 21
+parameter MicroFreqCalGateNum = 10
+parameter FreqCalAdjust = 8 Hz
+parameter DetectThreshold = 1
+parameter SyncTime
+#max wait time = 21.4s
+
+parameter pulseTime = 0
+parameter PostPulseWaitTime = 0
+parameter WaitForRam = 10 us
+
+parameter BoolFreqScan = 0
+parameter BoolTickle = 0
+parameter BooluWaveScan = 0
+parameter BoolSpinEcho = 0
+parameter BoolGateSequence = 0
+parameter BoolPiTimeCal = 0
+parameter BoolExpSync = 0
+
+# counter channels associated with when data should accumulated
+counter CoolingCounters
+counter DetectCounters
+counter CalibrationCounters
+counter Calibration2Counters
+
+# trigger list, for now just for applying updates to DDSs
+trigger ddsApplyAll
+trigger ddsLockPt
+trigger ddsuwave
+trigger uWaveReset
+
+# excitcodes for different types of exit sequences, ie end of scan, ion lost etc..
+exitcode endLabel = 0xfffe000000000000
+exitcode IonLostExitcode = 0xfffe000000000001
+
+# variables to be modified within pulse program
+var currentexperiment = 0
+var piTimeIntegrator = 0
+var CoolPhotons = 0
+var initRemaining = 0
+
+var repetitionCounter
+var SequenceRepetitions = 1
+var trainPhase = 0
+var PulsesRemaining = 0
+var pitime2 = 0
+pitime2 = piTime *2
+var gateId = 0
+var zero = 0
+var one = 1
+var two = 2
+var five = 5
+var CalibrationDetectPhotons = 0
+var PiTimeIntegrator
+var Calibration2DetectPhotons = 0
+var FreqIntegrator
+var CalibrationSkipCounter =0
+var CalFreqSkipCounter =0
+var NumberIgnoredBits = 3
+var CalPulseTime = 0
+var FreqCalTime = 0
+var AppliedFreqCal = 0
+var GateT = 0
+GateT = piTime/2
+var testv
+
+address RamStartAddress = 0
+
+def cool():
+    if BoolFreqScan>0:
+        set_dds( channel=DDSLock_370, freq=CoolingFreq )
+        set_trigger( ddsLockPt )
+    pulse(shutter=CoolingOn, counter=CoolingCounters, duration=CoolingTime)
+    CoolPhotons = load_count( PMTChannel )
+    update( PumpHoldTime )
+
+def adaptiveCool():
+    initRemaining = MaxInitRepeat
+    while CoolPhotons<PresenceThreshold:
+        if initRemaining==0:
+            exit( IonLostExitcode )
+        initRemaining -= 1
+        cool()
+
+def sync():
+    set_shutter(CoolingOn)
+    update()
+    wait_sync(SyncTime)
+    set_inv_shutter(CoolingOn)
+    update()
+
+
+def pump():
+    pulse(shutter=PumpingOn, duration=PumpTime)
+    update( PumpHoldTime )
+
+
+def microwaveon():
+    set_dds( channel=MicrowaveDDS, phase=MicrowaveInitPhase )
+    if MicrowaveLoop==2:
+        pulse(shutter=Microwave2On, trigger=ddsuwave,duration=MicrowaveInitTime)
+    else:
+        if MicrowaveLoop==1:
+            pulse(shutter=Microwave1On, trigger=ddsuwave,duration=MicrowaveInitTime)
+        else:
+            pulse(shutter=MicrowaveOn, trigger=ddsuwave,duration=MicrowaveInitTime)
+
+
+def spinecho():
+    set_dds( channel=MicrowaveDDS, phase=SpinEchoPhase )
+    pulse(shutter=Microwave1On, trigger=ddsuwave, duration=SpinEchoTime)
+
+def qubitAnalyze():
+    set_dds( channel=MicrowaveDDS, phase=MicrowaveAnalyzePhase )
+    pulse(shutter=Microwave1On, trigger=ddsuwave, duration=MicrowaveAnalyzeTime)
+
+def gatePulse(): #zero-gap gate pulse
+    set_dds( channel=MicrowaveDDS, phase=trainPhase )
+    set_trigger( ddsuwave )
+    #write_result(TestChan2, pulseTime)
+    pulseTime *= GateT
+    testv = piTime/2
+    #write_result(TestChan2, (piTime)/2)
+    set_shutter( Microwave1On )
+    update( pulseTime, pulse_mode=False )
+    #set_inv_shutter( Microwave1On )
+
+def iGate():   # implement I as XYXY (pi pulses)
+    trainPhase = xPhi
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = yPhi
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = xPhi
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = yPhi
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+
+def simpleiGate():   # implement I as X,-X (pi pulses)
+    trainPhase = xPhi
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = xPhim
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+def waitIGate():
+    pulseTime = 1
+    pulseTime *= GateT
+    pulseTime += PostPulseWaitTime
+    update( pulseTime )
+
+def longWaitIGate():
+    pulseTime = 8
+    pulseTime *= GateT
+    pulseTime += PostPulseWaitTime
+    update( pulseTime )
+
+def xGate():   # BB1 compensated
+    trainPhase = xPhi
+    pulseTime = 1     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = xPhi1
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = xPhi2
+    pulseTime = 4     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = xPhi1
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+
+def straightXGate():   # X
+    trainPhase = xPhi
+    pulseTime = 1     # has to be given in units of pi/2 time
+    gatePulse()
+
+def yGate():   # BB1 compensated Y
+    trainPhase = yPhi
+    pulseTime = 1     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = yPhi1
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = yPhi2
+    pulseTime = 4     # has to be given in units of pi/2 time
+    gatePulse()
+
+    trainPhase = yPhi1
+    pulseTime = 2     # has to be given in units of pi/2 time
+    gatePulse()
+
+
+def straightYGate():   # Y
+    trainPhase = yPhi
+    pulseTime = 1     # has to be given in units of pi/2 time
+    gatePulse()
+
+def gateSequence():
+    PulsesRemaining = read_ram()
+    while PulsesRemaining>0:
+        PulsesRemaining -= 1
+        gateId = read_ram()
+
+        if gateId<4:
+            if gateId==0:
+                waitIGate()
+                write_result(TestChan, zero)
+            else:
+                if gateId==1:
+                    straightXGate()
+                    write_result(TestChan, one)
+                else:
+                    if gateId==2:
+                        straightYGate()
+                        write_result(TestChan, two)
+                    else:
+                        if gateId==3:
+                            simpleiGate()
+        else:
+            if gateId==5:
+                waitIGate()
+                write_result(TestChan, five)
+            else:
+                if gateId==6:
+                    straightXGate()
+                else:
+                    if gateId==7:
+                        straightYGate()
+                    else:
+                        if gateId==8:
+                            longWaitIGate()
+
+
+def detect():
+    if BoolFreqScan==1:
+        set_dds( channel=DDSLock_370, freq=DetectFreq )
+        set_trigger( ddsLockPt )
+    update ( updateTime )
+    set_shutter( DetectOn )
+    set_counter( DetectCounters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    set_shutter( CoolingOn )
+    clear_counter()
+    update()
+
+def calibrationPulse():
+    set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq, phase=MicrowaveInitPhase )
+    CalPulseTime = GateT
+    CalPulseTime *= MicrowaveCalGateNum
+    set_trigger( ddsuwave )
+    set_shutter( Microwave1On )
+    update( CalPulseTime )
+    set_inv_shutter( Microwave1On )
+
+def calibrationDetect():
+    if BoolFreqScan>0:
+        set_dds( channel=DDSLock_370, freq=DetectFreq )
+        set_trigger( ddsApplyAll )
+    set_shutter( DetectOn )
+    set_counter( CalibrationCounters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    clear_counter()
+    update()
+
+def calibrate():
+    cool()
+    if MaxInitRepeat>0:
+        adaptiveCool()
+    if PumpTime>0:
+        pump()
+    calibrationPulse()
+    if DetectTime>0:
+        calibrationDetect()
+        CalibrationDetectPhotons = load_count(PMTChannel)
+        if CalibrationDetectPhotons > DetectThreshold:
+            PiTimeIntegrator -= 1
+        else:
+            PiTimeIntegrator += 1
+        GateT = PiTimeIntegrator >> NumberIgnoredBits
+
+def calibrateFreqPulse():
+    set_dds( channel=MicrowaveDDS, freq=AppliedFreqCal, phase=xPhi )
+    #FreqCalTime = GateT
+    FreqCalTime = MicroFreqCalGateNum
+    pulse(shutter=Microwave1On, trigger=ddsuwave, duration=GateT)
+    set_dds( channel=MicrowaveDDS, freq=AppliedFreqCal, phase=yPhi )
+    update( FreqCalTime )
+    pulse(shutter=Microwave1On, trigger=ddsuwave, duration=GateT)
+
+def calibration2Detect():
+    if BoolFreqScan>0:
+        set_dds( channel=DDSLock_370, freq=DetectFreq )
+    set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq, phase=MicrowaveInitPhase )
+    set_trigger( ddsApplyAll )
+    set_shutter( DetectOn )
+    set_counter( Calibration2Counters )
+    update( DetectTime )
+    set_inv_shutter( DetectOn )
+    clear_counter()
+    update()
+
+
+def calibrateFreq():
+    AppliedFreqCal = FreqIntegrator + MicrowaveFreqConst
+    cool()
+    if MaxInitRepeat>0:
+        adaptiveCool()
+    if PumpTime>0:
+        pump()
+    calibrateFreqPulse()
+    calibration2Detect()
+    Calibration2DetectPhotons = load_count(PMTChannel)
+    if Calibration2DetectPhotons > DetectThreshold:
+        FreqIntegrator -= FreqCalAdjust
+    else:
+        FreqIntegrator += FreqCalAdjust
+
+set_shutter(InitializationShutter)
+update()
+set_sync_time(SyncTime)
+
+if BoolTickle == 1:
+    set_shutter(TickleOn)
+    update()
+
+PiTimeIntegrator = GateT << NumberIgnoredBits
+FreqIntegrator = AppliedMicrowaveFreq - MicrowaveFreqConst
+
+while not pipe_empty():
+    apply_next_scan_point()
+    if BoolPiTimeCal==0:
+        GateT=piTime/2
+
+    # Initialize modulation frequency for Tickle Scan
+    if BoolTickle ==1:
+        set_dds( channel=TickleDDS, freq=AppliedTickleFreq )
+
+    # Initialize lockpoint for cooling
+    set_dds( channel=DDSLock_370, freq=CoolingFreq )
+    set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq, phase=MicrowaveInitPhase, amp=MicrowaveAmp)
+    set_dds( channel=Microwave2DDS, freq=AppliedMicrowave2Freq, phase=Microwave2InitPhase, amp=MicrowaveAmp)
+    set_trigger( ddsApplyAll )
+    update( updateTime )
+    set_dds( channel=MicrowaveDDS, freq=AppliedMicrowaveFreq, phase=MicrowaveInitPhase, amp=MicrowaveAmp )
+    set_dds( channel=Microwave2DDS, freq=AppliedMicrowave2Freq, phase=Microwave2InitPhase, amp=MicrowaveAmp)
+    set_trigger( ddsuwave )
+    update( updateTime )
+
+    currentexperiment = 0
+    while currentexperiment < experiments:
+        set_ram_address( RamStartAddress )
+        cool()
+        if MaxInitRepeat>0:
+            adaptiveCool()
+        #if BoolExpSync>0:
+        #    sync()
+        if PumpTime>0:
+            pump()
+        #if MicrowaveInitTime>0:
+        #    microwaveon()
+        if BoolGateSequence>0:
+            repetitionCounter = 0
+            while repetitionCounter<SequenceRepetitions:
+                repetitionCounter += 1
+                gateSequence()
+                update()
+                if repetitionCounter<SequenceRepetitions:
+                    set_ram_address( RamStartAddress )
+                    update( WaitForRam )
+        #if QubitWaitTime>0:
+        #    update( QubitWaitTime )
+        #if BoolSpinEcho>0:
+        #    spinecho()
+        #    if QubitWaitTime>0:
+        #        update( QubitWaitTime )
+        #if MicrowaveAnalyzeTime:
+            #qubitAnalyze()
+        if DetectTime>0:
+            detect()
+        #if CalibrateEvery>0:
+            #if CalibrationSkipCounter > CalibrateEvery:
+                #calibrate()
+                #CalibrationSkipCounter = 0
+            #else:
+                #CalibrationSkipCounter += 1
+        #if CalibrateFreqEvery>0:
+            #if CalFreqSkipCounter > CalibrateFreqEvery:
+                #calibrateFreq()
+                #CalFreqSkipCounter = 0
+            #else:
+                #CalFreqSkipCounter += 1
+        #write_result(PiCalibrator, PiTimeIntegrator)
+        #write_result(FreqCalibrator, FreqIntegrator)
+        currentexperiment += 1
+
+exit( endLabel )

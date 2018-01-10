@@ -33,7 +33,7 @@ def to_Q(value, unit):
         return Q(value, unit)
 
 
-def value(q, unit=None):
+def value(q, unit=""):
     if is_Q(q):
         return q.m_as(unit)
     if not unit or not q:

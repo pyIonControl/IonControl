@@ -7,9 +7,13 @@ import os
 
 import logging
 import sys
-
-from PyQt5 import QtCore, QtGui, QtWidgets
-import PyQt5.uic
+isPy3 = sys.version_info[0] > 2
+if isPy3:
+    from PyQt5 import QtCore, QtGui, QtWidgets
+    import PyQt5.uic
+else:
+    from PyQt4 import QtCore, QtGui, QtWidgets
+    import PyQt4.uic
 
 from mylogging.ExceptionLogButton import ExceptionLogButton
 from mylogging import LoggingSetup  #@UnusedImport
@@ -173,6 +177,7 @@ class InstrumentLoggingUi(WidgetContainerBase, WidgetContainerForm):
         self.initMenu()
         self.actionProject.triggered.connect( self.onProjectSelection)
         self.actionExit.triggered.connect(self.onClose)
+        self.actionSave.triggered.connect(self.onSave)
 
     def onProjectSelection(self):
         ui = ProjectInfoUi(self.project)

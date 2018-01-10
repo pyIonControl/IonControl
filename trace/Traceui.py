@@ -10,6 +10,7 @@ import numpy
 
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from trace.BlockAutoRange import BlockAutoRangeList
+from trace.PlottedStructure import PlottedStructure
 from trace.TraceCollection import TraceCollection
 from trace import pens
 
@@ -137,6 +138,9 @@ class TraceuiMixin:
         self.openDirectory = QtWidgets.QAction("Open containing directory", self)
         self.openDirectory.triggered.connect(self.openContainingDirectory)
 
+        self.copyFilenameAction = QtWidgets.QAction("Copy filename", self)
+        self.copyFilenameAction.triggered.connect(self.onCopyFilename)
+
         self.filterData = QtWidgets.QAction("Filter editor", self)
         self.filterData.triggered.connect(self.onEditFilterData)
 
@@ -152,8 +156,8 @@ class TraceuiMixin:
         filtersMenu.addAction(self.filterData)
         filtersMenu.addAction(self.filterROI)
         filtersMenu.addAction(self.removeFilterAction)
+        #self.plotParamTable.setupUi()
 
-    @doprofile
     def onDelete(self, _):
         with BlockAutoRangeList([gv['widget'] for gv in self.graphicsViewDict.values()]):
             self.traceView.onDelete()
@@ -274,7 +278,7 @@ class TraceuiMixin:
 
     def onPlotWithMatplotlib(self):
         from trace.MatplotlibInterface import MatplotWindow
-        mpw = MatplotWindow(exitSig=self.exitSignal)
+        mpw = MatplotWindow(config=self.config, exitSig=self.exitSignal)
         mpw.show()
         selectedNodes = self.traceView.selectedNodes()
         uniqueSelectedNodes = [node for node in selectedNodes if node.parent not in selectedNodes]
@@ -344,6 +348,17 @@ class TraceuiMixin:
                 trace = dataNode.content
                 trace.plot(-2, self.settings.plotstyle)
 
+    def onCopyFilename(self):
+        selectedTopNodes = self.traceView.selectedTopNodes()
+        filenames = list()
+        for node in selectedTopNodes:
+            dataNode = self.model.getFirstDataNode(node)
+            if dataNode:
+                traceCollection = dataNode.content.traceCollection
+                filenames.append(traceCollection.filename)
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(" ".join(filenames))
+
     def onSave(self, fileType=None, saveCopy=False, returnTraceNodeNames=False):
         """Save button is clicked. Save selected traces. If a trace has never been saved before, update model."""
         leftCol = 0
@@ -399,6 +414,12 @@ class TraceuiMixin:
             else:
                 self.finalizedDateLabel.setText('')
                 self.finalizedTimeLabel.setText('')
+            # take care of properties
+            plotted = dataNode.content
+            try:
+                self.plotParamTable.setParameters(plotted.parameters())
+            except:
+                pass
         else:
                 self.createdDateLabel.setText('')
                 self.createdTimeLabel.setText('')
@@ -506,7 +527,7 @@ class TraceuiMixin:
                     shortenedCode = code.split('\n')[2+len(files):]
                     plottedTraces = [self.openFile(f)[0] for f in files]
                     from trace.MatplotlibInterface import MatplotWindow
-                    mpw = MatplotWindow(exitSig=self.exitSignal)
+                    mpw = MatplotWindow(config=self.config, exitSig=self.exitSignal)
                     mpw.show()
                     for pt in plottedTraces:
                         mpw.plot(pt)
@@ -531,19 +552,17 @@ class TraceuiMixin:
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
                 return #If the filename and creation dates are the same, you're trying to open an existing trace.
-        plottedTraceList = list()
-        category = None if len(traceCollection.tracePlottingList)==1 else self.getUniqueCategory(filename)
-        for plotting in traceCollection.tracePlottingList:
-            windowName = plotting.windowName if plotting.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
-            name = plotting.name
-            plottedTrace = PlottedTrace(traceCollection, self.graphicsViewDict[windowName]['view'], pens.penList, -1, tracePlotting=plotting, windowName=windowName, name=name)
-            plottedTrace.category = category
-            plottedTraceList.append(plottedTrace)
-            self.addTrace(plottedTrace, defaultpen)
+        category = None if len(traceCollection.plottingList)==1 else self.getUniqueCategory(filename)
+        for plotted in traceCollection.plottingList:
+            windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
+            name = plotted.name
+            plotted.setup(traceCollection, self.graphicsViewDict[windowName], pens.penList, -1,
+                          windowName=windowName, name=name)
+            plotted.category = category
+            self.addTrace(plotted, defaultpen)
         if self.expandNew:
-            self.expand(plottedTraceList[0])
+            self.expand(traceCollection.plottingList[0])
         self.resizeColumnsToContents()
-        return plottedTraceList
 
     def openContainingDirectory(self):
         """Opens the parent directory of a file, selecting the file if possible."""
@@ -600,6 +619,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
         self.traceView.addAction(self.plotWithGnuplot)
         self.traceView.addAction(self.openDirectory)
         self.traceView.addAction(self.filtersAction)
+        self.traceView.addAction(self.copyFilenameAction)
 
     def rightClickMenu(self, pos):
         """a CustomContextMenu for right click"""
@@ -617,6 +637,7 @@ class Traceui(TraceuiMixin, TraceuiForm, TraceuiBase):
             menu.addAction(self.plotWithGnuplot)
             menu.addAction(self.openDirectory)
             menu.addAction(self.filtersAction)
+            menu.addAction(self.copyFilenameAction)
         menu.exec_(self.traceView.mapToGlobal(pos))
 
 

@@ -262,10 +262,48 @@
          <widget class="QTableView" name="tableView"/>
          <widget class="QWidget" name="layoutWidget">
           <layout class="QGridLayout" name="gridLayout">
-           <item row="4" column="2" colspan="2">
-            <widget class="QLineEdit" name="filenameEdit"/>
+           <item row="8" column="2" colspan="2">
+            <widget class="QLineEdit" name="histogramFilenameEdit"/>
            </item>
-           <item row="2" column="2" colspan="2">
+           <item row="9" column="0">
+            <widget class="QCheckBox" name="saveRawCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Raw data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>expression</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="xExprEdit">
+               <property name="toolTip">
+                <string>expression x is current value</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="10" column="0">
+            <widget class="QCheckBox" name="saveQubitCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Qubit data</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2" colspan="2">
             <widget class="QComboBox" name="scanTypeCombo">
              <item>
               <property name="text">
@@ -289,103 +327,24 @@
              </item>
             </widget>
            </item>
-           <item row="3" column="2" colspan="2">
-            <widget class="QComboBox" name="loadPPComboBox">
-             <property name="maxVisibleItems">
-              <number>100</number>
-             </property>
-            </widget>
+           <item row="7" column="2" colspan="2">
+            <widget class="QLineEdit" name="filenameEdit"/>
            </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="xaxisLabel">
-             <property name="text">
-              <string>x-axis </string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="autoSaveCheckBox">
-             <property name="toolTip">
-              <string>Checkbox: automatically save file</string>
-             </property>
-             <property name="text">
-              <string>Filename</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QCheckBox" name="loadPPcheckBox">
-             <property name="text">
-              <string>Load PP</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
+           <item row="5" column="0">
             <widget class="QLabel" name="directionLabel">
              <property name="text">
               <string>Direction</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="2" colspan="2">
-            <widget class="QLineEdit" name="histogramFilenameEdit"/>
-           </item>
-           <item row="5" column="0">
-            <widget class="QCheckBox" name="histogramSaveCheckBox">
-             <property name="toolTip">
-              <string>Checkbox: automatically save file</string>
-             </property>
+           <item row="4" column="0">
+            <widget class="QLabel" name="xaxisLabel">
              <property name="text">
-              <string>Histogram file</string>
+              <string>x-axis </string>
              </property>
             </widget>
            </item>
-           <item row="6" column="2" colspan="2">
-            <widget class="QLineEdit" name="rawFilenameEdit"/>
-           </item>
-           <item row="6" column="0">
-            <widget class="QCheckBox" name="saveRawCheckBox">
-             <property name="toolTip">
-              <string>Checkbox: automatically save file</string>
-             </property>
-             <property name="text">
-              <string>Raw data</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="maxPointsLabel">
-             <property name="text">
-              <string>Max Points</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2" colspan="2">
-            <widget class="MagnitudeSpinBox" name="maxPointsBox">
-             <property name="buttonSymbols">
-              <enum>QAbstractSpinBox::NoButtons</enum>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>expression</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="xExprEdit">
-               <property name="toolTip">
-                <string>expression x is current value</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="3">
+           <item row="4" column="3">
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
               <widget class="QLabel" name="label_2">
@@ -402,6 +361,85 @@
               </widget>
              </item>
             </layout>
+           </item>
+           <item row="7" column="0">
+            <widget class="QCheckBox" name="autoSaveCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Filename</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="maxPointsLabel">
+             <property name="text">
+              <string>Max Points</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="2" colspan="2">
+            <widget class="QComboBox" name="loadPPComboBox">
+             <property name="maxVisibleItems">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QCheckBox" name="histogramSaveCheckBox">
+             <property name="toolTip">
+              <string>Checkbox: automatically save file</string>
+             </property>
+             <property name="text">
+              <string>Histogram file</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="2" colspan="2">
+            <widget class="QLineEdit" name="rawFilenameEdit"/>
+           </item>
+           <item row="1" column="2" colspan="2">
+            <widget class="MagnitudeSpinBox" name="maxPointsBox">
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="loadPPcheckBox">
+             <property name="text">
+              <string>Load PP</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Repeats</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="2" colspan="2">
+            <widget class="QComboBox" name="qubitDataFormatBox">
+             <item>
+              <property name="text">
+               <string>Pickle</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Yaml</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="3" column="2" colspan="2">
+            <widget class="MagnitudeSpinBox" name="repeatsBox">
+             <property name="buttonSymbols">
+              <enum>QAbstractSpinBox::NoButtons</enum>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -428,14 +466,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>RedBlackComboBox</class>
-   <extends>QComboBox</extends>
-   <header>uiModules.RedBlackComboBox</header>
-  </customwidget>
-  <customwidget>
    <class>MagnitudeSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>uiModules.MagnitudeSpinBox</header>
+  </customwidget>
+  <customwidget>
+   <class>RedBlackComboBox</class>
+   <extends>QComboBox</extends>
+   <header>uiModules.RedBlackComboBox</header>
   </customwidget>
  </customwidgets>
  <tabstops>

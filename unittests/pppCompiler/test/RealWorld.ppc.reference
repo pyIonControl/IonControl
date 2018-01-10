@@ -105,17 +105,17 @@ while_label_1: NOP
   WAIT
   UPDATE NULL
 # line 201: procedurecall     apply_next_scan_point()
-  JMPNINTERRUPT apply_next_scan_point
+  JMPNINTERRUPT apply_next_scan_point_label_0
   LDWR INTERRUPT_EXITCODE
   WAIT
   WRITEPIPE
   END
-apply_next_scan_point:  READPIPEINDF
+apply_next_scan_point_label_0:  READPIPEINDF
   WRITEPIPEINDF
   READPIPE
   WRITEPIPE
   STWI
-  JMPCMP apply_next_scan_point
+  JMPCMP apply_next_scan_point_label_0
 # line 203 assignment     currentexperiment = 0
   LDWR NULL
   STWR currentexperiment

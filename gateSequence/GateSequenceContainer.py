@@ -3,56 +3,126 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import os
 from collections import OrderedDict
 import operator
 
-import xml.etree.ElementTree as etree
+from lxml import etree
+
+from pygsti.objects import GateString
+from pygsti.io import load_gateset, load_gatestring_list
+from pygsti.construction import make_lsgst_structs
 
 
-class GateSequenceOrderedDict(OrderedDict):
-    pass
+def split(text):
+    ''''Split a list if , are present it will use , as separator else whitespace'''
+    if text.find(',')>=0:
+        return map(operator.methodcaller('strip'), text.split(','))
+    return text.split()
+
 
 class GateSequenceException(Exception):
     pass
 
-class GateSequenceContainer(object):
-    def __init__(self, gateDefinition ):
+
+class GateSequenceContainer:
+    def __init__(self, gateDefinition):
         self.gateDefinition = gateDefinition
-        self.GateSequenceDict = GateSequenceOrderedDict()
+        self._gate_string_list = None
+        self._gate_string_struct = None
         self.GateSequenceAttributes = OrderedDict()
-        
+        self._usePyGSTi = False
+        self.gateSet = None
+        self.prep = None
+        self.meas = None
+        self.filename = None
+        self.germs = None
+        self.maxLengths = None
+
+    @property
+    def sequenceList(self):
+        if self._usePyGSTi:
+            return self._gate_string_struct.allstrs if self._gate_string_struct is not None else None
+        else:
+            return self._gate_string_list
+
+    @property
+    def usePyGSTi(self):
+        return self._usePyGSTi
+
+    @usePyGSTi.setter
+    def usePyGSTi(self, use):
+        self._usePyGSTi = use
+        if not self._usePyGSTi and self.filename:
+            self.loadXml(self.filename)
+        else:
+            self.update_pyGSTi()
+
+    def update_pyGSTi(self):
+        if self.gateSet and self.prep and self.meas and self.germs and self.maxLengths:
+            self._gate_string_struct = make_lsgst_structs(self.gateSet.gates.keys(), self.prep, self.meas,
+                                                          self.germs, self.maxLengths)[-1]
+        else:
+            self._gate_string_struct = None
+
     def __repr__(self):
         return self.GateSequenceDict.__repr__()
     
     def loadXml(self, filename):
-        self.GateSequenceDict = GateSequenceOrderedDict()
-        if filename is not None:
+        self.filename = filename
+        if not self._usePyGSTi and filename:
+            self._gate_string_list = list()
             tree = etree.parse(filename)
             root = tree.getroot()
-            
             # load pulse definition
             for gateset in root:
                 if gateset.text:
-                    self.GateSequenceDict.update( { gateset.attrib['name']: list(map(operator.methodcaller('strip'), gateset.text.split(',')))} )
+                    self._gate_string_list.append(GateString(None, gateset.text.strip().translate({ord(','): None})))
                 else:  # we have the length 0 gate string
-                    self.GateSequenceDict.update( { gateset.attrib['name']: [] } )
-                self.GateSequenceAttributes.update( { gateset.attrib['name']: gateset.attrib })
+                    self._gate_string_list.append(GateString(None, "{}"))
             self.validate()
     
     """Validate the gates used in the gate sets against the defined gates"""            
     def validate(self):
-        for name, gatesequence in self.GateSequenceDict.items():
-            self.validateGateSequence( name, gatesequence )
+        for gatesequence in self._gate_string_list:
+            basic_gates = set(self.gateSet.gates.keys())
+            for gate in gatesequence:
+                if gate not in basic_gates:
+                    raise GateSequenceException(
+                        "Gate '{0}' used in GateSequence is not defined".format(gate))
 
-    def validateGateSequence(self, name, gatesequence):
-        for gate in gatesequence:
-            self.validateGate(name, gate)
-        return gatesequence
+    def loadGateSet(self, path):
+        self.gateSet = load_gateset(path)
 
-    def validateGate(self, name, gate):
-        if gate not in self.gateDefinition.Gates:
-            raise GateSequenceException( "Gate '{0}' used in GateSequence '{1}' is not defined".format(gate, name) )
-        
+    def setPreparation(self, path_or_literal):
+        if os.path.exists(path_or_literal):
+            self.prep = load_gatestring_list(path_or_literal)
+            return os.path.split(path_or_literal)[-1]
+        self.prep = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
+        return path_or_literal
+
+    def setMeasurement(self, path_or_literal):
+        if os.path.exists(path_or_literal):
+            self.meas = load_gatestring_list(path_or_literal)
+            return os.path.split(path_or_literal)[-1]
+        self.meas = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
+        return path_or_literal
+
+    def setGerms(self, path_or_literal):
+        if os.path.exists(path_or_literal):
+            self.germs = load_gatestring_list(path_or_literal)
+            return os.path.split(path_or_literal)[-1]
+        self.germs = [GateString(None, i) for i in split(path_or_literal)]
+        self.update_pyGSTi()
+        return path_or_literal
+
+    def setLengths(self, literal):
+        self.maxLengths = list(map(int, split(literal)))
+        self.update_pyGSTi()
+        return literal
+
 
 if __name__=="__main__":
     from gateSequence.GateDefinition import GateDefinition

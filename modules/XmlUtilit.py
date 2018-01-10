@@ -3,9 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-from xml.dom import minidom
-
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 from modules.MagnitudeParser import parse
 
 
@@ -25,12 +23,10 @@ def typeName( obj ):
 def prettify(elem, commentchar=None):
     """Return a pretty-printed XML string for the Element.
     """
-    rough_string = ElementTree.tostring(elem, 'utf-8')
-    reparsed = minidom.parseString(rough_string)
-    text = reparsed.toprettyxml(indent="  ")
+    text = ElementTree.tostring(elem, encoding='unicode', pretty_print=True)
     if not commentchar:
         return text
-    return ''.join(['# {0}\n'.format(line) for line in text.splitlines()])
+    return ''.join(['# <?xml version="1.0" ?>\n']+['# {0}\n'.format(line) for line in text.splitlines()])
 
 def stringToStringOrNone(string):
     if string is None:

@@ -3,9 +3,12 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+import json
 from collections import defaultdict
 from datetime import datetime
+from zipfile import ZipFile, ZIP_DEFLATED, ZIP_BZIP2
+
+import yaml
 from dateutil import parser
 import io
 from itertools import zip_longest
@@ -13,18 +16,21 @@ import math
 import os.path
 import h5py
 import copy
+import pickle
 
 import numpy
 
 from modules.XmlUtilit import prettify
 from modules.enum import enum
-import xml.etree.ElementTree as ElementTree
+import lxml.etree as ElementTree
 import time
-from modules.SequenceDictSignal import SequenceDictSignal as SequenceDict
 import pytz
 from modules.DataDirectory import DataDirectory
 import logging
 from collections import OrderedDict
+
+from trace.PlottedStructure import PlottedStructure
+from trace.PlottedTrace import PlottedTrace, PlottedTraceProperties
 
 try:
     from fit import FitFunctions
@@ -32,8 +38,8 @@ try:
 except:
     FitFunctionsAvailable = False
 
-filetypes = {'.hdf': 'hdf5', '.hdf5': 'hdf5', '.txt': 'text'}
-extensions = {'text': '.txt', 'hdf5': '.hdf5'}
+filetypes = {'.hdf': 'hdf5', '.hdf5': 'hdf5', '.txt': 'text', '.zip': 'zip'}
+extensions = {'text': '.txt', 'hdf5': '.hdf5', 'zip': '.zip'}
 
 def file_type(filename, default):
     return filetypes.get(os.path.splitext(filename)[1], default)
@@ -57,71 +63,59 @@ class ColumnSpec(list):
     def fromXmlElement(element):
         return ColumnSpec( element.text.split(", ") )
     
-class TracePlotting(object):
-    Types = enum('default','steps')
-    def __init__(self, xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None, rawColumn=None,
-                 filtColumn=None, name="",type_ =None, xAxisUnit=None, xAxisLabel=None, windowName=None ):
-        self.xColumn = xColumn
-        self.yColumn = yColumn
-        self.topColumn = topColumn
-        self.bottomColumn = bottomColumn
-        self.heightColumn = heightColumn
-        self.rawColumn = rawColumn
-        self.filtColumn = filtColumn
-        self.fitFunction = None
-        self.name = name
-        self.xAxisUnit = xAxisUnit
-        self.xAxisLabel = xAxisLabel
-        self.type = TracePlotting.Types.default if type_ is None else type_
-        self.windowName = windowName
-        
-    def __setstate__(self, d):
-        self.__dict__ = d
-        self.__dict__.setdefault( 'xAxisUnit', None )
-        self.__dict__.setdefault( 'xAxisLabel', None )
-        self.__dict__.setdefault( 'windowName', None)
-        
-    attrFields = ['xColumn','yColumn','topColumn', 'bottomColumn','heightColumn', 'filtColumn', 'name', 'type', 'xAxisUnit', 'xAxisLabel', 'windowName']
 
-class TracePlottingList(list):        
+class PlottingList(list):
     def toXmlElement(self, root):
         myElement = ElementTree.SubElement(root, 'TracePlottingList', {})
         for traceplotting in self:
-            traceplottingElement = ElementTree.SubElement(myElement, 'TracePlotting', dict( (name,str(getattr(traceplotting,name))) for name in TracePlotting.attrFields))
-            if traceplotting.fitFunction:
-                traceplotting.fitFunction.toXmlElement(traceplottingElement)
+            traceplotting.toXML(myElement)
         return myElement
 
     def toHdf5(self, group):
         mygroup = group.require_group('TracePlottingList')
         for traceplotting in self:
             g = mygroup.require_group(traceplotting.name)
-            for name in TracePlotting.attrFields:
+            for name in PlottedTrace.serializeFields:
                 attr = getattr(traceplotting, name)
                 g.attrs[name] = attr if attr is not None else ''
             if traceplotting.fitFunction:
                 traceplotting.fitFunction.toHdf5(g)
 
     @staticmethod
-    def fromXmlElement(element):
-        l = TracePlottingList()
+    def fromXmlElement(element, traceCollection):
+        logger = logging.getLogger(__name__)
+        l = PlottingList()
         for plottingelement in element.findall("TracePlotting"):
-            plotting = TracePlotting()
-            plotting.__dict__.update( plottingelement.attrib )
-            plotting.type = int(plotting.type) if hasattr(plotting,'type') else 0
+            plotting = PlottedTrace(traceCollection)
+            # added workaraound for PlottedTraceProperties since xml loading via findall isn't recursive and returned
+            # a string instance of the PlottedTraceProperties object, probably best to derive a new class from ElementTree
+            attribdict = dict(plottingelement.attrib)
+            if "properties" in attribdict.keys() and isinstance(attribdict['properties'], str):
+                try:
+                    attribdict['properties'] = PlottedTraceProperties(**plottingelement.findall("PlottedTraceProperties")[0].attrib)
+                except Exception:
+                    logger.warning("Couldn't resolve PlottedTraceProperties in {}".format(traceCollection.filename))
+            plotting.__setstate__(attribdict)
+            plotting.type = int(plotting.type) if hasattr(plotting, 'type') else 0
             if plottingelement.find("FitFunction") is not None:
-                plotting.fitFunction = FitFunctions.fromXmlElement( plottingelement.find("FitFunction") )
+                plotting.fitFunction = FitFunctions.fromXmlElement(plottingelement.find("FitFunction"))
+            else:
+                plotting.fitFunction = None
             l.append(plotting)
+        # for plottingelement in element.findall("StructurePlotting"):
+        #     plotting = PlottedStructure()
+        #     plotting.__setstate__(plottingelement.attrib)
+        #     l.append(plotting)
         return l
 
     @staticmethod
     def fromHdf5(group):
-        l = TracePlottingList()
+        l = PlottingList()
         for name, g in group.items():
-            plotting = TracePlotting()
-            plotting.__dict__.update( g.attrs )
+            plotting = PlottedTrace()
+            plotting.__setstate__(g.attrs)
             if "FitFunction" in g:
-                plotting.fitFunction = FitFunctions.fromHdf5( g.get("FitFunction"))
+                plotting.fitFunction = FitFunctions.fromHdf5(g.get("FitFunction"))
             l.append(plotting)
         return l
     
@@ -145,6 +139,12 @@ class keydefaultdict(OrderedDict):
         else:
             ret = self[key] = self.default_factory(self, key)
             return ret
+
+
+class FormatDict(dict):
+    def __missing__(self, key):
+        ret = self[key] = 'pkl'
+        return ret
 
 
 class TraceCollection(keydefaultdict):
@@ -172,7 +172,7 @@ class TraceCollection(keydefaultdict):
         super(TraceCollection, self).__init__(self.defaultColumn)
         """Construct a trace object."""
         self.name = "noname" #name to display in table of traces
-        self.description = SequenceDict()
+        self.description = dict()
         self.description["comment"] = ""
         self.description["name"] = ""
         self.description["traceCreation"] = datetime.now(pytz.utc)
@@ -184,8 +184,10 @@ class TraceCollection(keydefaultdict):
         self.filepath = None
         self.fileleaf = None
         self.rawdata = None
-        self.description["tracePlottingList"] = TracePlottingList()
+        self.description["tracePlottingList"] = PlottingList()
         self.record_timestamps = record_timestamps
+        self.structuredData = keydefaultdict(dict)  #  Can contained structured data that can be json dumped
+        self.structuredDataFormat = FormatDict()
 
     def __bool__(self):
         return True  # to remain backwards compatible with previous behavior
@@ -193,14 +195,14 @@ class TraceCollection(keydefaultdict):
     @staticmethod
     def defaultColumn(d, key):
         if key == 'indexColumn' and 'x' in d:
-            return numpy.arange(0, len(d['x']), 1)
-        return numpy.array([])
+            return list(range(len(d['x'])))
+        return list()
 
-    def varFromXmlElement(self, element, description):       
+    def varFromXmlElement(self, element, description):
         name = element.attrib['name']
         mytype = element.attrib['type']
         if mytype=='dict':
-            mydict = SequenceDict()
+            mydict = dict()
             for subelement in element:
                 self.varFromXmlElement(subelement, mydict)
             description[name] = mydict
@@ -219,11 +221,11 @@ class TraceCollection(keydefaultdict):
     
     def timeintervalAppend(self, timeinterval, maxPoints=0):
         if 0 < maxPoints < len(self["timeTickFirst"]):
-            self['timeTickFirst'] = numpy.append(self['timeTickFirst'][-maxPoints+1:0], timeinterval[0])
-            self['timeTickLast'] = numpy.append(self['timeTickLast'][-maxPoints+1:0], timeinterval[1])
+            self['timeTickFirst'] = self['timeTickFirst'][-maxPoints+1:0].append(timeinterval[0])
+            self['timeTickLast'] = self['timeTickLast'][-maxPoints+1:0].append(timeinterval[1])
         else:
-            self['timeTickFirst'] = numpy.append(self['timeTickFirst'], timeinterval[0])
-            self['timeTickLast'] = numpy.append(self['timeTickLast'], timeinterval[1])
+            self['timeTickFirst'].append(timeinterval[0])
+            self['timeTickLast'].append(timeinterval[1])
         self.description["lastDataAquired"] = datetime.now(pytz.utc)
     
     @property
@@ -315,24 +317,82 @@ class TraceCollection(keydefaultdict):
             self._fileType = fileType
         if self._fileType == "text":
             self.saveText(self.filename)
-        else:
+        elif self._fileType == 'hdf5':
             self.saveHdf5(self.filename)
+        if self._fileType == 'zip' or self.structuredData:
+            self.saveZip(replaceExtension(self.filename, extensions['zip']))
         return self.filename
 
     def saveText(self, filename):
-        if self.rawdata:
-            self.description["rawdata"] = self.rawdata.save()
-        if hasattr(self,'fitfunction'):
-            self.description["fitfunction"] = self.fitfunction
         if filename:
-            of = open(filename,'w')
-            columnspec = ColumnSpec(key for key in self.keys() if key is not None)
-            self.description["columnspec"] = columnspec #",".join(columnspec)
-            self.saveTraceHeaderXml(of)
-            for l in zip_longest(*list(self.values()), fillvalue=float('NaN')):
-                print("\t".join(map(repr,l)), file=of)
-            of.close()
+            with open(filename,'w') as of:
+                self.saveTraceHeaderXml(of)
+                of.write(self.dataText())
             self.saved = True
+
+    def dataText(self):
+        return "\n".join("\t".join(map(repr, l)) for l in zip_longest(*list(self.values()), fillvalue=float('NaN')))
+
+    def saveZip(self, filename):
+        """Save data in zip file
+        Data structure is
+        header: xml header
+        data: standard data file
+        struct: folder with all structured data"""
+        with ZipFile(filename, 'w', compression=ZIP_DEFLATED) as myzip:
+            myzip.writestr('header.xml', prettify(self.headerXml()))
+            myzip.writestr('data.txt', self.dataText())
+            myzip.writestr('header.pkl', pickle.dumps({'header': self.header()}, -1))
+            for name, value in self.structuredData.items():
+                format = self.structuredDataFormat[name]
+                name = 'structuredData/' + name
+                if format.lower() in ['pkl', 'pickle']:
+                    myzip.writestr(name + '.pkl', pickle.dumps(value))
+                elif format.lower() == 'json':
+                    myzip.writestr(name + '.json', json.dumps(value).encode())
+                elif format.lower() == 'yaml':
+                    myzip.writestr(name + '.yaml', yaml.dump(value).encode())
+            myzip.writestr('structuredDataFormat.json', json.dumps(self.structuredDataFormat).encode())
+        self.saved = True
+
+    def loadZip(self, filename):
+        with ZipFile(filename) as myzip:
+            with myzip.open('header.pkl') as f:
+                data = pickle.loads(f.read())
+                self.description = data.get('header')
+            with myzip.open('data.txt') as stream:
+                data = []
+                for line in stream:
+                    line = line.strip()
+                    data.append(list(map(float, line.split())))
+            columnspec = self.description["columnspec"]
+            for colname, d in zip(columnspec, zip(*data)):
+                self[colname] = list(d)
+            if 'fitfunction' in self.description and FitFunctionsAvailable:
+                self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
+            if "tracePlottingList" not in self.description:
+                self.description["tracePlottingList"] = PlottingList(
+                    [PlottedTrace(Trace=self, xColumn='x', yColumn='y', topColumn=None, bottomColumn=None,
+                                 heightColumn=None,
+                                 rawColumn=None, filtColumn=None, name="")])
+            try:
+                with myzip.open('structuredDataFormat.json') as f:
+                    self.structuredDataFormat = FormatDict(json.loads(f.read().decode()))
+                for filename in myzip.namelist():
+                    if filename.startswith('structuredData/'):
+                        leaf = filename[15:]
+                        name = leaf.split('.', 1)[0]
+                        format = self.structuredDataFormat[name]
+                        with myzip.open(filename) as f:
+                            if format.lower() in ['pkl', 'pickle']:
+                                self.structuredData[name] = pickle.loads(f.read())
+                            elif format.lower() == 'json':
+                                self.structuredData[name] = json.loads(f.read().decode())
+                            elif format.lower() == 'yaml':
+                                self.structuredData[name] = yaml.load(f.read().decode())
+            except Exception as e:
+                logging.getLogger(__name__)
+                logging.error("Failed to load zip file: {}".format(e))
 
     def saveHdf5(self, filename):
         # if self.rawdata:
@@ -367,13 +427,26 @@ class TraceCollection(keydefaultdict):
         for var, value in self.description.items():
             print("# {0}\t{1}".format(var, value), file=outfile)
 
-    def saveTraceHeaderXml(self,outfile):
+    def header(self):
+        if hasattr(self, 'fitfunction'):
+            self.description["fitfunction"] = self.fitfunction
+        columnspec = ColumnSpec(key for key in self.keys() if key is not None)
+        self.description["columnspec"] = columnspec  # ",".join(columnspec)
+        return self.description
+
+    def headerXml(self):
+        if hasattr(self, 'fitfunction'):
+            self.description["fitfunction"] = self.fitfunction
+        columnspec = ColumnSpec(key for key in self.keys() if key is not None)
+        self.description["columnspec"] = columnspec  # ",".join(columnspec)
         root = ElementTree.Element('DataFileHeader')
         varsElement = ElementTree.SubElement(root, 'Variables', {})
-        self.description.sort()
-        for name, value in self.description.items():
+        for name, value in sorted(self.description.items()):
             self.saveDescriptionElement(name, value, varsElement)
-        outfile.write(prettify(root,'# '))
+        return root
+
+    def saveTraceHeaderXml(self,outfile):
+        outfile.write(prettify(self.headerXml(),'# '))
 
     def saveMetadata(self, f):
         variables = f.require_group('variables')
@@ -392,9 +465,12 @@ class TraceCollection(keydefaultdict):
         else:
             variables.attrs[name] = str(value)
 
-    def saveDescriptionElement(self, name, value, element):
+    def saveDescriptionElement(self, name, value, element, use_json=False):
         if hasattr(value,'toXmlElement'):
             value.toXmlElement(element)
+        elif use_json:
+            e = ElementTree.SubElement(element, 'Element', {'name': name, 'type': 'json'})
+            e.text = json.dumps(value)
         elif isinstance(value, dict):
             subElement = ElementTree.SubElement(element, 'Element', {'name': name, 'type': 'dict'})
             for subname, subvalue in value.items():
@@ -409,20 +485,23 @@ class TraceCollection(keydefaultdict):
         if self._fileType == "hdf5":
             try:
                 self.loadTraceHdf5(filename)
-            except:
-                logger.error( "Could not load file {}!".format(filename))
+            except Exception as e:
+                logger.error("Could not load file {} error {}".format(filename, e))
+        elif self._fileType == "zip":
+            self.loadZip(filename)
         else:
             try:
                 self.loadTracePlain(filename)
-            except:
-                logger.error( "Could not load file {}!".format(filename))
+            except Exception as e:
+                logger.error("Could not load file {} error {}".format(filename, e))
 
     def loadTraceHdf5(self, filename):
+        self.filename = filename
         with h5py.File(self.filename) as f:
             for colname, dataset in f['columns'].items():
-                self[colname] = numpy.array(dataset)
+                self[colname] = list(dataset)
             tpelement = f.get("/variables/TracePlottingList")
-            self.description["tracePlottingList"] = TracePlottingList.fromHdf5(tpelement) if tpelement is not None else None
+            self.description["tracePlottingList"] = PlottingList.fromHdf5(tpelement) if tpelement is not None else None
             # for element in root.findall("/variables/Element"):
             #     self.varFromXmlElement(element, self.description)
 
@@ -431,11 +510,11 @@ class TraceCollection(keydefaultdict):
             position = instream.tell()
             firstline = instream.readline()
             instream.seek(position)
-            if firstline.find("<?xml version")>0:
+            if firstline.find("<?xml version") > 0 or firstline.find("<DataFileHeader>") > 0:
                 self.loadTraceXml(instream)
             else:
                 self.loadTraceText(instream)
-                self.description["tracePlottingList"].append(TracePlotting())
+                self.description["tracePlottingList"].append(PlottedTrace())
         self.filename = filename
 
     def loadTraceXml(self, stream):
@@ -450,14 +529,16 @@ class TraceCollection(keydefaultdict):
         columnspec = ColumnSpec.fromXmlElement(root.find("./Variables/ColumnSpec"))
         for colname, d in zip(columnspec, zip(*data)):
             if math.isnan(d[-1]):
-                a = numpy.array(d[0:-1])
+                a = list(d[0:-1])
             else:
-                a = numpy.array(d)
+                a = list(d)
             self[colname] = a
         tpelement = root.find("./Variables/TracePlottingList")
-        self.description["tracePlottingList"] = TracePlottingList.fromXmlElement(tpelement) if tpelement is not None else None
+        self.description["tracePlottingList"] = PlottingList.fromXmlElement(tpelement, self) if tpelement is not None else None
         for element in root.findall("./Variables/Element"):
             self.varFromXmlElement(element, self.description)
+        for element in root.findall("./StructuredData/Element"):
+            self.structuredData[element.name] = json.loads(element.text)
 
     def loadTraceText(self, stream):
         data = []
@@ -476,19 +557,22 @@ class TraceCollection(keydefaultdict):
                 data.append( list(map(float,line.split())) )
         columnspec =  self.description["columnspec"].split(',')
         for colname, d in zip( columnspec, zip(*data) ):
-            self[colname] = numpy.array(d)
+            self[colname] = list(d)
         if 'fitfunction' in self.description and FitFunctionsAvailable:
             self.fitfunction = FitFunctions.fitFunctionFactory(self.description["fitfunction"])
-        self.description["tracePlottingList"] = [TracePlotting(xColumn='x',yColumn='y',topColumn=None,bottomColumn=None,heightColumn=None,rawColumn=None,filtColumn=None,name="")]
+        self.description["tracePlottingList"] = PlottingList(
+            [PlottedTrace(xColumn='x', yColumn='y', topColumn=None, bottomColumn=None, heightColumn=None,
+                          rawColumn=None, filtColumn=None, name="")])
             
     def setPlotfunction(self, callback):
         self.plotfunction = callback
         
-    def addTracePlotting(self, traceplotting):
-        self.description["tracePlottingList"].append(traceplotting)
+    def addPlotting(self, plotting):
+        if plotting not in self.description["tracePlottingList"]:
+            self.description["tracePlottingList"].append(plotting)
         
     @property 
-    def tracePlottingList(self):
+    def plottingList(self):
         return self.description["tracePlottingList"]
 
 if __name__=="__main__":

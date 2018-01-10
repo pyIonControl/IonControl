@@ -4,9 +4,14 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 
-import serial   #@UnresolvedImport @UnusedImport
-import serial.tools.list_ports
 import re
+import sys
+
+import serial  # @UnresolvedImport @UnusedImport
+import serial.tools.list_ports
+
+isPy3 = sys.version_info[0] > 2
+
 
 class MKSReader:
     @staticmethod
@@ -25,14 +30,23 @@ class MKSReader:
         
     def close(self):
         self.conn.close()
-        
+
+    def write(self, text):
+        if isPy3:
+            data = text.encode('ascii')
+        self.conn.write(data)
+
+    def read(self, length):
+        data = self.conn.read(length)
+        return data.decode('ascii') if isPy3 else data
+
     def query(self, question, length=100):
-        self.conn.write(question)
-        return self.conn.read(length)
+        self.write(question)
+        return self.read(length)
         
     def setupDatalogger(self, time):
-        self.conn.write("@{0}DLT!{1};FF".format(self.deviceaddr, time))
-        reply = self.conn.read(100)
+        self.write("@{0}DLT!{1};FF".format(self.deviceaddr, time))
+        reply = self.read(100)
         print(reply)
         
     def startLogger(self):
@@ -58,11 +72,9 @@ class MKSReader:
         return self.pr3()
     
     
-
-
 if __name__=="__main__":
-    mks = MKSReader()
+    mks = MKSReader('COM11')
     mks.open()
-    mks.pr3()
+    print(mks.pr3())
     mks.close()
     

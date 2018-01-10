@@ -4,6 +4,7 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 from PyQt5 import QtGui, QtCore, QtWidgets
+from modules.AttributeComparisonEquality import AttributeComparisonEquality
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
@@ -13,8 +14,20 @@ from modules.DataDirectory import DataDirectory
 from pathlib import Path
 from collections import OrderedDict
 
+class Settings(AttributeComparisonEquality):
+    def __init__(self, plotName=None, fileTypes=None, saveCode=True):
+        self.plotName = plotName or "Matplot"
+        self.fileTypes = fileTypes or []
+        self.saveCode = saveCode
+
+    def __setstate__(self, state):
+        self.__dict__ = state
+        self.__dict__.setdefault('plotName', "Matplot")
+        self.__dict__.setdefault('fileTypes', [])
+        self.__dict__.setdefault('saveCode', True)
+
 class MatplotWindow(QtWidgets.QDialog):
-    def __init__(self, parent=None, exitSig=None):
+    def __init__(self, parent=None, config=None, exitSig=None):
         super().__init__(parent)
         if exitSig is not None:
             exitSig.connect(self.close)
@@ -27,7 +40,11 @@ class MatplotWindow(QtWidgets.QDialog):
         self.plotbutton.clicked.connect(self.replot)
         self.savebutton.clicked.connect(self.savePlot)
 
-        self.filenamePattern = 'Matplot'
+        self.config = config
+        self.configname = "MatplotLib"
+        self.settings = self.config.get(self.configname+".settings", Settings())
+
+        self.filenamePattern = self.settings.plotName
         self.filename = None
         self.filepath = None
 
@@ -40,29 +57,34 @@ class MatplotWindow(QtWidgets.QDialog):
         self.traceind = 0
         self.code = ""
         self.header = """# Previous definitions:\n# import matplotlib.pyplot as plt\n# fig = plt.figure()\n# canvas = FigureCanvas(fig)\n\nplt.clf()\nax = fig.add_subplot(111)\n"""
-        self.footer = """\ncanvas.draw()"""
+        self.footer = """\nplt.tight_layout()\ncanvas.draw()"""
 
         self.savebutton.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.savebutton.setToolTip('<b>Right click for more options</b>\n\n<i>Saving plots with this button provides\nbetter quality figures, as they are saved\nnatively with matplotlib instead of\nthrough the Qt backend.<\i>')
         self.saveCode = QtWidgets.QAction("Save code", self)
         self.saveCode.setCheckable(True)
-        self.saveCode.setChecked(True)
+        self.saveCode.setChecked(self.settings.saveCode)
         self.savebutton.addAction(self.saveCode)
 
         self.allowedFileTypes = plt.gcf().canvas.get_supported_filetypes()
         self.fCheckWidgets = OrderedDict(sorted({key:QtWidgets.QCheckBox('{}'.format(key)) for key in self.allowedFileTypes.keys()}.items(), key=lambda t: t[0]))
         svbox = QtWidgets.QVBoxLayout()
         saveOptions = QtGui.QWidgetAction(self.savebutton)
-        for widget in self.fCheckWidgets.values():
+        for filetype, widget in self.fCheckWidgets.items():
+            if filetype in self.settings.fileTypes:
+                widget.setChecked(True)
             svbox.addWidget(widget)
 
         flbl = QtWidgets.QLabel('File name:', self)
         fhbox = QtWidgets.QHBoxLayout()
         flabelWidget = QtWidgets.QLineEdit(self.filenamePattern)
         flabelWidget.textEdited.connect(self.onChangeFileName)
+        storeDefaults = QtWidgets.QPushButton("Make current settings default")
+        storeDefaults.clicked.connect(self.saveSettings)
         fhbox.addWidget(flbl)
         fhbox.addWidget(flabelWidget)
         svbox.addLayout(fhbox)
+        svbox.addWidget(storeDefaults)
         swidgetContainer = QtWidgets.QWidget()
         swidgetContainer.setLayout(svbox)
         saveOptions.setDefaultWidget(swidgetContainer)
@@ -102,17 +124,17 @@ class MatplotWindow(QtWidgets.QDialog):
         if self.traceind == 0:
             xlab = "{0}".format(plottedtrace.xAxisLabel) if plottedtrace.xAxisLabel else ""
             xunit = " ({0})".format(plottedtrace.xAxisUnit) if plottedtrace.xAxisUnit else ""
-            ylab = "{0}".format(plottedtrace.yAxisLabel) if plottedtrace.yAxisLabel else ""
-            yunit = " ({0})".format(plottedtrace.yAxisUnit) if plottedtrace.yAxisUnit else ""
+            ylab = "{0}".format(plottedtrace.yAxisLabel) if hasattr(plottedtrace, 'yAxisLabel') and plottedtrace.yAxisLabel else ""
+            yunit = " ({0})".format(plottedtrace.yAxisUnit) if hasattr(plottedtrace, 'yAxisUnit') and plottedtrace.yAxisUnit else ""
             plt.xlabel(xlab+xunit)
             plt.ylabel(ylab+yunit)
-            plt.tight_layout()
-            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\nplt.tight_layout()\n".format(xlab+xunit,ylab+yunit)
+            self.code += "plt.xlabel('{0}')\nplt.ylabel('{1}')\n".format(xlab+xunit,ylab+yunit)
         if plottedtrace.fitFunction:
             style = {'ls': 'None', 'color': tuple(self.translateColor(plottedtrace))}
             style.update(self.styleLookup(plottedtrace, 'lines'))
             ax = self.fig.add_subplot(111)
             ax.plot(plottedtrace.fitx, plottedtrace.fity, **style)
+            plt.tight_layout()
             self.canvas.draw()
             styleStr = ', '.join([k+'='+str(v if not isinstance(v,str) else "'{}'".format(v)) for k,v in style.items()])
             self.code += """ax.plot(plottedTraces[{0}].fitx, plottedTraces[{0}].fity, {1})\n""".format(self.traceind, styleStr)
@@ -123,10 +145,12 @@ class MatplotWindow(QtWidgets.QDialog):
         if 'errorbar' in self.styleNames.get(plottedtrace.style,'lines') and plottedtrace.hasHeightColumn:
             self.code += """ax.errorbar(plottedTraces[{0}].x, plottedTraces[{0}].y, plottedTraces[{0}].height, {1})\n""".format(self.traceind, styleStr)
             ax.errorbar(plottedtrace.x, plottedtrace.y, plottedtrace.height, **style)
+            plt.tight_layout()
             self.canvas.draw()
         else:
             self.code += """ax.plot(plottedTraces[{0}].x, plottedTraces[{0}].y, {1})\n""".format(self.traceind, styleStr)
             ax.plot(plottedtrace.x, plottedtrace.y, **style)
+            plt.tight_layout()
             self.canvas.draw()
         self.textEdit.setPlainText(self.header+self.code+self.footer)
         self.traceind += 1
@@ -145,8 +169,20 @@ class MatplotWindow(QtWidgets.QDialog):
         savedCode = header+self.textEdit.textEdit.text()
         self.filename, (self.filepath, name, ext) = DataDirectory().sequencefile(self.filenamePattern)
         file = Path(self.filepath+'/'+name).with_suffix('.py')
-        file.write_text(savedCode)
+        if self.saveCode.isChecked():
+            file.write_text(savedCode)
         for filetype, cwidget in self.fCheckWidgets.items():
             if cwidget.isChecked():
                 self.fig.savefig(str(file.with_suffix('.'+filetype)))
+
+    def saveSettings(self):
+        """set current saving options as default, ie plot formats and file name"""
+        self.settings.plotName = self.filenamePattern
+        ftlist = []
+        for filetype, cwidget in self.fCheckWidgets.items():
+            if cwidget.isChecked():
+                ftlist.append(filetype)
+        self.settings.fileTypes = ftlist
+        self.settings.saveCode = self.saveCode.isChecked()
+        self.config[self.configname+".settings"] = self.settings
 

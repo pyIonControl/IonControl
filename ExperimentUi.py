@@ -3,9 +3,11 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
-
+import cProfile
+import pstats
 import webbrowser
 
+import time
 from PyQt5 import QtCore, QtGui, QtWidgets, QtPrintSupport
 import PyQt5.uic
 
@@ -60,6 +62,7 @@ import scan.FitHistogramsEvaluation
 import Experiment_rc
 from AWG.AWGUi import AWGUi
 from AWG import AWGDevices
+from pygsti_addons import yaml as _yaml
 
 setID = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
 if __name__=='__main__': #imports that aren't just definitions
@@ -112,6 +115,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dbConnection = project.dbConnection
         self.objectListToSaveContext = list()
         self.voltageControlWindow = None
+        self.profilingEnabled = False
 
         localpath = getProject().configDir+'/UserFunctions/'
         userFuncLoader(localpath)
@@ -377,6 +381,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.actionSave_GUI.triggered.connect(self.onSaveGUI)
         self.actionSave_GUI_Yaml.triggered.connect(self.onSaveGUIYaml)
 
+        self.actionProfiling.triggered.connect(self.setProfiling)
         self.actionStart.triggered.connect(self.onStart)
         self.actionStop.triggered.connect(self.onStop)
         self.actionAbort.triggered.connect(self.onAbort)
@@ -415,7 +420,10 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         else:
             self.showMaximized()
             
-        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser, self.globalVariablesUi, self.shutterUi,self.ExternalParametersUi.callWhenDoneAdjusting )
+        self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser,
+                                                         self.globalVariablesUi, self.shutterUi,
+                                                         self.ExternalParametersUi.callWhenDoneAdjusting,
+                                                         remoteRender=self.project.isEnabled('software', 'Remote render'))
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
         
         self.logicAnalyzerWindow = LogicAnalyzer(self.config, self.pulser, self.channelNameData )
@@ -538,7 +546,8 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dedicatedCountersWindow.show()
         self.dedicatedCountersWindow.setWindowState(QtCore.Qt.WindowActive)
         self.dedicatedCountersWindow.raise_()
-        self.dedicatedCountersWindow.onStart() #Start displaying data immediately
+        self.dedicatedCountersWindow.onEnableDataTaking(True) #Start displaying data immediately
+        self.dedicatedCountersWindow.onEnableDataPlotting(True)
 
     def showLogicAnalyzer(self):
         self.logicAnalyzerWindow.show()
@@ -599,6 +608,23 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             
     def onStart(self, checked=False, globalOverrides=list()):
         self.currentTab.onStart(globalOverrides)
+
+    def setProfiling(self, checked=False):
+        if checked:
+            self.profile = cProfile.Profile()
+            self.profile.enable()
+            self.profilingEnabled = True
+            self.profilingStartTime = time.time()
+        else:
+            self.profile.disable()
+            self.profilingEnabled = False
+            sortby = 'tottime'
+            ps = pstats.Stats(self.profile).sort_stats(sortby)
+            ps.print_stats()
+            timestr = time.strftime("%Y%m%d_%H%M", time.localtime())
+            duration = int(time.time() - self.profilingStartTime)
+            filename = "profile_{}_{}.pkl".format(timestr, duration)
+            ps.dump_stats(filename)
 
     def onStash(self):
         if hasattr(self.currentTab, 'onStash'):

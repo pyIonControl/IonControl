@@ -6,28 +6,32 @@
 """
 DedicatedCounters reads and displays the counts from the simple counters and ADCs.
 """
-from PyQt5 import QtCore, QtWidgets, QtGui
+import logging
+import os
+from time import time
+
 import PyQt5
 import numpy
-import logging
+from PyQt5 import QtCore, QtWidgets, QtGui
+from pyqtgraph.dockarea import Dock, DockArea
 
 from dedicatedCounters import AutoLoad
 from dedicatedCounters import DedicatedCountersSettings
 from dedicatedCounters import DedicatedDisplay
 from dedicatedCounters import InputCalibrationUi
-from modules import enum
-from trace.TraceCollection import TraceCollection, TracePlotting
-from modules.DataDirectory import DataDirectory
-from modules.SequenceDict import SequenceDict
-from trace.pens import penList
 from dedicatedCounters.StatusDisplay import StatusDisplay
-from pyqtgraph.dockarea import Dock, DockArea
-from uiModules.DateTimePlotWidget import DateTimePlotWidget
+from modules import enum
+from modules.DataDirectory import DataDirectory
 from modules.RollingUpdate import rollingUpdate
+from modules.SequenceDict import SequenceDict
+from modules.quantity import is_Q
+from trace.PlottedTrace import PlottedTrace
+from trace.TraceCollection import TraceCollection
+from trace.pens import penList, penArgList
 from uiModules.BlockAutoRange import BlockAutoRange
-from modules.quantity import is_Q, Q
+from uiModules.DateTimePlotWidget import DateTimePlotWidget
+from uiModules.RemoteCustomPlot import RemoteCustomView
 
-import os
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/DedicatedCounters.ui')
 DedicatedCountersForm, DedicatedCountersBase = PyQt5.uic.loadUiType(uipath)
 
@@ -40,7 +44,9 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
     dataAvailable = QtCore.pyqtSignal( object )
     OpStates = enum.enum('idle', 'running', 'paused')
 
-    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable, parent=None):
+    def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable,
+                 parent=None, remoteRender=False):
+        self.remoteRender = remoteRender
         DedicatedCountersForm.__init__(self)
         DedicatedCountersBase.__init__(self, parent)
         self.curvesDict = {}
@@ -61,8 +67,10 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.externalInstrumentObservable = externalInstrumentObservable
         self.dbConnection = dbConnection
         self.plotDict = dict()
-
+        self.lastPlotTime = 0
         self.area = None
+        self.enableDataPlotting = False
+        self.enableDataTaking = False
 #        [
 #            AnalogInputCalibration.PowerDetectorCalibration(),
 #            AnalogInputCalibration.PowerDetectorCalibrationTwo(),
@@ -78,8 +86,8 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.setupPlots()
         self.actionSave.triggered.connect( self.onSave )
         self.actionClear.triggered.connect( self.onClear )
-        self.actionStart.triggered.connect( self.onStart )
-        self.actionStop.triggered.connect( self.onStop )
+        self.actionData_Reporting.triggered.connect(self.onEnableDataTaking)
+        self.actionPlot_Data.triggered.connect(self.onEnableDataPlotting)
         self.settingsUi = DedicatedCountersSettings.DedicatedCountersSettings(self.config,self.plotDict)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget( self.settingsUi )
@@ -182,9 +190,9 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     adcIndexList = [self.adcDict[n] for n in dataSourceNames if n in self.adcDict]
                     mycurves = self.curvesDict[windowName]
                     for cIdx in counterIndexList:
-                        mycurves.setdefault(cIdx, self.plotDict[windowName]['view'].plot(pen=penList[cIdx + 1][0]))
+                        mycurves.setdefault(cIdx, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
                     for aIdx in adcIndexList:
-                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penList[cIdx + 1][0]))
+                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
                     for eIdx in set(mycurves) - set(counterIndexList) - set(i + 16 for i in adcIndexList):
                         curve = mycurves.pop(eIdx)
                         self.plotDict[windowName]['view'].removeItem(curve)
@@ -227,17 +235,25 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             self.pulserHardware.dedicatedDataAvailable.connect( self.onData )
             self.dataSlotConnected = True
         
-    def onStart(self):
-        self.pulserHardware.counterMask = self.settings.counterMask
-        self.pulserHardware.adcMask = self.settings.adcMask
-        self.state = self.OpStates.running
-        self.onSettingsChanged()
+    def onEnableDataTaking(self, checked):
+        self.enableDataTaking = checked
+        if checked:
+            self.pulserHardware.counterMask = self.settings.counterMask
+            self.pulserHardware.adcMask = self.settings.adcMask
+            self.state = self.OpStates.running
+            self.onSettingsChanged()
+        else:
+            self.pulserHardware.counterMask = 0
+            self.pulserHardware.adcMask = 0
+            self.state = self.OpStates.idle
+            self.onSettingsChanged()
+        if self.actionData_Reporting.isChecked() != checked:
+            self.actionData_Reporting.setChecked(checked)
 
-    def onStop(self):
-        self.pulserHardware.counterMask = 0
-        self.pulserHardware.adcMask = 0
-        self.state = self.OpStates.idle
-        self.onSettingsChanged()
+    def onEnableDataPlotting(self, checked):
+        self.enableDataPlotting = checked
+        if self.actionPlot_Data.isChecked() != checked:
+            self.actionPlot_Data.setChecked(checked)
                 
     def onSave(self):
         logger = logging.getLogger(__name__)
@@ -253,7 +269,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     else:
                         trace.description["ADC"] = str(plotName)
                     filename, _ = DataDirectory().sequencefile("DedicatedCounter_{0}.txt".format(n))
-                    trace.addTracePlotting( TracePlotting(name="Counter {0}".format(n)) )
+                    trace.addPlotting(PlottedTrace(Trace=trace, name="Counter {0}".format(n)))
                     trace.save()
         logger.info("saving dedicated counters")
     
@@ -265,17 +281,21 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             for n in list(subdict.keys()):
                 subdict[n].setData(self.xData[n], self.yData[n])
 
-    def onData(self, data):
-        self.tick += 1
-        self.displayUi.values = data.data[0:4]
-        self.displayUi2.values = data.data[4:8]
-        self.displayUiADC.values = self.convertAnalog(data.analog())
-        data.analogValues = self.displayUiADC.values
-        # if data.data[16] is not None and data.data[16] in self.integrationTimeLookup:
-        #     self.dataIntegrationTime = self.integrationTimeLookup[ data.data[16] ]
-        # else:
-        self.dataIntegrationTime = self.settings.integrationTime
-        data.integrationTime = self.dataIntegrationTime
+    def onData(self, data, queueSize):
+        if self.enableDataTaking:
+            self.tick += 1
+            self.dataIntegrationTime = self.settings.integrationTime
+            data.integrationTime = self.dataIntegrationTime
+            self.displayUiADC.values = self.convertAnalog(data.analog())
+            data.analogValues = self.displayUiADC.values
+            self.displayUi.values = data.data[0:4]
+            self.displayUi2.values = data.data[4:8]
+            self.statusDisplay.setData(data)
+            if self.enableDataPlotting:
+                self.plotData(data, queueSize)
+            self.dataAvailable.emit(data)
+
+    def plotData(self, data, queueSize):
         self.plotDisplayData = self.settingsUi.settings.plotDisplayData
         msIntegrationTime = self.dataIntegrationTime.m_as('ms')
         for index, value in enumerate(data.data[:16]):
@@ -297,17 +317,18 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     y = value
                 self.yData[myindex] = rollingUpdate(self.yData[myindex], y, self.settings.pointsToKeep)
                 self.xData[myindex] = rollingUpdate(self.xData[myindex], data.timestamp, self.settings.pointsToKeep)
+        lag = time() - self.lastPlotTime
+        if queueSize < 2 or (queueSize < 20 and lag > 1) or lag > 2:
+            self.replot()
+
+    def replot(self):
         for name, plotwin in self.curvesDict.items():
             if plotwin:
                 with BlockAutoRange(next(iter(plotwin.values()))):
                     for index, plotdata in plotwin.items():
                         plotdata.setData(self.xData[index], self.yData[index])
-        self.statusDisplay.setData(data)
-        self.dataAvailable.emit(data)
-        # logging.getLogger(__name__).info("Max bytes read {0}".format(data.maxBytesRead))
-        self.statusDisplay.setData(data)
-        self.dataAvailable.emit(data)
- 
+        self.lastPlotTime = time()
+
     def convertAnalog(self, data):
         converted = list()
         for channel, cal in enumerate(self.analogCalbrations):
@@ -326,11 +347,20 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             plotNames.append('Autoload')
         for name in plotNames:
             dock = Dock(name)
-            widget = DateTimePlotWidget(self, name=name)
-            view = widget._graphicsView
-            self.area.addDock(dock, "bottom")
-            dock.addWidget(widget)
-            self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
+            if self.remoteRender:
+                widget = RemoteCustomView()
+                widget.pg.setConfigOptions(antialias=True)  ## prettier plots at no cost to the main process!
+                rplt = widget.cp.CustomPlotItem(dateAxis=True, name=name)
+                rplt._setProxyOptions(deferGetattr=True)  ## speeds up access to rplt.plot
+                widget.setCentralItem(rplt)
+                dock.addWidget(widget)
+                self.plotDict[name] = {"dock":dock, "widget":widget, "view":rplt}
+            else:
+                widget = DateTimePlotWidget(self, name=name)
+                view = widget._graphicsView
+                self.area.addDock(dock, "bottom")
+                dock.addWidget(widget)
+                self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
 
     def onAddPlot(self):
         name, ok = QtGui.QInputDialog.getText(self, 'Plot Name', 'Please enter a plot name: ')
