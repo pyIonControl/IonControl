@@ -258,9 +258,19 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         elif isinstance(node.op, ast.Sub):
             self.codestr += [self.ppFormatLine("SUBW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Mult):
-            self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
+            if isinstance(node.right, ast.Num) and is_power2(node.right.n):
+                node.right.n = ln_of_power2(node.right.n)
+                nodevid, _ = self.localVarHandler(node.right)
+                self.codestr += [self.ppFormatLine("SHL {0}".format(nodevid), node.lineno)]
+            else:
+                self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Div):
-            self.codestr += [self.ppFormatLine("DIVW {0}".format(nodevid), node.lineno)]
+            if isinstance(node.right, ast.Num) and is_power2(node.right.n):
+                node.right.n = ln_of_power2(node.right.n)
+                nodevid, _ = self.localVarHandler(node.right)
+                self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
+            else:
+                self.codestr += [self.ppFormatLine("DIVW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.RShift):
             self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.LShift):
@@ -1150,7 +1160,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 lookup[codeline+1] = sourceline
         return lookup
 
-def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput=False ):
+
+def pppcompile(sourcefile, targetfile, referencefile, verbose=False, keepoutput=False, printFinalVars=False):
     import os.path
     try:
         with open(sourcefile, "r") as f:
@@ -1174,8 +1185,8 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput
         if keepoutput:
             outfilenew = Path(targetfile+'.vm')
             outfileref = Path(referencefile+'.vm')
-            outfilenew.write_text("#NewFile")
-            outfileref.write_text("#RefFile")
+            outfilenew.write_text("#NewFile\n")
+            outfileref.write_text("#RefFile\n")
         ppvm = ppVirtualMachine(assemblercode)
         ppvm.runCode(verbose, outfile=outfilenew)
         dast = ppvm.varDict
@@ -1183,6 +1194,9 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput
         ppvm2.runCode(verbose, outfile=outfileref)
         dcomp = ppvm2.varDict
         dictComparison = compareDicts(dast,dcomp)
+        if printFinalVars:
+            for k, v in sorted(dast.items(), key=lambda x: x[0]):
+                print("{}: {}".format(k, v))
         if dictComparison:
             print(dictComparison)
             return False

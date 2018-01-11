@@ -37,6 +37,7 @@ testfiles = ["Condition", "Assignements", "if_then_else", "ShiftOperations", "Re
              "Declarations",
              "Microwave",
              "Division",
+             "BinOp"
              ]
 
 
@@ -44,7 +45,7 @@ testfiles = ["Condition", "Assignements", "if_then_else", "ShiftOperations", "Re
 def test_astCompile(name):
     result = (pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
                                      os.path.join(folder, name + ".ppc.reference"), verbose=verbose,
-                                     keepoutput=keep_output))
+                                     keepoutput=keep_output, printFinalVars=True))
     assert result
 
 
