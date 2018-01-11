@@ -73,10 +73,11 @@ for filename in args.filename:
     if qubitData.is_gst:
         my_gs_target = qubitData.target_gateset
         gs_target = std1Q_XYI.gs_target
-        gs_target.spamdefs = my_gs_target.spamdefs
+        gs_target.preps = my_gs_target.preps
+        gs_target.povms = my_gs_target.povms
         ds = qubitData.gst_dataset
         output_name = os.path.join(folder, file_base + ".gstdata")
-        pygsti.io.write_dataset(output_name, ds, spamLabelOrder=['0', '1'])
+        pygsti.io.write_dataset(output_name, ds, outcomeLabelOrder=['0', '1'])
 
         #Create germ gate string lists
         germs = qubitData.germs or std1Q_XYI.germs
@@ -123,7 +124,7 @@ for filename in args.filename:
             results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
 
             #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
-            pygsti.report.create_general_report(results, filename=os.path.join(folder, file_base + "report.html"),
+            pygsti.report.create_standard_report(results, filename=os.path.join(folder, file_base + "report.html"),
                                                 title=file_base, verbosity=2)
         else:
             print("This claims to be not GST data, not running the evaluation")

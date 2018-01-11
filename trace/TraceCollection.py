@@ -31,6 +31,7 @@ from collections import OrderedDict
 
 from trace.PlottedStructure import PlottedStructure
 from trace.PlottedTrace import PlottedTrace, PlottedTraceProperties
+from trace.StructuredUnpickler import StructuredUnpickler
 
 try:
     from fit import FitFunctions
@@ -186,8 +187,12 @@ class TraceCollection(keydefaultdict):
         self.rawdata = None
         self.description["tracePlottingList"] = PlottingList()
         self.record_timestamps = record_timestamps
-        self.structuredData = keydefaultdict(dict)  #  Can contained structured data that can be json dumped
+        self.structuredData = keydefaultdict(self.get_structured_data)  #  Can contained structured data that can be json dumped
         self.structuredDataFormat = FormatDict()
+
+    @staticmethod
+    def get_structured_data(d, key):
+        return dict()
 
     def __bool__(self):
         return True  # to remain backwards compatible with previous behavior
@@ -385,7 +390,8 @@ class TraceCollection(keydefaultdict):
                         format = self.structuredDataFormat[name]
                         with myzip.open(filename) as f:
                             if format.lower() in ['pkl', 'pickle']:
-                                self.structuredData[name] = pickle.loads(f.read())
+                                u = StructuredUnpickler(f)
+                                self.structuredData[name] = u.load()
                             elif format.lower() == 'json':
                                 self.structuredData[name] = json.loads(f.read().decode())
                             elif format.lower() == 'yaml':
