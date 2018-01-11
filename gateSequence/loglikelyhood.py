@@ -1,7 +1,6 @@
 # functions copied from pygsti to be able to optimize them for the on the fly usage
 import numpy as _np
 from pygsti.tools import listtools as _lt
-from pygsti.tools.likelihoodfns import fill_count_vecs
 
 
 def logl_terms(gateset, dataset, gatestring_list=None,

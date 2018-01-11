@@ -50,7 +50,7 @@ class QubitDataSet:
 
     def _init_internal(self):
         if self.is_gst:
-            self.spam_labels = self.target_gateset.get_spam_labels()
+            self.spam_labels = ['0', '1']  # self.target_gateset.get_spam_labels()
             self._countVecMx = numpy.zeros((len(self.spam_labels), len(self.gatestring_list)), 'd')
             self._totalCntVec = numpy.zeros(len(self.gatestring_list), 'd')
             for gatestring, d in self._rawdata.items():
@@ -128,9 +128,9 @@ class QubitDataSet:
 
     @property
     def gst_dataset(self):
-        ds = pygsti.objects.DataSet(spamLabels=['0', '1'])
+        ds = pygsti.objects.DataSet(outcomeLabels=['0', '1'])
         for gs, data in self.data.items():
-            rc = ResultCounter(data['value'], data['repeats'], keys=self.target_gateset.spamdefs.keys(),
+            rc = ResultCounter(data['value'], data['repeats'], keys=['0', '1'],
                                force_string=True)
             ds.add_count_dict(gs, rc)
         ds.done_adding_data()
