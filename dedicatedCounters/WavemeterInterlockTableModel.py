@@ -83,7 +83,7 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
         return  QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def setChannel(self, index, value):
-        channel, _  = value.toInt()
+        channel, _  = int(value)
         if channel==self.channelDict.at(index.row()).channel:  # no change
             return True
         if channel not in self.channelDict:
