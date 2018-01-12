@@ -63,13 +63,18 @@ class VariableDictionary(SequenceDict):
     def __getstate__(self):
         return dict((key, value) for key, value in self.__dict__ if key not in ['globaldict'])
 
+    def __setstate__(self, state):
+        state.pop('dependencyGraph', None)  # Unpickling of networkx 1.x objects into  networkx 2.x objects fails
+        self.__dict__.update(state)
+
     def __reduce__(self):
         theclass, theitems, inst_dict = super(VariableDictionary, self).__reduce__()
         inst_dict.pop('globaldict', None)
         return theclass, theitems, inst_dict
 
     def setGlobaldict(self, globaldict):
-        self.globaldict = globaldict 
+        self.globaldict = globaldict
+        self.calculateDependencies()
                 
     def calculateDependencies(self):
         self.dependencyGraph = DiGraph()   # clear the old dependency graph in case parameters got removed
