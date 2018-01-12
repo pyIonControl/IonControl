@@ -4,6 +4,8 @@ from math import floor, ceil, sqrt
 
 import numpy
 from PyQt5 import QtCore
+from pygsti.objects import POVM
+
 from gateSequence.loglikelyhood import logl_terms, logl_max_terms
 from pyqtgraph.parametertree.Parameter import Parameter
 
@@ -176,7 +178,7 @@ class PlottedStructure:
     @gateSet.setter
     def gateSet(self, gateSet):
         self._gateSet = gateSet
-        self._spamLabels = self._gateSet.get_spam_labels()  # this list fixes the ordering of the spam labels
+        self._spamLabels = list(self._gateSet.povms['Mz'].keys())  # this list fixes the ordering of the spam labels
         self._spam_lbl_rows = {sl: i for (i, sl) in enumerate(self._spamLabels)}
         self._probs = numpy.empty((len(self._spamLabels), len(self.qubitData.gatestring_list)), 'd')
         try:
@@ -188,13 +190,17 @@ class PlottedStructure:
         except KeyError:
             self._evaltree = self._gateSet.bulk_evaltree(self.qubitData.gatestring_list)
             PlottedStructure._evaltree_cache[evaltree_dependency_hash] = self._evaltree
-        self._gateSet.bulk_fill_probs(self._probs, self._spam_lbl_rows, self._evaltree, (-1e6, 1e6))
+        evalTree, lookup, outcome_lookup = self._evaltree
+        self._gateSet.bulk_fill_probs(self._probs, evalTree, (-1e6, 1e6))
 
     def _assemble_data(self):
-        l = logl_terms(self._gateSet, None, gatestring_list=self.qubitData.gatestring_list, evalTree=self._evaltree,
-                       probs=self._probs, countVecMx=self.qubitData.countVecMx, totalCntVec=self.qubitData.totalCntVec)
-        l_max = logl_max_terms(None, gatestring_list=self.qubitData.gatestring_list,
-                               countVecMx=self.qubitData.countVecMx, totalCntVec=self.qubitData.totalCntVec)
+        evalTree, lookup, outcome_lookup = self._evaltree
+        l = logl_terms(gatestring_list=self.qubitData.gatestring_list, lookup=lookup,
+                       countVecMx=self.qubitData.countVecMx, totalCntVec=self.qubitData.totalCntVec,
+                       probs=self._probs)
+        l_max = logl_max_terms(gatestring_list=self.qubitData.gatestring_list,
+                               countVecMx=self.qubitData.countVecMx, totalCntVec=self.qubitData.totalCntVec,
+                               lookup=lookup)
         self._log_likelihood = numpy.sum(2 * (l_max - l), axis=0)
         self._y = [self._log_likelihood[i] for i in self._plot_s_idx]
 
@@ -227,7 +233,10 @@ class PlottedStructure:
 
     def updateGateSet(self):
         temp_gs = self.qubitData.target_gateset.depolarize(gate_noise=self.properties.gate_noise)
-        temp_gs['E0'] = [sqrt(2)/2 * (1-self.properties.bright_error), 0, 0, -sqrt(2)/2 * (1 - self.properties.dark_error)]
+        temp_gs['Mz'] = POVM({'0': [1 / sqrt(2) * (1 - self.properties.bright_error), 0, 0,
+                                          1 / sqrt(2) * (1 - self.properties.dark_error)],
+                                    '1': [1 / sqrt(2) * (1 - self.properties.bright_error), 0, 0,
+                                          -1 / sqrt(2) * (1 - self.properties.dark_error)]})
         self.gateSet = temp_gs
 
     def update(self, param, changes):
