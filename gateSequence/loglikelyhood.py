@@ -3,10 +3,9 @@ import numpy as _np
 from pygsti.tools import listtools as _lt
 
 
-def logl_terms(gateset, dataset, gatestring_list=None,
-         minProbClip=1e-6, probClipInterval=(-1e6,1e6), radius=1e-4,
-         evalTree=None, countVecMx=None, totalCntVec=None, poissonPicture=True,
-         check=False, gateLabelAliases=None, probs=None):
+def logl_terms(gatestring_list, lookup, countVecMx,
+               totalCntVec, probs=None, poissonPicture=True,
+               minProbClip=1e-6, radius=1e-4):
     """
     The vector of log-likelihood contributions for each gate string & SPAM label
 
@@ -24,36 +23,10 @@ def logl_terms(gateset, dataset, gatestring_list=None,
         Values are the log-likelihood contributions of the corresponding
         SPAM label and gate string.
     """
-    if gatestring_list is None:
-        gatestring_list = list(dataset.keys())
-
-    ds_gatestring_list = _lt.find_replace_tuple_list(
-        gatestring_list, gateLabelAliases)
-
-    spamLabels = gateset.get_spam_labels() #this list fixes the ordering of the spam labels
-    spam_lbl_rows = { sl:i for (i,sl) in enumerate(spamLabels) }
-
-    if countVecMx is None:
-        countVecMx = _np.empty( (len(spamLabels),len(gatestring_list)), 'd' )
-        fill_count_vecs(countVecMx, spam_lbl_rows, dataset, ds_gatestring_list)
-
-    if totalCntVec is None:
-        totalCntVec = _np.array( [dataset[gstr].total() for gstr in ds_gatestring_list], 'd')
-
-    #freqs = countVecMx / totalCntVec[None,:]
-    #freqs_nozeros = _np.where(countVecMx == 0, 1.0, freqs) # set zero freqs to 1.0 so np.log doesn't complain
-    #freqTerm = countVecMx * ( _np.log(freqs_nozeros) - 1.0 )
-    #freqTerm[ countVecMx == 0 ] = 0.0 # set 0 * log(0) terms explicitly to zero since numpy doesn't know this limiting behavior
 
     a = radius # parameterizes "roundness" of f == 0 terms
     min_p = minProbClip
 
-    if evalTree is None:
-        evalTree = gateset.bulk_evaltree(gatestring_list)
-
-    if probs is None:
-        probs = _np.empty( (len(spamLabels),len(gatestring_list)), 'd' )
-        gateset.bulk_fill_probs(probs, spam_lbl_rows, evalTree, probClipInterval, check)
     pos_probs = _np.where(probs < min_p, min_p, probs)
 
     if poissonPicture:
@@ -73,18 +46,16 @@ def logl_terms(gateset, dataset, gatestring_list=None,
         v = _np.where( probs < min_p, v + S*(probs - min_p) + S2*(probs - min_p)**2, v) #quadratic extrapolation of logl at min_p for probabilities < min_p
         v = _np.where( countVecMx == 0, 0.0, v)
 
-    #DEBUG
-    #print "num clipped = ",_np.sum(probs < min_p)," of ",probs.shape
-    #print "min/max probs = ",min(probs.flatten()),",",max(probs.flatten())
-    #for i in range(v.shape[1]):
-    #    print "%d %.0f (%f) %.0f (%g)" % (i,v[0,i],probs[0,i],v[1,i],probs[1,i])
-
-    # v[iSpamLabel,iGateString] contains all logl contributions
     return v
+    # nGateStrings = len(gatestring_list)
+    # terms = _np.empty(nGateStrings , 'd')
+    # for i in range(nGateStrings):
+    #     terms[i] = _np.sum( v[lookup[i]], axis=0 )
+    # return terms
 
 
-def logl_max_terms(dataset, gatestring_list=None, countVecMx=None, totalCntVec=None,
-                   poissonPicture=True, check=False, gateLabelAliases=None):
+def logl_max_terms(gatestring_list, countVecMx, totalCntVec, lookup,
+                   poissonPicture=True, gateLabelAliases=None):
     """
     The vector of maximum log-likelihood contributions for each gate string
     & SPAM label.
@@ -104,20 +75,7 @@ def logl_max_terms(dataset, gatestring_list=None, countVecMx=None, totalCntVec=N
          corresponding SPAM label and gate string.
     """
 
-    if gatestring_list is None:
-        gatestring_list = list(dataset.keys())
-    else:
-        gatestring_list = _lt.find_replace_tuple_list(
-            gatestring_list, gateLabelAliases)
-
-    if countVecMx is None:
-        spamLabels = dataset.get_spam_labels()
-        spam_lbl_rows = {sl: i for (i, sl) in enumerate(spamLabels)}
-        countVecMx = _np.empty((len(spamLabels), len(gatestring_list)), 'd')
-        fill_count_vecs(countVecMx, spam_lbl_rows, dataset, gatestring_list)
-
-    if totalCntVec is None:
-        totalCntVec = _np.array([dataset[gstr].total() for gstr in gatestring_list], 'd')
+    gatestring_list = _lt.find_replace_tuple_list(gatestring_list, gateLabelAliases)
 
     freqs = countVecMx / totalCntVec[None, :]
     freqs_nozeros = _np.where(countVecMx == 0, 1.0, freqs)  # set zero freqs to 1.0 so np.log doesn't complain
@@ -127,8 +85,12 @@ def logl_max_terms(dataset, gatestring_list=None, countVecMx=None, totalCntVec=N
     else:
         maxLogLTerms = countVecMx * _np.log(freqs_nozeros)
 
-    maxLogLTerms[
-        countVecMx == 0] = 0.0  # set 0 * log(0) terms explicitly to zero since numpy doesn't know this limiting behavior
-
-    # maxLogLTerms[iSpamLabel,iGateString] contains all logl-upper-bound contributions
+    maxLogLTerms[countVecMx == 0] = 0.0  # set 0 * log(0) terms explicitly to zero since numpy doesn't know this limiting behavior
     return maxLogLTerms
+    # maxLogLTerms[iSpamLabel,iGateString] contains all logl-upper-bound contributions
+    # nGateStrings = len(gatestring_list)
+    # terms = _np.empty(nGateStrings , 'd')
+    # for i in range(nGateStrings):
+    #     terms[i] = _np.sum( maxLogLTerms[lookup[i]], axis=0 )
+    # return terms
+
