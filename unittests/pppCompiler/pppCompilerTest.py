@@ -28,14 +28,15 @@ def ppCompile(assemblerfile):
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
 folder = "test"
-testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
-              "PulseCommand",
-              "indented_blocks",
-              "Master_uWave_program_v2",
-              "Declarations",
-              "Microwave",
-              "Division"
-            ]
+testfiles = ["Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
+             "PulseCommand",
+             "indented_blocks",
+             "Master_uWave_program_v2",
+             "Declarations",
+             "Microwave",
+             "Division",
+             "BinOp"
+             ]
 
 
 @pytest.mark.parametrize("name", testfiles)

@@ -59,7 +59,7 @@ class GateSequenceCompiler(object):
         length = 0
         for gate in gate_string:
             thisCompiledGate = self.compiledGates[gate]
-            data.extend(self.packData(thisCompiledGate))
+            data.extend(thisCompiledGate)
             length += len(thisCompiledGate) // self.pulseListLength
         return [length] + self.packData(data, packWidth)
 

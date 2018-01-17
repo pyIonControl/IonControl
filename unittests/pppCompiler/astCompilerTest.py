@@ -25,23 +25,27 @@ def ppCompile(assemblerfile):
 
     pp.toBinary()
 
-verbose = False # if verbose is True, the virtual machine prints line by line results
+verbose = False  # if verbose is True, the virtual machine prints line by line results
+keep_output = False
 
 resultMessage = {None: 'no comparison', False: 'failed', True: 'passed'}
 folder = os.path.join(os.getcwd(), 'test')
-testfiles = [ "Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
-              "PulseCommand",
-              "indented_blocks",
-              "Master_uWave_program_v2",
-              "Declarations",
-              "Microwave",
-              "Division"]
+testfiles = ["Condition", "Assignements", "if_then_else", "ShiftOperations", "RealWorld", "ProcedureCalls",
+             "PulseCommand",
+             "indented_blocks",
+             "Master_uWave_program_v2",
+             "Declarations",
+             "Microwave",
+             "Division",
+             "BinOp"
+             ]
 
 
 @pytest.mark.parametrize("name", testfiles)
 def test_astCompile(name):
     result = (pppCompiler.pppcompile(os.path.join(folder, name + ".ppp"), os.path.join(folder, name + ".ppc"),
-                                               os.path.join(folder, name + ".ppc.reference"), verbose=verbose))
+                                     os.path.join(folder, name + ".ppc.reference"), verbose=verbose,
+                                     keepoutput=keep_output, printFinalVars=True))
     assert result
 
 

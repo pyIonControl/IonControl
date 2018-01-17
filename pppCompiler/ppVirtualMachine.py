@@ -279,6 +279,17 @@ class ppVirtualMachine:
                     msg = " --> R *= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
+            m = re.match(r"\s*(DIVW)\s(\S+)", line)
+            if m:
+                self.Rref = None
+                self.R //= int(self.varDict[m.group(2)])
+                if printAll:
+                    msg = " --> R /= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> R /= {0} -> {1}".format(self.varDict[m.group(2)],self.R)
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
+                continue
             m = re.match(r"\s*(ADDW)\s(\S+)", line)
             if m:
                 self.Rref = None
@@ -754,6 +765,16 @@ class ppVirtualMachine:
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
                 if keepoutput:
                     msg = " --> TRIGGER {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
+                continue
+            m = re.match(r"\s*(SETSYNCTIME)\s(\S+)", line)
+            if m:
+                self.SYNCTIME = m.group(2)
+                if printAll:
+                    msg = " --> SYNCTIME {0}".format(m.group(2))
+                    print(self.fmtstr.format(line, msg, self.timestr.format(timer)))
+                if keepoutput:
+                    msg = " --> SYNCTIME {0}".format(m.group(2))
                     print(self.fmtstr.format(line, msg, self.timestr.format(timer)), file=outfile)
                 continue
             raise Exception("I don't know how to interpret {}", line)

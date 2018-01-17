@@ -50,6 +50,18 @@ def list_rtrim( l, trimvalue=None ):
         l.pop()
     return l
 
+def is_power2(num):
+    return num and (num & (num - 1) == 0)
+
+def ln_of_power2(num):
+    if not is_power2(num):
+        raise ValueError("ln_of_power2 needs power of 2 as input")
+    power = 0
+    while num:
+        num >>= 1
+        power += 1
+    return power - 1
+
 class OrderedSet(UserList):
     """Not really a set, more of a list that only contains unique elements"""
     def add(self, other):
@@ -189,34 +201,48 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def visit_AugAssign(self, node):
         """Node visitor for augmented assignment, eg x += 1"""
-        if 'n' in node.value._fields and node.value.n == 1:
+        if 'n' in node.value._fields:
             nodetid = "_".join(self.localNameSpace+deque(node.target.id))
             if nodetid not in self.symbols.keys():
                 nodetid = node.target.id
-            if isinstance(node.op, ast.Add):
-                self.codestr += self.ppFormatLine("INC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.Sub):
-                self.codestr += self.ppFormatLine("DEC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
+            n_value = node.value.n
         else:
-            nodetid,_ = self.localVarHandler(node.target)
-            nodevid,_ = self.localVarHandler(node.value)
-            self.codestr += [self.ppFormatLine("LDWR {}".format(nodetid), node.lineno)]
-            if isinstance(node.op, ast.Add):
+            nodetid, _ = self.localVarHandler(node.target)
+            n_value = None
+        nodevid, _ = self.localVarHandler(node.value)
+        self.codestr += [self.ppFormatLine("LDWR {}".format(nodetid), node.lineno)]
+        if isinstance(node.op, ast.Add):
+            if n_value == 1:
+                self.codestr += self.ppFormatLine("INC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
+            else:
                 self.codestr += self.ppFormatLine("ADDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.Sub):
+        elif isinstance(node.op, ast.Sub):
+            if n_value == 1:
+                self.codestr += self.ppFormatLine("DEC {0}\nSTWR {0}".format(nodetid).split('\n'), node.lineno)
+            else:
                 self.codestr += self.ppFormatLine("SUBW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.Mult):
-                self.codestr += self.ppFormatLine("MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.Div):
-                self.codestr += self.ppFormatLine("DIVW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.RShift):
-                self.codestr += self.ppFormatLine("SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.LShift):
+        elif isinstance(node.op, ast.Mult):
+            if is_power2(n_value):
+                node.value.n = ln_of_power2(n_value)
+                nodevid, _ = self.localVarHandler(node.value)
                 self.codestr += self.ppFormatLine("SHL {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.BitAnd):
-                self.codestr += self.ppFormatLine("ANDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
-            elif isinstance(node.op, ast.BitOr):
-                self.codestr += self.ppFormatLine("ORW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+            else:
+                self.codestr += self.ppFormatLine("MULTW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+        elif isinstance(node.op, ast.Div):
+            if is_power2(n_value):
+                node.value.n = ln_of_power2(n_value)
+                nodevid, _ = self.localVarHandler(node.value)
+                self.codestr += self.ppFormatLine("SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+            else:
+                self.codestr += self.ppFormatLine("DIVW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+        elif isinstance(node.op, ast.RShift):
+            self.codestr += self.ppFormatLine("SHR {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+        elif isinstance(node.op, ast.LShift):
+            self.codestr += self.ppFormatLine("SHL {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+        elif isinstance(node.op, ast.BitAnd):
+            self.codestr += self.ppFormatLine("ANDW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
+        elif isinstance(node.op, ast.BitOr):
+            self.codestr += self.ppFormatLine("ORW {0}\nSTWR {1}".format(nodevid, nodetid).split('\n'), node.lineno)
         self.safe_generic_visit(node)
         if not self.localNameSpace:
             self.maincode += self.codestr
@@ -232,9 +258,19 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         elif isinstance(node.op, ast.Sub):
             self.codestr += [self.ppFormatLine("SUBW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Mult):
-            self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
+            if isinstance(node.right, ast.Num) and is_power2(node.right.n):
+                node.right.n = ln_of_power2(node.right.n)
+                nodevid, _ = self.localVarHandler(node.right)
+                self.codestr += [self.ppFormatLine("SHL {0}".format(nodevid), node.lineno)]
+            else:
+                self.codestr += [self.ppFormatLine("MULTW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.Div):
-            self.codestr += [self.ppFormatLine("DIVW {0}".format(nodevid), node.lineno)]
+            if isinstance(node.right, ast.Num) and is_power2(node.right.n):
+                node.right.n = ln_of_power2(node.right.n)
+                nodevid, _ = self.localVarHandler(node.right)
+                self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
+            else:
+                self.codestr += [self.ppFormatLine("DIVW {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.RShift):
             self.codestr += [self.ppFormatLine("SHR {0}".format(nodevid), node.lineno)]
         elif isinstance(node.op, ast.LShift):
@@ -1061,7 +1097,7 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
 
     def collectShutters(self, code):
         """Parse shutter declarations with encoding and add them to symbols dictionary"""
-        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=1 if code.re.groups == 1 else code.group(2))
+        self.symbols[code.group(1)] = VarSymbol(type_="shutter", name=code.group(1), value=0 if code.re.groups == 1 else code.group(2))
         return ""
 
     def collectMaskedShutters(self, code):
@@ -1124,7 +1160,8 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
                 lookup[codeline+1] = sourceline
         return lookup
 
-def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput=False ):
+
+def pppcompile(sourcefile, targetfile, referencefile, verbose=False, keepoutput=False, printFinalVars=False):
     import os.path
     try:
         with open(sourcefile, "r") as f:
@@ -1148,8 +1185,8 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput
         if keepoutput:
             outfilenew = Path(targetfile+'.vm')
             outfileref = Path(referencefile+'.vm')
-            outfilenew.write_text("#NewFile")
-            outfileref.write_text("#RefFile")
+            outfilenew.write_text("#NewFile\n")
+            outfileref.write_text("#RefFile\n")
         ppvm = ppVirtualMachine(assemblercode)
         ppvm.runCode(verbose, outfile=outfilenew)
         dast = ppvm.varDict
@@ -1157,6 +1194,9 @@ def pppcompile( sourcefile, targetfile, referencefile, verbose=False, keepoutput
         ppvm2.runCode(verbose, outfile=outfileref)
         dcomp = ppvm2.varDict
         dictComparison = compareDicts(dast,dcomp)
+        if printFinalVars:
+            for k, v in sorted(dast.items(), key=lambda x: x[0]):
+                print("{}: {}".format(k, v))
         if dictComparison:
             print(dictComparison)
             return False

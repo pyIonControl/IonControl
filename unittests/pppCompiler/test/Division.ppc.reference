@@ -11,51 +11,70 @@ var a 4
 var b 2
 var c 7
 var d 8
-var piTime 1, parameter, ms
+var e 0
+var f 0
+var g 0
+var piTime 256, parameter
 var inlinevar_3 2
 var inlinevar_4 3
 var inlinevar_5 1
+var inlinevar_6 256
+var inlinevar_7 128
 # inline variables
 # end header
 
-# line 7: shiftexpression c = a / 2
+# line 11: shiftexpression c = a / 2
   LDWR a
   DIVW inlinevar_3
-# line 7 assignment c = a / 2
+# line 11 assignment c = a / 2
   STWR c
-# line 8: shiftexpression a = piTime/2
+# line 12: shiftexpression a = piTime/2
   LDWR piTime
   DIVW inlinevar_3
-# line 8 assignment a = piTime/2
+# line 12 assignment a = piTime/2
   STWR a
-# line 9: add_assignment: a /= 2
+# line 13: add_assignment: a /= 2
   LDWR a
   DIVW inlinevar_3
   STWR a
-# line 10: add_assignment: a *= 3
+# line 14: add_assignment: a *= 3
   LDWR a
   MULTW inlinevar_4
   STWR a
-# line 11: shiftexpression a = piTime * 2
+# line 15: shiftexpression b = piTime * 2
   LDWR piTime
   MULTW inlinevar_3
-# line 11 assignment a = piTime * 2
-  STWR a
-# line 12: shiftexpression a = piTime >> 1
+# line 15 assignment b = piTime * 2
+  STWR b
+# line 16: shiftexpression d = piTime >> 1
   LDWR piTime
   SHR inlinevar_5
-# line 12 assignment a = piTime >> 1
-  STWR a
-# line 13: add_assignment: a >>= 1
-  LDWR a
+# line 16 assignment d = piTime >> 1
+  STWR d
+# line 17: add_assignment: d >>= 1
+  LDWR d
   SHR inlinevar_5
-  STWR a
-# line 14: shiftexpression a = piTime << 1
+  STWR d
+# line 18: shiftexpression e = piTime << 1
   LDWR piTime
   SHL inlinevar_5
-# line 14 assignment a = piTime << 1
-  STWR a
-# line 15: add_assignment: a <<= 1
-  LDWR a
+# line 18 assignment e = piTime << 1
+  STWR e
+# line 19: add_assignment: e <<= 1
+  LDWR e
   SHL inlinevar_5
-  STWR a
+  STWR e
+# line 20 assignment f = 256
+  LDWR inlinevar_6
+  STWR f
+# line 21: add_assignment: f /= 2
+  LDWR f
+  DIVW inlinevar_3
+  STWR f
+# line 22 assignment g = 128
+  LDWR inlinevar_7
+  STWR g
+# line 23: add_assignment: g /= a
+  LDWR g
+  DIVW a
+  STWR g
