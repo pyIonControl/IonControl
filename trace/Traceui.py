@@ -551,7 +551,7 @@ class TraceuiMixin:
             dataNode=self.model.getFirstDataNode(node)
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
-                return #If the filename and creation dates are the same, you're trying to open an existing trace.
+                return traceCollection.plottingList #If the filename and creation dates are the same, you're trying to open an existing trace.
         category = None if len(traceCollection.plottingList)==1 else self.getUniqueCategory(filename)
         for plotted in traceCollection.plottingList:
             windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
@@ -563,6 +563,7 @@ class TraceuiMixin:
         if self.expandNew:
             self.expand(traceCollection.plottingList[0])
         self.resizeColumnsToContents()
+        return traceCollection.plottingList
 
     def openContainingDirectory(self):
         """Opens the parent directory of a file, selecting the file if possible."""
