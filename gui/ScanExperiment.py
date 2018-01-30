@@ -592,7 +592,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                                                  *algo.detailEvaluate(data, evaluation, ppDict=replacementDict,
                                                                       globalDict=self.globalVariables))
         if len(evaluated) > 0:
-            self.displayUi.add([e[0] for e in evaluated])
+            self.displayUi.add([e.value for e in evaluated])
             self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queue_size)
             self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         if data.other:
@@ -602,7 +602,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.showTimestamps(data)
         self.context.scanMethod.prepareNextPoint(data)
         names = [self.context.evaluation.ev.name for self.context.evaluation.ev in self.context.evaluation.evalList]
-        results = [(x, res[0]) for res in evaluated]
+        results = [(x, res.value) for res in evaluated]
         self.evaluatedDataSignal.emit(dict(list(zip(names, results))))
 
     def preparePlotting(self, x, evaluated, timeinterval, timeTickOffset):
@@ -611,7 +611,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         self.plottedTraceList = list()
         for (index, result), evaluation in zip(enumerate(evaluated), self.context.evaluation.evalList):
             if result is not None:  # result is None if there were no counter results
-                (_, error, _) = result
+                error = result.interval
                 showerror = error is not None
                 yColumnName = evaluation.name
                 rawColumnName = '{0}_raw'.format(evaluation.name)

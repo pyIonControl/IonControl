@@ -19,7 +19,7 @@ import numpy
 
 from gui.ExpressionValue import ExpressionValue
 from modules.quantity import Q
-from scan.EvaluationBase import EvaluationBase, EvaluationException
+from scan.EvaluationBase import EvaluationBase, EvaluationException, EvaluationResult
 from uiModules.ParameterTable import Parameter
 from modules.Expression import Expression
 from modules.enum import enum
@@ -49,33 +49,33 @@ class MeanEvaluation(EvaluationBase):
         l = float(len(countarray))
         mean = summe/l
         stderror = math.sqrt( max(summe,1) )/l
-        return mean, (stderror/2. if summe>0 else 0, stderror/2. ), summe
+        return EvaluationResult(mean, (stderror/2. if summe>0 else 0, stderror/2.), summe)
 
     def evaluateStatistical(self, countarray):
         mean = numpy.mean( countarray )
         stderr = numpy.std( countarray, ddof=1 ) / math.sqrt( max( len(countarray)-1, 1) )
-        return mean, (stderr/2.,stderr/2.), numpy.sum( countarray )
+        return EvaluationResult(mean, (stderr/2., stderr/2.), numpy.sum(countarray))
     
     def evaluateMinMax(self, countarray):
         mean = numpy.mean( countarray )
-        return mean, (mean-numpy.min(countarray), numpy.max(countarray)-mean), numpy.sum(countarray)
+        return EvaluationResult(mean, (mean-numpy.min(countarray), numpy.max(countarray)-mean), numpy.sum(countarray))
     
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return None
-        mean, (minus, plus), raw =  self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+            return EvaluationResult()
+        r =  self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         if self.settings['transformation']!="":
-            mydict = { 'y': mean }
+            mydict = { 'y': r.value }
             if ppDict:
                 mydict.update( ppDict )
             mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean+plus
+            mydict['y'] = mean+r.top
             plus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean-minus
+            mydict['y'] = mean-r.bottom
             minus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            return mean, (mean-minus, plus-mean), raw
-        return mean, (minus, plus), raw
+            return EvaluationResult(mean, (mean-minus, plus-mean), r.raw)
+        return r
 
     def parameters(self):
         parameterDict = super(MeanEvaluation, self).parameters()
@@ -128,7 +128,7 @@ class NumberEvaluation(EvaluationBase):
         countarray = evaluation.getChannelData(data)
         if not countarray:
             return 0, None, 0
-        return len(countarray), None, len(countarray)
+        return EvaluationResult(len(countarray), raw=len(countarray))
 
 class FeedbackEvaluation(EvaluationBase):
     name = 'Feedback'
@@ -153,7 +153,7 @@ class FeedbackEvaluation(EvaluationBase):
 
     def evaluateMinMax(self, countarray):
         mean = numpy.mean( countarray )
-        return mean, (mean-numpy.min(countarray), numpy.max(countarray)-mean), numpy.sum(countarray)
+        return EvaluationResult(mean, (mean-numpy.min(countarray), numpy.max(countarray)-mean), numpy.sum(countarray))
 
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
@@ -165,13 +165,13 @@ class FeedbackEvaluation(EvaluationBase):
         if self.integrator is None or self.settings['Reset']:
             self.integrator = globalDict[globalName]
             self.settings['Reset'] = False
-        mean, (_, _), raw =  self.evaluateMinMax(countarray)
-        errorval = self.settings['SetPoint'].m - mean
+        r =  self.evaluateMinMax(countarray)
+        errorval = self.settings['SetPoint'].m - r.value
         pOut = self.settings['P'] * errorval
         self.integrator = self.integrator + errorval * self.settings['I'] 
         totalOut = pOut + self.integrator
         globalDict[globalName] = totalOut.to(globalDict[globalName])
-        return float(totalOut.m), (0.0, 0.0), raw
+        return EvaluationResult(float(totalOut.m), (0.0, 0.0), r.raw)
 
     def parameters(self):
         parameterDict = super(FeedbackEvaluation, self).parameters()
@@ -223,7 +223,7 @@ class ThresholdEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return None
+            return EvaluationResult()
         N = float(len(countarray))
         discriminated = self._evaluate(data, evaluation, countarray)
         x = numpy.sum( discriminated )
@@ -234,7 +234,7 @@ class ThresholdEvaluation(EvaluationBase):
         top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
         rootb = -1-1/N +4*p+4*N*(1-p)*p
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0            
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def qubitEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
@@ -292,7 +292,7 @@ class RangeEvaluation(EvaluationBase):
         top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
         rootb = -1-1/N +4*p+4*N*(1-p)*p
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0            
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(RangeEvaluation, self).parameters()
@@ -341,7 +341,7 @@ class DoubleRangeEvaluation(EvaluationBase):
         top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
         rootb = -1-1/N +4*p+4*N*(1-p)*p
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0            
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(DoubleRangeEvaluation, self).parameters()
@@ -397,7 +397,7 @@ class FidelityEvaluation(EvaluationBase):
             p = abs(expected-p)
             bottom = abs(expected-bottom)
             top = abs(expected-top)
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(FidelityEvaluation, self).parameters()
@@ -446,7 +446,7 @@ class ParityEvaluation(EvaluationBase):
             p = abs(expected-p)
             bottom = abs(expected-bottom)
             top = abs(expected-top)
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(ParityEvaluation, self).parameters()
@@ -497,7 +497,7 @@ class TwoIonEvaluation(EvaluationBase):
             p = abs(expected-p)
             bottom = abs(expected-bottom)
             top = abs(expected-top)
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(TwoIonEvaluation, self).parameters()
@@ -543,11 +543,11 @@ class CounterSumMeanEvaluation(EvaluationBase):
     def evaluateStatistical(self, countarray):
         mean = numpy.mean(countarray)
         stderr = numpy.std(countarray, ddof=1) / math.sqrt(max(len(countarray) - 1, 1))
-        return mean, (stderr / 2., stderr / 2.), numpy.sum(countarray)
+        return EvaluationResult(mean, (stderr / 2., stderr / 2.), numpy.sum(countarray))
 
     def evaluateMinMax(self, countarray):
         mean = numpy.mean(countarray)
-        return mean, (mean - numpy.min(countarray), numpy.max(countarray) - mean), numpy.sum(countarray)
+        return EvaluationResult(mean, (mean - numpy.min(countarray), numpy.max(countarray) - mean), numpy.sum(countarray))
 
     def getCountArray(self, data):
         counters = [((self.settings['id']&0xff)<<8) | (int(counter) & 0xff) for counter in self.settings['counters']]
@@ -559,18 +559,18 @@ class CounterSumMeanEvaluation(EvaluationBase):
         countarray = self.getCountArray(data)
         if not countarray:
             return None
-        mean, (minus, plus), raw = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+        r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         if self.settings['transformation'] != "":
-            mydict = {'y': mean}
+            mydict = {'y': r.value}
             if ppDict:
                 mydict.update(ppDict)
             mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean + plus
+            mydict['y'] = mean + r.top
             plus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean - minus
+            mydict['y'] = mean - r.bottom
             minus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            return mean, (mean - minus, plus - mean), raw
-        return mean, (minus, plus), raw
+            return EvaluationResult(mean, (mean - minus, plus - mean), r.raw)
+        return r
 
     def histogram(self, data, evaluation, histogramBins=50 ):
         countarray = self.getCountArray(data)
@@ -618,7 +618,7 @@ class CounterSumThresholdEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         countarray = self.getCountArray(data)
         if not countarray:
-            return 0, None, 0
+            return EvaluationResult()
         N = float(len(countarray))
         if self.settings['invert']:
             discriminated = [ 0 if count > self.settings['threshold'] else 1 for count in countarray ]
@@ -634,7 +634,7 @@ class CounterSumThresholdEvaluation(EvaluationBase):
         top = min( 1, (2 + 2*N*p + math.sqrt(rootp))/(2*(N+1)) ) if rootp>=0 else 1
         rootb = -1-1/N +4*p+4*N*(1-p)*p
         bottom = max( 0, (2*N*p - math.sqrt(rootb))/(2*(N+1)) ) if rootb>=0 else 0
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(CounterSumThresholdEvaluation, self).parameters()
@@ -715,7 +715,7 @@ class ThreeIonEvaluation(EvaluationBase):
             p = abs(expected-p)
             bottom = abs(expected-bottom)
             top = abs(expected-top)
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(ThreeIonEvaluation, self).parameters()
@@ -824,7 +824,7 @@ class FourIonEvaluation(EvaluationBase):
             p = abs(expected-p)
             bottom = abs(expected-bottom)
             top = abs(expected-top)
-        return p, (p-bottom, top-p), x
+        return EvaluationResult(p, (p-bottom, top-p), x)
 
     def parameters(self):
         parameterDict = super(FourIonEvaluation, self).parameters()

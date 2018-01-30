@@ -5,7 +5,7 @@
 # *****************************************************************
 
 from modules.quantity import Q
-from .EvaluationBase import EvaluationBase
+from .EvaluationBase import EvaluationBase, EvaluationResult
 import numpy
 import logging
 from scipy.optimize import leastsq
@@ -130,7 +130,7 @@ class FitHistogramEvaluation(EvaluationBase):
         elif self.settings['Mode']=='Two':
             return params[2], (confidence[2],  confidence[2]), params[2]
         elif self.settings['Mode']=='Residuals':
-            return reducedchisq, None, reducedchisq
+            return EvaluationResult(reducedchisq, None, reducedchisq)
 
     def parameters(self):
         parameterDict = super(FitHistogramEvaluation, self).parameters()
@@ -245,7 +245,7 @@ class TwoIonFidelityEvaluation(EvaluationBase):
                 x = params[0]+params[1]+params[2]
         else:
             return 0, None, 0
-        return p, (pbottom, ptop), x
+        return EvaluationResult(p, (pbottom, ptop), x)
 
     def parameters(self):
         parameterDict = super(TwoIonFidelityEvaluation, self).parameters()

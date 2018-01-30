@@ -125,8 +125,9 @@ class AverageViewTable(Form, Base):
         self.tableView.resizeColumnsToContents()
 
     def add(self, data):
-        self.model.add(data)
-        self.setCountLabel()
+        if data is not None:
+            self.model.add(data)
+            self.setCountLabel()
         
     def onClear(self):
         self.model.clear()
