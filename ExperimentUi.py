@@ -404,6 +404,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.currentTab = self.tabDict.at( min(len(self.tabDict)-1, self.config.get('MainWindow.currentIndex',0) ) )
         self.tabWidget.setCurrentIndex( self.config.get('MainWindow.currentIndex',0) )
         self.currentTab.activate()
+        self.actionForceDock.triggered.connect(self.onForceDock)
         if hasattr( self.currentTab, 'stateChanged' ):
             self.currentTab.stateChanged.connect( self.todoList.onStateChanged )
         if 'MainWindow.State' in self.config:
@@ -676,7 +677,10 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                 self.currentTab.stateChanged.connect( self.todoList.onStateChanged )
             self.initMenu()
             self.actionResume.setEnabled(self.currentTab.stashSize())
-        
+
+    def onForceDock(self, *args):
+        self.todoListDock.setFloating(not self.todoListDock.isFloating())
+
     def initMenu(self):
         """setup print and view menus"""
         #view menu

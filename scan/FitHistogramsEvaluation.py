@@ -28,7 +28,7 @@ class HistogramFitFunction:
         return self.functionEval(x, self.param) * self.totalCounts
     
     def functionEval(self, x, p ):
-        return numpy.array( [ p[0] * self.ZeroBright[el] + p[1] * self.OneBright[el] + (1-p[0]-p[1]) * self.TwoBright[el] for el in x ] )
+        return numpy.array( [ p[0] * self.ZeroBright[el] + p[1] * self.OneBright[el] + (1-p[0]-p[1]) * self.TwoBright[el] for el in x.astype(int) ] )
 
     def residuals(self, p, y, x):
         penalty = 0

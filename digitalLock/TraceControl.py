@@ -106,7 +106,7 @@ class TraceControl(Form, Base):
             self.trace.x = numpy.arange(len(errorSig)) * (sampleTime.m_as('us') * (1 + int(self.traceSettings.subsample)))
             self.trace.y = numpy.array( errorSig )
             if self.errorSigCurve is None:
-                self.errorSigCurve = PlottedTrace(self.trace, self.plotDict[self.traceSettings.errorSigPlot]['view'], pen=-1, style=PlottedTrace.Styles.lines, name="Error Signal", #@UndefinedVariable 
+                self.errorSigCurve = PlottedTrace(self.trace, self.plotDict[self.traceSettings.errorSigPlot], pen=-1, style=PlottedTrace.Styles.lines, name="Error Signal", #@UndefinedVariable
                                                   windowName=self.traceSettings.errorSigPlot)  
                 self.errorSigCurve.plot()
                 self.traceui.addTrace( self.errorSigCurve, pen=-1 )
@@ -116,7 +116,7 @@ class TraceControl(Form, Base):
             frequency = list(map( binToFreqHz, data.frequency ))
             self.trace['freq'] = numpy.array( frequency )
             if self.freqCurve is None:
-                self.freqCurve = PlottedTrace(self.trace, self.plotDict[self.traceSettings.frequencyPlot]['view'], pen=-1, style=PlottedTrace.Styles.lines, name="Frequency",  #@UndefinedVariable
+                self.freqCurve = PlottedTrace(self.trace, self.plotDict[self.traceSettings.frequencyPlot], pen=-1, style=PlottedTrace.Styles.lines, name="Frequency",  #@UndefinedVariable
                                               xColumn='x', yColumn='freq', windowName=self.traceSettings.frequencyPlot ) 
                 self.freqCurve.plot()
                 self.traceui.addTrace( self.freqCurve, pen=-1 )

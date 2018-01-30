@@ -575,7 +575,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
             dataNode=self.model.getFirstDataNode(node)
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
-                return #If the filename and creation dates are the same, you're trying to open an existing trace.
+                return traceCollection.plottingList #If the filename and creation dates are the same, you're trying to open an existing trace.
         category = self.getUniqueCategory(filename) #this row differs from the Traceui version of this function
         for plotted in traceCollection.plottingList:
             windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]
@@ -587,6 +587,7 @@ class NamedTraceui(Traceui.TraceuiMixin, TraceuiForm, TraceuiBase):
         if self.expandNew:
             self.expand(traceCollection.plottingList[0])
         self.resizeColumnsToContents()
+        return traceCollection.plottingList
 
     def rightClickMenu(self, pos):
         """a CustomContextMenu for right click"""

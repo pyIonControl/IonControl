@@ -45,7 +45,7 @@ class PrintPreferences(AttributeComparisonEquality):
                #{'name': 'save pdf', 'object': self, 'field': 'savePdf', 'type': 'bool', 'value': self.savePdf},
                 {'name': 'print', 'object': self, 'field': 'doPrint', 'type': 'bool', 'value': self.doPrint},
                 {'name': 'save svg', 'object': self, 'field': 'saveSvg', 'type': 'bool', 'value': self.saveSvg},
-                {'name': 'export emf', 'object': self, 'field': 'exportEmf', 'type': 'bool', 'value': self.saveSvg},
+                {'name': 'export wmf', 'object': self, 'field': 'exportEmf', 'type': 'bool', 'value': self.saveSvg},
                 {'name': 'export pdf', 'object': self, 'field': 'exportPdf', 'type': 'bool', 'value': self.saveSvg},
                 {'name': 'inkscape executable', 'object': self, 'field': 'inkscapeExecutable', 'type': 'str', 'value': self.inkscapeExecutable},
                 {'name': 'gnuplot executable', 'object': self, 'field': 'gnuplotExecutable', 'type': 'str', 'value': self.gnuplotExecutable}]
