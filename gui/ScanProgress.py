@@ -150,9 +150,9 @@ class ScanProgress(Form, Base):
         if (percentage != self.lastPercentage and time.time() - self.lastTime > 4) or index + 1 >= self.range:
             self.lastPercentage = percentage
             self.progressBar.setValue(index)
-            self.expected = self.elapsedTime() / (index / float(self.range)) if index > 0 else 0
-            self.setTimeLabel()
             self.lastTime = time.time()
+        self.expected = self.elapsedTime() / (index / float(self.range)) if index > 0 else 0
+        self.setTimeLabel()
 
     def elapsedTime(self):
         return self.previouslyElapsedTime + (
