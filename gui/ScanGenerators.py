@@ -269,7 +269,11 @@ class GateSequenceScanGenerator(ScanGeneratorBase):
 
     @property
     def gateSequenceInfo(self):
-        return self.scan.gateSequenceUi.gateSequenceInfo
+        try:
+            return self.scan.gateSequenceUi.gateSequenceInfo
+        except AttributeError:
+            print(self.scan.gateSequenceUi, self.scan.gateSequenceUi.__class__)
+            raise
 
 
 GeneratorList = [ParameterScanGenerator, StepInPlaceGenerator, GateSequenceScanGenerator, FreerunningGenerator]   

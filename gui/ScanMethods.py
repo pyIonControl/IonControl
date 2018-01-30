@@ -26,7 +26,9 @@ class InternalScanMethod(object):
     
     def startScan(self):
         logger = logging.getLogger(__name__)
-        self.experiment.progressUi.setRunning( max(len(self.experiment.context.scan.list), 1) if self.experiment.context.scan.list is not None else 100)
+        self.experiment.progressUi.setRunning(
+            max(len(self.experiment.context.scan.list), 1) if self.experiment.context.scan.list is not None else 100,
+            self.experiment.context.scan.repeats)
         logger.info( "Starting" )
         self.experiment.pulserHardware.ppStart()
         self.experiment.context.currentIndex = 0
@@ -90,14 +92,17 @@ class ExternalScanMethod(InternalScanMethod):
     def startBottomHalf(self):
         logger = logging.getLogger(__name__)
         if self.experiment.progressUi.is_starting:
-            if self.experiment.context.scan.scanMode!=0 or self.parameter.setValue( self.experiment.context.scan.list[self.index]):
+            if self.experiment.context.scan.scanMode != 0 or self.parameter.setValue(
+                    self.experiment.context.scan.list[self.index]):
                 """We are done adjusting"""
                 self.experiment.pulserHardware.ppStart()
                 self.experiment.context.currentIndex = 0
                 self.experiment.context.timestampsNewRun = True
-                logger.info( "elapsed time {0}".format( time.time()-self.experiment.context.startTime ) )
-                logger.info( "Status -> Running" )
-                self.experiment.progressUi.setRunning( max(len(self.experiment.context.scan.list), 1) )
+                logger.info("elapsed time {0}".format(time.time() - self.experiment.context.startTime),
+                            self.experiment.context.scan.repeats)
+                logger.info("Status -> Running")
+                self.experiment.progressUi.setRunning(max(len(self.experiment.context.scan.list), 1),
+                                                      self.experiment.context.scan.repeats)
             else:
                 QtCore.QTimer.singleShot(100, self.startBottomHalf)
 
@@ -111,7 +116,8 @@ class ExternalScanMethod(InternalScanMethod):
     def resume(self):
         self.parameter.saveValue(overwrite=False)
         if self.experiment.context.scan.scanMode!=0 or self.parameter.setValue( self.experiment.context.scan.list[self.index]):
-            self.experiment.progressUi.setRunning( max(len(self.experiment.context.scan.list), 1) )
+            self.experiment.progressUi.setRunning(max(len(self.experiment.context.scan.list), 1),
+                                                  self.experiment.context.scan.repeats)
             self.experiment.resumeBottomHalf()
         else:
             QtCore.QTimer.singleShot(100, self.resume)
