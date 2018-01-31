@@ -45,34 +45,35 @@ class MeanEvaluation(EvaluationBase):
             self.settings['errorBarType'] = self.errorBarTypes[self.settings['errorBarType']]
          
     def evaluateShotnoise(self, countarray ):
-        summe = numpy.sum( countarray )
+        summe = numpy.sum(numpy.array(countarray, dtype=numpy.int64))
         l = float(len(countarray))
         mean = summe/l
-        stderror = math.sqrt( max(summe,1) )/l
+        stderror = math.sqrt(max(summe, 1))/l  # 1 l
         return EvaluationResult(mean, (stderror/2. if summe>0 else 0, stderror/2.), summe)
 
     def evaluateStatistical(self, countarray):
-        mean = numpy.mean( countarray )
+        mean = numpy.mean(countarray)
         stderr = numpy.std( countarray, ddof=1 ) / math.sqrt( max( len(countarray)-1, 1) )
         return EvaluationResult(mean, (stderr/2., stderr/2.), numpy.sum(countarray))
     
     def evaluateMinMax(self, countarray):
-        mean = numpy.mean( countarray )
+        mean = numpy.mean(countarray)
         return EvaluationResult(mean, (mean-numpy.min(countarray), numpy.max(countarray)-mean), numpy.sum(countarray))
     
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
         if not countarray:
             return EvaluationResult()
-        r =  self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+        r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+        bottom, top = r.interval
         if self.settings['transformation']!="":
             mydict = { 'y': r.value }
             if ppDict:
                 mydict.update( ppDict )
             mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean+r.top
+            mydict['y'] = mean + top
             plus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean-r.bottom
+            mydict['y'] = mean - bottom
             minus = float(self.expression.evaluate(self.settings['transformation'], mydict))
             return EvaluationResult(mean, (mean-minus, plus-mean), r.raw)
         return r
@@ -96,7 +97,7 @@ class MeanEvaluation(EvaluationBase):
         # if we do not find a timestamp we will accumulate the data, otherwise send back every event
         if countarray:
             if timestamps is None or len(timestamps) != len(countarray):
-                mean, (minus, plus), raw = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+                mean, (minus, plus), raw, valid = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
                 if self.settings['transformation'] != "":
                     mydict = {'y': mean}
                     if ppDict:
@@ -560,14 +561,15 @@ class CounterSumMeanEvaluation(EvaluationBase):
         if not countarray:
             return None
         r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
+        bottom, top = r.interval
         if self.settings['transformation'] != "":
             mydict = {'y': r.value}
             if ppDict:
                 mydict.update(ppDict)
             mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean + r.top
+            mydict['y'] = mean + top
             plus = float(self.expression.evaluate(self.settings['transformation'], mydict))
-            mydict['y'] = mean - r.bottom
+            mydict['y'] = mean - bottom
             minus = float(self.expression.evaluate(self.settings['transformation'], mydict))
             return EvaluationResult(mean, (mean - minus, plus - mean), r.raw)
         return r

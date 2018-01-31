@@ -144,6 +144,7 @@ class ScanProgress(Form, Base):
 
     def onData(self, index):
         percentage = round(100 * (index / self.range))
+        self.expected = self.elapsedTime() / (index / float(self.range)) if index > 0 else 0
         if self.repeats > 1 and self.state == self.OpStates.running:
             current_repeat = int(index * self.repeats / self.range) + 1
             self.statusLabel.setText("Running ({})".format(current_repeat))
@@ -151,8 +152,7 @@ class ScanProgress(Form, Base):
             self.lastPercentage = percentage
             self.progressBar.setValue(index)
             self.lastTime = time.time()
-        self.expected = self.elapsedTime() / (index / float(self.range)) if index > 0 else 0
-        self.setTimeLabel()
+            self.setTimeLabel()
 
     def elapsedTime(self):
         return self.previouslyElapsedTime + (
