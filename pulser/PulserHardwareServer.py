@@ -339,8 +339,10 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         self.data.result[channel].append( value  )
                     elif key==0x50:
                         channel = (token >>48) & 0xff 
-                        value = token & 0x000000000000ffff
-                        self.data.result[channel][-1] |= ( value << 48 )                           
+                        value = (token & 0x000000000000ffff) << 48 | self.data.result[channel][-1]
+                        if value & 0x8000000000000000:
+                            value -= 0x10000000000000000
+                        self.data.result[channel][-1] = value
 #                  logger.debug("result key: {0} hi-low: {1} value: {2} length: {3} value: {4}".format(resultkey,channel,value&0xffff,len(self.data.result[resultkey]),self.data.result[resultkey][-1]))
                     else:
                         self.data.other.append(token)
