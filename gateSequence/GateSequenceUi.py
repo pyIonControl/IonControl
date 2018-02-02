@@ -9,6 +9,7 @@ import operator
 import os.path
 from enum import Enum
 from functools import partial
+from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
@@ -349,7 +350,10 @@ class GateSequenceUi(Form, Base):
 
     def loadGateSequenceList(self, path):
         logger = logging.getLogger(__name__)
-        if isXmlFile(path):
+        p = Path(path)
+        if p.suffix == ".pkl":
+            self.gateSequenceContainer.loadPickle(path)
+        elif isXmlFile(path):
             self.gateSequenceContainer.loadXml(path)
         else:
             self.gateSequenceContainer.loadText(path)
