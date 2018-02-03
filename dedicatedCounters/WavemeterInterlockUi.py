@@ -47,8 +47,8 @@ class WavemeterInterlockUi(Form, Base):
 
 
 if __name__ == "__main__":
-    def onLoad(status):
-        print(status)
+    def onLoad(context, status):
+        print(context, status)
 
 
     import sys
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     wavemeters = {'1236': "http://S973587:8082"}
     config = {"InterlockChannels": [InterlockChannel(wavemeter='1236', channel=4, minimum=Q(751527, 'GHz'), maximum=Q(751528, 'GHz'), useServerInterlock=False, contextSet=set(['load', 'exp']))]}
     il = Interlock(wavemeters=wavemeters, config=config)
-    il.subscribe("load", onLoad)
+    il.subscribe(onLoad, "load")
     ui = WavemeterInterlockUi(wavemeterNames=list(wavemeters.keys()), channels=il.channels, contexts=il.contexts)
     ui.setupUi(ui)
     ui.show()

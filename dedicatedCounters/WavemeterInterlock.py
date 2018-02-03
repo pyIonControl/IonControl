@@ -146,8 +146,11 @@ class Interlock:
             for c in ch.contextSet:
                 self.contexts[c].add(ch)
 
-    def subscribe(self, context, callback, unique=False):
+    def subscribe(self, callback, context=None, unique=False):
         self.observables[context].subscribe(callback, unique)
+
+    def createContext(self, context):
+        self.observables[context]  # touch the defaultdict
 
     def contextStatus(self, context):
         channels = self.contexts.get(context)
@@ -166,7 +169,8 @@ class Interlock:
             if changed:
                 changedContexts.update(channel.contextSet)
         for c in changedContexts:
-            self.observables[c].firebare(self.contextStatus(c))
+            self.observables[c].firebare(c, self.contextStatus(c))
+            self.observables[None].firebare(c, self.contextStatus(c))
 
 
 

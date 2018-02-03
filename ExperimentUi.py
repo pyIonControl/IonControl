@@ -443,6 +443,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser,
                                                          self.globalVariablesUi, self.shutterUi,
                                                          self.ExternalParametersUi.callWhenDoneAdjusting,
+                                                         self.wavemeterInterlock,
                                                          remoteRender=self.project.isEnabled('software', 'Remote render'))
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
         

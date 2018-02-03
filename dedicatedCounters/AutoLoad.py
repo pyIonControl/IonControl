@@ -72,7 +72,6 @@ class AutoLoadSettings(object):
     def __init__(self):
         # All dicts necessary
         self.shutterDict = None
-        self.interlock = SequenceDict()
         self.adjustDisplayData = list()
         self.counterDisplayData = list()
         # ints to be used in multiple functions
@@ -99,6 +98,7 @@ class AutoLoadSettings(object):
         self.beyondThresholdTime = Q(3, 's')
         self.dumpTime = Q(3, 's')
         self.maxLoadCheckCycles = Q(3)
+        self.interlockContext = "load"
 
     def paramDef(self):
         """
@@ -159,10 +159,12 @@ class AutoLoadSettings(object):
         self.__dict__.setdefault('dumpTime', Q(10, 's'))
         self.__dict__.setdefault('ovenCoolDownTime', Q(10, 's'))
         self.__dict__.setdefault('maxLoadCheckCycles', Q(3))
+        self.__dict__.setdefault('interlockContext', 'load')
 
     stateFields = ['maxTime', 'ovenCoolDownTime', 'checkTime', 'useInterlock', 'interlock',
                    'autoReload', 'waitForComebackTime', 'maxFailedAutoload', 'postSequenceWaitTime', 'historyLength',
-                   'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime', 'maxLoadCheckCycles']
+                   'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime', 'maxLoadCheckCycles',
+                   'interlockContext']
 
     def __eq__(self, other):
         return isinstance(other, AutoLoadSettings) and tuple(getattr(self,field) for field in self.stateFields) == \
@@ -202,7 +204,8 @@ class keydefaultdict(defaultdict):
 class AutoLoad(UiForm, UiBase):
     ionReappeared = QtCore.pyqtSignal()
     valueChanged = QtCore.pyqtSignal(object)
-    def __init__(self, config, dbConnection, pulser, dataAvailableSignal, globalVariablesUi, shutterUi, externalInstrumentObservable, parent=None):
+    def __init__(self, config, dbConnection, pulser, dataAvailableSignal, globalVariablesUi, shutterUi,
+                 externalInstrumentObservable, interlock, parent=None):
         UiBase.__init__(self,parent)
         UiForm.__init__(self)
         self.globalVariablesUi = globalVariablesUi
@@ -236,12 +239,12 @@ class AutoLoad(UiForm, UiBase):
         self.originalResetValue = 0
         self.tempName = None
         self.revertRecord = None
-        wavemeterHardwareSetting = next(iter(getProject().hardware.get('HighFinesse Wavemeter', {None: {}}).values()))
-        self.wavemeterAddress = wavemeterHardwareSetting.get('uri', None)
-        self.wavemeterAvailable = wavemeterHardwareSetting.get('enabled', False) and bool(self.wavemeterAddress)
-        self.wavemeterOutOfLock = False
         self._loadCheckCycleCounter = 0
-        logging.getLogger(__name__).info("Wavemeter URI: {0} {1}".format(self.wavemeterAddress, "available" if self.wavemeterAvailable else "not available"))
+        self.interlock = interlock
+        self.interlock.subscribe(self.onInterlockStatusChanged)
+
+    def onInterlockStatusChanged(self, context, status):
+        print("Autoload interlock status changed", context, status)
 
     @property
     def loadCheckCycleOkay(self):
@@ -423,29 +426,6 @@ class AutoLoad(UiForm, UiBase):
         self.keyFilter.keyPressed.connect( self.deleteFromHistory )
         self.historyTableView.installEventFilter( self.keyFilter )
 
-        #Wavemeter interlock setup
-        self.useInterlockGui.setChecked(self.settings.useInterlock)
-        self.useInterlockGui.stateChanged.connect(self.onUseInterlockClicked)
-        self.tableModel = WavemeterInterlockTableModel(self.settings.interlock)
-        self.tableModel.edited.connect(self.autoSave)
-        self.delegate = MagnitudeSpinBoxDelegate()
-        self.interlockTableView.setItemDelegateForColumn(3, self.delegate)
-        self.interlockTableView.setItemDelegateForColumn(4, self.delegate)
-        self.tableModel.getWavemeterData.connect(self.getWavemeterData)
-        self.tableModel.getWavemeterData.connect(self.checkFreqsInRange)
-        self.interlockTableView.setModel(self.tableModel)
-        self.interlockTableView.resizeColumnsToContents()
-        self.interlockTableView.setSortingEnabled(True)
-        if self.wavemeterAvailable:
-            self.am = QtNetwork.QNetworkAccessManager()
-            self.checkFreqsInRange() #Begins the loop which continually checks if frequencies are in range
-            for ilChannel in list(self.settings.interlock.values()):
-                self.getWavemeterData(ilChannel.channel)
-        else:
-
-            self.useInterlockGui.setEnabled(False)
-            #end wavemeter interlock setup
-        self.interlockTableView.setEnabled(self.wavemeterAvailable)
         self.pulser.ppActiveChanged.connect( self.setDisabled )
         self.statemachine.initialize( 'Idle' )
 
@@ -477,25 +457,31 @@ class AutoLoad(UiForm, UiBase):
         self.dropCounterSettingButton.clicked.connect( self.onCounterRemoveSetting )
         self.addCounterSettingButton.clicked.connect( self.CounterTableModel.addSetting )
 
+        self.interlockContextEdit.setText(self.settings.interlockContext)
+        self.interlockContextEdit.editingFinished.connect(self.onInterlockContext)
+
         # Actions
-        self.createAction("Last ion is still trapped", self.onIonIsStillTrapped )
-        self.createAction("Trapped an ion now", self.onTrappedIonNow )
-        self.createAction("auto save profile", self.onAutoSave, checkable=True, checked=self.parameters.autoSave )
-        self.createAction("Add wavemeter channel", self.tableModel.addChannel)
-        self.createAction("Remove selected wavemeter channels", self.onRemoveChannel)
-        self.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
-        restoreGuiState( self, self.config.get('AutoLoad.guiState') )
+        self.createAction("Last ion is still trapped", self.onIonIsStillTrapped)
+        self.createAction("Trapped an ion now", self.onTrappedIonNow)
+        self.createAction("auto save profile", self.onAutoSave, checkable=True, checked=self.parameters.autoSave)
+        self.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        restoreGuiState(self, self.config.get('AutoLoad.guiState'))
 
-        self.profileComboBox.addItems( self.settingsDict.keys() )
+        self.profileComboBox.addItems(self.settingsDict.keys())
         if self.currentSettingsName in self.settingsDict:
-            self.profileComboBox.setCurrentIndex( self.profileComboBox.findText(self.currentSettingsName))
+            self.profileComboBox.setCurrentIndex(self.profileComboBox.findText(self.currentSettingsName))
         else:
-            self.currentSettingsName = str( self.profileComboBox.currentText() )
+            self.currentSettingsName = str(self.profileComboBox.currentText())
         self.profileComboBox.currentIndexChanged[str].connect(self.onLoadProfile)
-        self.profileComboBox.lineEdit().editingFinished.connect( self.autoSave )
+        self.profileComboBox.lineEdit().editingFinished.connect(self.autoSave)
 
-        self.setProfile( self.currentSettingsName, self.settings )
+        self.setProfile(self.currentSettingsName, self.settings)
         self.calculateOverrides()
+        self.autoSave()
+
+    def onInterlockContext(self):
+        self.settings.interlockContext = self.interlockContextEdit.text()
+        self.interlock.createContext(self.settings.interlockContext)
         self.autoSave()
 
     def setProfile(self, name, profile):
@@ -510,7 +496,8 @@ class AutoLoad(UiForm, UiBase):
                                    now() + timedelta(hours=2), self.currentSettingsName)
         self.AdjustTableModel.setSettings(self.settings.adjustDisplayData)
         self.CounterTableModel.setSettings(self.settings.counterDisplayData)
-        self.tableModel.setChannelDict( self.settings.interlock )
+        self.interlockContextEdit.setText(self.settings.interlockContext)
+        self.interlock.createContext(self.settings.interlockContext)
 
     def onLoadProfile(self, name):
         name = str(name)
@@ -610,11 +597,6 @@ class AutoLoad(UiForm, UiBase):
         for row in sorted(unique([ i.row() for i in self.historyTableView.selectedIndexes() ]), reverse=False):
             self.historyTableModel.removeRow(row)
 
-    def onRemoveChannel(self):
-        for index in sorted(unique([ i.row() for i in self.interlockTableView.selectedIndexes() ]), reverse=True):
-            self.tableModel.removeChannel(index)
-        self.autoSave()
-
     def onStateChanged(self, name, state):
         setattr( self.settings, name, state==QtCore.Qt.Checked )
         self.autoSave()
@@ -623,90 +605,6 @@ class AutoLoad(UiForm, UiBase):
         """Run if useInterlock button is clicked. Change settings to match."""
         self.settings.useInterlock = self.useInterlockGui.isChecked()
         self.autoSave()
-
-    def onWavemeterError(self, channel, reply, error):
-        """Print out received error"""
-        logging.getLogger(__name__).warning("Error {0} accessing wavemeter at '{1}'".format(error, self.wavemeterAddress))
-        reply.finished.disconnect()  # necessary to make reply garbage collectable
-        reply.error.disconnect()
-        reply.deleteLater()
-        del reply
-
-    def getWavemeterData(self, channel):
-        """Get the data from the wavemeter at the specified channel."""
-        if channel in self.settings.interlock:
-            if self.settings.interlock[channel].enable:
-                address = self.wavemeterAddress + "/wavemeter/wavemeter/wavemeter-status?channel={0}".format(int(channel))
-                reply = self.am.get( QtNetwork.QNetworkRequest(QtCore.QUrl(address)))
-                reply.error.connect(functools.partial(self.onWavemeterError, int(channel),  reply) )
-                reply.finished.connect(functools.partial(self.onWavemeterData, int(channel), reply))
-            else:
-                self.checkFreqsInRange()
-
-    def onWavemeterData(self, channel, reply):
-        """Execute when reply is received from the wavemeter. Display it on the
-           GUI, and check whether it is in range."""
-        if channel in self.settings.interlock:
-            ilChannel = self.settings.interlock[channel]
-            if reply.error()==0:
-                value = float(reply.readAll())
-                self.tableModel.setCurrent( channel, round(value, 4) )
-                if ilChannel.lastReading==value:
-                    ilChannel.identicalCount += 1
-                else:
-                    ilChannel.identicalCount = 0
-                ilChannel.lastReading = value
-            #freq_string = "{0:.4f}".format(self.channelResult[channel]) + " GHz"
-        #read the wavemeter channel once per second
-            if ilChannel.enable:
-                QtCore.QTimer.singleShot(1000, functools.partial(self.getWavemeterData, channel))
-        self.checkFreqsInRange()
-        reply.finished.disconnect()  # necessary to make reply garbage collectable
-        reply.error.disconnect()
-        reply.deleteLater()
-        del reply
-
-    def checkFreqsInRange(self):
-        """Check whether all laser frequencies being used by the interlock are in range.
-
-            If they are not, loading is stopped/prevented, and the lock status bar turns
-            from green to red. If the lock is not being used, the status bar is black."""
-        enabledChannels = sum(1 if x.enable else 0 for x in self.settings.interlock.values() )
-        outOfRangeChannels = sum(1 if x.enable and not x.inRange else 0 for x in self.settings.interlock.values() )
-        maxIdenticalReading = max_iterable(x.identicalCount if x.enable else 0 for x in self.settings.interlock.values() )
-        if enabledChannels==0:
-            #if no channels are checked, set bar on GUI to black
-            self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(0, 0, 0)}")
-            self.allFreqsInRange.setToolTip("No channels are selected")
-            self.outOfRangeCount = 0
-            self.wavemeterOutOfLock = False
-        elif outOfRangeChannels==0:
-            if maxIdenticalReading is None or maxIdenticalReading<10:
-                #if all channels are in range, set bar on GUI to green
-                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(0, 198, 0)}")
-                self.allFreqsInRange.setToolTip("All laser frequencies are in range")
-                self.outOfRangeCount = 0
-                self.wavemeterOutOfLock = False
-            else:
-                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(198, 198, 0)}")
-                self.allFreqsInRange.setToolTip("All laser frequencies seem in range but some readings are struck")
-                self.outOfRangeCount += 1
-                self.wavemeterOutOfLock = False
-        else:
-            #Because of the bug where the wavemeter reads incorrectly after calibration,
-            #Loading is only inhibited after 10 consecutive bad measurements
-            if self.outOfRangeCount < 20 : #Count how many times the frequency measures out of range. Stop counting at 20. (why count forever?)
-                self.outOfRangeCount += 1
-#                 self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(255, 255, 0)}")
-#                 self.allFreqsInRange.setToolTip("There are laser frequencies temporarily of range")
-            if (self.outOfRangeCount >= 10):
-                #set bar on GUI to red
-                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(255, 0, 0)}")
-                self.allFreqsInRange.setToolTip("There are laser frequencies out of range")
-                #This is the interlock: loading is inhibited if frequencies are out of range
-                if self.settings.useInterlock:
-                    self.wavemeterOutOfLock = True
-                    self.statemachine.processEvent( 'outOfLock' )
 
     def onValueChanged(self,attr,value):
         """Change the value of attr in settings to value"""
