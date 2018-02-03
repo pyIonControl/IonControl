@@ -78,7 +78,8 @@ class LockStatus(Enum):
 
 
 class InterlockChannel(Observable):
-    def __init__(self, name=None, wavemeter=None, channel=None, minimum=None, maximum=None, useServerInterlock=False, contextSet=set()):
+    def __init__(self, name=None, wavemeter=None, channel=None, minimum=None, maximum=None, useServerInterlock=False,
+                 contextSet=set(), enabled=False):
         super(InterlockChannel, self).__init__()
         self.wavemeter = wavemeter
         self.channel = channel
@@ -92,8 +93,12 @@ class InterlockChannel(Observable):
         self.serverInRange = False
         self.serverRangeActive = False
         self.serverActive = False
-        self.enabled = False
+        self.enabled = enabled
         self.name = name
+
+    def __reduce__(self):
+        return InterlockChannel, (self.name, self.wavemeter, self.channel, self.minimum, self.maximum,
+                                  self.useServerInterlock, self.contextSet, self.enabled)
 
     def update(self, cd):
         now = datetime.utcnow()
