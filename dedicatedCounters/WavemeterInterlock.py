@@ -78,7 +78,7 @@ class LockStatus(Enum):
 
 
 class InterlockChannel(Observable):
-    def __init__(self, wavemeter=None, channel=None, minimum=None, maximum=None, useServerInterlock=False, contextSet=set()):
+    def __init__(self, name=None, wavemeter=None, channel=None, minimum=None, maximum=None, useServerInterlock=False, contextSet=set()):
         super(InterlockChannel, self).__init__()
         self.wavemeter = wavemeter
         self.channel = channel
@@ -93,6 +93,7 @@ class InterlockChannel(Observable):
         self.serverRangeActive = False
         self.serverActive = False
         self.enabled = False
+        self.name = name
 
     def update(self, cd):
         now = datetime.utcnow()
@@ -119,15 +120,20 @@ class InterlockChannel(Observable):
 
 
 class Interlock:
-    def __init__(self, wavemeters):
+    def __init__(self, wavemeters, config):
         self.wavemeters = wavemeters
         self.pollers = [WavemeterPoll(name, url) for name, url in wavemeters.items()]
         self.contexts = defaultdict(set)  # context: set(InterlockChannel, ...)
         self.observables = defaultdict(Observable)  # keys are contexts
-        self.channels = list()  # contains all channels
+        self.config = config
+        self.channels = config.get("InterlockChannels", list())  # contains all channels
         for p in self.pollers:
             p.subscribe(self.onData)
             self._data = dict()
+        self._updateChannels()
+
+    def saveConfig(self):
+        self.config["InterlockChannels"] = self.channels
 
     def _updateChannels(self):
         """Keep the self.contexts populated"""
