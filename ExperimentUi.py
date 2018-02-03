@@ -248,6 +248,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                                                             "ScanExperiment", toolBar=self.experimentToolBar,
                                                             measurementLog=self.measurementLog,
                                                             callWhenDoneAdjusting=self.callWhenDoneAdjusting,
+                                                            interlock=self.wavemeterInterlock,
                                                             preferences=self.preferencesUi.preferences().printPreferences),
                               "Scan")
                              ]:
