@@ -4,63 +4,79 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 from PyQt5 import QtCore, QtGui
+
+from dedicatedCounters.WavemeterInterlock import LockStatus, InterlockChannel
 from modules.quantity import Q
-
-
-class InterlockChannel:
-    def __init__(self):
-        self.enable = False
-        self.channel = 0
-        self.min = Q(1, 'GHz')
-        self.max = Q(1, 'GHz')
-        self.current = 0
-        self.inRange = False
-        self.identicalCount = 0
-        self.lastReading = 0  # same as current only this one has full precision
-
-    def __setstate__(self, d):
-        self.__dict__ = d
-        self.__dict__.setdefault('identicalCount', 0)
-        self.__dict__.setdefault('lastReading', 0)
 
 
 class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
     getWavemeterData = QtCore.pyqtSignal(object)
-    headerDataLookup = ['Enable', 'Channel', 'Current', 'Minimum', 'Maximum']
-    attributeLookup = ['enable', 'channel', 'current', 'min', 'max']
+    headerDataLookup = ['Enable', 'Wavemeter', 'Channel', 'Current', 'Minimum', 'Maximum', 'Use Server', 'Contexts']
+    attributeLookup = ['enabled', 'wavemeter', 'channel', 'current', 'minimum', 'maximum', 'useServerInterlock', None]
     edited = QtCore.pyqtSignal()
 
-    def __init__(self, channeldict, parent=None, *args):
+    def __init__(self, channelData=list(), wavemeterNames=[], contexts=set(), parent=None, *args):
         """ datain: a list where each item is a row
         
         """
         QtCore.QAbstractTableModel.__init__(self, parent, *args)
-        self.channelDict = channeldict
-        self.setDataLookup = {(QtCore.Qt.EditRole, 1): self.setChannel,
-                              (QtCore.Qt.EditRole, 3): self.setMin,
-                              (QtCore.Qt.EditRole, 4): self.setMax,
-                              (QtCore.Qt.CheckStateRole, 0): self.setEnable, }
-        self.dataLookup = {(QtCore.Qt.CheckStateRole, 0): lambda row: QtCore.Qt.Checked if self.channelDict.at(
-            row).enable else QtCore.Qt.Unchecked,
-                           (QtCore.Qt.DisplayRole, 1): lambda row: self.channelDict.at(row).channel,
-                           (QtCore.Qt.DisplayRole, 2): lambda row: "{0:.4f} GHz".format(
-                               self.channelDict.at(row).current),
-                           (QtCore.Qt.BackgroundColorRole, 2): lambda row: QtGui.QColor(
-                               QtCore.Qt.white) if not self.channelDict.at(row).enable else QtGui.QColor(0xa6, 0xff,
-                                                                                                         0xa6,
-                                                                                                         0xff) if self.channelDict.at(
-                               row).inRange else QtGui.QColor(0xff, 0xa6, 0xa6, 0xff),
-                           (QtCore.Qt.DisplayRole, 3): lambda row: str(self.channelDict.at(row).min),
-                           (QtCore.Qt.DisplayRole, 4): lambda row: str(self.channelDict.at(row).max),
-                           (QtCore.Qt.EditRole, 1): lambda row: self.channelDict.at(row).channel,
-                           (QtCore.Qt.EditRole, 3): lambda row: str(self.channelDict.at(row).min),
-                           (QtCore.Qt.EditRole, 4): lambda row: str(self.channelDict.at(row).max),
-                           (QtCore.Qt.UserRole, 3): lambda row: Q(1, 'GHz'),
-                           (QtCore.Qt.UserRole, 4): lambda row: Q(1, 'GHz'), }
+        self.lookup = dict()
+        self.channelData = channelData
+        self.setDataLookup = {(QtCore.Qt.EditRole, 0): self.setName,
+                              (QtCore.Qt.EditRole, 1): self.setWavemeter,
+                              (QtCore.Qt.EditRole, 2): self.setChannel,
+                              (QtCore.Qt.EditRole, 4): self.setMin,
+                              (QtCore.Qt.EditRole, 5): self.setMax,
+                              (QtCore.Qt.EditRole, 7): self.setContext,
+                              (QtCore.Qt.CheckStateRole, 0): self.setEnable,
+                              (QtCore.Qt.CheckStateRole, 6): self.setUseServer,}
+        self.dataLookup = {(QtCore.Qt.CheckStateRole, 0): lambda row: QtCore.Qt.Checked if self.channelData[row].enabled else QtCore.Qt.Unchecked,
+                           (QtCore.Qt.CheckStateRole, 6): lambda row: QtCore.Qt.Checked if self.channelData[row].useServerInterlock else QtCore.Qt.Unchecked,
+                           (QtCore.Qt.DisplayRole, 0): lambda row: self.channelData[row].name,
+                           (QtCore.Qt.DisplayRole, 1): lambda row: self.channelData[row].wavemeter,
+                           (QtCore.Qt.DisplayRole, 2): lambda row: self.channelData[row].channel,
+                           (QtCore.Qt.DisplayRole, 3): lambda row: "{}".format(
+                               self.channelData[row].currentFreq),
+                           (QtCore.Qt.BackgroundColorRole, 3): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].enabled else QtGui.QColor(0xa6, 0xff, 0xa6, 0xff) if self.channelData[row].currentState == LockStatus.Locked else QtGui.QColor(0xff, 0xa6, 0xa6, 0xff),
+                           (QtCore.Qt.BackgroundColorRole, 4): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].useServerInterlock else QtGui.QColor(QtCore.Qt.lightGray),
+                           (QtCore.Qt.BackgroundColorRole, 5): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].useServerInterlock else QtGui.QColor(QtCore.Qt.lightGray),
+                           (QtCore.Qt.BackgroundColorRole, 6): lambda row: QtGui.QColor(QtCore.Qt.white) if self.channelData[row].serverRangeActive else QtGui.QColor(QtCore.Qt.lightGray),
+                           (QtCore.Qt.DisplayRole, 4): lambda row: str(self.channelData[row].minimum),
+                           (QtCore.Qt.DisplayRole, 5): lambda row: str(self.channelData[row].maximum),
+                           (QtCore.Qt.DisplayRole, 7): lambda row: " | ".join(self.channelData[row].contextSet),
+                           (QtCore.Qt.EditRole, 0): lambda row: self.channelData[row].name,
+                           (QtCore.Qt.EditRole, 2): lambda row: self.channelData[row].channel,
+                           (QtCore.Qt.EditRole, 4): lambda row: str(self.channelData[row].minimum),
+                           (QtCore.Qt.EditRole, 5): lambda row: str(self.channelData[row].maximum),
+                           (QtCore.Qt.EditRole, 7): lambda row: self.channelData[row].contextSet,
+                           (QtCore.Qt.UserRole, 4): lambda row: Q(1, 'GHz'),
+                           (QtCore.Qt.UserRole, 5): lambda row: Q(1, 'GHz'), }
+        self._subscribe()
+        self.wavemeterNames = wavemeterNames
+        self.contexts = contexts
+        self._updateLookup()
 
-    def setChannelDict(self, channelDict):
+    def _updateLookup(self):
+        self.lookup = {(c.wavemeter, c.channel): i for i, c in enumerate(self.channelData)}
+
+    def choice(self, index):
+        if index.column() == 1:
+            return self.wavemeterNames
+        if index.column() == 7:
+            return [c for c in self.contexts if c]  # remove the None
+
+    def _subscribe(self):
+        for c in self.channelData:
+            c.subscribe(self._dataChanged)
+
+    def _dataChanged(self, wavemeter=None, channel=None):
+        idx = self.lookup.get((wavemeter, channel))
+        if idx is not None:
+            self.dataChanged.emit(self.createIndex(idx, 3), self.createIndex(idx, 3))
+
+    def setChannels(self, channelData):
         self.beginResetModel()
-        self.channelDict = channelDict
+        self.channelData = channelData
         self.endResetModel()
 
     def data(self, index, role):
@@ -84,70 +100,70 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
         pass
 
     def flags(self, index):
-        if index.column() in [1, 3, 4]:
+        if index.column() in [1, 2, 4, 5, 7]:
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable
-        if index.column() == 0:
+        if index.column() in [6]:
             return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled
+        if index.column() in [0]:
+            return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
-    def setChannel(self, index, value):
-        channel, _ = int(value)
-        if channel == self.channelDict.at(index.row()).channel:  # no change
-            return True
-        if channel not in self.channelDict:
-            self.channelDict.renameAt(index.row(), channel)
-            self.channelDict.at(index.row()).channel = channel
-            return True
-        return False
+    def setWavemeter(self, index, value):
+        self.channelData[index.row()].wavemeter = value
+        return True
 
-    def setCurrent(self, channel, value):
-        ilChannel = self.channelDict[channel]
-        index = self.channelDict.index(channel)
-        ilChannel.current = value
-        self.dataChanged.emit(self.createIndex(index, 2), self.createIndex(index, 2))
-        ilChannel.inRange = ilChannel.min.m_as('GHz') < ilChannel.current < ilChannel.max.m_as('GHz')
+    def setName(self, index, value):
+        self.channelData[index.row()].name = value
+        return True
+
+    def setContext(self, index, value):
+        self.channelData[index.row()].contextSet = set(value)
+        return True
+
+    def setChannel(self, index, value):
+        channel = int(value)
+        if channel == self.channelData[index.row()].channel:  # no change
+            return True
+        self.channelData[index.row()].channel = channel
+        return True
 
     def setMin(self, index, value):
-        self.channelDict.at(index.row()).min = value
+        self.channelData[index.row()].minimum = value
         return True
 
     def setMax(self, index, value):
-        self.channelDict.at(index.row()).max = value
+        self.channelData[index.row()].maximum = value
         return True
 
     def setEnable(self, index, value):
-        enable = value == QtCore.Qt.Checked
-        if self.channelDict.at(index.row()).enable != enable:  # it changed
-            self.channelDict.at(index.row()).enable = value == QtCore.Qt.Checked
-            if enable:
-                self.getWavemeterData.emit(self.channelDict.at(index.row()).channel)
-            self.dataChanged.emit(self.createIndex(index.row(), 2), self.createIndex(index.row(), 2))
+        self.channelData[index.row()].enabled = value == QtCore.Qt.Checked
+        return True
+
+    def setUseServer(self, index, value):
+        self.channelData[index.row()].useServerInterlock = value == QtCore.Qt.Checked
         return True
 
     def addChannel(self):
-        s = set(range(len(self.channelDict) + 1))
-        for ch in list(self.channelDict.keys()):
-            s.discard(ch)
-        ch = sorted(s)[0]
-        index = len(self.channelDict)
+        index = len(self.channelData)
         self.beginInsertRows(QtCore.QModelIndex(), index, index)
-        ilChannel = InterlockChannel()
-        ilChannel.channel = ch
-        self.channelDict[ch] = ilChannel
+        c = InterlockChannel(channel=0)
+        c.subscribe(self._dataChanged)
+        self.channelData.append(c)
         self.endInsertRows()
 
     def removeChannel(self, index):
         self.beginRemoveRows(QtCore.QModelIndex(), index, index)
-        self.channelDict.pop(self.channelDict.at(index).channel)
+        self.channelData.pop(index)
+        self._updateLookup()
         self.endRemoveRows()
 
     def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.channelDict)
+        return len(self.channelData)
 
     def columnCount(self, parent=QtCore.QModelIndex()):
-        return 5
+        return 8
 
     def sort(self, column, order):
         self.beginResetModel()
-        self.channelDict.sortByAttribute(self.attributeLookup[column], order == QtCore.Qt.DescendingOrder)
+        # self.channelData = sorted(self.channelData, key=lambda x: getattr(x, self.attributeLookup[column]), reverse=order==QtCore.Qt.DescendingOrder)
         self.endResetModel()

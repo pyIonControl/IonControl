@@ -11,54 +11,39 @@ the wavemeter.
 
 import copy
 import functools
-import operator
-
 import logging
+import operator
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
-import pytz
 
 import PyQt5.uic
-from PyQt5 import QtCore, QtNetwork, QtWidgets
+import pytz
+from PyQt5 import QtCore, QtWidgets
+from pyqtgraph.parametertree.Parameter import Parameter
 
+from dedicatedCounters.AutoLoadTableModel import AutoLoadSettingsTableModel
+from dedicatedCounters.CounterSetting import AdjustType
+from dedicatedCounters.CounterTableModel import AutoLoadCounterTableModel
 from dedicatedCounters.LoadingHistoryModel import LoadingHistoryModel
-from dedicatedCounters.WavemeterInterlockTableModel import WavemeterInterlockTableModel
-from gui.TodoListSettingsTableModel import TodoListSettingsTableModel
+from dedicatedCounters.OverrideRecord import OverrideRecord
+from dedicatedCounters.WavemeterInterlock import LockStatus
 from modules import iteratortools
 from modules.AttributeComparisonEquality import AttributeComparisonEquality
-from modules.GuiAppearance import restoreGuiState, saveGuiState #@UnresolvedImport
+from modules.GuiAppearance import restoreGuiState, saveGuiState  # @UnresolvedImport
 from modules.PyqtUtility import updateComboBoxItems
-from modules.SequenceDict import SequenceDict
-from pulseProgram.ShutterDictionary import ShutterDictionary
 from modules.Utility import unique
+from modules.descriptor import SetterProperty
 from modules.firstNotNone import firstNotNone
 from modules.formatDelta import formatDelta
 from modules.quantity import Q
-from modules.aggregates import max_iterable
 from modules.statemachine import Statemachine, timedeltaToMagnitude
-from dedicatedCounters.AutoLoadTableModel import AutoLoadSettingsTableModel
-from dedicatedCounters.CounterTableModel import AutoLoadCounterTableModel
+from persist.LoadingEvent import LoadingEvent, LoadingHistory
+from pulseProgram.PulseProgramUi import PulseProgramUi
 from uiModules.ComboBoxDelegate import ComboBoxDelegate
-from uiModules.MultiSelectDelegate import MultiSelectDelegate
 from uiModules.KeyboardFilter import KeyFilter
 from uiModules.MagnitudeSpinBoxDelegate import MagnitudeSpinBoxDelegate
-from pyqtgraph.parametertree.Parameter import Parameter
-from modules.GuiAppearance import restoreGuiState, saveGuiState #@UnresolvedImport
-import copy
-from modules.PyqtUtility import updateComboBoxItems
-from persist.LoadingEvent import LoadingEvent, LoadingHistory
-from pyqtgraph.dockarea import Dock, DockArea
-from modules.firstNotNone import firstNotNone
-from pulseProgram.PulseProgramUi import PulseProgramUi
-from pulser.ShutterUi import ShutterUi
-from gui.ExpressionValue import ExpressionValue
-from enum import Enum
-from modules.descriptor import SetterProperty
-from modules import iteratortools
-from dedicatedCounters.OverrideRecord import OverrideRecord
-from collections import defaultdict
-from dedicatedCounters.CounterSetting import AdjustType
-from ProjectConfig.Project import getProject
+from uiModules.MultiSelectDelegate import MultiSelectDelegate
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/AutoLoad.ui')
 UiForm, UiBase = PyQt5.uic.loadUiType(uipath)
@@ -161,7 +146,7 @@ class AutoLoadSettings(object):
         self.__dict__.setdefault('maxLoadCheckCycles', Q(3))
         self.__dict__.setdefault('interlockContext', 'load')
 
-    stateFields = ['maxTime', 'ovenCoolDownTime', 'checkTime', 'useInterlock', 'interlock',
+    stateFields = ['maxTime', 'ovenCoolDownTime', 'checkTime', 'useInterlock',
                    'autoReload', 'waitForComebackTime', 'maxFailedAutoload', 'postSequenceWaitTime', 'historyLength',
                    'adjustDisplayData', 'counterDisplayData', 'beyondThresholdTime', 'dumpTime', 'maxLoadCheckCycles',
                    'interlockContext']
@@ -226,7 +211,6 @@ class AutoLoad(UiForm, UiBase):
         self.timer = None
         self.pulser = pulser
         self.dataSignalConnected = False
-        self.outOfRangeCount=0
         self.dataSignal = dataAvailableSignal
         self.numFailedAutoload = 0
         self.constructStatemachine()
@@ -244,7 +228,25 @@ class AutoLoad(UiForm, UiBase):
         self.interlock.subscribe(self.onInterlockStatusChanged)
 
     def onInterlockStatusChanged(self, context, status):
+        if context == self.settings.interlockContext:
+            if status == LockStatus.Locked:
+                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(0, 198, 0)}")
+                self.allFreqsInRange.setToolTip("All laser frequencies are in range")
+            elif status == LockStatus.NoData:
+                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(198, 198, 0)}")
+                self.allFreqsInRange.setToolTip("Not all readings are available")
+            elif status == LockStatus.Transient:
+                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(198, 198, 0)}")
+                self.allFreqsInRange.setToolTip("At least one laser was out of lock in less than 2 readings")
+            elif status == LockStatus.Unlocked:
+                self.allFreqsInRange.setStyleSheet("QLabel {background-color: rgb(255, 0, 0)}")
+                self.allFreqsInRange.setToolTip("There are laser frequencies out of range")
+                if self.settings.useInterlock:
+                    self.statemachine.processEvent('outOfLock')
         print("Autoload interlock status changed", context, status)
+
+    def wavemeterOutOfLock(self):
+        return self.settings.useInterlock and self.interlock.contextStatus(self.settings.interlockContext) == LockStatus.Unlocked
 
     @property
     def loadCheckCycleOkay(self):
@@ -374,6 +376,7 @@ class AutoLoad(UiForm, UiBase):
         self.statemachine.addTransition('timer', 'Dump', 'Load',
                                         lambda state: state.timeInState() > self.settings.dumpTime,
                                         description="end dump threshold")
+        self.statemachine.addTransition('outOfLock', 'Load', 'Idle', description='stop loading lasers out of lock')
         self.statemachine.ignoreEventTypes.add('data')
         self.statemachine.ignoreEventTypes.add('timer')
 

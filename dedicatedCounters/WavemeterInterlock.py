@@ -74,7 +74,8 @@ class WavemeterPoll(Observable):
 class LockStatus(Enum):
     Unlocked = 0
     NoData = 1
-    Locked = 2
+    Transient = 2
+    Locked = 3
 
 
 class InterlockChannel(Observable):
@@ -95,8 +96,14 @@ class InterlockChannel(Observable):
         self.serverActive = False
         self.enabled = enabled
         self.name = name
+        self.unlockedCount = 0  # counts how often the reading was out
+
+    def __repr__(self):
+        return "<InterlockChannel {} {}:{}, {}-{}>".format(self.name, self.wavemeter, self.channel, self.minimum,
+                                                          self.maximum)
 
     def __reduce__(self):
+        print(self)
         return InterlockChannel, (self.name, self.wavemeter, self.channel, self.minimum, self.maximum,
                                   self.useServerInterlock, self.contextSet, self.enabled)
 
@@ -116,9 +123,16 @@ class InterlockChannel(Observable):
             if self.useServerInterlock and self.serverRangeActive:
                 self.currentState = LockStatus.Locked if self.serverInRange else LockStatus.Unlocked
             else:
-                self.currentState = LockStatus.Locked
                 if (self.minimum is not None and self.currentFreq < self.minimum or
-                    self.maximum is not None and self.currentFreq > self.maximum):
+                                self.maximum is not None and self.currentFreq > self.maximum):
+                    self.unlockedCount += 1
+                else:
+                    self.unlockedCount = 0
+                if self.unlockedCount == 0:
+                    self.currentState = LockStatus.Locked
+                elif self.unlockedCount < 2:
+                    self.currentState = LockStatus.Transient
+                else:
                     self.currentState = LockStatus.Unlocked
         self.firebare(wavemeter=self.wavemeter, channel=self.channel)
         return oldstate != self.currentState
@@ -148,9 +162,11 @@ class Interlock:
 
     def subscribe(self, callback, context=None, unique=False):
         self.observables[context].subscribe(callback, unique)
+        self.contexts[context]
 
     def createContext(self, context):
         self.observables[context]  # touch the defaultdict
+        self.contexts[context]
 
     def contextStatus(self, context):
         channels = self.contexts.get(context)
@@ -169,8 +185,9 @@ class Interlock:
             if changed:
                 changedContexts.update(channel.contextSet)
         for c in changedContexts:
-            self.observables[c].firebare(c, self.contextStatus(c))
-            self.observables[None].firebare(c, self.contextStatus(c))
+            status = self.contextStatus(c)
+            self.observables[c].firebare(c, status)
+            self.observables[None].firebare(c, status)
 
 
 

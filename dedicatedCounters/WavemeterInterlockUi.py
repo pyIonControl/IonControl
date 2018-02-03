@@ -4,7 +4,7 @@ from PyQt5 import QtWidgets
 import PyQt5
 
 from dedicatedCounters.WavemeterInterlock import Interlock, InterlockChannel
-from dedicatedCounters.WavemeterInterlockTableModel2 import WavemeterInterlockTableModel
+from dedicatedCounters.WavemeterInterlockTableModel import WavemeterInterlockTableModel
 from modules.Utility import unique
 from modules.quantity import Q
 from uiModules.ComboBoxDelegate import ComboBoxDelegate
@@ -21,7 +21,7 @@ class WavemeterInterlockUi(Form, Base):
         Form.__init__(self)
         self.wavemeterNames = wavemeterNames
         self.channels = channels
-        self.contexts = set(contexts)
+        self.contexts = contexts
 
     def setupUi(self, parent):
         Form.setupUi(self, parent)
