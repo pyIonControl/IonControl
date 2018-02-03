@@ -15,7 +15,7 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
     attributeLookup = ['enabled', 'wavemeter', 'channel', 'current', 'minimum', 'maximum', 'useServerInterlock', None]
     edited = QtCore.pyqtSignal()
 
-    def __init__(self, channelData=list(), parent=None, *args):
+    def __init__(self, channelData=list(), wavemeterNames=[], contexts=set(), parent=None, *args):
         """ datain: a list where each item is a row
         
         """
@@ -25,6 +25,7 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
                               (QtCore.Qt.EditRole, 2): self.setChannel,
                               (QtCore.Qt.EditRole, 4): self.setMin,
                               (QtCore.Qt.EditRole, 5): self.setMax,
+                              (QtCore.Qt.EditRole, 7): self.setContext,
                               (QtCore.Qt.CheckStateRole, 0): self.setEnable,
                               (QtCore.Qt.CheckStateRole, 6): self.setUseServer,}
         self.dataLookup = {(QtCore.Qt.CheckStateRole, 0): lambda row: QtCore.Qt.Checked if self.channelData[row].enabled else QtCore.Qt.Unchecked,
@@ -34,15 +35,28 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
                            (QtCore.Qt.DisplayRole, 3): lambda row: "{}".format(
                                self.channelData[row].currentFreq),
                            (QtCore.Qt.BackgroundColorRole, 3): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].enabled else QtGui.QColor(0xa6, 0xff, 0xa6, 0xff) if self.channelData[row].currentState == LockStatus.Locked else QtGui.QColor(0xff, 0xa6, 0xa6, 0xff),
+                           (QtCore.Qt.BackgroundColorRole, 4): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].useServerInterlock else QtGui.QColor(QtCore.Qt.lightGray),
+                           (QtCore.Qt.BackgroundColorRole, 5): lambda row: QtGui.QColor(QtCore.Qt.white) if not self.channelData[row].useServerInterlock else QtGui.QColor(QtCore.Qt.lightGray),
                            (QtCore.Qt.DisplayRole, 4): lambda row: str(self.channelData[row].minimum),
                            (QtCore.Qt.DisplayRole, 5): lambda row: str(self.channelData[row].maximum),
+                           (QtCore.Qt.DisplayRole, 7): lambda row: " ".join(self.channelData[row].contextSet),
                            (QtCore.Qt.EditRole, 2): lambda row: self.channelData[row].channel,
                            (QtCore.Qt.EditRole, 4): lambda row: str(self.channelData[row].minimum),
                            (QtCore.Qt.EditRole, 5): lambda row: str(self.channelData[row].maximum),
+                           (QtCore.Qt.EditRole, 7): lambda row: " ".join(self.channelData[row].contextSet),
                            (QtCore.Qt.UserRole, 4): lambda row: Q(1, 'GHz'),
                            (QtCore.Qt.UserRole, 5): lambda row: Q(1, 'GHz'), }
         self._subscribe()
         self.lookup = {(c.wavemeter, c.channel): i for i, c in enumerate(self.channelData)}
+        self.wavemeterNames = wavemeterNames
+        self.contexts = contexts
+
+    def choice(self, index):
+        if index.column() == 1:
+            return self.wavemeterNames
+        if index.column() == 7:
+            print(self.contexts)
+            return list(self.contexts)
 
     def _subscribe(self):
         for c in self.channelData:
@@ -50,7 +64,8 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
 
     def _dataChanged(self, wavemeter=None, channel=None):
         idx = self.lookup.get((wavemeter, channel))
-        self.dataChanged.emit(self.createIndex(idx, 3), self.createIndex(idx, 7))
+        if idx is not None:
+            self.dataChanged.emit(self.createIndex(idx, 3), self.createIndex(idx, 3))
 
     def setChannels(self, channelData):
         self.beginResetModel()
@@ -78,14 +93,19 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
         pass
 
     def flags(self, index):
-        if index.column() in [1, 3, 4]:
+        if index.column() in [1, 2, 4, 5, 7]:
             return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsSelectable
-        if index.column() == 0:
+        if index.column() in [0, 6]:
             return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled
         return QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsSelectable
 
     def setWavemeter(self, index, value):
-        pass
+        self.channelData[index.row()].wavemeter = value
+        return True
+
+    def setContext(self, index, value):
+        self.channelData[index.row()].contextSet = set([value])
+        return True
 
     def setChannel(self, index, value):
         channel = int(value)
@@ -115,7 +135,7 @@ class WavemeterInterlockTableModel(QtCore.QAbstractTableModel):
         self.beginInsertRows(QtCore.QModelIndex(), index, index)
         c = InterlockChannel(channel=0)
         c.subscribe(self._dataChanged)
-        self.channelData.append()
+        self.channelData.append(c)
         self.endInsertRows()
 
     def removeChannel(self, index):

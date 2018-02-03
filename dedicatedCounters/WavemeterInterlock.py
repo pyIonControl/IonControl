@@ -107,7 +107,13 @@ class InterlockChannel(Observable):
         if now - self.timestamp > timedelta(seconds=20) or not self.serverActive:
             self.currentState = LockStatus.NoData
         else:
-            self.currentState = LockStatus.Locked if self.minimum <= self.currentFreq <= self.maximum else LockStatus.Unlocked
+            if self.useServerInterlock and self.serverRangeActive:
+                self.currentState = LockStatus.Locked if self.serverInRange else LockStatus.Unlocked
+            else:
+                self.currentState = LockStatus.Locked
+                if (self.minimum is not None and self.currentFreq < self.minimum or
+                    self.maximum is not None and self.currentFreq > self.maximum):
+                    self.currentState = LockStatus.Unlocked
         self.firebare(wavemeter=self.wavemeter, channel=self.channel)
         return oldstate != self.currentState
 
@@ -136,10 +142,11 @@ class Interlock:
         channels = self.contexts.get(context)
         if channels is None:
             return LockStatus.NoData
-        return LockStatus(min(c.currentState.value for c in channels if c.enabled))
+        l = [c.currentState.value for c in channels if c.enabled]
+        return LockStatus(min(l)) if l else LockStatus.Locked
 
     def onData(self, data):
-        print(data)
+        # print(data)
         changedContexts = set()
         for channel in self.channels:
             d = data.get((channel.wavemeter, channel.channel))
