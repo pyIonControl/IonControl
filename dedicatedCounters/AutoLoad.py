@@ -281,7 +281,7 @@ class AutoLoad(UiForm, UiBase):
                                         description="maximum auto load parameter reached")
         self.statemachine.addTransition('timer', 'Load', 'Idle',
                                         lambda state: (self.ovenLimitReached() and not self.settings.autoReload) or
-                                                      self.wavemeterOutOfLock,
+                                                      self.wavemeterOutOfLock(),
                                         description="maximum loading time reached")
         self.statemachine.addTransition('timer', 'Load', 'OvenCooldown',
                                         lambda state: self.ovenLimitReached() and self.settings.autoReload and
@@ -505,7 +505,7 @@ class AutoLoad(UiForm, UiBase):
     def onLoadProfile(self, name):
         name = str(name)
         if name in self.settingsDict and name!=self.currentSettingsName:
-            self.setProfile( name, copy.deepcopy( self.settingsDict[name] ) )
+            self.setProfile(name, copy.deepcopy(self.settingsDict[name]))
 
     def onSaveProfile(self):
         name = str(self.profileComboBox.currentText())

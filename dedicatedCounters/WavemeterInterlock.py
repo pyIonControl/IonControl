@@ -97,12 +97,15 @@ class InterlockChannel(Observable):
         self.name = name
         self.unlockedCount = 0  # counts how often the reading was out
 
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+
     def __repr__(self):
         return "<InterlockChannel {} {}:{}, {}-{}>".format(self.name, self.wavemeter, self.channel, self.minimum,
                                                           self.maximum)
 
     def __reduce__(self):
-        print(self)
+        # print(self)
         return InterlockChannel, (self.name, self.wavemeter, self.channel, self.minimum, self.maximum,
                                   self.useServerInterlock, self.contextSet, self.enabled)
 
