@@ -56,7 +56,6 @@ class WavemeterPoll(Observable):
         """Execute when reply is received from the wavemeter. Display it on the
            GUI, and check whether it is in range."""
         answer = reply.readAll().data().decode()  # expect {"0": [456.123, 123456789], ...}
-        answer = answer.replace('"freq:"', '"freq"')  # fix a stupid typo on the server side
         try:
             data = {(self.name, int(k)): LaserInfo(**v) for k, v in json.loads(answer).items()}
             self.data.update(data)
