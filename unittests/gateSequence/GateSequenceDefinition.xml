@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+<GateSequenceList>
+	<!-- Used gates Gi, Gx, Gy, Gx^2 -->
+	<!-- Sij i,j = 1..4 -->
+	<GateSequence name="S11">
+		Gi, Gi
+	</GateSequence>
+	<GateSequence name="S12">
+		Gi, Gx
+	</GateSequence>
+	<GateSequence name="S13">
+		Gi, Gy
+	</GateSequence>
+	<GateSequence name="S14">
+		Gi, Gx^2
+	</GateSequence>
+	<GateSequence name="S21">
+		Gx, Gi
+	</GateSequence>
+	<GateSequence name="S22">
+		Gx, Gx
+	</GateSequence>
+	<GateSequence name="S23">
+		Gx, Gy
+	</GateSequence>
+	<GateSequence name="S24">
+		Gx, Gx^2
+	</GateSequence>
+	<GateSequence name="S31">
+		Gy, Gi
+	</GateSequence>
+	<GateSequence name="S32">
+		Gy, Gx
+	</GateSequence>
+	<GateSequence name="S33">
+		Gy, Gy
+	</GateSequence>
+	<GateSequence name="S34">
+		Gy, Gx^2
+	</GateSequence>
+	<GateSequence name="S41">
+		Gx^2, Gi
+	</GateSequence>
+	<GateSequence name="S42">
+		Gx^2, Gx
+	</GateSequence>
+	<GateSequence name="S43">
+		Gx^2, Gy
+	</GateSequence>
+	<GateSequence name="S44">
+		Gx^2, Gx^2
+	</GateSequence>
+	<!-- Si Gx Sj i,j = 1..4 -->
+	<GateSequence name="AS11">
+		Gi, Gx, Gi
+	</GateSequence>
+	<GateSequence name="AS12">
+		Gi, Gx, Gx
+	</GateSequence>
+	<GateSequence name="AS13">
+		Gi, Gx, Gy
+	</GateSequence>
+	<GateSequence name="AS14">
+		Gi, Gx, Gx^2
+	</GateSequence>
+	<GateSequence name="AS21">
+		Gx, Gx, Gi
+	</GateSequence>
+	<GateSequence name="AS22">
+		Gx, Gx, Gx
+	</GateSequence>
+	<GateSequence name="AS23">
+		Gx, Gx, Gy
+	</GateSequence>
+	<GateSequence name="AS24">
+		Gx, Gx, Gx^2
+	</GateSequence>
+	<GateSequence name="AS31">
+		Gy, Gx, Gi
+	</GateSequence>
+	<GateSequence name="AS32">
+		Gy, Gx, Gx
+	</GateSequence>
+	<GateSequence name="AS33">
+		Gy, Gx, Gy
+	</GateSequence>
+	<GateSequence name="AS34">
+		Gy, Gx, Gx^2
+	</GateSequence>
+	<GateSequence name="AS41">
+		Gx^2, Gx, Gi
+	</GateSequence>
+	<GateSequence name="AS42">
+		Gx^2, Gx, Gx
+	</GateSequence>
+	<GateSequence name="AS43">
+		Gx^2, Gx, Gy
+	</GateSequence>
+	<GateSequence name="AS44">
+		Gx^2, Gx, Gx^2
+	</GateSequence>
+	<!-- Si Gy Sj i,j = 1..4 -->
+	<GateSequence name="BS11">
+		Gi, Gy, Gi
+	</GateSequence>
+	<GateSequence name="BS12">
+		Gi, Gy, Gx
+	</GateSequence>
+	<GateSequence name="BS13">
+		Gi, Gy, Gy
+	</GateSequence>
+	<GateSequence name="BS14">
+		Gi, Gy, Gx^2
+	</GateSequence>
+	<GateSequence name="BS21">
+		Gx, Gy, Gi
+	</GateSequence>
+	<GateSequence name="BS22">
+		Gx, Gy, Gx
+	</GateSequence>
+	<GateSequence name="BS23">
+		Gx, Gy, Gy
+	</GateSequence>
+	<GateSequence name="BS24">
+		Gx, Gy, Gx^2
+	</GateSequence>
+	<GateSequence name="BS31">
+		Gy, Gy, Gi
+	</GateSequence>
+	<GateSequence name="BS32">
+		Gy, Gy, Gx
+	</GateSequence>
+	<GateSequence name="BS33">
+		Gy, Gy, Gy
+	</GateSequence>
+	<GateSequence name="BS34">
+		Gy, Gy, Gx^2
+	</GateSequence>
+	<GateSequence name="BS41">
+		Gx^2, Gy, Gi
+	</GateSequence>
+	<GateSequence name="BS42">
+		Gx^2, Gy, Gx
+	</GateSequence>
+	<GateSequence name="BS43">
+		Gx^2, Gy, Gy
+	</GateSequence>
+	<GateSequence name="BS44">
+		Gx^2, Gy, Gx^2
+	</GateSequence>
+	<!-- Si Gx^2 Sj i,j = 1..4 -->
+	<GateSequence name="AAS11">
+		Gi, Gx^2, Gi
+	</GateSequence>
+	<GateSequence name="AAS12">
+		Gi, Gx^2, Gx
+	</GateSequence>
+	<GateSequence name="AAS13">
+		Gi, Gx^2, Gy
+	</GateSequence>
+	<GateSequence name="AAS14">
+		Gi, Gx^2, Gx^2
+	</GateSequence>
+	<GateSequence name="AAS21">
+		Gx, Gx^2, Gi
+	</GateSequence>
+	<GateSequence name="AAS22">
+		Gx, Gx^2, Gx
+	</GateSequence>
+	<GateSequence name="AAS23">
+		Gx, Gx^2, Gy
+	</GateSequence>
+	<GateSequence name="AAS24">
+		Gx, Gx^2, Gx^2
+	</GateSequence>
+	<GateSequence name="AAS31">
+		Gy, Gx^2, Gi
+	</GateSequence>
+	<GateSequence name="AAS32">
+		Gy, Gx^2, Gx
+	</GateSequence>
+	<GateSequence name="AAS33">
+		Gy, Gx^2, Gy
+	</GateSequence>
+	<GateSequence name="AAS34">
+		Gy, Gx^2, Gx^2
+	</GateSequence>
+	<GateSequence name="AAS41">
+		Gx^2, Gx^2, Gi
+	</GateSequence>
+	<GateSequence name="AAS42">
+		Gx^2, Gx^2, Gx
+	</GateSequence>
+	<GateSequence name="AAS43">
+		Gx^2, Gx^2, Gy
+	</GateSequence>
+	<GateSequence name="AAS44">
+		Gx^2, Gx^2, Gx^2
+	</GateSequence>
+</GateSequenceList>

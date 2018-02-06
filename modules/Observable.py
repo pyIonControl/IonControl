@@ -31,7 +31,9 @@ class Observable(object):
             setattr(e, k, v)
         for fn in self.callbacks:
             fn(e)
-            
-    def firebare(self):
+
+    def firebare(self, *args, **kwargs):
         for fn in self.callbacks:
-            fn()
+            fn(*args, **kwargs)
+
+

@@ -65,6 +65,13 @@ class ColumnSpec(list):
         return ColumnSpec( element.text.split(", ") )
     
 
+def to_float(s):
+    try:
+        return float(s)
+    except ValueError:
+        return float("nan")
+
+
 class PlottingList(list):
     def toXmlElement(self, root):
         myElement = ElementTree.SubElement(root, 'TracePlottingList', {})
@@ -369,7 +376,7 @@ class TraceCollection(keydefaultdict):
                 data = []
                 for line in stream:
                     line = line.strip()
-                    data.append(list(map(float, line.split())))
+                    data.append(list(map(to_float, line.split())))
             columnspec = self.description["columnspec"]
             for colname, d in zip(columnspec, zip(*data)):
                 self[colname] = list(d)
@@ -530,7 +537,7 @@ class TraceCollection(keydefaultdict):
             if line[0]=="#":
                 xmlstringlist.append(line.lstrip("# "))
             else:
-                data.append( list(map(float,line.split())) )
+                data.append(list(map(to_float, line.split())))
         root = ElementTree.fromstringlist(xmlstringlist)
         columnspec = ColumnSpec.fromXmlElement(root.find("./Variables/ColumnSpec"))
         for colname, d in zip(columnspec, zip(*data)):
@@ -560,7 +567,7 @@ class TraceCollection(keydefaultdict):
                 if len(a)>1:
                     self.description[a[0]] = a[1]  
             else:
-                data.append( list(map(float,line.split())) )
+                data.append(list(map(to_float, line.split())))
         columnspec =  self.description["columnspec"].split(',')
         for colname, d in zip( columnspec, zip(*data) ):
             self[colname] = list(d)

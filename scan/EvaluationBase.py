@@ -3,6 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from collections import namedtuple
 
 from modules.Observable import Observable
 from modules.SequenceDict import SequenceDict
@@ -26,6 +27,12 @@ class EvaluationMeta(type):
                 raise EvaluationException("Evaluation class needs to have class attribute 'name'")
             EvaluationAlgorithms[dct['name']] = evalclass
         return evalclass
+
+
+class EvaluationResult(namedtuple("EvaluationResultBase", "value interval raw valid")):
+    def __new__(cls, value=float('NaN'), interval=None, raw=None, valid=False):
+        is_valid = valid or (value is not None)
+        return super(EvaluationResult, cls).__new__(cls, value, interval, raw, is_valid)
 
 
 class EvaluationBase(Observable, metaclass=EvaluationMeta):

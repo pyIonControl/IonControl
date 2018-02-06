@@ -30,6 +30,7 @@ class ScanProgress(Form, Base):
         self.timer = None
         self.lastPercentage = 0
         self.lastTime = 0
+        self.repeats = 1
 
     def getData(self):
         return (self.startTime, self.previouslyElapsedTime)
@@ -80,7 +81,7 @@ class ScanProgress(Form, Base):
         self.previouslyElapsedTime = time.time()-self.startTime
         self.widget.setStyleSheet( "QWidget { background: #ffffff; }")
     
-    def setRunning(self, total):
+    def setRunning(self, total, repeats=1):
         self.statusLabel.setText("Running")    
         self.range = total
         self.progressBar.setRange(0, total)
@@ -94,6 +95,7 @@ class ScanProgress(Form, Base):
         self.widget.setStyleSheet( "QWidget { background: #a0ffa0; }")
         self.startTimer()
         self.previouslyElapsedTime = 0
+        self.repeats = repeats
         
     def resumeRunning(self, index):
         self.statusLabel.setText("Running")    
@@ -139,22 +141,26 @@ class ScanProgress(Form, Base):
         self.previouslyElapsedTime += time.time()-self.startTime
         self.widget.setStyleSheet( "QWidget { background: #ffa0a0; }")
         self.stopTimer()
-       
+
     def onData(self, index):
         percentage = round(100 * (index / self.range))
+        self.expected = self.elapsedTime() / (index / float(self.range)) if index > 0 else 0
+        if self.repeats > 1 and self.state == self.OpStates.running:
+            current_repeat = int(index * self.repeats / self.range) + 1
+            self.statusLabel.setText("Running ({})".format(current_repeat))
         if (percentage != self.lastPercentage and time.time() - self.lastTime > 4) or index + 1 >= self.range:
             self.lastPercentage = percentage
             self.progressBar.setValue(index)
-            self.expected =  self.elapsedTime() / (index/float(self.range)) if index>0 else 0
-            self.setTimeLabel()
             self.lastTime = time.time()
-        
+            self.setTimeLabel()
+
     def elapsedTime(self):
-        return self.previouslyElapsedTime + ( (time.time() - self.startTime) if self.state==self.OpStates.running else 0 )
- 
+        return self.previouslyElapsedTime + (
+        (time.time() - self.startTime) if self.state == self.OpStates.running else 0)
+
     def setTimeLabel(self):
-        self.timeLabel.setText( "{0} / {1}".format(timedelta(seconds=round(self.elapsedTime())),
-                                                   timedelta(seconds=round(self.expected)))) 
+        self.timeLabel.setText("{0} / {1}".format(timedelta(seconds=round(self.elapsedTime())),
+                                                  timedelta(seconds=round(self.expected))))
 
 
 

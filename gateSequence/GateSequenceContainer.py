@@ -4,6 +4,7 @@
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
 import os
+import pickle
 from collections import OrderedDict
 import operator
 
@@ -26,7 +27,7 @@ class GateSequenceException(Exception):
 
 
 class GateSequenceContainer:
-    def __init__(self, gateDefinition):
+    def __init__(self, gateDefinition=None):
         self.gateDefinition = gateDefinition
         self._gate_string_list = None
         self._gate_string_struct = None
@@ -69,19 +70,45 @@ class GateSequenceContainer:
         return self.GateSequenceDict.__repr__()
     
     def loadXml(self, filename):
+        self._gate_string_struct = None
         self.filename = filename
         if not self._usePyGSTi and filename:
             self._gate_string_list = list()
             tree = etree.parse(filename)
             root = tree.getroot()
             # load pulse definition
-            for gateset in root:
-                if gateset.text:
-                    self._gate_string_list.append(GateString(None, gateset.text.strip().translate({ord(','): None})))
+            for gateset in root.findall("GateSequence"):
+                text = gateset.text.strip()
+                if text:
+                    self._gate_string_list.append(GateString(None, text.translate({ord(','): None})))
                 else:  # we have the length 0 gate string
                     self._gate_string_list.append(GateString(None, "{}"))
             self.validate()
-    
+
+    def loadText(self, filename):
+        self._gate_string_struct = None
+        self.filename = filename
+        if not self._usePyGSTi and filename:
+            self._gate_string_list = list()
+            with open(filename) as f:
+                for text in f:
+                    self._gate_string_list.append(GateString(None, text.strip()))
+            if self.gateSet:
+                self.validate()
+
+    def savePickle(self, filename):
+        with open(filename, "wb") as f:
+            pickle.dump(self._gate_string_list, f, -1)
+
+    def loadPickle(self, filename):
+        self._gate_string_struct = None
+        self.filename = filename
+        if not self._usePyGSTi and filename:
+            with open(filename, 'rb') as f:
+                self._gate_string_list = pickle.load(f)
+            if self.gateSet:
+                self.validate()
+
     """Validate the gates used in the gate sets against the defined gates"""            
     def validate(self):
         for gatesequence in self._gate_string_list:

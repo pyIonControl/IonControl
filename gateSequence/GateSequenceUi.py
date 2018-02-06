@@ -9,11 +9,13 @@ import operator
 import os.path
 from enum import Enum
 from functools import partial
+from pathlib import Path
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import PyQt5.uic
 from pygsti.objects import GateString
 
+from modules.filetype import isXmlFile
 from trace.PlottedStructure import PlottedStructureProperties
 from .GateDefinition import GateDefinition
 from .GateSequenceCompiler import GateSequenceCompiler
@@ -348,7 +350,13 @@ class GateSequenceUi(Form, Base):
 
     def loadGateSequenceList(self, path):
         logger = logging.getLogger(__name__)
-        self.gateSequenceContainer.loadXml(path)
+        p = Path(path)
+        if p.suffix == ".pkl":
+            self.gateSequenceContainer.loadPickle(path)
+        elif isXmlFile(path):
+            self.gateSequenceContainer.loadXml(path)
+        else:
+            self.gateSequenceContainer.loadText(path)
         if self.gateSequenceContainer._gate_string_list:
             logger.debug("loaded {0} gateSequences from {1}.".format(len(self.gateSequenceContainer._gate_string_list), path))
         _, filename = os.path.split(path)
@@ -429,7 +437,7 @@ class GateSequenceUi(Form, Base):
     def plaquettes(self):
         if self._usePyGSTi:
             return self.gateSequenceContainer._gate_string_struct._plaquettes
-        elif self.settings.active == self.Mode.FullList:
+        elif self.settings.active == self.Mode.FullList and self.gateSequenceContainer._gate_string_struct is not None:
             return self.gateSequenceContainer._gate_string_struct._plaquettes
         return None
 
