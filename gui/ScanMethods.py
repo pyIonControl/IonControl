@@ -98,8 +98,8 @@ class ExternalScanMethod(InternalScanMethod):
                 self.experiment.pulserHardware.ppStart()
                 self.experiment.context.currentIndex = 0
                 self.experiment.context.timestampsNewRun = True
-                logger.info("elapsed time {0}".format(time.time() - self.experiment.context.startTime),
-                            self.experiment.context.scan.repeats)
+                logger.info("elapsed time {}, repeats {}".format(time.time() - self.experiment.context.startTime,
+                                                                 self.experiment.context.scan.repeats))
                 logger.info("Status -> Running")
                 self.experiment.progressUi.setRunning(max(len(self.experiment.context.scan.list), 1),
                                                       self.experiment.context.scan.repeats)
