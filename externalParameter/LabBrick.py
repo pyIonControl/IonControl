@@ -63,7 +63,7 @@ class LabBrick(object):
         return self._extTTL
 
     @extTTL.setter
-    def extTTL(selfself, external):
+    def extTTL(self, external):
         LabBrickDll.fnLMS_SetUseExternalPulseMod(self.deviceID, external)
         return self._extTTL
 
