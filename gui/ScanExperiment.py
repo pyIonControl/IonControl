@@ -958,6 +958,11 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                     InkscapeConversion.convertSvgEmf(preferences.inkscapeExecutable, emfFilename)
                 else:
                     logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
+            if preferences.exportWmf:
+                if os.path.exists(preferences.inkscapeExecutable):
+                    InkscapeConversion.convertSvgWmf(preferences.inkscapeExecutable, emfFilename)
+                else:
+                    logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
             if preferences.exportPdf:
                 if os.path.exists(preferences.inkscapeExecutable):
                     InkscapeConversion.convertSvgPdf(preferences.inkscapeExecutable, emfFilename, filenames)

@@ -97,8 +97,23 @@ class InterlockChannel(Observable):
         self.name = name
         self.unlockedCount = 0  # counts how often the reading was out
 
-    def __setstate__(self, state):
-        self.__dict__.update(state)
+    def __setstate__(self, state):  # is called when an older version InterlockChannel is unpickled
+        super(InterlockChannel, self).__init__()
+        self.wavemeter = None
+        self.channel = state.get('channel')
+        self.minimum = state.get('min')
+        self.maximum = state.get('max')
+        self.useServerInterlock = False
+        self.contextSet = set()
+        self.currentFreq = None
+        self.timestamp = datetime.utcfromtimestamp(0)
+        self.currentState = LockStatus.NoData
+        self.serverInRange = False
+        self.serverRangeActive = False
+        self.serverActive = False
+        self.enabled = state.get('enable')
+        self.name = None
+        self.unlockedCount = 0  # counts how often the reading was out
 
     def __repr__(self):
         return "<InterlockChannel {} {}:{}, {}-{}>".format(self.name, self.wavemeter, self.channel, self.minimum,
