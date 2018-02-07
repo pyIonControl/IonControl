@@ -38,13 +38,16 @@ class NotificationSubscription:
 
 
 class NotificationCenter:
-    def __init__(self, notifyer=EmailNotification()):
-        self.subscriptions = list()
+    def __init__(self, subscriptions=None, notifyer=EmailNotification()):
+        self.subscriptions = subscriptions if subscriptions is not None else list()
         self.origins = set()
         self.notifyer = notifyer
 
     def register(self, origin):
-        self.origins.add(origin)
+        if isinstance(origin, str):
+            self.origins.add(origin)
+        else:
+            self.origins.update(set(origin))
 
     def notify(self, origin, title=None, message=None, priority=None):
         self.origins.add(origin)

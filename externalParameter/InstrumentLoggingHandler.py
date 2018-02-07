@@ -36,6 +36,8 @@ class DataHandling(object):
         self.plottedTrace = None
         self.filename = None
         self.maximumPoints = 0
+        self.highAlarmThreshold = None
+        self.lowAlarmThreshold = None
         
     @property
     def decimationClass(self):
@@ -91,6 +93,13 @@ class DataHandling(object):
 
     def finishTrace(self):
         self.trace = None
+
+    def outOfRange(self, source, value):
+        if self.lowAlarmThreshold and value < float(self.lowAlarmThreshold):
+            return "{} too low {} < {}".format(source, value, self.lowAlarmThreshold)
+        if self.highAlarmThreshold and value > float(self.highAlarmThreshold):
+            return "{} too high {} > {}".format(source, value, self.highAlarmThreshold)
+        return None
         
     def decimate(self, takentime, value, callback):
         if value is not None:
@@ -162,12 +171,14 @@ class DataHandling(object):
 class InstrumentLoggingHandler(QtCore.QObject):
     paramTreeChanged = QtCore.pyqtSignal()
     newData = QtCore.pyqtSignal(object, object)
-    def __init__(self, traceui, plotDict, config, persistSpace):
+    def __init__(self, traceui, plotDict, config, persistSpace, notifications=None):
         super(InstrumentLoggingHandler, self).__init__()
+        self.notifications = notifications
         self.traceui = traceui
         self.plotDict = plotDict
         self.config = config
-        self.handlerDict = self.config.get("InstrumentLogging.HandlerDict", defaultdict( DataHandling ) )
+        self.handlerDict = self.config.get("InstrumentLogging.HandlerDict", defaultdict(DataHandling))
+        self.notifications.register(self.handlerDict.keys())
         self.persistSpace = persistSpace
         self.subscriptions = set()
         
@@ -184,6 +195,9 @@ class InstrumentLoggingHandler(QtCore.QObject):
         if data is None:
             handler.finishTrace()
         else:
+            outOfRangeMessage = handler.outOfRange(source, data[1])
+            if outOfRangeMessage:
+                self.notifications.notify(origin=source, message=outOfRangeMessage)
             handler.decimate( data[0], data[1], partial(self.dataCallback, source ))
             handler.persistenceDecimate( data[0], data[1], partial(self.persistenceCallback, source ) )
             self.newData.emit( source, InputData(raw=data[1]) )
@@ -207,7 +221,10 @@ class InstrumentLoggingHandler(QtCore.QObject):
 
     def paramDef(self, source):
         handler = self.handlerDict[source]
+        self.notifications.register(source)
         param = [{'name': 'filename', 'type': 'str', 'object': handler, 'field': 'filename', 'value': handler.filename, 'tip': "Filename to be saved"},
+                 {'name': 'low alarm', 'type': 'magnitude', 'object': handler, 'field': 'lowAlarmThreshold', 'value': handler.lowAlarmThreshold, 'tip': "Send notification if value is smaller"},
+                 {'name': 'high alarm', 'type': 'magnitude', 'object': handler, 'field': 'highAlarmThreshold', 'value': handler.highAlarmThreshold, 'tip': "Send notification if value is larger"},
                 {'name': 'plot window', 'type': 'list', 'object': handler,'field': 'plotName', 'value': handler.plotName, 'values': list(self.plotDict.keys()) },
                 {'name': 'max points', 'type': 'int', 'object': handler,'field': 'maximumPoints', 'value': handler.maximumPoints },
                 {'name': 'decimation', 'type': 'list', 'object': handler, 'field': 'decimationClass', 

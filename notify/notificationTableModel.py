@@ -11,7 +11,6 @@ from notify.notification import NotificationSubscription
 class NotificationTableModel(QtCore.QAbstractTableModel):
     getWavemeterData = QtCore.pyqtSignal(object)
     headerDataLookup = ['Name', 'Recipients', 'Subscriptions']
-    edited = QtCore.pyqtSignal()
 
     def __init__(self, notificationCenter, parent=None, *args):
         """ datain: a list where each item is a row
@@ -50,8 +49,6 @@ class NotificationTableModel(QtCore.QAbstractTableModel):
 
     def setData(self, index, value, role):
         result = self.setDataLookup.get((role, index.column()), lambda index, value: False)(index, value)
-        if result:
-            self.edited.emit()
         return result
 
     def setValue(self, index, value):

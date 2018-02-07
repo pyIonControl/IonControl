@@ -7,6 +7,10 @@ import os
 
 import logging
 import sys
+
+from notify.notification import NotificationCenter
+from notify.notification_ui import NotificationUi
+
 isPy3 = sys.version_info[0] > 2
 if isPy3:
     from PyQt5 import QtCore, QtGui, QtWidgets
@@ -84,7 +88,19 @@ class InstrumentLoggingUi(WidgetContainerBase, WidgetContainerForm):
 
         logger = logging.getLogger()        
         self.toolBar.addWidget(ExceptionLogButton())
-            
+
+        # Notification center
+        self.notificationCenter = NotificationCenter(subscriptions=self.config.get("NotificationSubscriptions"))
+        self.notificationCenterUi = NotificationUi(self.notificationCenter)
+        self.notificationCenterUi.setupUi(self.notificationCenterUi)
+        self.notificationCenterDock = QtWidgets.QDockWidget("Notifications")
+        self.notificationCenterDock.setObjectName("Notifications")
+        self.notificationCenterDock.setWidget(self.notificationCenterUi)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.notificationCenterDock)
+        self.notificationPeriodicTimer = QtCore.QTimer()
+        self.notificationPeriodicTimer.timeout.connect(self.notificationCenter.periodicWork)
+        self.notificationPeriodicTimer.start(180000)  # send rate limited pending messages every 3 minutes
+
         # Setup Console Dockwidget
         self.levelComboBox.addItems(self.levelNameList)
         self.levelComboBox.currentIndexChanged[int].connect( self.setLoggingLevel )            
@@ -125,7 +141,8 @@ class InstrumentLoggingUi(WidgetContainerBase, WidgetContainerForm):
         self.fitWidget.setupUi(self.fitWidget)
         self.fitWidgetDock = self.setupAsDockWidget(self.fitWidget, "Fit", QtCore.Qt.LeftDockWidgetArea, stackBelow=traceuiDock)
 
-        self.instrumentLoggingHandler = InstrumentLoggingHandler(self.traceui, self.plotDict, self.config, 'externalInput')
+        self.instrumentLoggingHandler = InstrumentLoggingHandler(self.traceui, self.plotDict, self.config,
+                                                                 'externalInput', notifications=self.notificationCenter)
 
         self.ExternalParametersSelectionUi = InstrumentLoggingSelection(self.config, classdict=LoggingInstruments, plotNames=list(self.plotDict.keys()),
                                                                         instrumentLoggingHandler=self.instrumentLoggingHandler )
@@ -310,6 +327,7 @@ class InstrumentLoggingUi(WidgetContainerBase, WidgetContainerForm):
         self.instrumentLoggingHandler.saveConfig()
         self.instrumentLoggingQueryUi.saveConfig()
         self.preferencesUi.saveConfig()
+        self.config["NotificationSubscriptions"] = self.notificationCenter.subscriptions
 
     def onPrint(self, target):
         printer = QtPrintSupport.QPrinter(mode=QtPrintSupport.QPrinter.ScreenResolution)
