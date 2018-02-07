@@ -122,13 +122,13 @@ class FitHistogramEvaluation(EvaluationBase):
             confidence.append( (confidence[0]+confidence[1]) if confidence[0] is not None and confidence[1] is not None else None)  # don't know what to do :(
             data.evaluated['FitHistogramsResult'] = (params, confidence, self.chisq/self.dof)
         if self.settings['Mode']=='Parity':
-            return params[0]+params[2]-params[1], None, params[0]+params[2]-params[1]
+            return EvaluationResult(params[0]+params[2]-params[1], None, params[0]+params[2]-params[1])
         elif self.settings['Mode']=='Zero':
-            return params[0], (confidence[0],  confidence[0]), params[0]
+            return EvaluationResult(params[0], (confidence[0],  confidence[0]), params[0])
         elif self.settings['Mode']=='One':
-            return params[1], (confidence[1],  confidence[1]), params[1]
+            return EvaluationResult(params[1], (confidence[1],  confidence[1]), params[1])
         elif self.settings['Mode']=='Two':
-            return params[2], (confidence[2],  confidence[2]), params[2]
+            return EvaluationResult(params[2], (confidence[2],  confidence[2]), params[2])
         elif self.settings['Mode']=='Residuals':
             return EvaluationResult(reducedchisq, None, reducedchisq)
 
@@ -221,7 +221,7 @@ class TwoIonFidelityEvaluation(EvaluationBase):
         #countarray = evaluation.getChannelData(data)
         params, confidence, reducedchisq = data.evaluated.get('FitHistogramsResult', (None, None, None))
         if params is None:
-            return 0, None, 0
+            return EvaluationResult()
         elif expected is not None:
             if self.settings['Mode']=='Zero':
                 p = 1.0-abs(params[0] - self.ExpectedLookup[expected][0])
@@ -244,7 +244,7 @@ class TwoIonFidelityEvaluation(EvaluationBase):
                 ptop = confidence[2]
                 x = params[0]+params[1]+params[2]
         else:
-            return 0, None, 0
+            return EvaluationResult()
         return EvaluationResult(p, (pbottom, ptop), x)
 
     def parameters(self):
