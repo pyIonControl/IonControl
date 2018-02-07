@@ -88,6 +88,8 @@ class DataHandling(object):
     
     def __setstate__(self, state):
         self.__dict__.update(state)
+        self.__dict__.setdefault('highAlarmThreshold', None)
+        self.__dict__.setdefault('lowAlarmThreshold', None)
         self.trace = None
         self.plottedTrace = None
 
