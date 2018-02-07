@@ -9,6 +9,8 @@ class EmailNotification:
         self.sender = "{}@{}".format(getpass.getuser(), domain)
 
     def message(self, recipients, title, message, priority=None):
+        if isinstance(recipients, str):
+            recipients = [recipients]
         server = smtplib.SMTP(self.server)
         DATA = data_template.format(self.sender, ", ".join(recipients), title, message)
         response = server.sendmail(self.sender, recipients, DATA)
