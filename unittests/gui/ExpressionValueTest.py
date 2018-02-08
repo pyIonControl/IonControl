@@ -23,8 +23,6 @@ class ExpressionValueTest(unittest.TestCase):
         expr = ExpressionValue(name='Count 3', value=Q(12, 'kHz'), globalDict=globalDict)
         c = copy.deepcopy(expr)
         self.assertEqual(expr, c)
-        c.value = Q(123, 'MHz')
-        c.string = '123 MHz'
 
 if __name__ == "__main__":
     unittest.main()

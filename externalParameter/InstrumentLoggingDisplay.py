@@ -113,7 +113,7 @@ class InstrumentLoggingDisplay(UiForm, UiBase):
         UiForm.setupUi(self, MainWindow)
         self.tableModel = InstrumentLoggingDisplayTableModel(self, self.config)
         self.tableView.setModel( self.tableModel )
-        #self.setupParameters(EnabledParameters)
+        self.setupParameters(EnabledParameters)
         self.filter = KeyListFilter( [QtCore.Qt.Key_Plus, QtCore.Qt.Key_Minus, QtCore.Qt.Key_Equal] )
         self.filter.keyPressed.connect( self.onResize )
         self.tableView.installEventFilter(self.filter)

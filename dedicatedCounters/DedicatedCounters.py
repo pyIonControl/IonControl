@@ -45,7 +45,8 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
     OpStates = enum.enum('idle', 'running', 'paused')
 
     def __init__(self, config, dbConnection, pulserHardware, globalVariablesUi, shutterUi, externalInstrumentObservable,
-                 parent=None, remoteRender=False):
+                 interlock, parent=None, remoteRender=False):
+        self.interlock = interlock
         self.remoteRender = remoteRender
         DedicatedCountersForm.__init__(self)
         DedicatedCountersBase.__init__(self, parent)
@@ -149,7 +150,9 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.calibrationDock.hide()        
 
         # AutoLoad
-        self.autoLoad = AutoLoad.AutoLoad(self.config, self.dbConnection, self.pulserHardware, self.dataAvailable, self.globalVariablesUi,self.shutterUi, self.externalInstrumentObservable)
+        self.autoLoad = AutoLoad.AutoLoad(self.config, self.dbConnection, self.pulserHardware, self.dataAvailable,
+                                          self.globalVariablesUi,self.shutterUi, self.externalInstrumentObservable,
+                                          self.interlock)
         self.autoLoad.setupUi(self.autoLoad)
         self.autoLoadDock = QtWidgets.QDockWidget("Auto Loader")
         self.autoLoadDock.setObjectName("Auto Loader")
