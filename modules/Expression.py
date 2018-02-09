@@ -58,7 +58,10 @@ class Parser:
                                'abs':     abs,
                                'exp':     math.exp,
                                'sign':    lambda a: abs(a)>self.epsilon and (1 if a > 0 else -1) or 0,
-                               'sgn':     lambda a: abs(a)>self.epsilon and (1 if a > 0 else -1) or 0
+                               'sgn':     lambda a: abs(a)>self.epsilon and (1 if a > 0 else -1) or 0,
+                               'sint16':  lambda a: -0x8000 + (int(a) & 0x7fff) if (int(a) & 0x8000) else (int(a) & 0x7fff),
+                               'sint12':  lambda a: -0x800 + (int(a) & 0x7ff) if (int(a) & 0x800) else (int(a) & 0x7ff),
+                               'sint32':  lambda a: -0x80000000 + (int(a) & 0x7fffffff) if (int(a) & 0x80000000) else (int(a) & 0x7fffffff),
                                }
         self.defaultVarCM = ChainMap(variabledict, self.constLookup)
         self.defaultFuncCM = ChainMap(ExpressionFunctions, self.localFunctions, functiondict)

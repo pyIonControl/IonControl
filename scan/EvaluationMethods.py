@@ -64,6 +64,7 @@ class MeanEvaluation(EvaluationBase):
         countarray = evaluation.getChannelData(data)
         if not countarray:
             return EvaluationResult()
+        countarray = list(map(self.intConversionsLookup.get(self.settings['intConversion'], lambda x: x), countarray))
         r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         bottom, top = r.interval
         if self.settings['transformation']!="":
