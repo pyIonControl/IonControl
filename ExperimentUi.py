@@ -189,6 +189,13 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                     list(self.project.hardware['Lab Brick'].values())[0]['dllPath'])
             except Exception as e:  # popup on failed import
                 importErrorPopup('Lab Brick error {0}'.format(e))
+        if self.project.isEnabled('hardware', 'Remote Lab Brick'):
+            try:
+                import externalParameter.RemoteLabBrick  # @UnusedImport
+                externalParameter.RemoteLabBrick.Servers.update(
+                    {name: e['serverUrl'] for name, e in self.project.hardware['Remote Lab Brick'].items()})
+            except Exception as e:  # popup on failed import
+                importErrorPopup('Remote Lab Brick error {0}'.format(e))
         from externalParameter.ExternalParameterBase import InstrumentDict
 
         # setup FPGAs
