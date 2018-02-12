@@ -16,6 +16,9 @@ from ProjectConfig.Project import Project, ProjectInfoUi
 import sys
 import logging
 import os
+
+from dedicatedCounters.WavemeterInterlock import Interlock
+from dedicatedCounters.WavemeterInterlockUi import WavemeterInterlockUi
 from modules.SequenceDict import SequenceDict
 from functools import partial
 from GlobalVariables.GlobalVariablesUi import GlobalVariablesUi
@@ -203,6 +206,22 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.pulseProgramDialog = PulseProgramUi.PulseProgramSetUi(self.config,  self.channelNameData, pulser=self.pulser)
         self.pulseProgramDialog.setupUi(self.pulseProgramDialog)
 
+        # Wavemeter Interlock
+        wmSetup = self.project.hardware.get('HighFinesse Wavemeter')
+        wavemeters = {name: v.get("uri") for name, v in wmSetup.items() if v.get('enabled')}
+        if wavemeters:
+            self.wavemeterInterlock = Interlock(wavemeters=wavemeters, config=self.config)
+            self.wavemeterInterlockUi = WavemeterInterlockUi(wavemeterNames=list(wavemeters.keys()),
+                                                             channels=self.wavemeterInterlock.channels,
+                                                             contexts=self.wavemeterInterlock.contexts)
+            self.wavemeterInterlockUi.setupUi(self.wavemeterInterlockUi)
+            self.interlockDock = QtWidgets.QDockWidget("Wavemeter Interlock")
+            self.interlockDock.setObjectName("Wavemeter Interlock")
+            self.interlockDock.setWidget(self.wavemeterInterlockUi)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.interlockDock)
+        else:
+            self.wavemeterInterlock = None
+
         # Global Variables
         self.globalVariablesUi = GlobalVariablesUi(self.config)
         self.globalVariablesUi.setupUi(self.globalVariablesUi)
@@ -229,6 +248,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
                                                             "ScanExperiment", toolBar=self.experimentToolBar,
                                                             measurementLog=self.measurementLog,
                                                             callWhenDoneAdjusting=self.callWhenDoneAdjusting,
+                                                            interlock=self.wavemeterInterlock,
                                                             preferences=self.preferencesUi.preferences().printPreferences),
                               "Scan")
                              ]:
@@ -424,6 +444,7 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.dedicatedCountersWindow = DedicatedCounters(self.config, self.dbConnection, self.pulser,
                                                          self.globalVariablesUi, self.shutterUi,
                                                          self.ExternalParametersUi.callWhenDoneAdjusting,
+                                                         self.wavemeterInterlock,
                                                          remoteRender=self.project.isEnabled('software', 'Remote render'))
         self.dedicatedCountersWindow.setupUi(self.dedicatedCountersWindow)
         
@@ -788,6 +809,8 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         list(map(lambda x: x.saveConfig(), self.objectListToSaveContext))  # call saveConfig() for each element in the list
         for awgUi in self.AWGUiDict.values():
             awgUi.saveConfig()
+        if self.wavemeterInterlock is not None:
+            self.wavemeterInterlock.saveConfig()
         
     def onProjectSelection(self):
         ui = ProjectInfoUi(self.project)

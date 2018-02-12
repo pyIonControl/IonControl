@@ -30,7 +30,7 @@ def makeMStepper(stepSize):
     def stepper(val, n):
         d = datetime.utcfromtimestamp(val)
         base0m = (d.month + n*stepSize - 1)
-        d = datetime(d.year + base0m / 12, base0m % 12 + 1, 1)
+        d = datetime(d.year + base0m // 12, base0m % 12 + 1, 1)
         return (d - datetime(1970, 1, 1)).total_seconds()
     return stepper
 

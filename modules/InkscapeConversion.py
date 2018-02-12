@@ -12,6 +12,11 @@ from pdfrw import PdfReader, PdfWriter
 
 def convertSvgEmf(inkscapeExecutable, filename):
     basename, ext = os.path.splitext(filename)
+    emfname = basename + ".emf"
+    subprocess.call([inkscapeExecutable, filename, "--export-emf={0}".format(emfname)])
+
+def convertSvgWmf(inkscapeExecutable, filename):
+    basename, ext = os.path.splitext(filename)
     emfname = basename + ".wmf"
     subprocess.call([inkscapeExecutable, filename, "--export-wmf={0}".format(emfname)])
 

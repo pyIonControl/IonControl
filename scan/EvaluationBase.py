@@ -35,8 +35,18 @@ class EvaluationResult(namedtuple("EvaluationResultBase", "value interval raw va
         return super(EvaluationResult, cls).__new__(cls, value, interval, raw, is_valid)
 
 
+def sint12(a):
+    return -0x800 + (int(a) & 0x7ff) if (int(a) & 0x800) else (int(a) & 0x7ff)
+
+def sint16(a):
+    return -0x8000 + (int(a) & 0x7fff) if (int(a) & 0x8000) else (int(a) & 0x7fff)
+
+def sint32(a):
+    return -0x80000000 + (int(a) & 0x7fffffff) if (int(a) & 0x80000000) else (int(a) & 0x7fffffff)
+
 class EvaluationBase(Observable, metaclass=EvaluationMeta):
     hasChannel = True
+    intConversionsLookup = {'None': lambda x: x, 'sint12': sint12, 'sint16': sint16, 'sint32': sint32}
     def __init__(self, globalDict=None, settings= None):
         Observable.__init__(self)
         self.settings = settings if settings else dict()
@@ -60,6 +70,7 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
         self.settings.setdefault('averageSameX', False)
         self.settings.setdefault('combinePoints', 0)
         self.settings.setdefault('averageType', 0)
+        self.settings.setdefault('intConversion', 'None')
 
     def parameters(self):
         """return the parameter definitions used by the parameterTable"""
@@ -71,6 +82,9 @@ class EvaluationBase(Observable, metaclass=EvaluationMeta):
                                                   value=self.settings['combinePoints'])
         parameterDict['averageType'] = Parameter(name='averageType', dataType='magnitude',
                                                   value=self.settings['averageType'])
+        parameterDict['intConversion'] = Parameter(name='intConversion', dataType='select',
+                                                   choices=list(sorted(self.intConversionsLookup.keys())),
+                                                   value=self.settings['intConversion'])
         return parameterDict
 
     def update(self, parameter):

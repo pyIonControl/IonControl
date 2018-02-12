@@ -5,14 +5,18 @@
 # *****************************************************************
 import logging
 import os
+import pickle
 from collections import OrderedDict
 import operator
+from pathlib import Path
 
 from lxml import etree
 
 from pygsti.objects import GateString
 from pygsti.io import load_gateset, load_gatestring_list
 from pygsti.construction import make_lsgst_structs
+
+from modules.filetype import isXmlFile
 
 
 def split(text):
@@ -27,7 +31,7 @@ class GateSequenceException(Exception):
 
 
 class GateSequenceContainer:
-    def __init__(self, gateDefinition):
+    def __init__(self, gateDefinition=None):
         self.gateDefinition = gateDefinition
         self._gate_string_list = None
         self._gate_string_struct = None
@@ -55,7 +59,7 @@ class GateSequenceContainer:
     def usePyGSTi(self, use):
         self._usePyGSTi = use
         if not self._usePyGSTi and self.filename:
-            self.loadXml(self.filename)
+            self.load(self.filename)
         else:
             self.update_pyGSTi()
 
@@ -68,7 +72,16 @@ class GateSequenceContainer:
 
     def __repr__(self):
         return self.GateSequenceDict.__repr__()
-    
+
+    def load(self, filename):
+        p = Path(filename)
+        if p.suffix == ".pkl":
+            self.loadPickle(filename)
+        elif isXmlFile(filename):
+            self.loadXml(filename)
+        else:
+            self.loadText(filename)
+
     def loadXml(self, filename):
         self._gate_string_struct = None
         self.filename = filename
@@ -93,8 +106,22 @@ class GateSequenceContainer:
             with open(filename) as f:
                 for text in f:
                     self._gate_string_list.append(GateString(None, text.strip()))
-            self.validate()
-    
+            if self.gateSet:
+                self.validate()
+
+    def savePickle(self, filename):
+        with open(filename, "wb") as f:
+            pickle.dump(self._gate_string_list, f, -1)
+
+    def loadPickle(self, filename):
+        self._gate_string_struct = None
+        self.filename = filename
+        if not self._usePyGSTi and filename:
+            with open(filename, 'rb') as f:
+                self._gate_string_list = pickle.load(f)
+            if self.gateSet:
+                self.validate()
+
     """Validate the gates used in the gate sets against the defined gates"""            
     def validate(self):
         for gatesequence in self._gate_string_list:

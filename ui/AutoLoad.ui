@@ -146,7 +146,7 @@
          <x>0</x>
          <y>0</y>
          <width>370</width>
-         <height>319</height>
+         <height>470</height>
         </rect>
        </property>
        <attribute name="label">
@@ -164,7 +164,7 @@
          <x>0</x>
          <y>0</y>
          <width>370</width>
-         <height>319</height>
+         <height>470</height>
         </rect>
        </property>
        <attribute name="label">
@@ -196,7 +196,7 @@
          <x>0</x>
          <y>0</y>
          <width>370</width>
-         <height>360</height>
+         <height>530</height>
         </rect>
        </property>
        <attribute name="label">
@@ -259,7 +259,7 @@
          <x>0</x>
          <y>0</y>
          <width>370</width>
-         <height>360</height>
+         <height>530</height>
         </rect>
        </property>
        <attribute name="label">
@@ -317,70 +317,65 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QGroupBox" name="interlockGroupBox">
-      <property name="title">
-       <string>Interlock Table</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <item>
-        <widget class="QTableView" name="interlockTableView"/>
-       </item>
-      </layout>
-     </widget>
     </widget>
    </item>
    <item>
-    <widget class="QSplitter" name="splitter_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <widget class="QLabel" name="allFreqsInRange">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>25</height>
-       </size>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">QLabel {background-color: rgb(0, 0, 0)}</string>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="useInterlockGui">
-      <property name="toolTip">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select to stop loading if frequencies are out of range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-      </property>
-      <property name="text">
-       <string>Interlock</string>
-      </property>
-     </widget>
-    </widget>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="allFreqsInRange">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QLabel {background-color: rgb(0, 0, 0)}</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="interlockContextEdit">
+       <property name="toolTip">
+        <string>Interlock Context</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="useInterlockGui">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Select to stop loading if frequencies are out of range&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Interlock</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TableViewExtended</class>
-   <extends>QTableView</extends>
-   <header>uiModules.TableViewExtended</header>
-  </customwidget>
-  <customwidget>
    <class>ParameterTree</class>
    <extends>QTreeWidget</extends>
    <header>pyqtgraph.parametertree</header>
   </customwidget>
+  <customwidget>
+   <class>TableViewExtended</class>
+   <extends>QTableView</extends>
+   <header>uiModules.TableViewExtended</header>
+  </customwidget>
  </customwidgets>
- <tabstops>
-  <tabstop>useInterlockGui</tabstop>
- </tabstops>
  <resources>
   <include location="Experiment.qrc"/>
  </resources>
