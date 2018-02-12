@@ -133,7 +133,7 @@ class ScanControlParameters(AttributeComparisonEquality):
     def __init__(self):
         self.autoSave = True
         self.useDefaultFilename = True
-        self.useHdf5Filetype = True
+        self.useHdf5Filetype = False
         self.currentScanTarget = None
         self.scanTargetCache = dict()
         
@@ -142,7 +142,7 @@ class ScanControlParameters(AttributeComparisonEquality):
         self.__dict__.setdefault( 'currentScanTarget', None )
         self.__dict__.setdefault( 'scanTargetCache', dict() )
         self.__dict__.setdefault( 'useDefaultFilename', True )
-        self.__dict__.setdefault('useHdf5Filetype', True)
+        self.__dict__.setdefault('useHdf5Filetype', False)
         if self.scanTargetCache is None:
             self.scanTargetCache = dict()
 

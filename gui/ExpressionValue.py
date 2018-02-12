@@ -177,6 +177,8 @@ class ExpressionValue(QtCore.QObject):
         result.name = deepcopy(self.name)
         if self._globalDict is not None:
             result.string = deepcopy(self._string)
+            if result._string is None:
+                result._value = deepcopy(self._value)
         else:
             result._string = deepcopy(self._string)
             result._value = deepcopy(self._value)

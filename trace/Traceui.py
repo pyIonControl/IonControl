@@ -551,7 +551,7 @@ class TraceuiMixin:
             dataNode=self.model.getFirstDataNode(node)
             existingTraceCollection=dataNode.content.traceCollection
             if existingTraceCollection.fileleaf==traceCollection.fileleaf and str(existingTraceCollection.traceCreation)==str(traceCollection.traceCreation):
-                return traceCollection.plottingList #If the filename and creation dates are the same, you're trying to open an existing trace.
+                return existingTraceCollection.plottingList #If the filename and creation dates are the same, you're trying to open an existing trace.
         category = None if len(traceCollection.plottingList)==1 else self.getUniqueCategory(filename)
         for plotted in traceCollection.plottingList:
             windowName = plotted.windowName if plotted.windowName in self.graphicsViewDict else list(self.graphicsViewDict.keys())[0]

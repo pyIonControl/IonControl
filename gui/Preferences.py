@@ -23,6 +23,7 @@ class PrintPreferences(AttributeComparisonEquality):
         self.doPrint = True
         self.saveSvg = True
         self.exportEmf = True
+        self.exportWmf = True
         self.exportPdf = True
         self.inkscapeExecutable = r'C:\Program Files\Inkscape\inkscape.exe'
         self.gnuplotExecutable = r'C:\Program Files (x86)\gnuplot\\bin\pgnuplot.exe'
@@ -31,6 +32,7 @@ class PrintPreferences(AttributeComparisonEquality):
         self.__dict__ = state
         self.__dict__.setdefault('saveSvg', True)
         self.__dict__.setdefault('exportEmf', True)
+        self.__dict__.setdefault('exportWmf', True)
         self.__dict__.setdefault('exportPdf', True)
         self.__dict__.setdefault('inkscapeExecutable', r'C:\Program Files\Inkscape\inkscape.exe')
         self.__dict__.setdefault('gnuplotExecutable', r'C:\Program Files (x86)\gnuplot\\bin\pgnuplot.exe')
@@ -45,7 +47,8 @@ class PrintPreferences(AttributeComparisonEquality):
                #{'name': 'save pdf', 'object': self, 'field': 'savePdf', 'type': 'bool', 'value': self.savePdf},
                 {'name': 'print', 'object': self, 'field': 'doPrint', 'type': 'bool', 'value': self.doPrint},
                 {'name': 'save svg', 'object': self, 'field': 'saveSvg', 'type': 'bool', 'value': self.saveSvg},
-                {'name': 'export wmf', 'object': self, 'field': 'exportEmf', 'type': 'bool', 'value': self.saveSvg},
+                {'name': 'export emf', 'object': self, 'field': 'exportEmf', 'type': 'bool', 'value': self.saveSvg},
+                {'name': 'export wmf', 'object': self, 'field': 'exportWmf', 'type': 'bool', 'value': self.saveSvg},
                 {'name': 'export pdf', 'object': self, 'field': 'exportPdf', 'type': 'bool', 'value': self.saveSvg},
                 {'name': 'inkscape executable', 'object': self, 'field': 'inkscapeExecutable', 'type': 'str', 'value': self.inkscapeExecutable},
                 {'name': 'gnuplot executable', 'object': self, 'field': 'gnuplotExecutable', 'type': 'str', 'value': self.gnuplotExecutable}]

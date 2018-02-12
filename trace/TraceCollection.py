@@ -330,7 +330,11 @@ class TraceCollection(keydefaultdict):
         if self._fileType == "text":
             self.saveText(self.filename)
         elif self._fileType == 'hdf5':
-            self.saveHdf5(self.filename)
+            try:
+                self.saveHdf5(self.filename)
+            except Exception as e:
+                self.saveZip(replaceExtension(self.filename, extensions['zip']))
+                logging.getLogger(__name__).warning("Failed to save hdf5 error '{}' saved zip instead".format(e))
         if self._fileType == 'zip' or self.structuredData:
             self.saveZip(replaceExtension(self.filename, extensions['zip']))
         return self.filename

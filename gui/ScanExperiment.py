@@ -23,6 +23,7 @@ import itertools
 
 import yaml
 
+from dedicatedCounters.WavemeterInterlock import LockStatus
 from modules.InkscapeConversion import addPdfMetaData
 from modules.doProfile import doprofile
 from persist.StringTable import DataStore
@@ -136,9 +137,10 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
     allDataSignal = QtCore.pyqtSignal( dict ) #key is the eval name, val is (xlist, ylist)
     stashChanged = QtCore.pyqtSignal(object) # indicates that the size of the stash has changed
     def __init__(self, settings, pulserHardware, globalVariablesUi, experimentName, toolBar=None, parent=None, measurementLog=None, callWhenDoneAdjusting=None,
-                 dbConnection=None, preferences=None):
+                 dbConnection=None, preferences=None, interlock=None):
         MainWindowWidget.MainWindowWidget.__init__(self, toolBar=toolBar, parent=parent)
         ScanExperimentForm.__init__(self)
+        self.interlock = interlock
         self.deviceSettings = settings
         self.pulserHardware = pulserHardware
         self.context = ScanExperimentContext()
@@ -167,6 +169,18 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.dataStore = None
         self.pulseProgramIdentifier = None     # will save the hash of the Pulse Program
         self.last_plot_time = time.time()
+        self.interlock.subscribe(self.onInterlock, "Scan")
+        self.interlockPaused = False
+
+    def onInterlock(self, context, status):
+        if status == LockStatus.Locked:
+            if self.interlockPaused and self.progressUi.state in [self.OpStates.paused, self.OpStates.interrupted]:
+                self.onContinue()
+                self.interlockPaused = False
+        elif status == LockStatus.Unlocked:
+            if self.progressUi.state in [self.OpStates.running]:
+                self.interlockPaused = True
+                self.onPause()
 
     def setupUi(self, MainWindow, config):
         logger = logging.getLogger(__name__)
@@ -354,6 +368,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
  
     def onStart(self, globalOverrides=list()):
         logging.getLogger(__name__).debug("globalOverrides: {0}".format(globalOverrides))
+        self.interlockPaused = False
         self.context.globalOverrides = globalOverrides
         self.context.analysisName = self.analysisControlWidget.currentAnalysisName
         self.context.overrideGlobals(self.globalVariables)
@@ -941,6 +956,11 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             if preferences.exportEmf:
                 if os.path.exists(preferences.inkscapeExecutable):
                     InkscapeConversion.convertSvgEmf(preferences.inkscapeExecutable, emfFilename)
+                else:
+                    logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
+            if preferences.exportWmf:
+                if os.path.exists(preferences.inkscapeExecutable):
+                    InkscapeConversion.convertSvgWmf(preferences.inkscapeExecutable, emfFilename)
                 else:
                     logging.getLogger(__name__).error("Inkscape executable not found at '{0}'".format(preferences.inkscapeExecutable))
             if preferences.exportPdf:

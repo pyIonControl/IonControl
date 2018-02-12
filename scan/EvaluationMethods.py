@@ -64,6 +64,7 @@ class MeanEvaluation(EvaluationBase):
         countarray = evaluation.getChannelData(data)
         if not countarray:
             return EvaluationResult()
+        countarray = list(map(self.intConversionsLookup.get(self.settings['intConversion'], lambda x: x), countarray))
         r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         bottom, top = r.interval
         if self.settings['transformation']!="":
@@ -128,7 +129,7 @@ class NumberEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return 0, None, 0
+            return EvaluationResult()
         return EvaluationResult(len(countarray), raw=len(countarray))
 
 class FeedbackEvaluation(EvaluationBase):
@@ -160,13 +161,13 @@ class FeedbackEvaluation(EvaluationBase):
         countarray = evaluation.getChannelData(data)
         globalName = self.settings['GlobalVariable']
         if not countarray:
-            return None
+            return EvaluationResult()
+        r = self.evaluateMinMax(countarray)
         if not globalDict or globalName not in globalDict:
-            return 1, (0,0), 0
+            return r
         if self.integrator is None or self.settings['Reset']:
             self.integrator = globalDict[globalName]
             self.settings['Reset'] = False
-        r =  self.evaluateMinMax(countarray)
         errorval = self.settings['SetPoint'].m - r.value
         pOut = self.settings['P'] * errorval
         self.integrator = self.integrator + errorval * self.settings['I'] 
@@ -276,7 +277,7 @@ class RangeEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return None
+            return EvaluationResult()
         N = float(len(countarray))
         if self.settings['invert']:
             discriminated = [ 0 if self.settings['min'] <= count <= self.settings['max'] else 1 for count in countarray ]
@@ -323,7 +324,7 @@ class DoubleRangeEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return None
+            return EvaluationResult()
         N = float(len(countarray))
         if self.settings['invert']:
             discriminated = [ 0 if ( self.settings['min_1'] <= count <= self.settings['max_1'] ) or
@@ -377,7 +378,7 @@ class FidelityEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         countarray = evaluation.getChannelData(data)
         if not countarray:
-            return None
+            return EvaluationResult()
         N = float(len(countarray))
         if self.settings['invert']:
             discriminated = [ 0 if count > self.settings['threshold'] else 1 for count in countarray ]
@@ -559,7 +560,7 @@ class CounterSumMeanEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None):
         countarray = self.getCountArray(data)
         if not countarray:
-            return None
+            return EvaluationResult()
         r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         bottom, top = r.interval
         if self.settings['transformation'] != "":

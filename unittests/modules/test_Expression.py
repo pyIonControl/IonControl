@@ -8,11 +8,31 @@ from modules.Expression import Expression
 import math
 from modules.quantity import Q
 ExprEval = Expression()
+import pytest
 
 def e(expr, vars=dict(), useFloat=False):
     return ExprEval.evaluate(expr, vars, useFloat=useFloat)
 
 class TestExpression(unittest.TestCase):
+    def test_sint16(self):
+        self.assertEqual(e("sint16(y)", {'y': 150}), 150)
+        self.assertEqual(e("sint16(y)", {'y': 0x7123}), 0x7123)
+        self.assertEqual(e("sint16(y)", {'y': 0x8000}), -32768)
+        self.assertEqual(e("sint16(y)", {'y': 0xffff}), -1)
+        self.assertEqual(e("sint16(y)", {'y': 15.0}), 15)
+
+    def test_sint12(self):
+        self.assertEqual(e("sint12(y)", {'y': 150}), 150)
+        self.assertEqual(e("sint12(y)", {'y': 0x712}), 0x712)
+        self.assertEqual(e("sint12(y)", {'y': 0x800}), -2048)
+        self.assertEqual(e("sint12(y)", {'y': 0xfff}), -1)
+
+    def test_sint32(self):
+        self.assertEqual(e("sint32(y)", {'y': 150}), 150)
+        self.assertEqual(e("sint32(y)", {'y': 0x71234567}), 0x71234567)
+        self.assertEqual(e("sint32(y)", {'y': 0x80000000}), -2147483648)
+        self.assertEqual(e("sint32(y)", {'y': 0xffffffff}), -1)
+
     def test_literals(self):
         self.assertEqual(e("9"), 9)
         self.assertEqual(e('-9'), -9)

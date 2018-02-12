@@ -169,7 +169,8 @@ class configshelve:
                     self.dbDigest[key] = entry.digest
         self.session.commit()
         self.session = self.Session()
-        self.commit_ready.set()
+        if self.commit_ready:
+            self.commit_ready.set()
         
     @synchronized
     def saveConfig(self, copyTo=None, yamlfile=None):
