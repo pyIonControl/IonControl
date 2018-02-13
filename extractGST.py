@@ -57,6 +57,7 @@ parser.add_argument('--gst-eval', action='store_true')
 parser.add_argument('--save-pickle', action='store_true')
 parser.add_argument('--save-txt', action='store_true')
 parser.add_argument('--save-yaml', action='store_true')
+parser.add_argument('--length-exp', type=str, default=None, help='GST maximum length exponent e.g. 10 for 1024')
 parser.add_argument('--path', type=str, default=None, help='prepend path for all files')
 parser.add_argument('--pickle-protocol', type=int, default=2, help='For python 2.7 use 2; for python 3.5+ use 4')
 parser.add_argument('--separate-no-timestamp-from-qubit-data', action='store_true',
@@ -77,12 +78,19 @@ for otherfilename in args.filename[1:]:
     otherTrace.loadZip(str(commonPath / otherfilename))
     qubitData.update(otherTrace.structuredData['qubitData'])
 
+my_gs_target = qubitData.target_gateset
+gs_target = std1Q_XYI.gs_target
+gs_target.preps = my_gs_target.preps
+gs_target.povms = my_gs_target.povms
+ds = qubitData.gst_dataset
+germs = std1Q_XYI.germs
+prep_fiducials = std1Q_XYI.prepStrs
+meas_fiducials = std1Q_XYI.effectStrs
+if args.length_exp is not None:
+    exponent = int(args.length_exp)
+    maxLengths = [1<<i for i in range(exponent+1)]
+
 if qubitData.is_gst:
-    my_gs_target = qubitData.target_gateset
-    gs_target = std1Q_XYI.gs_target
-    gs_target.preps = my_gs_target.preps
-    gs_target.povms = my_gs_target.povms
-    ds = qubitData.gst_dataset
     output_name = filename.with_suffix(".gstdata")
     pygsti.io.write_dataset(str(output_name), ds, outcomeLabelOrder=['0', '1'])
 
@@ -126,13 +134,13 @@ if args.copy_to_GST_data:
     ds = qubitData.gst_dataset
 
 if args.gst_eval:
-    if qubitData.is_gst:
+    #if qubitData.is_gst:
         #gs_target.set_all_parameterizations("TP")
-        results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
+    results = pygsti.do_stdpractice_gst(ds, gs_target, prep_fiducials, meas_fiducials, germs, maxLengths)
 
         #CHANGE THE OUTPUT FILE FROM OUTPUT.HTML TO WHATEVER YOU WANT, THE TITLE ONLY AFFECTS THE NAME THAT SHOWS UP ON A TAB IN YOUR BROWSER
-        pygsti.report.create_standard_report(results, filename=str(filename.with_suffix(".html")),
+    pygsti.report.create_standard_report(results, filename=str(filename.with_suffix(".html")),
                                             title=filename.stem, verbosity=2)
-    else:
-        print("This claims to be not GST data, not running the evaluation")
+    # else:
+    #     print("This claims to be not GST data, not running the evaluation")
 
