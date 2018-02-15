@@ -169,7 +169,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.dataStore = None
         self.pulseProgramIdentifier = None     # will save the hash of the Pulse Program
         self.last_plot_time = time.time()
-        self.interlock.subscribe(self.onInterlock, "Scan")
+        if self.interlock:
+            self.interlock.subscribe(self.onInterlock, "Scan")
         self.interlockPaused = False
 
     def onInterlock(self, context, status):
