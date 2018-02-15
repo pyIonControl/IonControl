@@ -367,6 +367,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
     def openBySerial(self, serial ):
         super(PulserHardwareServer, self).openBySerial(serial)
         self.syncTime()
+        self.ppClearReadFifo()  # clear all read data to make sure there is no time counter wraparound
      
     def getShutter(self):
         return self._shutter  #
@@ -795,6 +796,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
     def uploadBitfile(self, bitfile):
         OKBase.uploadBitfile(self, bitfile)
         self.syncTime()
+        self.ppClearReadFifo()  # clear all read data to make sure there is no time counter wraparound
 
     def getOpenModule(self):
         return self.openModule
