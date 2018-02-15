@@ -2,7 +2,8 @@ import grpc
 from externalParameter.labbricksproto_pb2_grpc import LabbricksStub
 from externalParameter.labbricksproto_pb2 import DeviceRequest, DeviceSetIntRequest
 
-channel = grpc.insecure_channel('localhost:50051')
+creds = grpc.ssl_channel_credentials(open('server-cert.pem', 'rb').read())
+channel = grpc.secure_channel('thinker:50051', creds)
 stub = LabbricksStub(channel)
 
 r = DeviceRequest()
