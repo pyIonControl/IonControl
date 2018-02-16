@@ -226,8 +226,7 @@ class TraceCollection(keydefaultdict):
             if name=='name' and mytype=='str' and not element.text:
                 description[name] = '' #avoid comments being set to the string 'None'
 
-    def recordTimeinterval(self, timeTickOffset):
-        self.description['timeTickOffset'] = timeTickOffset
+    def recordTimeinterval(self):
         self['timeTickFirst']
         self['timeTickLast']
     

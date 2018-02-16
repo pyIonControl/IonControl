@@ -3,6 +3,8 @@ import argparse
 import os
 import pickle
 from pathlib import Path
+import datetime
+from datetime import timezone
 
 import pygsti
 import yaml
@@ -51,6 +53,16 @@ def copy_to_GST_data(raw_data, name):
         record['value'] = record['_' + name + "_value"]
 
 
+def fix_timestamps(qubit_data, offset):
+    d = qubit_data._rawdata
+    for v in d.values():
+        ts = v.get('timestamps')
+        if ts and isinstance(ts[0], int):
+            v['timestamps'] = [t * 5 + offset for t in ts]
+        for key, value in v.items():
+            if key.endswith("_ts") and value and isinstance(value[0], int):
+                value[:] = [t * 5 + offset for t in value]
+
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('filename', type=str, default=None, nargs='+', help='filename of trace zip')
 parser.add_argument('--gst-eval', action='store_true')
@@ -73,10 +85,17 @@ folder = filename.parent
 Trace = TraceCollection()
 Trace.loadZip(str(filename))
 qubitData = Trace.structuredData['qubitData']
+time_offset = int(Trace.description.get('timeTickOffset', 0) * 1e9)
+if time_offset:
+    fix_timestamps(qubitData, time_offset)
 for otherfilename in args.filename[1:]:
     otherTrace = TraceCollection()
     otherTrace.loadZip(str(commonPath / otherfilename))
-    qubitData.update(otherTrace.structuredData['qubitData'])
+    qd = otherTrace.structuredData['qubitData']
+    time_offset = int(otherTrace.description.get('timeTickOffset', 0) * 1e9)
+    if time_offset:
+        fix_timestamps(qd, time_offset)
+    qubitData.update(qd)
 
 my_gs_target = qubitData.target_gateset
 gs_target = std1Q_XYI.gs_target

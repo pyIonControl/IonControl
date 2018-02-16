@@ -225,7 +225,8 @@ class AutoLoad(UiForm, UiBase):
         self.revertRecord = None
         self._loadCheckCycleCounter = 0
         self.interlock = interlock
-        self.interlock.subscribe(self.onInterlockStatusChanged)
+        if self.interlock:
+            self.interlock.subscribe(self.onInterlockStatusChanged)
 
     def onInterlockStatusChanged(self, context, status):
         if context == self.settings.interlockContext:
@@ -246,7 +247,7 @@ class AutoLoad(UiForm, UiBase):
         print("Autoload interlock status changed", context, status)
 
     def wavemeterOutOfLock(self):
-        return self.settings.useInterlock and self.interlock.contextStatus(self.settings.interlockContext) == LockStatus.Unlocked
+        return self.interlock and self.settings.useInterlock and self.interlock.contextStatus(self.settings.interlockContext) == LockStatus.Unlocked
 
     @property
     def loadCheckCycleOkay(self):
@@ -484,7 +485,8 @@ class AutoLoad(UiForm, UiBase):
 
     def onInterlockContext(self):
         self.settings.interlockContext = self.interlockContextEdit.text()
-        self.interlock.createContext(self.settings.interlockContext)
+        if self.interlock:
+            self.interlock.createContext(self.settings.interlockContext)
         self.autoSave()
 
     def setProfile(self, name, profile):
@@ -500,7 +502,8 @@ class AutoLoad(UiForm, UiBase):
         self.AdjustTableModel.setSettings(self.settings.adjustDisplayData)
         self.CounterTableModel.setSettings(self.settings.counterDisplayData)
         self.interlockContextEdit.setText(self.settings.interlockContext)
-        self.interlock.createContext(self.settings.interlockContext)
+        if self.interlock:
+            self.interlock.createContext(self.settings.interlockContext)
 
     def onLoadProfile(self, name):
         name = str(name)

@@ -96,7 +96,7 @@ class RemoteLabBrick(object):
             r = DeviceSetIntRequest()
             r.ModelName = self.model
             r.SerialNumber = self.serial
-            r.Data = power_in_dBm * 4
+            r.Data = int(power_in_dBm * 4)
             self.deviceState = stub.SetPower(r)
         else:
             raise LabBrickError("Labbrick: Power {} is out of range ({}, {})".format(power_in_dBm, self.minPower, self.maxPower))
