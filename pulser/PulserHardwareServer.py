@@ -27,6 +27,7 @@ from pulser.ServerProcess import ServerProcess
 class PulserHardwareException(Exception):
     pass
 
+LastTimetickCheck = 0
 
 class Data(object):
     def __init__(self):
@@ -75,7 +76,18 @@ class Data(object):
     
     def dataString(self):
         return repr(self)
-    
+
+    def checkTimeTick(self):
+        global LastTimetickCheck
+        if time_time() - LastTimetickCheck > 60:
+            ct = time_time()
+            for l in self.timeTick.values():
+                if l:
+                    LastTimetickCheck = ct
+                    if abs(1e-9 * l[0] - ct) > 60:
+                        logging.getLogger(__name__).warning("Timeticks differ from computer time epoch: {} timestamp: {}", ct, l[0])
+                        break
+
     def __repr__(self):
         return json.dumps([self.count, self.timestamp, self.timestampZero, self.scanvalue, self.final, self.other,
                            self.overrun, self.exitcode, self.dependentValues, self.result, self.externalStatus,
@@ -174,6 +186,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
 
     def queueData(self):
         self.data.post_time = time_time()
+        self.data.checkTimeTick()
         self.dataQueue.put(self.data)
         self.data = Data()
 
