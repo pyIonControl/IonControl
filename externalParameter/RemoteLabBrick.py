@@ -161,6 +161,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
         self.qtHelper = qtHelper()
         self.newData = self.qtHelper.newData
         self.setDefaults()
+        self.initOutput()
 
     def setValue(self, channel, v):
         setattr(self.instrument, channel, v)
