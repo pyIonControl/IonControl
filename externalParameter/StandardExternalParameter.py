@@ -54,6 +54,7 @@ if visaEnabled:
             self.initializeChannelsToExternals()
             self.qtHelper = qtHelper()
             self.newData = self.qtHelper.newData
+            self.initOutput()
 
         def setValue(self, channel, v):
             function, index, unit = self._outputLookup[channel]
@@ -153,6 +154,7 @@ if visaEnabled:
             self.initializeChannelsToExternals()
             self.qtHelper = qtHelper()
             self.newData = self.qtHelper.newData
+            self.initOutput()
 
         def setValue(self, channel, v):
             function, index, unit = self._outputLookup[channel]
@@ -194,6 +196,7 @@ if visaEnabled:
             self.rm = visa.ResourceManager()
             self.synthesizer = self.rm.open_resource( instrument)
             self.synthesizer.write(initialAmplitudeString)
+            self.initOutput()
 
         def setValue(self, channel, value ):
             """Send the command string to the HP8672A to set the frequency to 'value'."""
@@ -240,6 +243,7 @@ if visaEnabled:
             self.synthesizer = self.rm.open_resource( instrument)
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setValue(self, channel, v):
             if channel =='Freq':
@@ -273,6 +277,7 @@ if visaEnabled:
             self.synthesizer = self.rm.open_resource( instrument)
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setValue(self, channel, v):
             if channel =='Freq':
@@ -308,6 +313,7 @@ if visaEnabled:
             self.powersupply = self.rm.open_resource( instrument)
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setDefaults(self):
             ExternalParameterBase.setDefaults(self)
@@ -343,6 +349,7 @@ if visaEnabled:
             logger.info( "opened {0}".format(instrument) )
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setValue(self, channel, v):
             if channel=="OnOff":
@@ -385,6 +392,7 @@ if visaEnabled:
             logger.info( "opened {0}".format(instrument) )
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setValue(self, channel, v):
             function, unit, suffix= self._outputLookup[channel]
@@ -414,6 +422,7 @@ if visaEnabled:
             logger.info( "opened {0}".format(instrument) )
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setValue(self, channel, v):
             function, unit = self._outputLookup[channel]
@@ -443,6 +452,7 @@ if visaEnabled and wavemeterEnabled:
             AgilentPowerSupply.__init__(self, name, config, globalDict, instrument)
             self.setDefaults()
             self.wavemeter = None
+            self.initOutput()
 
         def setDefaults(self):
             AgilentPowerSupply.setDefaults(self)
@@ -494,6 +504,7 @@ if wavemeterEnabled:
             #logger.info( "LaserWavemeterScan savedValue {0}".format(self.savedValue) )
             self.setDefaults()
             self.initializeChannelsToExternals()
+            self.initOutput()
 
         def setDefaults(self):
             ExternalParameterBase.setDefaults(self)
@@ -539,6 +550,7 @@ class DummyParameter(ExternalParameterBase):
         ExternalParameterBase.__init__(self, name, settings, globalDict)
         logger.info( "Opening DummyInstrument {0}".format(instrument) )
         self.initializeChannelsToExternals()
+        self.initOutput()
 
     def setValue(self, channel, value):
         logger = logging.getLogger(__name__)
@@ -558,6 +570,7 @@ class DummySingleParameter(ExternalParameterBase):
         ExternalParameterBase.__init__(self, name, settings, globalDict)
         logger.info( "Opening DummyInstrument {0}".format(instrument) )
         self.initializeChannelsToExternals()
+        self.initOutput()
 
     def setValue(self, channel, value):
         logger = logging.getLogger(__name__)
