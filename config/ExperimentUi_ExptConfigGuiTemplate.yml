@@ -79,6 +79,10 @@ hardware:
     description: Remote Vaunix Lab Brick server
     fields:
         serverUrl: str
+        auth: bool
+        clientKey: path
+        clientCertificate: path
+        rootCertificates: path
   VISA:
     description: communication with peripherals (e.g. GPIB, RS232, USB, Ethernet)
   HighFinesse Wavemeter:
