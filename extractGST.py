@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 
 import os
 import pickle
@@ -10,6 +11,7 @@ import pygsti
 import yaml
 from pygsti import report
 from pygsti.construction import std1Q_XYI
+from objecthash import Hasher
 
 from trace.TraceCollection import TraceCollection
 try:
@@ -53,15 +55,32 @@ def copy_to_GST_data(raw_data, name):
         record['value'] = record['_' + name + "_value"]
 
 
-def fix_timestamps(qubit_data, offset):
+def fix_timestamps(qubit_data, offset, scaling=5):
     d = qubit_data._rawdata
+    min_ts = 2**64
+    max_ts = 0
+    min_fts = 1e12
+    max_fts = 0
     for v in d.values():
         ts = v.get('timestamps')
         if ts and isinstance(ts[0], int):
-            v['timestamps'] = [t * 5 + offset for t in ts]
+            v['timestamps'] = [t * scaling + offset for t in ts]
+            min_ts = min(min_ts, min(v['timestamps']))
+            max_ts = max(max_ts, max(v['timestamps']))
         for key, value in v.items():
-            if key.endswith("_ts") and value and isinstance(value[0], int):
-                value[:] = [t * 5 + offset for t in value]
+            if key.endswith("_ts") and value:
+                if isinstance(value[0], int):
+                    value[:] = [t * scaling + offset for t in value]
+                    min_ts = min(min_ts, min(value))
+                    max_ts = max(max_ts, max(value))
+                else:
+                    min_fts = min(min_fts, min(value))
+                    max_fts = max(max_fts, max(value))
+    deviation = (min_ts*1e-9 - min_fts)/(2**40*5e-9)
+    if abs(deviation > 0.001):
+        print("Timestamp difference: {} overflows --- correcting".format(deviation))
+        return fix_timestamps(qubit_data, int(-min_ts + min_fts*1e9), 1)
+    return min_ts, max_ts
 
 parser = argparse.ArgumentParser(description='Parametrically generate Phoenix geometry')
 parser.add_argument('filename', type=str, default=None, nargs='+', help='filename of trace zip')
@@ -87,14 +106,16 @@ Trace.loadZip(str(filename))
 qubitData = Trace.structuredData['qubitData']
 time_offset = int(Trace.description.get('timeTickOffset', 0) * 1e9)
 if time_offset:
-    fix_timestamps(qubitData, time_offset)
+    mi, ma = fix_timestamps(qubitData, time_offset)
+    print(args.filename[0], round((ma-mi)*1e-9, 6), "s")
 for otherfilename in args.filename[1:]:
     otherTrace = TraceCollection()
     otherTrace.loadZip(str(commonPath / otherfilename))
     qd = otherTrace.structuredData['qubitData']
     time_offset = int(otherTrace.description.get('timeTickOffset', 0) * 1e9)
     if time_offset:
-        fix_timestamps(qd, time_offset)
+        mi, ma = fix_timestamps(qd, time_offset)
+        print(otherfilename, round((ma-mi)*1e-9, 6), "s")
     qubitData.update(qd)
 
 my_gs_target = qubitData.target_gateset
