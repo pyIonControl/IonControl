@@ -70,14 +70,17 @@ class ExternalParameterBase(object, metaclass=InstrumentMeta):
         
     def setDefaults(self, settings=None):
         if settings is None:
-            self.settings.__dict__.setdefault('channelSettings', dict())
+            settings = self.settings
+        settings.__dict__.setdefault('channelSettings', dict())
+        settings.__dict__.setdefault('setExternal', False)
+        for cname in self._outputChannels:
+            settings.channelSettings.setdefault(cname, InstrumentSettings())
+
+    def initOutput(self):
+        if self.settings.setExternal:
             for cname in self._outputChannels:
-                self.settings.channelSettings.setdefault( cname, InstrumentSettings() )
-        else:
-            settings.__dict__.setdefault('channelSettings', dict())
-            for cname in self._outputChannels:
-                settings.channelSettings.setdefault( cname, InstrumentSettings() )
-               
+                self.setValue(cname, self.settings.channelSettings[cname].targetValue)
+
     def setValue(self, channel, v):
         """write the value to the instrument"""
         return None
@@ -96,7 +99,7 @@ class ExternalParameterBase(object, metaclass=InstrumentMeta):
         """
         return the parameter definition used by pyqtgraph parametertree to show the gui
         """
-        return []
+        return [{'name': 'setExternal', 'type': 'bool', 'value': self.settings.setExternal}]
         
     def update(self, param, changes):
         """

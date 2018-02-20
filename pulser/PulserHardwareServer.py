@@ -27,6 +27,7 @@ from pulser.ServerProcess import ServerProcess
 class PulserHardwareException(Exception):
     pass
 
+LastTimetickCheck = 0
 
 class Data(object):
     def __init__(self):
@@ -44,18 +45,28 @@ class Data(object):
         self.externalStatus = None
         self._creationTime = time_time()
         self.timeTick = defaultdict(list)
-        self.timeTickOffset = 0.0
         self.timingViolations = None
         self.post_time = None
-        
+
+    @property
+    def allTimeTick(self):
+        all = list()
+        for l in self.timeTick.values():
+            all.extend(l)
+        return all
+
+    @property
+    def creationTimeNs(self):
+        return int(self._creationTime * 1e9)
+
     @property
     def creationTime(self):
-        return (list(self.timeTick.values())[0]*5e-9)+self.timeTickOffset if self.timeTick else self._creationTime
+        return (list(self.timeTick.values())[0]*1e-9) if self.timeTick else self._creationTime
     
     @property
     def timeinterval(self):
-        return ( ((list(self.timeTick.values())[0][0]*5e-9)+self.timeTickOffset, (list(self.timeTick.values())[0][-1]*5e-9)+self.timeTickOffset) if self.timeTick 
-                 else (self._creationTime, self._creationTime) )
+        return (((list(self.timeTick.values())[0][0]*1e-9), (list(self.timeTick.values())[0][-1]*1e-9)) if self.timeTick
+                 else (self._creationTime, self._creationTime))
         
     def __str__(self):
         return str(len(self.count))+" "+" ".join( [str(self.count[i]) for i in range(16) ])
@@ -65,24 +76,34 @@ class Data(object):
     
     def dataString(self):
         return repr(self)
-    
+
+    def checkTimeTick(self):
+        global LastTimetickCheck
+        if time_time() - LastTimetickCheck > 60:
+            ct = time_time()
+            for l in self.timeTick.values():
+                if l:
+                    LastTimetickCheck = ct
+                    if abs(1e-9 * l[0] - ct) > 60:
+                        logging.getLogger(__name__).warning("Timeticks differ from computer time epoch: {} timestamp: {}", ct, l[0])
+                        break
+
     def __repr__(self):
         return json.dumps([self.count, self.timestamp, self.timestampZero, self.scanvalue, self.final, self.other,
                            self.overrun, self.exitcode, self.dependentValues, self.result, self.externalStatus,
-                           self._creationTime, self.timeTickOffset, self.timeTick])
+                           self._creationTime, 0, self.timeTick])
         
     @staticmethod
     def fromJson(string):
         data = Data()
         (data.count, data.timestamp, data.timestampZero, data.scanvalue, data.final, data.other, data.overrun,
-         data.exitcode, data.dependentValues, data.result, data.externalStatus, data._creationTime, data.timeTickOffset) = json.loads(string)
+         data.exitcode, data.dependentValues, data.result, data.externalStatus, data._creationTime, _, data.timeTick) = json.loads(string)
 
 
 class DedicatedData(object):
-    def __init__(self, timeTickOffset=0):
+    def __init__(self):
         self.data = [None]*34
         self.externalStatus = None
-        self.timeTickOffset = timeTickOffset
         self._timestamp = time_time()
         self.maxBytesRead = 0
         
@@ -97,7 +118,7 @@ class DedicatedData(object):
     
     @property
     def timestamp(self):
-        return self.data[33]*5e-9+self.timeTickOffset if self.data[33] else self._timestamp
+        return self.data[33]*1e-9 if self.data[33] else self._timestamp
     
     @timestamp.setter
     def timestamp(self, ts):
@@ -137,8 +158,8 @@ class PulserHardwareServer(ServerProcess, OKBase):
         # PipeReader stuff
         self.state = self.analyzingState.normal
         self.data = Data()
-        self.dedicatedData = self.dedicatedDataClass(time_time())
-        self.timestampOffset = 0
+        self.dedicatedData = self.dedicatedDataClass()
+        self.timestampOffset = int(time_time() * 1e9)
 
         self._shutter = 0
         self._trigger = 0
@@ -161,11 +182,11 @@ class PulserHardwareServer(ServerProcess, OKBase):
             logging.getLogger(__name__).info("Time synchronized at {0}".format(time_time()))
         else:
             logging.getLogger(__name__).error("No time synchronization because FPGA is not available")
-        self.timeTickOffset = time_time()        
-            
+        self.timestampOffset = int(time_time() * 1e9)
+
     def queueData(self):
-        self.data.timeTickOffset = self.timeTickOffset
         self.data.post_time = time_time()
+        self.data.checkTimeTick()
         self.dataQueue.put(self.data)
         self.data = Data()
 
@@ -264,9 +285,9 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         channel = (token >>48) & 0xff
                         if self.dedicatedData.data[channel] is not None:
                             self.dataQueue.put( self.dedicatedData )
-                            self.dedicatedData = self.dedicatedDataClass(self.timeTickOffset)
+                            self.dedicatedData = self.dedicatedDataClass()
                         if channel==33:
-                            self.dedicatedData.data[channel] = (token & 0xffffffffff) + self.timestampOffset
+                            self.dedicatedData.data[channel] = (token & 0xffffffffff) * 5 + self.timestampOffset
                         else:
                             self.dedicatedData.data[channel] = token & 0xffffffffffff
                     except IndexError:
@@ -284,7 +305,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         logger.info( "Exitcode {0:x} received".format(self.data.exitcode) )
                         self.queueData()
                     elif token == 0xfffd000000000000:
-                        self.timestampOffset += (1<<40)
+                        self.timestampOffset += 5 * (1 << 40)
                     elif token & 0xffff000000000000 == 0xfffc000000000000:  # new scan parameter
                         self.state = self.analyzingState.dependentscanparameter if (token & 0x8000 == 0x8000) else self.analyzingState.scanparameter 
                     elif token & 0xffff000000000000 == 0xfffb000000000000:
@@ -300,7 +321,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         (self.data.count[ channel ]).append(value)
                     elif key==2:  # timestamp
                         channel = (token >>40) & 0xffff 
-                        value = token & 0x000000ffffffffff
+                        value = (token & 0x000000ffffffffff) * 5
                         if self.data.timestamp is None:
                             self.data.timestamp = defaultdict(list)
                         try:
@@ -312,7 +333,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                             raise
                     elif key==3:  # timestamp gate start
                         channel = (token >>40) & 0xffff 
-                        value = token & 0x000000ffffffffff
+                        value = (token & 0x000000ffffffffff) * 5
                         if self.data.timestampZero is None:
                             self.data.timestampZero = defaultdict(list)
                         self.data.timestampZero[channel].append(self.timestampOffset + value)
@@ -330,7 +351,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
                         if count>0:
                             self.data.count[channel + 32].append( sumvalue/float(count)  )
                     elif key==6: # clock timestamp
-                        self.data.timeTick[(token>>40) & 0xff].append(self.timestampOffset + (token & 0xffffffffff))
+                        self.data.timeTick[(token>>40) & 0xff].append(self.timestampOffset + (token & 0xffffffffff) * 5)
                     elif key==0x51:
                         channel = (token >>48) & 0xff 
                         value = token & 0x0000ffffffffffff
@@ -367,6 +388,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
     def openBySerial(self, serial ):
         super(PulserHardwareServer, self).openBySerial(serial)
         self.syncTime()
+        self.ppClearReadFifo()  # clear all read data to make sure there is no time counter wraparound
      
     def getShutter(self):
         return self._shutter  #
@@ -795,6 +817,7 @@ class PulserHardwareServer(ServerProcess, OKBase):
     def uploadBitfile(self, bitfile):
         OKBase.uploadBitfile(self, bitfile)
         self.syncTime()
+        self.ppClearReadFifo()  # clear all read data to make sure there is no time counter wraparound
 
     def getOpenModule(self):
         return self.openModule

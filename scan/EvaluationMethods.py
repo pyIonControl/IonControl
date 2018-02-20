@@ -64,6 +64,7 @@ class MeanEvaluation(EvaluationBase):
         countarray = evaluation.getChannelData(data)
         if not countarray:
             return EvaluationResult()
+        countarray = list(map(self.intConversionsLookup.get(self.settings['intConversion'], lambda x: x), countarray))
         r = self.errorBarTypeLookup[self.settings['errorBarType']](countarray)
         bottom, top = r.interval
         if self.settings['transformation']!="":
@@ -92,7 +93,9 @@ class MeanEvaluation(EvaluationBase):
 
     def detailEvaluate(self, data, evaluation, ppDict=None, globalDict=None):
         countarray = evaluation.getChannelData(data)
-        timestamps = data.timeTick.get(self.settings['timestamp_id'], None)
+        timestamps = data.timeTick.get(int(self.settings['timestamp_id']), None)
+        if not timestamps:
+            timestamps = data.allTimeTick
         # we will return 3-tuple of lists: value, repeats, timestamp
         # if we do not find a timestamp we will accumulate the data, otherwise send back every event
         if countarray:
@@ -103,7 +106,11 @@ class MeanEvaluation(EvaluationBase):
                     if ppDict:
                         mydict.update(ppDict)
                     mean = float(self.expression.evaluate(self.settings['transformation'], mydict))
-                return [mean], [data._creationTime]
+                if timestamps:
+                    avg_time = sum(timestamps) // len(timestamps)
+                else:
+                    avg_time = data.creationTimeNs
+                return [mean], [avg_time]
             else:
                 if self.settings['transformation'] != "":
                     mydict = dict()

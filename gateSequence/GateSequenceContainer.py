@@ -3,6 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import logging
 import os
 import pickle
 from collections import OrderedDict
@@ -131,7 +132,10 @@ class GateSequenceContainer:
                         "Gate '{0}' used in GateSequence is not defined".format(gate))
 
     def loadGateSet(self, path):
-        self.gateSet = load_gateset(path)
+        try:
+            self.gateSet = load_gateset(path)
+        except Exception as e:
+            logging.getLogger(__name__).warning("Error loading GateSet from '{}': {}".format(path, e))
 
     def setPreparation(self, path_or_literal):
         if os.path.exists(path_or_literal):

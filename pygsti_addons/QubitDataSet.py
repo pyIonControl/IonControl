@@ -9,11 +9,19 @@ class QubitResultContainer(dict):
         ret = self[key] = QubitResult()
         return ret
 
+    def update(self, other):
+        for key, value in other.items():
+            self[key].update(value)
+
 
 class QubitResult(dict):
     def __missing__(self, key):
         ret = self[key] = list()
         return ret
+
+    def update(self, other):
+        for key, value in other.items():
+            self[key].extend(value)
 
 
 class ResultCounter(dict):
@@ -59,6 +67,11 @@ class QubitDataSet:
             self._countVecMx = None
             self._totalCntVec = None
             self.spam_labels = None
+
+    def update(self, other):
+        if self.gatestring_list != other.gatestring_list:
+            raise AttributeError("gatestring_lists do not match")
+        self._rawdata.update(other._rawdata)
 
     def __getstate__(self):
         return {key: getattr(self, key) for key in self._fields}

@@ -169,7 +169,8 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.dataStore = None
         self.pulseProgramIdentifier = None     # will save the hash of the Pulse Program
         self.last_plot_time = time.time()
-        self.interlock.subscribe(self.onInterlock, "Scan")
+        if self.interlock:
+            self.interlock.subscribe(self.onInterlock, "Scan")
         self.interlockPaused = False
 
     def onInterlock(self, context, status):
@@ -608,7 +609,7 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                                                                       globalDict=self.globalVariables))
         if len(evaluated) > 0:
             self.displayUi.add([e.value for e in evaluated])
-            self.updateMainGraph(x, evaluated, data.timeinterval, data.timeTickOffset, queue_size)
+            self.updateMainGraph(x, evaluated, data.timeinterval, queue_size)
             self.showHistogram(data, self.context.evaluation.evalList, self.context.evaluation.evalAlgorithmList)
         if data.other:
             logger.info("Other: {0}".format(data.other))
@@ -620,9 +621,9 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
         results = [(x, res.value) for res in evaluated]
         self.evaluatedDataSignal.emit(dict(list(zip(names, results))))
 
-    def preparePlotting(self, x, evaluated, timeinterval, timeTickOffset):
+    def preparePlotting(self, x, evaluated, timeinterval):
         traceCollection = TraceCollection(record_timestamps=True)
-        traceCollection.recordTimeinterval(timeTickOffset)
+        traceCollection.recordTimeinterval()
         self.plottedTraceList = list()
         for (index, result), evaluation in zip(enumerate(evaluated), self.context.evaluation.evalList):
             if result is not None:  # result is None if there were no counter results
@@ -699,9 +700,9 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.traceui.expand(self.context.plottedTraceList[0])
         self.traceui.resizeColumnsToContents()
 
-    def updateMainGraph(self, x, evaluated, timeinterval, timeTickOffset, queue_size): # evaluated is list of mean, error, raw
+    def updateMainGraph(self, x, evaluated, timeinterval, queue_size): # evaluated is list of mean, error, raw
         if not self.context.plottedTraceList:
-            self.preparePlotting(x, evaluated, timeinterval, timeTickOffset)
+            self.preparePlotting(x, evaluated, timeinterval)
         else:
             self.context.generator.appendData(self.context.plottedTraceList, x, evaluated, timeinterval )
             if queue_size < 2 or time.time() - self.last_plot_time > 5:

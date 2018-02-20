@@ -654,7 +654,9 @@ class pppCompiler(ast.NodeTransformer, metaclass=astMeta):
         preprocessed_code = '\n'.join(splitcode)
         if self.passToOldPPPCompiler:
             oldcompiler = oldpppCompiler()
-            return oldcompiler.compileString(code)
+            result = oldcompiler.compileString(code)
+            self.reverseLineLookup = oldcompiler.reverseLineLookup
+            return result
         tree = ast.parse(preprocessed_code)
         self.visit(tree)
         self.optimize()
