@@ -3,7 +3,10 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+from PyQt5 import QtCore
 from collections import namedtuple
+
+from PyQt5.QtCore import QObject
 
 from externalParameter.ExternalParameterBase import ExternalParameterBase
 import logging
@@ -21,6 +24,44 @@ RemoteLabBrickConfig = namedtuple("RemoteLabBrickConfig", "name url auth clientK
 class LabBrickError(Exception):
     pass
 
+
+class NotificationListener(QtCore.QThread):
+    def __init__(self, server, auth, root_certificates="", client_key="", client_certificate=""):
+        QtCore.QThread.__init__(self)
+        self.exiting = False
+        self.server = server
+        self.auth = auth
+        self.root_certificates = root_certificates
+        self.client_key = client_key
+        self.client_certificates = client_certificate
+
+    def raise_(self, ex):
+        raise ex
+
+    def run(self):
+        logger = logging.getLogger(__name__)
+        logger.info("Labbrick Notification Listener thread started.")
+        try:
+            if self.auth:
+                creds = grpc.ssl_channel_credentials(root_certificates=open(self.root_certificates, 'rb').read(),
+                                                     private_key=open(self.client_key, 'rb').read(),
+                                                     certificate_chain=open(self.client_certificate, 'rb').read())
+                channel = grpc.secure_channel(self.server, creds)
+            else:
+                channel = grpc.insecure_channel(self.server)
+            stub = LabbricksStub(channel)
+        except KeyError:
+            pass
+        r = DeviceRequest()
+        while True:
+            try:
+                for state in stub.DeviceNotifications(r):
+                    self.stateChanged
+            except (KeyboardInterrupt, SystemExit, FinishException):
+                break
+            except Exception as ex:
+                logger.error("Labbrick Notification Listener error {}".format(ex))
+        logger.info("Labbrick Notification Listener thread finished.")
 
 class RemoteLabBrick(object):
     @staticmethod
