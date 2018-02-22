@@ -26,9 +26,10 @@ class LabBrickError(Exception):
 
 
 class NotificationListener(QtCore.QThread):
+    dataChanged = QtCore.pyqtSignal(object)
     def __init__(self, server, auth, root_certificates="", client_key="", client_certificate=""):
         QtCore.QThread.__init__(self)
-        self.exiting = False
+        self.keepGoing = True
         self.server = server
         self.auth = auth
         self.root_certificates = root_certificates
@@ -41,29 +42,35 @@ class NotificationListener(QtCore.QThread):
     def run(self):
         logger = logging.getLogger(__name__)
         logger.info("Labbrick Notification Listener thread started.")
-        try:
-            if self.auth:
-                creds = grpc.ssl_channel_credentials(root_certificates=open(self.root_certificates, 'rb').read(),
-                                                     private_key=open(self.client_key, 'rb').read(),
-                                                     certificate_chain=open(self.client_certificate, 'rb').read())
-                channel = grpc.secure_channel(self.server, creds)
-            else:
-                channel = grpc.insecure_channel(self.server)
-            stub = LabbricksStub(channel)
-        except KeyError:
-            pass
-        r = DeviceRequest()
-        while True:
+        while self.keepGoing:
             try:
-                for state in stub.DeviceNotifications(r):
-                    self.stateChanged
-            except (KeyboardInterrupt, SystemExit, FinishException):
-                break
-            except Exception as ex:
-                logger.error("Labbrick Notification Listener error {}".format(ex))
+                if self.auth:
+                    creds = grpc.ssl_channel_credentials(root_certificates=open(self.root_certificates, 'rb').read(),
+                                                         private_key=open(self.client_key, 'rb').read(),
+                                                         certificate_chain=open(self.client_certificates, 'rb').read())
+                    channel = grpc.secure_channel(self.server, creds)
+                else:
+                    channel = grpc.insecure_channel(self.server)
+                stub = LabbricksStub(channel)
+            except KeyError:
+                pass
+
+            r = DeviceRequest()
+            while self.keepGoing:
+                try:
+                    for state in stub.DeviceNotifications(r):
+                        self.dataChanged.emit(state)
+                        if not self.keepGoing:
+                            break
+                except (KeyboardInterrupt, SystemExit):
+                    break
+                except Exception as ex:
+                    logger.error("Labbrick Notification Listener error {}".format(ex))
         logger.info("Labbrick Notification Listener thread finished.")
 
 class RemoteLabBrick(object):
+    serverListeners = dict()
+    serverUseCount = dict()
     @staticmethod
     def collectInformation():
         instrumentMap = dict()
@@ -94,6 +101,24 @@ class RemoteLabBrick(object):
         self.channel = None
         self.stub = None
         self._getInfo()
+        self._initListener()
+
+    def onDataChanged(self, state):
+        self.deviceState = state
+        print(state)
+
+    def _initListener(self):
+        if self.cfg.url in self.serverListeners:
+            self.serverListeners[self.cfg.url].dataChanged.connect(self.onDataChanged)
+            self.serverUseCount[self.cfg.url] += 1
+            return
+        notificationListener = NotificationListener(self.cfg.url, self.cfg.auth, self.cfg.rootCertificate,
+                                                    self.cfg.clientKey, self.cfg.clientCertificate)
+        notificationListener.start()
+        notificationListener.dataChanged.connect(self.onDataChanged)
+        self.dataChanged = notificationListener.dataChanged
+        self.serverListeners[self.cfg.url] = notificationListener
+        self.serverUseCount[self.cfg.url] = 1
 
     def _getInfo(self):
         self._open()
@@ -123,9 +148,6 @@ class RemoteLabBrick(object):
                 self.stub = LabbricksStub(self.channel)
             except KeyError:
                 raise LabBrickError("LabBrick Model '{}' serial number {} is not available on server {}".format(self.model, self.serial, cfg.url))
-
-    def close(self):
-        pass
 
     def _getUpdatedState(self):
         self._open()
@@ -185,6 +207,17 @@ class RemoteLabBrick(object):
         else:
             raise LabBrickError("Labbrick: Frequency {} is out of range ({}, {})".format(frequency, self.minFrequency, self.maxFrequency))
 
+    def close(self):  # shutdown
+        for name, thread in list(self.serverListeners.items()):
+            if name == self.cfg.url:
+                self.serverUseCount[self.cfg.url] -= 1
+                if self.serverUseCount[self.cfg.url] == 0:
+                    thread.keepGoing = False
+                    self.frequency = Q(10 * self.deviceState.Frequency, "Hz") # triggers an update for the listener
+                    thread.wait()
+                    self.serverUseCount.pop(self.cfg.url)
+                    self.serverListeners.pop(self.cfg.url)
+
 
 class RemoteLabBrickInstrument(ExternalParameterBase):
     className = "RemoteLabBrick"
@@ -197,6 +230,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
         logger = logging.getLogger(__name__)
         logger.info("trying to open '{0}'".format(instrument))
         self.instrument = RemoteLabBrick(instrument)
+        self.instrument.dataChanged.connect(self.onDataChanged)
         logger.info("opened {0}".format(instrument))
         self.initializeChannelsToExternals()
         self.qtHelper = qtHelper()
@@ -220,6 +254,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
         return ["{}_{}_{}".format(name, model, serial) for name, model, serial in map.keys()]
 
     def close(self):
+        self.instrument.close()
         del self.instrument
 
     def setDefaults(self):
@@ -241,3 +276,8 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
                 setattr(self.instrument, param.name(), data)
             elif change == 'activated':
                 getattr(self, param.opts['field'])()
+
+    def onDataChanged(self, state):
+        for name, ch in self.outputChannels.items():
+            ch.valueChanged.emit(ch.externalValue)
+

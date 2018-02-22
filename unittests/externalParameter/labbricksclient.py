@@ -14,8 +14,16 @@ r = DeviceRequest()
 for info in stub.DeviceInfo(r):
     print(info)
 
+# for info in stub.DeviceNotifications(r):
+#     print(info)
+
 r = DeviceSetIntRequest()
 r.ModelName = "LMS-123"
 r.SerialNumber = 200123
 r.Data = 900000000
 print(stub.SetFrequency(r))
+
+f = stub.SetFrequency.future(r)
+print(f.result())
+
+f = stub.DeviceNotifications.future_stream(r)
