@@ -255,7 +255,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
 
     def close(self):
         self.instrument.close()
-        del self.instrument
+        self.instrument = None
 
     def setDefaults(self):
         ExternalParameterBase.setDefaults(self)
@@ -278,6 +278,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
                 getattr(self, param.opts['field'])()
 
     def onDataChanged(self, state):
-        for name, ch in self.outputChannels.items():
-            ch.valueChanged.emit(ch.externalValue)
+        if self.instrument:
+            for name, ch in self.outputChannels.items():
+                ch.valueChanged.emit(ch.externalValue)
 
