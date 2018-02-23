@@ -3,6 +3,7 @@
 # This Software is released under the GPL license detailed
 # in the file "license.txt" in the top-level IonControl directory
 # *****************************************************************
+import time
 from PyQt5 import QtCore
 from collections import namedtuple
 
@@ -66,6 +67,7 @@ class NotificationListener(QtCore.QThread):
                     break
                 except Exception as ex:
                     logger.error("Labbrick Notification Listener error {}".format(ex))
+                    time.sleep(5)
         logger.info("Labbrick Notification Listener thread finished.")
 
 class RemoteLabBrick(object):
