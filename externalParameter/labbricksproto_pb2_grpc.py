@@ -49,6 +49,11 @@ class LabbricksStub(object):
         request_serializer=labbricksproto__pb2.DeviceRequest.SerializeToString,
         response_deserializer=labbricksproto__pb2.DeviceInfoMsg.FromString,
         )
+    self.DeviceNotifications = channel.unary_stream(
+        '/labbricksproto.Labbricks/DeviceNotifications',
+        request_serializer=labbricksproto__pb2.DeviceRequest.SerializeToString,
+        response_deserializer=labbricksproto__pb2.DeviceStateMsg.FromString,
+        )
 
 
 class LabbricksServicer(object):
@@ -104,6 +109,13 @@ class LabbricksServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
+  def DeviceNotifications(self, request, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
 
 def add_LabbricksServicer_to_server(servicer, server):
   rpc_method_handlers = {
@@ -141,6 +153,11 @@ def add_LabbricksServicer_to_server(servicer, server):
           servicer.UpdateDevices,
           request_deserializer=labbricksproto__pb2.DeviceRequest.FromString,
           response_serializer=labbricksproto__pb2.DeviceInfoMsg.SerializeToString,
+      ),
+      'DeviceNotifications': grpc.unary_stream_rpc_method_handler(
+          servicer.DeviceNotifications,
+          request_deserializer=labbricksproto__pb2.DeviceRequest.FromString,
+          response_serializer=labbricksproto__pb2.DeviceStateMsg.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(
