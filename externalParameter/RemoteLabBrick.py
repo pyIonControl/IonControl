@@ -112,6 +112,7 @@ class RemoteLabBrick(object):
     def _initListener(self):
         if self.cfg.url in self.serverListeners:
             self.serverListeners[self.cfg.url].dataChanged.connect(self.onDataChanged)
+            self.dataChanged = self.serverListeners[self.cfg.url].dataChanged
             self.serverUseCount[self.cfg.url] += 1
             return
         notificationListener = NotificationListener(self.cfg.url, self.cfg.auth, self.cfg.rootCertificate,
