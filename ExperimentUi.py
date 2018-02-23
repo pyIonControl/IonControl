@@ -215,20 +215,20 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
         self.pulseProgramDialog.setupUi(self.pulseProgramDialog)
 
         # Wavemeter Interlock
+        self.wavemeterInterlock = None
         wmSetup = self.project.hardware.get('HighFinesse Wavemeter')
-        wavemeters = {name: v.get("uri") for name, v in wmSetup.items() if v.get('enabled')}
-        if wavemeters:
-            self.wavemeterInterlock = Interlock(wavemeters=wavemeters, config=self.config)
-            self.wavemeterInterlockUi = WavemeterInterlockUi(wavemeterNames=list(wavemeters.keys()),
-                                                             channels=self.wavemeterInterlock.channels,
-                                                             contexts=self.wavemeterInterlock.contexts)
-            self.wavemeterInterlockUi.setupUi(self.wavemeterInterlockUi)
-            self.interlockDock = QtWidgets.QDockWidget("Wavemeter Interlock")
-            self.interlockDock.setObjectName("Wavemeter Interlock")
-            self.interlockDock.setWidget(self.wavemeterInterlockUi)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.interlockDock)
-        else:
-            self.wavemeterInterlock = None
+        if wmSetup:
+            wavemeters = {name: v.get("uri") for name, v in wmSetup.items() if v.get('enabled')}
+            if wavemeters:
+                self.wavemeterInterlock = Interlock(wavemeters=wavemeters, config=self.config)
+                self.wavemeterInterlockUi = WavemeterInterlockUi(wavemeterNames=list(wavemeters.keys()),
+                                                                 channels=self.wavemeterInterlock.channels,
+                                                                 contexts=self.wavemeterInterlock.contexts)
+                self.wavemeterInterlockUi.setupUi(self.wavemeterInterlockUi)
+                self.interlockDock = QtWidgets.QDockWidget("Wavemeter Interlock")
+                self.interlockDock.setObjectName("Wavemeter Interlock")
+                self.interlockDock.setWidget(self.wavemeterInterlockUi)
+                self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.interlockDock)
 
         # Global Variables
         self.globalVariablesUi = GlobalVariablesUi(self.config)
