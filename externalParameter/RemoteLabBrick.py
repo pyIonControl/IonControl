@@ -110,18 +110,18 @@ class RemoteLabBrick(object):
         print(state)
 
     def _initListener(self):
-        if self.cfg.url in self.serverListeners:
-            self.serverListeners[self.cfg.url].dataChanged.connect(self.onDataChanged)
-            self.dataChanged = self.serverListeners[self.cfg.url].dataChanged
+        if self.cfg.url not in self.serverListeners:
+            notificationListener = NotificationListener(self.cfg.url, self.cfg.auth, self.cfg.rootCertificate,
+                                                        self.cfg.clientKey, self.cfg.clientCertificate)
+            notificationListener.start()
+            self.serverListeners[self.cfg.url] = notificationListener
+            self.serverUseCount[self.cfg.url] = 1
+        else:
+            notificationListener = self.serverListeners[self.cfg.url]
             self.serverUseCount[self.cfg.url] += 1
-            return
-        notificationListener = NotificationListener(self.cfg.url, self.cfg.auth, self.cfg.rootCertificate,
-                                                    self.cfg.clientKey, self.cfg.clientCertificate)
-        notificationListener.start()
+
         notificationListener.dataChanged.connect(self.onDataChanged)
         self.dataChanged = notificationListener.dataChanged
-        self.serverListeners[self.cfg.url] = notificationListener
-        self.serverUseCount[self.cfg.url] = 1
 
     def _getInfo(self):
         self._open()
@@ -211,15 +211,16 @@ class RemoteLabBrick(object):
             raise LabBrickError("Labbrick: Frequency {} is out of range ({}, {})".format(frequency, self.minFrequency, self.maxFrequency))
 
     def close(self):  # shutdown
-        for name, thread in list(self.serverListeners.items()):
-            if name == self.cfg.url:
-                self.serverUseCount[self.cfg.url] -= 1
-                if self.serverUseCount[self.cfg.url] == 0:
-                    thread.keepGoing = False
-                    self.frequency = Q(10 * self.deviceState.Frequency, "Hz") # triggers an update for the listener
-                    thread.wait()
-                    self.serverUseCount.pop(self.cfg.url)
-                    self.serverListeners.pop(self.cfg.url)
+        notificationListener = self.serverListeners.get(self.cfg.url)
+        if notificationListener:
+            self.serverUseCount[self.cfg.url] -= 1
+            if self.serverUseCount[self.cfg.url] == 0:
+                notificationListener.keepGoing = False
+                self.frequency = Q(10 * self.deviceState.Frequency, "Hz")  # triggers an update for the listener
+                notificationListener.wait()
+                self.serverUseCount.pop(self.cfg.url)
+                self.serverListeners.pop(self.cfg.url)
+            notificationListener.disconnect(self.onDataChanged)
 
 
 class RemoteLabBrickInstrument(ExternalParameterBase):
