@@ -38,10 +38,12 @@ if visaEnabled:
         _outputChannels = OrderedDict([("Curr1", "A"), ("Curr2", "A"), ("Curr3", "A"), ("Curr4", "A"), ("Volt1", "V"),
                                        ("Volt2", "V"), ("Volt3", "V"), ("Volt4", "V"), ("OutEnable1", ""),
                                        ("OutEnable2", ""), ("OutEnable3", ""), ("OutEnable4", "")])
-        _outputLookup = { "Curr1": ("Curr", 1, "A"), "Curr2": ("Curr", 2, "A"), "Curr3": ("Curr", 3, "A"), "Curr4": ("Curr", 4, "A"),
-                          "Volt1": ("Volt", 1, "V"), "Volt2": ("Volt", 2, "V"), "Volt3": ("Volt", 3, "V"), "Volt4": ("Volt", 4, "V"),
-                          "OutEnable1": ("OUTP:STAT", 1, ""), "OutEnable2": ("OUTP:STAT", 2, ""),
-                          "OutEnable3": ("OUTP:STAT", 3, ""), "OutEnable4": ("OUTP:STAT", 4, "")}
+        _outputLookup = { "Curr1": ("Curr", "Meas:Curr", 1, "A"), "Curr2": ("Curr", "Meas:Curr", 2, "A"),
+                          "Curr3": ("Curr", "Meas:Curr", 3, "A"), "Curr4": ("Curr", "Meas:Curr", 4, "A"),
+                          "Volt1": ("Volt", "Meas:Volt", 1, "V"), "Volt2": ("Volt", "Meas:Volt", 2, "V"),
+                          "Volt3": ("Volt", "Meas:Volt", 3, "V"), "Volt4": ("Volt", "Meas:Volt", 4, "V"),
+                          "OutEnable1": ("OUTP:STAT", "OUTP:STAT", 1, ""), "OutEnable2": ("OUTP:STAT", "OUTP:STAT", 2, ""),
+                          "OutEnable3": ("OUTP:STAT", "OUTP:STAT", 3, ""), "OutEnable4": ("OUTP:STAT", "OUTP:STAT", 4, "")}
         _inputChannels = dict({"Curr1":"A", "Curr2":"A", "Curr3":"A", "Curr4":"A", "Volt1":"V", "Volt2":"V", "Volt3":"V", "Volt4":"V"})
         def __init__(self, name, config, globalDict, instrument="QGABField"):
             logger = logging.getLogger(__name__)
@@ -57,19 +59,20 @@ if visaEnabled:
             self.initOutput()
 
         def setValue(self, channel, v):
-            function, index, unit = self._outputLookup[channel]
+            function, _, index, unit = self._outputLookup[channel]
             command = "{0} {1},(@{2})".format(function, v.m_as(unit), index)
             self.instrument.write(command) #set voltage
             return v
 
         def getValue(self, channel):
-            function, index, unit = self._outputLookup[channel]
+            function, _, index, unit = self._outputLookup[channel]
             command = "{0}? (@{1})".format(function, index)
             return Q(float(self.instrument.query(command)), unit) #set voltage
 
         def getExternalValue(self, channel):
-            function, index, unit = self._outputLookup[channel]
-            command = "MEAS:{0}? (@{1})".format(function, index)
+            _, function, index, unit = self._outputLookup[channel]
+            command = "{0}? (@{1})".format(function, index)
+            print(command)
             value = Q( float( self.instrument.query(command)), unit )
             return value
 
