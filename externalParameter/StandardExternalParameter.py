@@ -72,7 +72,6 @@ if visaEnabled:
         def getExternalValue(self, channel):
             _, function, index, unit = self._outputLookup[channel]
             command = "{0}? (@{1})".format(function, index)
-            print(command)
             value = Q( float( self.instrument.query(command)), unit )
             return value
 
