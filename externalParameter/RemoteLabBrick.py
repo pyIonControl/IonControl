@@ -220,7 +220,7 @@ class RemoteLabBrick(object):
                 notificationListener.wait()
                 self.serverUseCount.pop(self.cfg.url)
                 self.serverListeners.pop(self.cfg.url)
-            notificationListener.disconnect(self.onDataChanged)
+            notificationListener.dataChanged.disconnect(self.onDataChanged)
 
 
 class RemoteLabBrickInstrument(ExternalParameterBase):
