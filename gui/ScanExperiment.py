@@ -835,16 +835,18 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
             self.addPlot(name)
             
     def addPlot(self, name):
-        name = str(name)
-        dock = Dock(name)
-        widget = CoordinatePlotWidget(self)
-        view = widget._graphicsView
-        self.area.addDock(dock, "bottom")
-        dock.addWidget(widget)
-        self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
-        self.evaluationControlWidget.plotnames.append(name)
-        self.saveConfig() #In case the program suddenly shuts down
-        self.plotsChanged.emit()
+        if name not in self.plotDict:
+            dock = Dock(name)
+            widget = CoordinatePlotWidget(self)
+            view = widget._graphicsView
+            self.area.addDock(dock, "bottom")
+            dock.addWidget(widget)
+            self.plotDict[name] = {"dock":dock, "widget":widget, "view":view}
+            self.evaluationControlWidget.plotnames.append(name)
+            self.saveConfig() #In case the program suddenly shuts down
+            self.plotsChanged.emit()
+        else:
+            logging.getLogger(__name__).warning("Plot '{}' already exists.".format(name))
 
     def onRemovePlot(self):
         names = [name for name in list(self.plotDict.keys()) if name not in self.requiredPlotNames]
@@ -866,26 +868,31 @@ class ScanExperiment(ScanExperimentForm, MainWindowWidget.MainWindowWidget):
                 
     def onRenamePlot(self):
         names = [name for name in list(self.plotDict.keys()) if name not in self.requiredPlotNames]
-        if len(names) > 0:
-            name, ok = QtWidgets.QInputDialog.getItem(self, "Select Plot", "Please select which plot to rename: ", names, editable=False)
-            if ok:
-                newName, newOk = QtWidgets.QInputDialog.getText(self, 'New Plot Name', 'Please enter a new plot name: ')
-                if newOk:
-                    self.plotDict[name]["dock"].label.setText(newName)
-                    self.plotDict[newName] = self.plotDict[name]
-                    del self.plotDict[name]
-                    self.evaluationControlWidget.plotnames.append(newName)
-                    self.evaluationControlWidget.plotnames.remove(name)
-                    for evaluation in self.evaluationControlWidget.settings.evalList: #Update the current evaluation plot names, whether or not it has been saved
-                        if evaluation.plotname == name:
-                            evaluation.plotname = newName
-                    for settingsName in list(self.evaluationControlWidget.settingsDict.keys()): #Update all the saved evaluation plot names
-                        for evaluation in self.evaluationControlWidget.settingsDict[settingsName].evalList:
-                            if evaluation.plotname == name:
-                                evaluation.plotname = newName
-                    self.saveConfig() #In case the program suddenly shuts down
-        else:
+        if len(names) == 0:
             logging.getLogger(__name__).info("There are no plots which can be renamed")
+            return
+        name, ok = QtWidgets.QInputDialog.getItem(self, "Select Plot", "Please select which plot to rename: ", names, editable=False)
+        if not ok:
+            return
+        newName, ok = QtWidgets.QInputDialog.getText(self, 'New Plot Name', 'Please enter a new plot name: ')
+        if not ok:
+            return
+        if newName in self.plotDict:
+            logging.getLogger(__name__).warning("Plot with name '{}' already exists.")
+            return
+
+        self.plotDict[name]["dock"].label.setText(newName)
+        self.plotDict[newName] = self.plotDict.pop(name)
+        self.evaluationControlWidget.plotnames.append(newName)
+        self.evaluationControlWidget.plotnames.remove(name)
+        for evaluation in self.evaluationControlWidget.settings.evalList: #Update the current evaluation plot names, whether or not it has been saved
+            if evaluation.plotname == name:
+                evaluation.plotname = newName
+        for settingsName in list(self.evaluationControlWidget.settingsDict.keys()): #Update all the saved evaluation plot names
+            for evaluation in self.evaluationControlWidget.settingsDict[settingsName].evalList:
+                if evaluation.plotname == name:
+                    evaluation.plotname = newName
+        self.saveConfig() #In case the program suddenly shuts down
         self.plotsChanged.emit()
 
 
