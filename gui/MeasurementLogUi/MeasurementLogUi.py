@@ -175,7 +175,7 @@ class MeasurementLogUi(Form, Base ):
         
     def addTraceui(self, scan, traceui ):
         self.traceuiLookup[scan] = traceui 
-        self.plotWindowIndex = dict( (("{0}.{1}".format(key, item), (ui, item, d["view"])) for key, ui in self.traceuiLookup.items() for item, d in ui.graphicsViewDict.items()) )
+        self.plotWindowIndex = dict( (("{0}.{1}".format(key, item), (ui, item, d)) for key, ui in self.traceuiLookup.items() for item, d in ui.graphicsViewDict.items()) )
         updateComboBoxItems( self.windowComboBox, sorted(self.plotWindowIndex.keys()), self.settings.plotWindow )
         self.settings.plotWindow = firstNotNone( self.settings.plotWindow, str(self.windowComboBox.currentText()) )
 
@@ -320,7 +320,7 @@ class MeasurementLogUi(Form, Base ):
                         trace.top = numpy.array([d.m_as(yUnit) for d in topData])
                         trace.bottom = numpy.array([d.m_as(yUnit) for d in bottomData])
                     traceui, item, view = self.plotWindowIndex[plotName]
-                    plottedTrace = PlottedTrace( trace, view, xAxisLabel = "local time", windowName=item) 
+                    plottedTrace = PlottedTrace(trace, view, xAxisLabel="local time", windowName=item)
                     #plottedTrace.trace.filenameCallback = partial( WeakMethod.ref(plottedTrace.traceFilename), "" )
                     traceui.addTrace( plottedTrace, pen=-1)
                     traceui.resizeColumnsToContents()
@@ -348,7 +348,7 @@ class MeasurementLogUi(Form, Base ):
                         trace.top = numpy.array([d.m_as(yUnit) for d in topData])
                         trace.bottom = numpy.array([d.m_as(yUnit) for d in bottomData])
                     traceui, item, view = self.plotWindowIndex[plotName]
-                    plottedTrace = PlottedTrace( trace, view, xAxisLabel = xDataDef[2], windowName=item) 
+                    plottedTrace = PlottedTrace(trace, view, xAxisLabel=xDataDef[2], windowName=item)
                     traceui.addTrace( plottedTrace, pen=-1)
                     traceui.resizeColumnsToContents()
                     self.cache[(xDataDef, yDataDef)] = ( weakref.ref(plottedTrace), (xDataDef, yDataDef, plotName) )
