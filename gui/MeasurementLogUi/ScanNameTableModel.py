@@ -50,9 +50,13 @@ class ScanNameTableModel(QtCore.QAbstractTableModel):
                 return self.headerDataLookup[section]
         return None  # QtCore.QVariant()
     
-    def showAll(self, show):
+    def showAll(self, show=False, showOnlyThese=None):
+        if showOnlyThese is not None:
+            showthis = lambda x: x in showOnlyThese
+        else:
+            showthis = lambda x: show
         for row in range(len(self.scanNames)):
-            self.scanNames.setAt(row, show)
-            self.scanNameFilterChanged.emit( self.scanNames)
-            self.dataChanged.emit( self.createIndex(0, 0), self.createIndex(0, len(self.scanNames)))
+            self.scanNames.setAt(row, showthis(row))
+        self.scanNameFilterChanged.emit(self.scanNames)
+        self.dataChanged.emit(self.createIndex(0, 0), self.createIndex(0, len(self.scanNames)))
        
