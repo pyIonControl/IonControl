@@ -20,6 +20,12 @@ software:
     description: Interface for memory profiling and object counting
   Remote render:
     description: Render dedicated counter displays in remote processes
+  Timeseries Database:
+    description: Use Influx timeseries database
+    fields:
+      host: str
+      database: str
+
 
 #"hardware" are pieces of hardware together with configuration information. If a hardware has a role, it can be selected under the corresponding software's "hardware" field.
 hardware:
