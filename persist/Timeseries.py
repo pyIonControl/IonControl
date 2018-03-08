@@ -19,6 +19,7 @@ try:
         def initDB(self):
             if TimeseriesPersist.store is None:
                 prj = getProject()
+                self.projectName = prj.name
                 self.active = False
                 if 'Timeseries Database' in prj.software:
                     dbs = getProject().software['Timeseries Database']
@@ -39,6 +40,7 @@ try:
                     "measurement": source,
                     "tags": {
                         "space": space,
+                        "project": self.projectName,
                     },
                     "fields": {
                         "value": value,
