@@ -44,6 +44,8 @@ from gui.Preferences import PreferencesUi
 from modules.SceneToPrint import SceneToPrint
 from ProjectConfig.Project import Project, ProjectInfoUi
 import ctypes
+from persist import Timeseries  # need this unused
+
 setID = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
 
 WidgetContainerForm, WidgetContainerBase = PyQt5.uic.loadUiType(r'ui\InstrumentLoggingUi.ui')
