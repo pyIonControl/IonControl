@@ -18,6 +18,11 @@ software:
     description: Interface for reading and plotting the timestamps of TTL pulses
   Memory Profiler:
     description: Interface for memory profiling and object counting
+  Timeseries Database:
+    description: Use Influx timeseries database
+    fields:
+      host: str
+      database: str
 
 #"hardware" are pieces of hardware together with configuration information. If a hardware has a role, it can be selected under the corresponding software's "hardware" field.
 hardware:
