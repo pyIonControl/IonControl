@@ -117,9 +117,12 @@ class MeasurementLogUi(Form, Base ):
         self.selectAllAction = QtWidgets.QAction( "select all", self)
         self.selectAllAction.triggered.connect( partial( self.scanNameTableModel.showAll, True )  )
         self.scanNameTableView.addAction( self.selectAllAction )
-        self.deselectAllAction = QtWidgets.QAction( "deselect all", self)
-        self.deselectAllAction.triggered.connect( partial( self.scanNameTableModel.showAll, False )  )
-        self.scanNameTableView.addAction( self.deselectAllAction )
+        self.deselectAllAction = QtWidgets.QAction("deselect all", self)
+        self.onlyCheckSelectedAction = QtWidgets.QAction("only check selected", self)
+        self.deselectAllAction.triggered.connect(partial(self.scanNameTableModel.showAll, False))
+        self.onlyCheckSelectedAction.triggered.connect(self.onlyCheckSelected)
+        self.scanNameTableView.addAction(self.deselectAllAction)
+        self.scanNameTableView.addAction(self.onlyCheckSelectedAction)
         # Context Menu for ResultsTable
         self.resultTableView.setContextMenuPolicy( QtCore.Qt.ActionsContextMenu )
         self.addResultToMeasurementAction = QtWidgets.QAction( "add as column to measurement", self)
@@ -172,10 +175,13 @@ class MeasurementLogUi(Form, Base ):
         self.xUnitEdit.editingFinished.connect( partial(self.onEditingFinished, 'xUnit', 'xUnitEdit'))
         self.yUnitEdit.editingFinished.connect( partial(self.onEditingFinished, 'yUnit', 'yUnitEdit'))
         restoreGuiState( self, self.config.get(self.configname+".guiSate") )
-        
+
+    def onlyCheckSelected(self):
+        self.scanNameTableModel.showAll(showOnlyThese=set([i.row() for i in self.scanNameTableView.selectedIndexes()]))
+
     def addTraceui(self, scan, traceui ):
         self.traceuiLookup[scan] = traceui 
-        self.plotWindowIndex = dict( (("{0}.{1}".format(key, item), (ui, item, d["view"])) for key, ui in self.traceuiLookup.items() for item, d in ui.graphicsViewDict.items()) )
+        self.plotWindowIndex = dict( (("{0}.{1}".format(key, item), (ui, item, d)) for key, ui in self.traceuiLookup.items() for item, d in ui.graphicsViewDict.items()) )
         updateComboBoxItems( self.windowComboBox, sorted(self.plotWindowIndex.keys()), self.settings.plotWindow )
         self.settings.plotWindow = firstNotNone( self.settings.plotWindow, str(self.windowComboBox.currentText()) )
 
@@ -320,7 +326,7 @@ class MeasurementLogUi(Form, Base ):
                         trace.top = numpy.array([d.m_as(yUnit) for d in topData])
                         trace.bottom = numpy.array([d.m_as(yUnit) for d in bottomData])
                     traceui, item, view = self.plotWindowIndex[plotName]
-                    plottedTrace = PlottedTrace( trace, view, xAxisLabel = "local time", windowName=item) 
+                    plottedTrace = PlottedTrace(trace, view, xAxisLabel="local time", windowName=item)
                     #plottedTrace.trace.filenameCallback = partial( WeakMethod.ref(plottedTrace.traceFilename), "" )
                     traceui.addTrace( plottedTrace, pen=-1)
                     traceui.resizeColumnsToContents()
@@ -348,7 +354,7 @@ class MeasurementLogUi(Form, Base ):
                         trace.top = numpy.array([d.m_as(yUnit) for d in topData])
                         trace.bottom = numpy.array([d.m_as(yUnit) for d in bottomData])
                     traceui, item, view = self.plotWindowIndex[plotName]
-                    plottedTrace = PlottedTrace( trace, view, xAxisLabel = xDataDef[2], windowName=item) 
+                    plottedTrace = PlottedTrace(trace, view, xAxisLabel=xDataDef[2], windowName=item)
                     traceui.addTrace( plottedTrace, pen=-1)
                     traceui.resizeColumnsToContents()
                     self.cache[(xDataDef, yDataDef)] = ( weakref.ref(plottedTrace), (xDataDef, yDataDef, plotName) )

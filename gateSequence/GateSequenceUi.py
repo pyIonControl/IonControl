@@ -424,7 +424,7 @@ class GateSequenceUi(Form, Base):
                 address, data = self.gateSequenceCompiler.gateSequencesCompile(self.gateSequenceContainer, self.settings.packWidth)
             else:
                 self.gateSequenceCompiler.gateCompile(self.gateSequenceContainer.gateDefinition)
-                data = self.gateSequenceCompiler.gateSequenceCompile(self.settings.gate)
+                data = self.gateSequenceCompiler.gateSequenceCompile(self.settings.gate, self.settings.packWidth)
                 address = [0] * self.settings.thisSequenceRepetition
         return address, data, self.settings
     

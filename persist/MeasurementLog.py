@@ -244,6 +244,7 @@ class MeasurementContainer(object):
             self.session = self.Session()
         
     def query(self, fromTime, toTime, scanNameFilter=None):
+        logging.getLogger(__name__).info("Starting query from {} to {} scannames {}".format(fromTime, toTime, scanNameFilter))
         if scanNameFilter is None:
             self.measurements = self.session.query(Measurement).filter(Measurement.startDate>=fromTime).filter(Measurement.startDate<=toTime).order_by(Measurement.id.desc()).all() 
             self._scanNames = SequenceDict(((m.scanName, self._scanNames.get(m.scanName, True)) for m in self.measurements))
@@ -255,6 +256,7 @@ class MeasurementContainer(object):
         self.scanNamesChanged.fire( scanNames=self.scanNames )
         self.measurementsUpdated.fire(measurements=self.measurements)
         self.fromTime, self.toTime = fromTime, toTime
+        logging.getLogger(__name__).info("Query complete.")
     
     def refreshLookups(self):
         """Load the basic short tables into memory
