@@ -336,9 +336,8 @@ class ShuttlingGraph(list):
         for a, b in pairs_iter(sp):
             edge = sorted(self.shuttlingGraph.adj[a][b].values(), key=itemgetter('weight'))[0]['edge']
             path.append((a, b, edge, self.index(edge)))
-        return path
         return path, preShuttle, postShuttle if allow_position else path
-
+    
     def nodes(self):
         return self.shuttlingGraph.nodes()
     
