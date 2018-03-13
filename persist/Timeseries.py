@@ -22,7 +22,7 @@ try:
                 self.projectName = prj.name
                 self.active = False
                 if 'Timeseries Database' in prj.software:
-                    dbs = getProject().software['Timeseries Database']
+                    dbs = prj.software['Timeseries Database']
                     if dbs:
                         db = list(dbs.values())[0]
                         TimeseriesPersist.store = InfluxDBClient(host=db.get('host'), port=8086,
