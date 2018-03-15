@@ -43,9 +43,9 @@ try:
                         "project": self.projectName,
                     },
                     "fields": {
-                        "value": value,
-                        "minval": minval,
-                        "maxval": maxval,
+                        "value": float(value),
+                        "minval": float(minval),
+                        "maxval": float(maxval),
                         "unit": unit
                     },
                      "time": time if time > 1000000000000000000 else int(time * 1000000000)
