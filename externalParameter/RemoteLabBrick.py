@@ -15,7 +15,8 @@ from modules.quantity import Q
 from .qtHelper import qtHelper
 
 import grpc
-from externalParameter.labbricksproto_pb2 import DeviceRequest, DeviceSetIntRequest, DeviceSetBoolRequest
+from externalParameter.labbricksproto_pb2 import DeviceRequest, DeviceSetIntRequest, DeviceSetBoolRequest, \
+    DeviceSetStateRequest
 from externalParameter.labbricksproto_pb2_grpc import LabbricksStub
 from ProjectConfig.Project import currentProject
 Servers = dict()
@@ -162,6 +163,17 @@ class RemoteLabBrick(object):
             # self._frequency = Q(10 * state.Frequency, " Hz")
             self.deviceState = state
 
+    def setParameters(self, rfOn, externalPulseMod, internalRef):
+        self._open()
+        r = DeviceSetStateRequest()
+        r.ModelName = self.model
+        r.SerialNumber = self.serial
+        self.deviceState.ExternalPulseMod = externalPulseMod
+        self.deviceState.InternalRef = internalRef
+        self.deviceState.RFOn = rfOn
+        r.State = self.deviceState
+        self.deviceState = self.stub.SetDeviceState(r)
+
     @property
     def rfOn(self):
         self._getUpdatedState()
@@ -175,6 +187,36 @@ class RemoteLabBrick(object):
         r.SerialNumber = self.serial
         r.Data = on
         self.deviceState = self.stub.SetRFOn(r)
+
+    @property
+    def externalPulseMod(self):
+        self._getUpdatedState()
+        return self.deviceState.ExternalPulseMod
+
+    @externalPulseMod.setter
+    def externalPulseMod(self, external):
+        self._open()
+        r = DeviceSetStateRequest()
+        r.ModelName = self.model
+        r.SerialNumber = self.serial
+        self.deviceState.ExternalPulseMod = external
+        r.State = self.deviceState
+        self.deviceState = self.stub.SetDeviceState(r)
+
+    @property
+    def internalRef(self):
+        self._getUpdatedState()
+        return self.deviceState.InternalRef
+
+    @internalRef.setter
+    def internalRef(self, internal):
+        self._open()
+        r = DeviceSetStateRequest()
+        r.ModelName = self.model
+        r.SerialNumber = self.serial
+        self.deviceState.InternalRef = internal
+        r.State = self.deviceState
+        self.deviceState = self.stub.SetDeviceState(r)
 
     @property
     def power(self):
@@ -242,6 +284,9 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
         self.setDefaults()
         self.initOutput()
 
+    def setParameters(self):
+        self.instrument.setParameters(self.settings.rfOn, self.settings.externalPulseMod, self.instrument.internalRef)
+
     def setValue(self, channel, v):
         setattr(self.instrument, channel, v)
         return v
@@ -264,10 +309,14 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
     def setDefaults(self):
         ExternalParameterBase.setDefaults(self)
         self.settings.__dict__.setdefault('rfOn', True)
+        self.settings.__dict__.setdefault('externalPulseMod', False)
+        self.settings.__dict__.setdefault('internalRef', True)
 
     def paramDef(self):
         superior = ExternalParameterBase.paramDef(self)
         superior.append({'name': 'rfOn', 'type': 'bool', 'value': self.instrument.rfOn if self.instrument else True})
+        superior.append({'name': 'externalPulseMod', 'type': 'bool', 'value': self.instrument.externalPulseMod if self.instrument else False})
+        superior.append({'name': 'internalRef', 'type': 'bool', 'value': self.instrument.internalRef if self.instrument else True})
         return superior
 
     def update(self, param, changes):

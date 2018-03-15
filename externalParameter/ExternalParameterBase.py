@@ -59,7 +59,10 @@ class ExternalParameterBase(object, metaclass=InstrumentMeta):
 
     def dimension(self, channel):
         """return the dimension eg 'Hz' or 'V' for channel""" 
-        return self._outputChannels[channel] 
+        return self._outputChannels[channel]
+
+    def setParameters(self):
+        pass
         
     @property
     def parameter(self):
@@ -80,6 +83,7 @@ class ExternalParameterBase(object, metaclass=InstrumentMeta):
         if self.settings.setExternal:
             for cname in self._outputChannels:
                 self.setValue(cname, self.settings.channelSettings[cname].targetValue)
+            self.setParameters()
 
     def setValue(self, channel, v):
         """write the value to the instrument"""
