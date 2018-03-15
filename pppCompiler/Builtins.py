@@ -45,15 +45,23 @@ def set_inv_shutter( symboltable, arg=list(), kwarg=dict() ):
         raise CompileException("cannot set shutter for variable type '{0}'".format(symbol.type_))
     return code
 
-def set_counter( symboltable, arg=list(), kwarg=dict() ):
+
+def set_counter(symboltable, arg=list(), kwarg=dict()):
     """
-    set_counter( counter )
+    set_counter( counter, [sendmask=bitmask] )
     Set the counterchannels to be enabled after the next update.
+    By default all channel counts are transmitted via USB. If sendmask is given,
+    then only the channels for which the corresponding bit is 1 will be sent via USB.
+    The bitmask persists on the FPGA until it is again explicitly written to.
     """
-    if len(arg)!=2:
-        raise CompileException( "expected exactly one argument in set_counter" )
-    symbol = symboltable.getVar( arg[1] )
-    return ["  COUNTERMASK {0}".format(symbol.name)]
+    if len(arg) != 2:
+        raise CompileException("expected exactly one argument in set_counter")
+    symbol = symboltable.getVar(arg[1])
+    code = ["  COUNTERMASK {0}".format(symbol.name)]
+    if 'sendmask' in kwarg:
+        mask = symboltable.getVar(kwarg['sendmask'])
+        code.append("  SENDENABLEMASK {}".format(mask))
+    return code
 
 def clear_counter( symboltable, arg=list(), kwarg=dict() ):
     """
