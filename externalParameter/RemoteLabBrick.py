@@ -171,8 +171,10 @@ class RemoteLabBrick(object):
         self.deviceState.ExternalPulseMod = externalPulseMod
         self.deviceState.InternalRef = internalRef
         self.deviceState.RFOn = rfOn
-        r.State = self.deviceState
-        self.deviceState = self.stub.SetDeviceState(r)
+        r.State.CopyFrom(self.deviceState)
+        r.State.PulseOnTime = 0
+        r.State.PulseOffTime = 0
+        self.deviceState = self.stub.SetState(r)
 
     @property
     def rfOn(self):
@@ -200,8 +202,10 @@ class RemoteLabBrick(object):
         r.ModelName = self.model
         r.SerialNumber = self.serial
         self.deviceState.ExternalPulseMod = external
-        r.State = self.deviceState
-        self.deviceState = self.stub.SetDeviceState(r)
+        r.State.CopyFrom(self.deviceState)
+        r.State.PulseOnTime = 0
+        r.State.PulseOffTime = 0
+        self.deviceState = self.stub.SetState(r)
 
     @property
     def internalRef(self):
@@ -215,8 +219,10 @@ class RemoteLabBrick(object):
         r.ModelName = self.model
         r.SerialNumber = self.serial
         self.deviceState.InternalRef = internal
-        r.State = self.deviceState
-        self.deviceState = self.stub.SetDeviceState(r)
+        r.State.CopyFrom(self.deviceState)
+        r.State.PulseOnTime = 0
+        r.State.PulseOffTime = 0
+        self.deviceState = self.stub.SetState(r)
 
     @property
     def power(self):
