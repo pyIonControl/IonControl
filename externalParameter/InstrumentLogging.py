@@ -38,7 +38,11 @@ try:
 except:
     logging.getLogger(__name__).info("Multi Meter reader not available")
 
-
+try:
+    from .CryoCon22CReader import CryoCon22CReader
+    LoggingInstruments['CryoCon 22C'] = wrapInstrument( "CryoCon22CReaderInstrumentReader", CryoCon22CReader )
+except:
+    logging.getLogger(__name__).info("Cryo Con reader not available")
 
 try:
     from .PhotodiodeReader import PhotoDiodeReader
