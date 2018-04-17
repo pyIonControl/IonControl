@@ -40,7 +40,7 @@ class Data(object):
         self.overrun = False
         self.exitcode = 0
         self.dependentValues = list()                   # additional scan values
-        self.evaluated = dict()
+        self.evaluated = defaultdict(dict)
         self.result = None                              # data received in the result channels dict with channel number as key
         self.externalStatus = None
         self._creationTime = time_time()

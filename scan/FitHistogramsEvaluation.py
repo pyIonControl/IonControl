@@ -111,7 +111,7 @@ class FitHistogramEvaluation(EvaluationBase):
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         if not self.dataLoaded:
             self.loadReferenceData()
-        params, confidence, reducedchisq = data.evaluated.get('FitHistogramsResult', (None, None, None))
+        params, confidence, reducedchisq = data.evaluated['FitHistogramsResult'].get(evaluation.channelKey, (None, None, None))
         if params is None:
             countarray = evaluation.getChannelData(data)
             y, x = numpy.histogram( countarray, range=(0, self.settings['HistogramBins']), bins=self.settings['HistogramBins']) 
@@ -120,7 +120,7 @@ class FitHistogramEvaluation(EvaluationBase):
             params = list(params) + [ 1-params[0]-params[1] ]     # fill in the constrained parameter
             confidence = list(confidence)
             confidence.append( (confidence[0]+confidence[1]) if confidence[0] is not None and confidence[1] is not None else None)  # don't know what to do :(
-            data.evaluated['FitHistogramsResult'] = (params, confidence, self.chisq/self.dof)
+            data.evaluated['FitHistogramsResult'][evaluation.channelKey] = (params, confidence, self.chisq/self.dof)
         if self.settings['Mode']=='Parity':
             return EvaluationResult(params[0]+params[2]-params[1], None, params[0]+params[2]-params[1])
         elif self.settings['Mode']=='Zero':
@@ -219,7 +219,7 @@ class TwoIonFidelityEvaluation(EvaluationBase):
         
     def evaluate(self, data, evaluation, expected=None, ppDict=None, globalDict=None ):
         #countarray = evaluation.getChannelData(data)
-        params, confidence, reducedchisq = data.evaluated.get('FitHistogramsResult', (None, None, None))
+        params, confidence, reducedchisq = data.evaluated['FitHistogramsResult'].get(evaluation.channelKey, (None, None, None))
         if params is None:
             return EvaluationResult()
         elif expected is not None:
