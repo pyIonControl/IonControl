@@ -40,7 +40,7 @@ try:
                     "measurement": source,
                     "tags": {
                         "space": space,
-                        "project": self.projectName,
+                        "project": getProject().name,
                     },
                     "fields": {
                         "value": float(value),

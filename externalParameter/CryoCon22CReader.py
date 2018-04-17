@@ -89,5 +89,6 @@ class CryoCon22CReader(object):
 if __name__ == "__main__":
     mks = CryoCon22CReader()
     mks.open()
-    mks.pr3()
+    result = mks.value()
+    print(result)
     mks.close()
