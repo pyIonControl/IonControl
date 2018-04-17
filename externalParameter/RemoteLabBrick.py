@@ -91,7 +91,7 @@ class RemoteLabBrick(object):
                 for info in stub.DeviceInfo(r):
                     instrumentMap[(name, info.ModelName, info.SerialNumber)] = cfg
             except grpc.RpcError as e:
-                raise AttributeError("connection to Labbricks server {} failed with error {}".format(cfg.url, e))
+                logging.getLogger(__name__).warning("Connection to server {} failed, cannot get list of available instruments.".format(name))
         return instrumentMap
 
     def __init__(self, instrument):
