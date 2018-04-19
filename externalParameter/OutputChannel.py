@@ -222,7 +222,9 @@ class SlowAdjustOutputChannel(OutputChannel):
         and True is returned.
         """
         if targetValue is not None:
-            self.settings.targetValue = targetValue
+            if self.settings.targetValue != targetValue:
+                self.settings.targetValue = targetValue
+                self.settings.value = self.externalValue
             newvalue, arrived = nextValue(self.settings.value, targetValue, self.settings.stepsize, self.settings.jump)
             reportvalue, arrived = self.encpasulate_value(self.device.setValue(self.channelName, newvalue), second=arrived)
             self.settings.value = reportvalue

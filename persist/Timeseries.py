@@ -22,7 +22,7 @@ try:
                 self.projectName = prj.name
                 self.active = False
                 if 'Timeseries Database' in prj.software:
-                    dbs = getProject().software['Timeseries Database']
+                    dbs = prj.software['Timeseries Database']
                     if dbs:
                         db = list(dbs.values())[0]
                         TimeseriesPersist.store = InfluxDBClient(host=db.get('host'), port=8086,
@@ -43,9 +43,9 @@ try:
                         "project": self.projectName,
                     },
                     "fields": {
-                        "value": value,
-                        "minval": minval,
-                        "maxval": maxval,
+                        "valuef": float(value) if value is not None else None,
+                        "minvalf": float(minval) if minval is not None else None,
+                        "maxvalf": float(maxval) if maxval is not None else None,
                         "unit": unit
                     },
                      "time": time if time > 1000000000000000000 else int(time * 1000000000)
