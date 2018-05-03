@@ -44,7 +44,9 @@ from gui.Preferences import PreferencesUi
 from modules.SceneToPrint import SceneToPrint
 from ProjectConfig.Project import Project, ProjectInfoUi
 import ctypes
-from persist import Timeseries  # need this unused
+from persist import Timeseries
+
+_ = Timeseries.TimeseriesPersist  # We want this imported
 
 setID = ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID
 
