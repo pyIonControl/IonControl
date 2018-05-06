@@ -167,7 +167,7 @@ class ILX5900Reader(object):
 
     def open(self):
         self.rm = visa.ResourceManager()
-        self.conn = self.rm.open_resource( self.instrument, timeout=self.settings.timeout.m_as('s'))
+        self.conn = self.rm.open_resource( self.instrument, timeout=self.settings.timeout.m_as('ms'))
         self.initialize()
            
     def close(self):
