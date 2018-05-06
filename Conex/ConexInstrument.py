@@ -9,12 +9,6 @@ import time
 from Conex.ConexBase import ConexCC, ConexError
 
 
-def processReturn(name, retval):
-    if len(retval) < 2:
-        return retval
-    if retval[0] != 0:
-        raise ConexError("{0}: {1}".format(name, retval[-1]))
-    return retval[1:-1]
 
 
 class ConexInstrument:
@@ -32,23 +26,29 @@ class ConexInstrument:
         retval = self._cc.OpenInstrument(self.instrumentKey)
         if retval != 0:
             raise ConexError("Newport Conex cannot open '{0}' returnvalue {1}".format(self.instrumentKey, retval))
-        (self.controllerId,) = processReturn('ID_Get', self._cc.ID_Get(self.address, None, None))
+        (self.controllerId,) = self.processReturn('ID_Get', self._cc.ID_Get(self.address, None, None))
         if self.isNotHomed:
             logging.getLogger(__name__).info("Newport conex home search {0}".format(self.instrumentKey))
             self.homeSearch()
 
+    def processReturn(self, name, retval):
+        if len(retval) < 2:
+            return retval
+        if retval[0] != 0:
+            raise ConexError("Conex instrument {}: {}: {}".format(self.instrumentKey, name, retval[-1]))
+        return retval[1:-1]
 
     def close(self):
         self._cc.CloseInstrument()
 
     def controllerVersion(self):
-        (version,) = processReturn('controllerVersion', self._cc.VE(self.address, None, None))
+        (version,) = self.processReturn('controllerVersion', self._cc.VE(self.address, None, None))
         return version
 
     @property
     def position(self):
         number = 0.0
-        (position,) = processReturn('read position', self._cc.TP(self.address, number, None))
+        (position,) = self.processReturn('read position', self._cc.TP(self.address, number, None))
         self._position = float(position)
         return self._position
 
@@ -56,13 +56,13 @@ class ConexInstrument:
     def position(self, position=0.0):
         if self.isNotHomed:
             raise ConexError("Conex Instrument {0} is not ready to move. Try a home search.".format(self.instrumentKey))
-        processReturn('write position', self._cc.PA_Set(self.address, position, None))
+        self.processReturn('write position', self._cc.PA_Set(self.address, position, None))
         self._position = position
         return self._position
 
     @property
     def status(self):
-        return processReturn('status', self._cc.TS(self.address, None, None, None))
+        return self.processReturn('status', self._cc.TS(self.address, None, None, None))
 
     @property
     def isSerchingHome(self):
@@ -85,10 +85,10 @@ class ConexInstrument:
         return state == '0A'
 
     def reset(self):
-        processReturn('reset', self._cc.RS(self.address, None))
+        self.processReturn('reset', self._cc.RS(self.address, None))
 
     def homeSearch(self):
-        processReturn('homeSearch', self._cc.OR(self.address, None))
+        self.processReturn('homeSearch', self._cc.OR(self.address, None))
 
     def waitEndOfHomeSearch(self):
         while self.isSerchingHome:
