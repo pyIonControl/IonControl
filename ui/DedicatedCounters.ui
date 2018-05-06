@@ -32,6 +32,7 @@
    <addaction name="actionClear"/>
    <addaction name="actionData_Reporting"/>
    <addaction name="actionPlot_Data"/>
+   <addaction name="actionTimeseries"/>
   </widget>
   <widget class="QDockWidget" name="settingsDock">
    <property name="windowTitle">
@@ -106,6 +107,21 @@
    </property>
    <property name="toolTip">
     <string>Plot data</string>
+   </property>
+  </action>
+  <action name="actionTimeseries">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="Experiment.qrc">
+     <normaloff>:/kde/icons/grafanalogo.png</normaloff>:/kde/icons/grafanalogo.png</iconset>
+   </property>
+   <property name="text">
+    <string>Timeseries</string>
+   </property>
+   <property name="toolTip">
+    <string>Log in Timeseries database</string>
    </property>
   </action>
  </widget>
