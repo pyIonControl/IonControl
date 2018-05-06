@@ -54,13 +54,13 @@ def set_counter(symboltable, arg=list(), kwarg=dict()):
     then only the channels for which the corresponding bit is 1 will be sent via USB.
     The bitmask persists on the FPGA until it is again explicitly written to.
     """
-    if len(arg) != 2:
+    if len(arg) < 2:
         raise CompileException("expected exactly one argument in set_counter")
     symbol = symboltable.getVar(arg[1])
     code = ["  COUNTERMASK {0}".format(symbol.name)]
     if 'sendmask' in kwarg:
         mask = symboltable.getVar(kwarg['sendmask'])
-        code.append("  SENDENABLEMASK {}".format(mask))
+        code.append("  SENDENABLEMASK {}".format(mask.name))
     return code
 
 def clear_counter( symboltable, arg=list(), kwarg=dict() ):
