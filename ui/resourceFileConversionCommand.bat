@@ -1,1 +1,1 @@
-\WinPython-64bit-3.4.3.7Qt5\python-3.4.3.amd64\Lib\site-packages\PyQt5\pyrcc5.exe Experiment.qrc -o Experiment_rc.py
+\WinPython-64bit-3.5.4.0Qt5\python-3.5.4.amd64\Scripts\pyrcc5.exe Experiment.qrc -o Experiment_rc.py

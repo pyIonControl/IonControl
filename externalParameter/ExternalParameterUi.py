@@ -133,7 +133,7 @@ class ExternalParameterControlModel(CategoryTreeModel):
                 
     def evaluate(self, name):
         for inst in self.parameterList:
-            if inst.hasDependency:
+            if (name is None or inst.name == name) and inst.hasDependency:
                 value = self.expression.evaluateAsMagnitude(inst.string, self.controlUi.globalDict)
                 self._setValue(inst, value)
                 inst.savedValue = value   # set saved value to make this new value the default
@@ -175,10 +175,10 @@ class ControlUi(Form, Base):
             if key not in oldNodeDictKeys: #Expand any new nodes
                 index = self.categoryTreeView.model().indexFromNode(node)
                 self.categoryTreeView.expand(index)
-        try:
-            self.evaluate(None)
-        except (KeyError, ValueError) as e:
-            logging.getLogger(__name__).warning(str(e))
+                try:
+                    self.evaluate(key)
+                except (KeyError, ValueError) as e:
+                    logging.getLogger(__name__).warning(str(e))
         
     def keys(self):
         pList = self.categoryTreeView.model().parameterList

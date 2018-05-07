@@ -31,6 +31,7 @@ from trace.pens import penList, penArgList
 from uiModules.BlockAutoRange import BlockAutoRange
 from uiModules.DateTimePlotWidget import DateTimePlotWidget
 from uiModules.RemoteCustomPlot import RemoteCustomView
+from persist.Timeseries import TimeseriesPersist
 
 uipath = os.path.join(os.path.dirname(__file__), '..', 'ui/DedicatedCounters.ui')
 DedicatedCountersForm, DedicatedCountersBase = PyQt5.uic.loadUiType(uipath)
@@ -71,6 +72,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.lastPlotTime = 0
         self.area = None
         self.enableDataPlotting = False
+        self.enableTimeseries = False
         self.enableDataTaking = False
 #        [
 #            AnalogInputCalibration.PowerDetectorCalibration(),
@@ -89,6 +91,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.actionClear.triggered.connect( self.onClear )
         self.actionData_Reporting.triggered.connect(self.onEnableDataTaking)
         self.actionPlot_Data.triggered.connect(self.onEnableDataPlotting)
+        self.actionTimeseries.triggered.connect(self.onEnableTimeseries)
         self.settingsUi = DedicatedCountersSettings.DedicatedCountersSettings(self.config,self.plotDict)
         self.settingsUi.setupUi(self.settingsUi)
         self.settingsDock.setWidget( self.settingsUi )
@@ -257,7 +260,17 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         self.enableDataPlotting = checked
         if self.actionPlot_Data.isChecked() != checked:
             self.actionPlot_Data.setChecked(checked)
-                
+
+    def onEnableTimeseries(self, checked):
+        if checked:
+            self.timeseries = TimeseriesPersist()
+            checked = self.timeseries.initDB()
+        else:
+            self.timeseries = None
+        self.enableTimeseries = checked
+        if self.actionTimeseries.isChecked() != checked:
+            self.actionTimeseries.setChecked(checked)
+
     def onSave(self):
         logger = logging.getLogger(__name__)
         self.plotDisplayData = self.settingsUi.settings.plotDisplayData
@@ -296,7 +309,21 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
             self.statusDisplay.setData(data)
             if self.enableDataPlotting:
                 self.plotData(data, queueSize)
+            if self.enableTimeseries:
+                self.storeData(data, queueSize)
             self.dataAvailable.emit(data)
+
+    def analogValue(self, myindex, value):
+        refValue = self.refValue[myindex]
+        if is_Q(value):
+            if refValue is not None and refValue.dimensionality == value.dimensionality:
+                y = value.m_as(refValue)
+            else:
+                self.refValue[myindex] = value
+                y = value.m
+        else:
+            y = value
+        return y
 
     def plotData(self, data, queueSize):
         self.plotDisplayData = self.settingsUi.settings.plotDisplayData
@@ -309,20 +336,28 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
         for index, value in enumerate(data.analogValues):
             if value is not None:
                 myindex = 16 + index
-                refValue = self.refValue[myindex]
-                if is_Q(value):
-                    if refValue is not None and refValue.dimensionality == value.dimensionality:
-                        y = value.m_as(refValue)
-                    else:
-                        self.refValue[myindex] = value
-                        y = value.m
-                else:
-                    y = value
-                self.yData[myindex] = rollingUpdate(self.yData[myindex], y, self.settings.pointsToKeep)
+                self.yData[myindex] = rollingUpdate(self.yData[myindex], self.analogValue(myindex, value), self.settings.pointsToKeep)
                 self.xData[myindex] = rollingUpdate(self.xData[myindex], data.timestamp, self.settings.pointsToKeep)
         lag = time() - self.lastPlotTime
         if queueSize < 2 or (queueSize < 20 and lag > 1) or lag > 2:
             self.replot()
+
+    def storeData(self, data, queueSize):
+        if self.timeseries is None or not self.timeseries.active:
+            return
+        if not self.timeseries.initialized:
+            self.timeseries.initDB()
+        fields = {'count{}'.format(index): float(value) for index, value in enumerate(data.data[:16]) if value is not None}
+        fields.update({'analog{}'.format(index): float(self.analogValue(index+16, value)) for index, value in enumerate(data.analogValues) if value is not None})
+        fields['integrationtime'] = float(self.dataIntegrationTime.m_as('ms'))
+        TimeseriesPersist.store.write_points([{
+            "measurement": "dedicated",
+            "tags": {
+                "project": self.timeseries.projectName,
+            },
+            "fields": fields,
+            "time": data.timestamp if data.timestamp > 1000000000000000000 else int(data.timestamp * 1000000000)
+        }])
 
     def replot(self):
         for name, plotwin in self.curvesDict.items():
