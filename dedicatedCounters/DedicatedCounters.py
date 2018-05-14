@@ -198,7 +198,7 @@ class DedicatedCounters(DedicatedCountersForm, DedicatedCountersBase ):
                     for cIdx in counterIndexList:
                         mycurves.setdefault(cIdx, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
                     for aIdx in adcIndexList:
-                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penArgList[cIdx + 1]))
+                        mycurves.setdefault(aIdx + 16, self.plotDict[windowName]['view'].plot(pen=penArgList[aIdx + 1]))
                     for eIdx in set(mycurves) - set(counterIndexList) - set(i + 16 for i in adcIndexList):
                         curve = mycurves.pop(eIdx)
                         self.plotDict[windowName]['view'].removeItem(curve)
