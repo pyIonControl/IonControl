@@ -27,6 +27,12 @@ except:
     logging.getLogger(__name__).info("Keithley 2010 reader not available")
 
 try:
+    from externalParameter.Agilent34401Reader import Agilent34401Reader
+    LoggingInstruments['Agilent 34401'] = wrapInstrument("Agilent34401ReaderInstrumentReader", Agilent34401Reader)
+except:
+    logging.getLogger(__name__).info("Keithley 2010 reader not available")
+
+try:
     from .MultiMeterReader import MultiMeterReader
     from .Keithley2010Reader import Keithley2010Reader
     from .ILX5900Reader import ILX5900Reader
