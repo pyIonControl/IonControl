@@ -28,22 +28,25 @@ def test_influx_ssl():
 
 def test_influx_ssl_verify():
     host = "r446212.mdl.sandia.gov"
-    port = 8042
+    port = 8086
     dbname = "lab"
 
-    client = InfluxDBClient(host, port, "root", "root", dbname, ssl=True, verify_ssl=True, cert=('R446656.crt', 'R446656.key'))
+    client = InfluxDBClient(host, port, "root", "root", dbname, ssl=False)
     json_body = list()
     json_body.append(
         {
-            "measurement": "testmeas",
+            "measurement": "test44",
             "tags": {
                 "serial": 1,
                 "instrument": "myinst",
             },
             "fields": {
-                "temp": float(24),
-                "hum": float(44),
-            }
+                "temp": None,
+                "hum": None,
+                "this": None,
+                "that": "",
+            },
+            "time" : 100,
         })
     client.write_points(json_body)
     print("added {} points".format(len(json_body)))
