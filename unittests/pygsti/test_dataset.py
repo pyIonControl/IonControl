@@ -1,6 +1,6 @@
 import pygsti
 from pygsti.construction import std1Q_XYI
-
+import pytest
 
 def test_dataset():
 
@@ -19,3 +19,7 @@ def test_dataset():
     ds3b = pygsti.construction.generate_fake_data(depol_gateset, gatestring_list, nSamples=50,
                                                   sampleError='binomial', seed=100)
     pass
+
+
+if __name__ == "__main__":
+    pytest.main()
