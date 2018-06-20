@@ -18,7 +18,7 @@ import os.path
 import sys
 from PyQt5 import QtCore
 
-from sqlalchemy import Column, String, Binary, Integer, DateTime, PickleType, func
+from sqlalchemy import Column, String, Binary, Boolean, Integer, DateTime, PickleType, func
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
@@ -74,10 +74,12 @@ class PgShelveEntry(Base):
     upd_date = Column(DateTime(timezone=True), default=datetime.datetime.now)
     pvalue = Column(Binary)
     digest = Column(Binary)
+    active = Column(Boolean)
 
     def __init__(self, key, value):
         self.key = key
         self.value = value
+        self.active = True
 
     @property
     def value(self):
@@ -98,7 +100,7 @@ class PgShelveEntry(Base):
 
 
 class configshelve:
-    version = 1
+    version = 2
     def __init__(self, dbConnection, filename=None, loadFromDate=None, filetype='sqlite'):
         self.database_conn_str = dbConnection.connectionString
         self.engine = create_engine(self.database_conn_str, echo=dbConnection.echo)
@@ -117,10 +119,12 @@ class configshelve:
             databaseVersion = v.id if v is not None else 0
         except NoResultFound:
             databaseVersion = 0
+        if self.version > databaseVersion:
+            self.upgradeDatabase(databaseVersion)
         if self.loadFromDate:
-            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.upd_date < self.loadFromDate).group_by(PgShelveEntry.key)
+            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.upd_date < self.loadFromDate).filter(PgShelveEntry.active).group_by(PgShelveEntry.key)
         else:
-            subquery = self.session.query(func.max(PgShelveEntry.id)).group_by(PgShelveEntry.key)
+            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.active).group_by(PgShelveEntry.key)
         for record in self.session.query(PgShelveEntry).filter(PgShelveEntry.id.in_(subquery)).all():
             try:
                 self.buffer[record.key] = copy.deepcopy(record.value)
@@ -129,13 +133,24 @@ class configshelve:
             except Exception as e:
                 logging.getLogger(__name__).exception(e)
                 logging.getLogger(__name__).warning("configuration parameter '{0}' cannot be read from database. ({1})".format(record.key, e))
-        if self.version > databaseVersion:
-            self.upgradeDatabase(databaseVersion)
 
     def upgradeDatabase(self, databaseVersion):
-        self.session.add(DatabaseVersion(self.version))
         if databaseVersion < 1:
             self._commitToDatabase(forcePickle=True)
+        if databaseVersion < 2:
+            connection = self.engine.connect()
+            trans = connection.begin()
+            try:
+                self.engine.execute("alter table {} add column active boolean".format(PgShelveEntry.__tablename__))
+                self.engine.execute("update {} set active=True".format(PgShelveEntry.__tablename__))
+                trans.commit();
+            except Exception as e:
+                print(e)
+                trans.rollback()
+                raise
+        self.session.add(DatabaseVersion(self.version))
+        self.session.commit()
+        self.session = self.Session()
 
     @synchronized
     def loadFromFile(self, filename, filetype='sqlite'):
@@ -213,10 +228,12 @@ class configshelve:
     @synchronized
     def __delitem__(self, key):
         try:
-            elem = self.session.query(ShelveEntry).filter(ShelveEntry.key==key, ShelveEntry.category==category).one()
+            elem = self.session.query(PgShelveEntry).filter(PgShelveEntry.key==key).one()
+            elem.active = False
+            self.session.commit()
+            self.session = self.Session()
         except NoResultFound:
             return False
-        self.session.delete(elem)
         return True
 
     @synchronized

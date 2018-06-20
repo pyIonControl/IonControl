@@ -131,17 +131,19 @@ class GlobalVariablesModel(CategoryTreeModel):
         var = node.content
         newName = value.strip()
         if var.name != newName:
-            if isIdentifier(newName):
-                del self._globalDict_[var.name]
-                try:
-                    var.name = newName
-                except HistoryException as e:
-                    logging.getLogger(__name__).warning(str(e))
-                self._globalDict_[newName] = var
-                return True
-            else:
+            if not isIdentifier(newName):
                 logging.getLogger(__name__).warning("'{0}' is not a valid identifier".format(newName))
                 return False
+            if newName in self._globalDict_:
+                logging.getLogger(__name__).warning("'{0}' already exists".format(newName))
+                return False
+            del self._globalDict_[var.name]
+            try:
+                var.name = newName
+            except HistoryException as e:
+                logging.getLogger(__name__).warning(str(e))
+            self._globalDict_[newName] = var
+            return True
         return True
 
     def setValue(self, index, value):
@@ -175,6 +177,7 @@ class GlobalVariablesModel(CategoryTreeModel):
             var = node.content
             deletedID = super(GlobalVariablesModel, self).removeNode(node, useModelReset)
             del self._globalDict_[var.name]
+            del self.config["GlobalVariables.dict.{}".format(var.name)]
             self.removeAllEmptyParents(parent)
             self.globalRemoved.emit()
         elif node.nodeType==nodeTypes.category and node.children==[]: #deleting whole categories of global variables with one keystroke is a bad idea
