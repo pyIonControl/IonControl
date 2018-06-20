@@ -74,9 +74,9 @@ class RabiCarrierFunction(FitFunctionBase):
                 -2*(n/(n+1.))*cos(2*omega*x*eta2))) )
         return value
 
-
 def getLaguerreTable(mass, trapFrequency, wavelength, angle):
-    secfreq = float(trapFrequency, 'Hz') * 10**6
+    #secfreq = float(trapFrequency, 'Hz') * 10**6
+    secfreq = float(trapFrequency.m_as('Hz')) * 10**6
     m = mass * constants.m_p
     eta = ( (2*pi/(wavelength*10**-9))*cos(angle*pi/180)
                  * sqrt(constants.hbar/(2*m*2*pi*secfreq)) )
