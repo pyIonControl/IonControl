@@ -199,8 +199,9 @@ class ExperimentUi(WidgetContainerBase,WidgetContainerForm):
             try:
                 from externalParameter import RemoteLabBrick  # @UnusedImport
                 for name, e in self.project.hardware['Remote Lab Brick'].items():
-                    serverConfig = RemoteLabBrick.RemoteLabBrickConfig(name, e['serverUrl'], e['auth'], e['clientKey'], e['clientCertificate'], e['rootCertificates'])
-                    RemoteLabBrick.Servers[name] = serverConfig
+                    if e['enabled']:
+                        serverConfig = RemoteLabBrick.RemoteLabBrickConfig(name, e['serverUrl'], e['auth'], e['clientKey'], e['clientCertificate'], e['rootCertificates'])
+                        RemoteLabBrick.Servers[name] = serverConfig
             except Exception as e:  # popup on failed import
                 importErrorPopup('Remote Lab Brick error {0}'.format(e))
         from externalParameter.ExternalParameterBase import InstrumentDict

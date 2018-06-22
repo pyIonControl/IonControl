@@ -40,6 +40,9 @@ class GlobalVariablesUi(Form, Base):
         except:
             storedGlobals = dict()
         self._globalDict_ = storedGlobals
+        # make sure the internal name matches the key
+        for key, value in self._globalDict_.items():
+            value._name = key
         self.globalDict = GlobalVariablesLookup(self._globalDict_)
 
     @property

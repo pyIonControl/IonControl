@@ -1,0 +1,18 @@
+# if behind a proxy on bash:
+# export https_proxy=proxyname.domain:port
+# on windows shell
+# set https_proxy=proxyname.domain:port
+# pip install -r requirements.txt
+#
+ply
+QScintilla
+psycopg2
+pyvisa
+influxdb
+sqlalchemy
+sqlalchemy_utils
+-e git+https://gitlab.com/pmaunz/pygsti@ioncontrol-201801#egg=pygsti
+-e git+https://gitlab.com/pmaunz/pint#egg=pint
+-e git+https://gitlab.com/pmaunz/pyqtgraph@develop-pm#egg=pyqtgraph
+-e git+https://gitlab.com/pmaunz/leastsqbound-scipy#egg=leastsqbound
+-e git+https://gitlab.com/pmaunz/objecthash#egg=objecthash
