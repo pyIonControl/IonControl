@@ -46,6 +46,8 @@ class TerranovaReader:
     def value(self):
         reply = self.query("F").rstrip('\n\r')
         m = re.match('\s*(\d+)\s+([-0-9]+)\s*', reply)
+        if m is None:
+            return 0
         mantissa = float(m.group(1))
         exponent = int(m.group(2))
         return mantissa * math.pow(10, exponent)
