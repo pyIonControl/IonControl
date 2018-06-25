@@ -25,7 +25,9 @@ def transitionAmplitude(eta, n, m):
     nl = min(n, m)
     ng = max(n, m)
     d = abs(n-m)
-    return exp(-eta2/2) * pow(eta, d) * genlaguerre(nl, d)(eta2) / sqrt( factorialRatio(ng, nl ) ) if n>=0 and m>=0 else 0
+    if n>=0 and m>=0:
+        return exp(-eta2/2) * pow(eta, d) * genlaguerre(nl, d)(eta2) / sqrt( factorialRatio(ng, nl ) ) #if n>=0 and m>=0 else 0
+    return 0
 
 @lru_cache(maxsize=20)
 def laguerreTable(eta, delta_n):
@@ -81,6 +83,9 @@ class MotionalRabiFlopping(FitFunctionBase):
                
     def updateTables(self, nBar):
         _, _, _, mass, angle, trapFrequency, wavelength, delta_n = self.parameters #@UnusedVariable
+        if delta_n < 0:
+            delta_n = 0
+            self.parameters[-1] = 0
         if not is_Q(trapFrequency):
             trapFrequency = Q(trapFrequency, 'MHz')
         if not is_Q(wavelength):
