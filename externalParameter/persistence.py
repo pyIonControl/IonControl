@@ -24,7 +24,7 @@ class DBPersist:
 
     def initDB(self):
         if DBPersist.engines is None:
-            DBPersist.engines = [engine() for engine in persistenceProviders]
+            DBPersist.engines = [ e for e in [engine() for engine in persistenceProviders] if e.active]
         self.initialized = True
 
     def persist(self, space, source, time, value, minval=None, maxval=None, unit=None):
@@ -57,8 +57,10 @@ class SQLDBPersist:
     store = None
     name = "SQL DB Persist"
     newPersistData = Observable()
+    active = True
     def __init__(self):
         self.initialized = False
+        self.initDB()
 
     def __setstate__(self, state):
         self.__dict__.update(state)
@@ -72,8 +74,6 @@ class SQLDBPersist:
         self.initialized = True
         
     def persist(self, space, source, time, value, minval=None, maxval=None, unit=None):
-        if not self.initialized:
-            self.initDB()
         if source:
             ts = datetime.fromtimestamp(time)
             SQLDBPersist.store.add( space, source, value, unit, ts, bottom=minval, top=maxval )
