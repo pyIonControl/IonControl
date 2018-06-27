@@ -122,10 +122,10 @@ class configshelve:
         if self.version > databaseVersion:
             self.upgradeDatabase(databaseVersion)
         if self.loadFromDate:
-            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.upd_date < self.loadFromDate).filter(PgShelveEntry.active).group_by(PgShelveEntry.key)
+            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.upd_date < self.loadFromDate).group_by(PgShelveEntry.key)
         else:
-            subquery = self.session.query(func.max(PgShelveEntry.id)).filter(PgShelveEntry.active).group_by(PgShelveEntry.key)
-        for record in self.session.query(PgShelveEntry).filter(PgShelveEntry.id.in_(subquery)).all():
+            subquery = self.session.query(func.max(PgShelveEntry.id)).group_by(PgShelveEntry.key)
+        for record in self.session.query(PgShelveEntry).filter(PgShelveEntry.id.in_(subquery)).filter(PgShelveEntry.active).all():
             try:
                 self.buffer[record.key] = copy.deepcopy(record.value)
                 self.dbContent[record.key] = record.value
@@ -228,7 +228,7 @@ class configshelve:
     @synchronized
     def __delitem__(self, key):
         try:
-            elem = self.session.query(PgShelveEntry).filter(PgShelveEntry.key==key).one()
+            elem = self.session.query(PgShelveEntry).filter(PgShelveEntry.key==key).order_by(PgShelveEntry.upd_date.desc()).first()
             elem.active = False
             self.session.commit()
             self.session = self.Session()
