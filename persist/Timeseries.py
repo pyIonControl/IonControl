@@ -13,6 +13,7 @@ try:
         def __init__(self):
             self.initialized = False
             self.active = True
+            self.initDB()
 
         def __setstate__(self, state):
             self.__dict__.update(state)
@@ -36,8 +37,6 @@ try:
         def persist(self, space, source, time, value, minval=None, maxval=None, unit=None):
             if not self.active:
                 return
-            if not self.initialized:
-                self.initDB()
             if source:
                 try:
                      TimeseriesPersist.store.write_points([{
