@@ -4,6 +4,10 @@
 # set https_proxy=proxyname.domain:port
 # pip install -r requirements.txt
 #
+# if the https certificate is not trusted you can do the following:
+# copy the certificate at some location lets say /full/path/cert.cer
+# git config --global http.sslCAInfo /full/path/cert.cer
+
 ply
 QScintilla
 psycopg2
@@ -13,7 +17,7 @@ sqlalchemy
 sqlalchemy_utils
 plotly
 https://gitlab.com/pmaunz/pyGSTi/uploads/f9d6b16f60fa3ef3033607afcf2a9da9/pyGSTi-0.9.4.4-cp36-cp36m-win_amd64.whl
-#-e git+https://gitlab.com/pmaunz/pygsti@ioncontrol-201801#egg=pygsti
+##-e git+https://gitlab.com/pmaunz/pygsti@ioncontrol-201801#egg=pygsti
 -e git+https://gitlab.com/pmaunz/pint#egg=pint
 -e git+https://gitlab.com/pmaunz/pyqtgraph@develop-pm#egg=pyqtgraph
 -e git+https://gitlab.com/pmaunz/leastsqbound-scipy#egg=leastsqbound
