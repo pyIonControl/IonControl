@@ -120,7 +120,8 @@ OPS = {'NOP'    : 0x00,
        'DACOUT': 0x5b,
        'LDACTIVE': 0x5c,
        'JMPNINTERRUPT': 0x5d,
-       'SENDENABLEMASK': 0x5e,
+       'LDADCCOUNT': 0x5e,
+       'LDADCSUM': 0x5f,
        'RAND': 0x60,
        'RANDSEED': 0x61,
        'SETSYNCTIME' : 0x62,
@@ -129,7 +130,8 @@ OPS = {'NOP'    : 0x00,
        'POP': 0x65,
        'JMPPUSH': 0x66,
        'JMPPOP': 0x67,
-       'END'    : 0xFF }
+       'SENDENABLEMASK': 0x68,
+       'END': 0xFF}
 
 
 class Variable:
