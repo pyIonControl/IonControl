@@ -20,6 +20,7 @@ from PyQt5 import QtCore
 
 from sqlalchemy import Column, String, Binary, Boolean, Integer, DateTime, PickleType, func
 from sqlalchemy import create_engine
+from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
@@ -144,6 +145,11 @@ class configshelve:
                 self.engine.execute("alter table {} add column active boolean".format(PgShelveEntry.__tablename__))
                 self.engine.execute("update {} set active=True".format(PgShelveEntry.__tablename__))
                 trans.commit();
+            except ProgrammingError as e:
+                trans.rollback()
+                if e.code != 'f405':  # f405 appears if the column already exists
+                    print(e)
+                    raise
             except Exception as e:
                 print(e)
                 trans.rollback()
