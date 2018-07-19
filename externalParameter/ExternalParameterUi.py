@@ -99,8 +99,7 @@ class ExternalParameterControlModel(CategoryTreeModel):
     def _setValue(self, inst, value):
         logger = logging.getLogger(__name__)
         logger.debug( "setValue {0}".format(value))
-        inst.targetValue = value
-        self.setValueFollowup(inst)
+        self.setValueFollowup(inst, value)
         return True
  
     def setStrValue(self, index, strValue):
@@ -108,16 +107,17 @@ class ExternalParameterControlModel(CategoryTreeModel):
         node.content.string = strValue
         return True
         
-    def setValueFollowup(self, inst):
+    def setValueFollowup(self, inst, targetValue=None):
         try:
+            value = targetValue or inst.targetValue
             logger = logging.getLogger(__name__)
-            logger.debug( "setValueFollowup {0}".format( inst.value ) )
-            if not inst.setValue(inst.targetValue):
-                delay = int( inst.settings.delay.m_as('ms') )
-                QtCore.QTimer.singleShot(delay, functools.partial(self.setValueFollowup, inst))
+            logger.debug("setValueFollowup {0}".format(inst.value))
+            if not inst.setValue(value):
+                delay = int(inst.settings.delay.m_as('ms'))
+                QtCore.QTimer.singleShot(delay, functools.partial(self.setValueFollowup, inst, None))
         except Exception as e:
             logger.exception(e)
-            logger.warning( "Exception during setValueFollowup, number of adjusting devices likely to be faulty")
+            logger.warning("Exception during setValueFollowup, number of adjusting devices likely to be faulty")
 
     def update(self, iterable):
         for destination, name, value in iterable:
