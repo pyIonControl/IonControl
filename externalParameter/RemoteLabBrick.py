@@ -11,6 +11,8 @@ from PyQt5.QtCore import QObject
 
 from externalParameter.ExternalParameterBase import ExternalParameterBase
 import logging
+
+from modules.Observable import Observable
 from modules.quantity import Q
 from .qtHelper import qtHelper
 
@@ -105,10 +107,13 @@ class RemoteLabBrick(object):
         self.stub = None
         self._getInfo()
         self._initListener()
+        self.changeObservable = Observable()
 
     def onDataChanged(self, state):
-        self.deviceState = state
-        print(state)
+        if state.SerialNumber == self.serial and state.ModelName == self.model:
+            self.deviceState = state
+            self.changeObservable.firebare()
+            print(state)
 
     def _initListener(self):
         if self.cfg.url not in self.serverListeners:
@@ -120,9 +125,7 @@ class RemoteLabBrick(object):
         else:
             notificationListener = self.serverListeners[self.cfg.url]
             self.serverUseCount[self.cfg.url] += 1
-
         notificationListener.dataChanged.connect(self.onDataChanged)
-        self.dataChanged = notificationListener.dataChanged
 
     def _getInfo(self):
         self._open()
@@ -275,14 +278,13 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
     className = "RemoteLabBrick"
     _outputChannels = {"frequency": "Hz", "power": ""}
     _inputChannels = {"frequency": "Hz", "power": ""}
-
     def __init__(self, name, config, globalDict, instrument):
         self.instrument = None
         ExternalParameterBase.__init__(self, name, config, globalDict)
         logger = logging.getLogger(__name__)
         logger.info("trying to open '{0}'".format(instrument))
         self.instrument = RemoteLabBrick(instrument)
-        self.instrument.dataChanged.connect(self.onDataChanged)
+        self.instrument.changeObservable.subscribe(self.onDataChanged)
         logger.info("opened {0}".format(instrument))
         self.initializeChannelsToExternals()
         self.qtHelper = qtHelper()
@@ -336,7 +338,7 @@ class RemoteLabBrickInstrument(ExternalParameterBase):
             elif change == 'activated':
                 getattr(self, param.opts['field'])()
 
-    def onDataChanged(self, state):
+    def onDataChanged(self):
         if self.instrument:
             for name, ch in self.outputChannels.items():
                 ch.valueChanged.emit(ch.externalValue)
